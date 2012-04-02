@@ -1,0 +1,11 @@
+config-version: 1
+
+online-mode: false
+server-mode:
+  socket-port: 43760
+  server-list:
+    - localhost:43761
+  server-key: YOUR-KEY-GOES-HERE
+    
+settings:
+  friendly-fire: false

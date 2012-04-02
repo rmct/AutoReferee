@@ -1,0 +1,25 @@
+name: AutoReferee
+main: org.mctourney.AutoReferee.AutoReferee
+version: 0.1
+
+commands:
+  zone:
+    description: Set a region's ownership
+    permission: autoreferee.configure
+    usage: /<command> team
+  zones:
+    description: List all zones for a given team
+    permission: autoreferee.configure
+    usage: /<command> team
+  wincond:
+    description: Setup win conditions
+    permission: autoreferee.configure
+    usage: /<command> [add|remove] [teamname]
+  jointeam:
+    description: Set player's team
+    permission: autoreferee.referee
+    usage: /<command> [teamname] [playername]
+  leaveteam:
+    description: Remove player's team
+    permission: autoreferee.referee
+    usage: /<command> [playername]

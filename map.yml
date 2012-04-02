@@ -1,0 +1,31 @@
+# information about the map
+map:
+
+  # name of the map
+  name: My Competitive Map
+  
+  # names of any creators
+  creators:
+  - creator1
+  - creator2
+
+# information needed to run a match
+match:
+
+  # a list of all teams. each team has several basic features:
+  # name, unique color, size of a team, and owned regions
+  teams:
+    - name: Red Team
+      color: RED
+      maxsize: 4
+    
+    - name: Blue Team
+      color: BLUE
+      maxsize: 4
+  
+  # this would include spawn or any other shared regions
+  shared-regions: []
+  
+  # allow friendly fire: should players take damage from teammates
+  allow-ff: false
+  
