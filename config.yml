@@ -6,3 +6,6 @@ server-mode:
   server-list:
     - localhost:43761
   server-key: YOUR-KEY-GOES-HERE
+
+tools:
+  win-condition: 284
