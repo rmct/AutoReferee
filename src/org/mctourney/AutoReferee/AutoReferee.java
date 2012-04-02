@@ -245,7 +245,7 @@ public class AutoReferee extends JavaPlugin
 		Team team = teams.get(t);
 
 		getServer().broadcastMessage(colorPlayer(player) + 
-				" has left " + team.getName());
+			" has left " + team.getName());
 	}
 
 	public boolean playerWhitelisted(Player player)
