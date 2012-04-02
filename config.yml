@@ -1,11 +1,11 @@
 config-version: 1
 
-online-mode: false
 server-mode:
-  socket-port: 43760
-  server-list:
-    - localhost:43761
+  online: false
   server-key: YOUR-KEY-GOES-HERE
+
+  server-list: []
+  socket-port: 43760
 
 tools:
   win-condition: 284

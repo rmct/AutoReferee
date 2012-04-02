@@ -12,12 +12,12 @@ public class TeamListener implements Listener
 {
 	AutoReferee refPlugin = null;
 	public Logger log = Logger.getLogger("Minecraft");
-	
+
 	public TeamListener(Plugin plugin)
 	{
 		refPlugin = (AutoReferee) plugin;
 	}
-	
+
 	@EventHandler
 	public void chatMessage(PlayerChatEvent event)
 	{
@@ -25,7 +25,7 @@ public class TeamListener implements Listener
 		Player player = event.getPlayer();
 		event.setFormat("<" + refPlugin.colorPlayer(player) + "> " + event.getMessage());
 	}
-	
+
 	@EventHandler
 	public void playerRespawn(PlayerRespawnEvent event)
 	{
@@ -36,34 +36,34 @@ public class TeamListener implements Listener
 			if (spawn != null) event.setRespawnLocation(spawn);
 		}
 	}
-	
+
 	@EventHandler
 	public void playerLogin(PlayerLoginEvent event)
 	{
 		log.info(event.getPlayer().getName() + " login");
 		if (refPlugin.getState() == AutoReferee.eMatchStatus.NONE) return;
-		
+
 		// if they should be whitelisted, let them in, otherwise, block them
 		if (refPlugin.playerWhitelisted(event.getPlayer())) event.allow();
 		else event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, 
 			"Match in progress: " + refPlugin.matchName);
 	}
-	
+
 	@EventHandler
 	public void playerJoin(PlayerJoinEvent event)
 	{
 		Player player = event.getPlayer();
 		Integer team = refPlugin.getTeam(player);
-		
+
 		if (team != null) event.setJoinMessage(event.getJoinMessage()
 			.replace(player.getName(), refPlugin.colorPlayer(player)));
-		
 		refPlugin.checkTeamsReady();
 	}
-	
+
 	@EventHandler
 	public void playerQuit(PlayerQuitEvent event)
 	{
 		log.info(event.getPlayer().getName() + " quit");
 	}
 }
+
