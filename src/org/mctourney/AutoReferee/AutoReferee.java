@@ -1,8 +1,10 @@
 package org.mctourney.AutoReferee;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -22,7 +24,10 @@ import com.sk89q.worldedit.bukkit.selections.*;
 import com.sk89q.worldedit.regions.CuboidRegion;
 
 public class AutoReferee extends JavaPlugin 
-{	
+{
+	// default port for a "master" server
+	public static final int DEFAULT_SERVER_PORT = 43760;
+	
 	public enum eAction {
 		ENTERED_VOIDLANE,
 	};
@@ -33,7 +38,7 @@ public class AutoReferee extends JavaPlugin
 
 	// is this plugin in online mode?
 	public boolean onlineMode = false;
-	private Socket serverConn = null;
+	private RefereeClient conn = null;
 
 	// status always starts with NONE
 	private eMatchStatus currentState = eMatchStatus.NONE;
@@ -127,7 +132,7 @@ public class AutoReferee extends JavaPlugin
 		sharedRegions = new ArrayList<CuboidRegion>();
 
 		// get server list, and attempt to determine whether we are in online mode
-		List<String> serverList = getConfig().getList("server-mode.server-list", new ArrayList<String>());
+		List<Object> serverList = getConfig().getList("server-mode.server-list", new ArrayList<String>());
 		onlineMode = (serverList.size() == 0 || getConfig().getBoolean("online", true));
 
 		// wrap up, debug to follow this message
@@ -139,9 +144,32 @@ public class AutoReferee extends JavaPlugin
 
 	}
 
-	public boolean makeServerConnection(List<String> servers)
+	public boolean makeServerConnection(List<?> serverList)
 	{
-		// TODO: Make socket connection!
+		for (Object obj : serverList) if (obj instanceof String)
+		{
+			// split the server address on the colon, to get the port
+			String[] serv = ((String) obj).split(":", 2);
+			String addr = serv[0]; int port = DEFAULT_SERVER_PORT;
+			
+			// if provided parse the port out of the server address
+			if (serv.length > 1) try { port = Integer.parseInt(serv[1]); }
+			catch (NumberFormatException e) {  }
+			
+			try
+			{
+				// create a socket and a client connection
+				Socket socket = new Socket(addr, port);
+				conn = new RefereeClient(this, socket);
+			
+				// successful connection, return success
+				new Thread(conn).start(); return true;
+			}
+			catch (UnknownHostException e) {  }
+			catch (IOException e) {  }
+		}
+		
+		// none worked, return failure
 		return false;
 	}
 
