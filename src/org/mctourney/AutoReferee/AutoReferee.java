@@ -11,9 +11,12 @@ import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.command.*;
 import org.bukkit.configuration.file.*;
 import org.bukkit.entity.*;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -23,7 +26,7 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.*;
 import com.sk89q.worldedit.regions.CuboidRegion;
 
-public class AutoReferee extends JavaPlugin 
+public class AutoReferee extends JavaPlugin
 {
 	// default port for a "master" server
 	public static final int DEFAULT_SERVER_PORT = 43760;
@@ -64,10 +67,10 @@ public class AutoReferee extends JavaPlugin
 				return new Integer(t);
 
 		// is this team name a number?
-		try 
+		try
 		{
 			// we check that this is a valid team
-			Integer z = Integer.parseInt(name) - 1; 
+			Integer z = Integer.parseInt(name) - 1;
 			return z < teams.size() ? z : null;
 		}
 		catch (NumberFormatException e) { return null; }
@@ -133,19 +136,36 @@ public class AutoReferee extends JavaPlugin
 
 		// get server list, and attempt to determine whether we are in online mode
 		List<Object> serverList = getConfig().getList("server-mode.server-list", new ArrayList<String>());
-		onlineMode = (serverList.size() == 0 || getConfig().getBoolean("online", true));
+		onlineMode = !(serverList.size() == 0 || !getConfig().getBoolean("server-mode.online", true));
 
 		// wrap up, debug to follow this message
 		log.info("AutoReferee loaded successfully.");
 
 		// connect to server, or let the server operator know to set up the match manually
-		if (onlineMode && makeServerConnection(serverList));
-		else log.info("AutoReferee is running in OFFLINE mode. All setup must be done manually.");
+		if (!makeServerConnection(serverList))
+			log.info("AutoReferee is running in OFFLINE mode. All setup must be done manually.");
 
+		// update online mode to represent whether or not we have a connection
+		onlineMode = (conn != null);
 	}
 
 	public boolean makeServerConnection(List<?> serverList)
 	{
+		// if we are not in online mode, stop right here
+		if (!onlineMode) return false;
+		
+		// get default key and server key
+		String defkey = getConfig().getDefaults().getString("server-mode.server-key");
+		String key = getConfig().getString("server-mode.server-key", null);
+		
+		// if there is no server key listed, or it is set to the default key
+		if (key == null || key.equals(defkey))
+		{
+			// reference the keyserver to remind operator to get a server key
+			log.severe("Please get a server key from " + getConfig().getString("keyserver"));
+			return false;
+		}
+		
 		for (Object obj : serverList) if (obj instanceof String)
 		{
 			// split the server address on the colon, to get the port
@@ -179,6 +199,9 @@ public class AutoReferee extends JavaPlugin
 		World world = getServer().getWorlds().get(0);
 		saveWorldConfiguration(world);
 
+		// if there is a socket connection, close it
+		if (conn != null) conn.close();
+		
 		log.info("AutoReferee disabled.");
 	}
 
@@ -245,15 +268,31 @@ public class AutoReferee extends JavaPlugin
 		return (WorldEditPlugin) plugin;
 	}
 
+	public void prepareTeam(Integer t, List<String> players)
+	{
+		// null team not allowed
+		if (t == null) return;
+
+		// delete all elements from the map for team 't'
+		Iterator<Map.Entry<String, Integer>> i = playerTeam.entrySet().iterator();
+		while (i.hasNext()) if (t.equals(i.next().getValue())) i.remove();
+
+		// insert all players into their list
+		for (String p : players) playerTeam.put(p, t);
+	}
+
 	public String colorPlayer(Player player)
 	{
-		// color a team's name with its team's color
+		// color a player's name with its team's color
 		ChatColor color = getTeamColor(player);
 		return color + player.getName() + ChatColor.WHITE;
 	}
 
 	public void joinTeam(Player player, Integer t)
 	{
+		// null team not allowed
+		if (t == null) return;
+
 		// just in case, announce they are leaving their previous team
 		leaveTeam(player);
 
@@ -405,29 +444,65 @@ public class AutoReferee extends JavaPlugin
 		}
 		if (cmd.getName().equalsIgnoreCase("wincond"))
 		{
-			return true;
+			int wincondtool = getConfig().getInt("tools.win-condition", 284);
+			
+			// get the tool for setting win condition
+			if (args.length == 1 && "tool".equalsIgnoreCase(args[0]))
+			{
+				// get the tool used to set the winconditions
+				ItemStack toolitem = new ItemStack(wincondtool);
+				
+				// add to the inventory and switch to holding it
+				PlayerInventory inv = player.getInventory();
+				inv.addItem(toolitem); inv.setItemInHand(toolitem);
+				
+				// let the player know what the tool is and how to use it
+				player.sendMessage("Given win condition tool: " + toolitem.getType().name());
+				player.sendMessage("Right-click on a block to set it as a win-condition.");
+				return true;
+			}
+			// change win-condition setting mode
+			else if (args.length == 2 && "mode".equalsIgnoreCase(args[0]))
+			{
+				
+				return true;
+			}
 		}
 
 		return false;
 	}
 
-	public Boolean checkPosition(Player player, Location loc, Boolean move)
+	public void addWinCondition(Block block)
+	{
+		
+	}
+	
+	public List<Team> locationOwnership(Location loc)
+	{
+		// teams who own this location
+		List<Team> owners = new ArrayList<Team>();
+		
+		// convert location to a WorldEdit vector
+		Vector pos = new Vector(loc.getX(), loc.getY(), loc.getZ());
+
+		// check all safe regions for that team
+		for (Team team : teams) for (CuboidRegion reg : team.regions)
+		{
+			// if the location is inside the region, add it
+			if (!reg.contains(pos)) owners.add(team);
+		}
+		
+		return owners;
+	}
+
+	public Boolean checkPosition(Player player, Location loc)
 	{
 		// get the player's team (if they are not on a team, ignore them)
 		Integer pteam = playerTeam.get(player.getName());
 		if (pteam == null) return false;
-
-		// convert their location to a WorldEdit vector
-		Vector pos = new Vector(loc.getX(), loc.getY(), loc.getZ());
-
-		// check all safe regions for that player's team
-		for (CuboidRegion reg : teams.get(pteam).regions)
-		{
-			// if the player is inside this region, they are okay
-			if (!reg.contains(pos)) return true;
-		}
-
-		return false;
+		
+		// is the player's location owned by the player's team?
+		return locationOwnership(loc).contains(teams.get(pteam));
 	}
 
 	public void checkTeamsReady() 
@@ -457,6 +532,14 @@ public class AutoReferee extends JavaPlugin
 
 		// return garbage, something failed...
 		catch (Exception e) { return null; }
+	}
+
+	public static String regionToCoords(CuboidRegion reg)
+	{
+		// save region as "minX minY minZ maxX maxY maxZ"
+		Vector mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
+		return mn.getBlockX() + " " + mn.getBlockY() + " " + mn.getBlockZ() +
+			" " + mx.getBlockX() + " " + mx.getBlockY() + " " + mx.getBlockZ();
 	}
 }
 
@@ -531,16 +614,14 @@ class Team
 
 		// add the maximum team size
 		map.put("maxsize", new Integer(maxSize));
+		
+		// add the win conditions
+		map.put("win-condition", null);
 
 		// convert regions to strings
 		List<String> regstr = new ArrayList<String>();
 		for (CuboidRegion reg : regions)
-		{
-			// save region as "minX minY minZ maxX maxY maxZ"
-			Vector mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
-			regstr.add(mn.getBlockX() + " " + mn.getBlockY() + " " + mn.getBlockZ() + 
-				" " + mx.getBlockX() + " " + mx.getBlockY() + " " + mx.getBlockZ());
-		}
+			regstr.add(AutoReferee.regionToCoords(reg));
 
 		// add the region list
 		map.put("regions", regstr);

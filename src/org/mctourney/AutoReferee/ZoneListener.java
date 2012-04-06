@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -44,7 +45,7 @@ public class ZoneListener implements Listener
 
 		// only kill if they are in survival mode. otherwise, what's the point?
 		if (player.getGameMode() == GameMode.SURVIVAL &&
-				refPlugin.checkPosition(player, event.getTo(), true))
+				refPlugin.checkPosition(player, event.getTo()))
 		{
 			// if they were in none of their team's regions, kill them
 			refPlugin.actionTaken.put(player, AutoReferee.eAction.ENTERED_VOIDLANE);
@@ -59,7 +60,7 @@ public class ZoneListener implements Listener
 		Location loc = event.getBlock().getLocation();
 
 		// if this block is outside the player's zone, don't place
-		if (refPlugin.checkPosition(player, loc, true))
+		if (refPlugin.checkPosition(player, loc))
 		{ event.setCancelled(true); return; }
 	}
 
@@ -84,10 +85,16 @@ public class ZoneListener implements Listener
 		// get which action to perform
 		switch (toolMap.get(typeID))
 		{
-
 			// this is the tool built for setting win conditions
 			case TOOL_WINCOND:
-
+				
+				// if there is no block involved in this event, nothing
+				if (!event.hasBlock()) return;
+				
+				// add the clicked block as a win condition
+				Block block = event.getClickedBlock();
+				refPlugin.addWinCondition(block);
+				
 				break;
 		}
 	}

@@ -5,6 +5,9 @@ import java.net.Socket;
 
 public class RefereeClient implements Runnable 
 {
+	public BufferedReader inp; 
+	public PrintStream oup;
+	
 	private Socket socket = null;
 	private AutoReferee refPlugin = null;
 	
@@ -18,14 +21,29 @@ public class RefereeClient implements Runnable
 		// if the socket is connected, save it
 		// we should only be passed CONNECTED sockets
 		failure = !s.isConnected(); socket = s;
-		
 		refPlugin = ref;
+	}
+	
+	public void close()
+	{
+		try
+		{
+			// close streams
+			inp.close();
+			oup.close();
+			
+			// close socket
+			socket.close();
+		}
+		catch (IOException e) {  };
 	}
 	
 	public void run()
 	{
-		BufferedReader inp; 
-		PrintStream oup;
+		
+		// get the key from the configuration file (should be guaranteed not-null)
+		String key = refPlugin.getConfig().getString("server-mode.server-key", null);
+		if (key == null) { failure = true; close(); return; }
 		
 		try
 		{
@@ -37,11 +55,14 @@ public class RefereeClient implements Runnable
 		{
 			// log the error, stop running the thread and report failure
 			refPlugin.log.severe("Could not initialize communication with server.");
-			failure = true; return;
+			failure = true; close(); return;
 		}
 		
 		try
 		{
+			// send our key to the central server
+			oup.println("START " + key);
+			
 			// read lines from the socket, process them
 			for (String resp; (resp = inp.readLine()) != null; )
 			{
@@ -53,7 +74,7 @@ public class RefereeClient implements Runnable
 		{
 			// log the error, stop running the thread and report failure
 			refPlugin.log.severe("Server communication failure: " + e);
-			failure = true; return;
+			failure = true; close(); return;
 		}
 	}
 }
