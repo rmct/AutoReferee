@@ -3,6 +3,10 @@ main: org.mctourney.AutoReferee.AutoReferee
 version: 0.1
 
 commands:
+  autoref:
+    description: AutoReferee configuration
+    permission: autoreferee.configure
+    usage: /<command> save|
   zone:
     description: Set a region's ownership
     permission: autoreferee.configure
@@ -14,7 +18,7 @@ commands:
   wincond:
     description: Setup win conditions
     permission: autoreferee.configure
-    usage: /<command> [add|remove] [teamname]
+    usage: /<command> [tool|mode|team] [teamname]
   jointeam:
     description: Set player's team
     permission: autoreferee.referee
