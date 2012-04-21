@@ -54,8 +54,13 @@ public class PlayerVersusPlayerListener implements Listener
 			dmsg = dmsg.replace(player.getName(), refPlugin.colorPlayer(player));
 
 			// if the killer was a player, color their name as well
-			if (killer != null) dmsg = dmsg.replace(
-					killer.getName(), refPlugin.colorPlayer(killer));
+			if (killer != null) 
+			{
+				if (refPlugin.getConfig().getBoolean("server-mode.console.log", false))
+					log.info("[DEATH] " + killer.getDisplayName() 
+						+ " killed " + player.getDisplayName());
+				dmsg = dmsg.replace(killer.getName(), refPlugin.colorPlayer(killer));
+			}
 
 			// update the death message with the changes
 			playerdeath.setDeathMessage(dmsg);
@@ -91,6 +96,7 @@ public class PlayerVersusPlayerListener implements Listener
 			// get team affiliations of these players (maybe null)
 			Integer d1team = refPlugin.getTeam(damager);
 			Integer d2team = refPlugin.getTeam(damaged);
+			if (d1team == null && d2team == null) return;
 
 			// if the attacked isn't on a team, or same team (w/ no FF), cancel
 			if (d2team == null || (d1team == d2team && allow_ff))
