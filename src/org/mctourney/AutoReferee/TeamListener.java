@@ -10,29 +10,28 @@ import org.bukkit.plugin.Plugin;
 
 public class TeamListener implements Listener 
 {
-	AutoReferee refPlugin = null;
+	AutoReferee plugin = null;
 	public Logger log = Logger.getLogger("Minecraft");
 
-	public TeamListener(Plugin plugin)
-	{
-		refPlugin = (AutoReferee) plugin;
-	}
+	public TeamListener(Plugin p)
+	{ plugin = (AutoReferee) p; }
 
 	@EventHandler
 	public void chatMessage(PlayerChatEvent event)
 	{
 		// typical chat message format, swap out with colored version
 		Player player = event.getPlayer();
-		event.setFormat("<" + refPlugin.colorPlayer(player) + "> " + event.getMessage());
+		event.setFormat("<" + plugin.colorPlayer(player) + "> " + event.getMessage());
 	}
 
 	@EventHandler
 	public void playerRespawn(PlayerRespawnEvent event)
 	{
-		if (refPlugin.getState() == AutoReferee.eMatchStatus.PLAYING)
+		if (plugin.getState() == AutoReferee.eMatchStatus.PLAYING &&
+			event.getPlayer().getBedSpawnLocation() == null)
 		{
 			// get the location for the respawn event
-			Location spawn = refPlugin.getPlayerSpawn(event.getPlayer());
+			Location spawn = plugin.getPlayerSpawn(event.getPlayer());
 			if (spawn != null) event.setRespawnLocation(spawn);
 		}
 	}
@@ -41,23 +40,23 @@ public class TeamListener implements Listener
 	public void playerLogin(PlayerLoginEvent event)
 	{
 		log.info(event.getPlayer().getName() + " login");
-		if (refPlugin.getState() == AutoReferee.eMatchStatus.NONE) return;
+		if (plugin.getState() == AutoReferee.eMatchStatus.NONE) return;
 
 		// if they should be whitelisted, let them in, otherwise, block them
-		if (refPlugin.playerWhitelisted(event.getPlayer())) event.allow();
+		if (plugin.playerWhitelisted(event.getPlayer())) event.allow();
 		else event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, 
-			"Match in progress: " + refPlugin.matchName);
+			"Match in progress: " + plugin.matchName);
 	}
 
 	@EventHandler
 	public void playerJoin(PlayerJoinEvent event)
 	{
 		Player player = event.getPlayer();
-		Integer team = refPlugin.getTeam(player);
+		Integer team = plugin.getTeam(player);
 
 		if (team != null) event.setJoinMessage(event.getJoinMessage()
-			.replace(player.getName(), refPlugin.colorPlayer(player)));
-		refPlugin.checkTeamsReady();
+			.replace(player.getName(), plugin.colorPlayer(player)));
+		plugin.checkTeamsReady();
 	}
 
 	@EventHandler

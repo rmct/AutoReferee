@@ -7,8 +7,11 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -39,6 +42,9 @@ public class AutoReferee extends JavaPlugin
 	public enum eMatchStatus {
 		NONE, WAITING, READY, PLAYING, COMPLETED,
 	};
+	
+	private World world;
+	private long startTime = 8000;
 
 	// is this plugin in online mode?
 	public boolean onlineMode = false;
@@ -52,7 +58,7 @@ public class AutoReferee extends JavaPlugin
 	public List<Team> teams = null;
 
 	// a map from a team to a list of cuboid regions that are "safe"
-	private List<CuboidRegion> sharedRegions;
+	private CuboidRegion startRegion;
 
 	// a map from a player to info about why they were killed
 	public HashMap<Player, eAction> actionTaken;
@@ -114,7 +120,7 @@ public class AutoReferee extends JavaPlugin
 
 		// load main world's configuration file BEFORE the listeners
 		// (some listeners will cache the map configuration settings)
-		World world = getServer().getWorlds().get(0);
+		world = getServer().getWorlds().get(0);
 		loadWorldConfiguration(world);
 
 		// events related to team management, chat, whitelists, respawn
@@ -131,9 +137,6 @@ public class AutoReferee extends JavaPlugin
 
 		// global configuration object (can't be changed, so don't save onDisable)
 		getConfig().options().copyDefaults(true); saveConfig();
-
-		// create lists for each team of safe regions (initially empty)
-		sharedRegions = new ArrayList<CuboidRegion>();
 
 		// get server list, and attempt to determine whether we are in online mode
 		List<?> serverList = getConfig().getList("server-mode.server-list", new ArrayList<String>());
@@ -199,7 +202,7 @@ public class AutoReferee extends JavaPlugin
 	{
 		// if autosaving is on, save the world config file
 		if (getConfig().getBoolean("config-mode.autosave", false))
-			saveWorldConfiguration(getServer().getWorlds().get(0));
+			saveWorldConfiguration(world);
 
 		// if there is a socket connection, close it
 		if (conn != null) conn.close();
@@ -237,8 +240,13 @@ public class AutoReferee extends JavaPlugin
 		List<Map<?, ?>> cfgTeams = worldConfig.getMapList("match.teams");
 		for (Map<?, ?> map : cfgTeams) teams.add(Team.fromMap((Map<String, Object>) map, world));
 		
-		List<String> cfgSharedRegions = worldConfig.getStringList("shared-regions");
-		for (String sreg : cfgSharedRegions) sharedRegions.add(coordsToRegion(sreg));
+		// get the start region (safe for both teams, no pvp allowed)
+		if (worldConfig.isString("match.start-region"))
+			startRegion = coordsToRegion(worldConfig.getString("match.start-region"));
+		
+		// get the time the match is set to start
+		if (worldConfig.isString("match.start-time"))
+			startTime = parseStartTime(worldConfig.getString("match.start-time"));
 	}
 
 	private void saveWorldConfiguration(World world) 
@@ -246,12 +254,14 @@ public class AutoReferee extends JavaPlugin
 		// if there is no configuration object or file, nothin' doin'...
 		if (worldConfigFile == null || worldConfig == null) return;
 
-		// create the team data list
+		// create and save the team data list
 		List<Map<String, Object>> teamData = new ArrayList<Map<String, Object>>();
 		for (Team t : teams) teamData.add(t.toMap());
-
-		// save this list
 		worldConfig.set("match.teams", teamData);
+		
+		// save the start region
+		if (startRegion != null)
+			worldConfig.set("match.start-region", regionToCoords(startRegion));
 
 		// save the configuration file back to the original filename
 		try { worldConfig.save(worldConfigFile); }
@@ -337,9 +347,10 @@ public class AutoReferee extends JavaPlugin
 				player.sendMessage("Must specify a team as this zone's owner.");
 				return true;
 			}
-
+			
 			Integer t = teamNameLookup(args[0]);
-			if (t == null)
+			if ("start".equals(args[0])) t = -1;
+			else if (t == null)
 			{
 				// team name is invalid. let the player know
 				player.sendMessage("Not a valid team: " + args[0]);
@@ -356,11 +367,20 @@ public class AutoReferee extends JavaPlugin
 					csel.getNativeMaximumPoint()
 					);
 
-				Team team = teams.get(t);
-				team.regions.add(reg);
-
-				player.sendMessage("Region now marked as " + 
-					team.getName() + "'s zone!");
+				if (t == -1)
+				{
+					startRegion = reg;
+					player.sendMessage("Region now marked as " +
+						"the start region!");
+				}
+				else
+				{
+					Team team = teams.get(t);
+					team.regions.add(reg);
+	
+					player.sendMessage("Region now marked as " + 
+						team.getName() + "'s zone!");
+				}
 			}
 			return true;
 		}
@@ -396,8 +416,7 @@ public class AutoReferee extends JavaPlugin
 				if (team.regions.size() > 0) for (CuboidRegion reg : team.regions)
 				{
 					Vector mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
-					player.sendMessage("   (" + mn.getBlockX() + ", " + mn.getBlockY() + ", " + mn.getBlockZ() + 
-						") => (" + mx.getBlockX() + ", " + mx.getBlockY() + ", " + mx.getBlockZ() + ")");
+					player.sendMessage("   (" + vectorToCoords(mn) + ") => (" + vectorToCoords(mx) + ")");
 				}
 
 				// if there are no regions, print None
@@ -409,14 +428,7 @@ public class AutoReferee extends JavaPlugin
 
 		if (cmd.getName().equalsIgnoreCase("jointeam") && !onlineMode)
 		{
-			if (args.length == 0)
-			{
-				// command is invalid. let the player know
-				player.sendMessage("Must specify a team to join.");
-				return true;
-			}
-
-			Integer t = teamNameLookup(args[0]);
+			Integer t = (args.length > 0) ? teamNameLookup(args[0]) : getArbitraryTeam();
 			if (t == null)
 			{
 				// team name is invalid. let the player know
@@ -446,6 +458,11 @@ public class AutoReferee extends JavaPlugin
 			leaveTeam(player);
 			return true;
 		}
+		if (cmd.getName().equalsIgnoreCase("ready"))
+		{
+			prepareWorld(world);
+			return true;
+		}
 		if (cmd.getName().equalsIgnoreCase("wincond"))
 		{
 			int wincondtool = getConfig().getInt("config-mode.tools.win-condition", 284);
@@ -458,7 +475,7 @@ public class AutoReferee extends JavaPlugin
 				
 				// add to the inventory and switch to holding it
 				PlayerInventory inv = player.getInventory();
-				inv.addItem(toolitem); inv.setItemInHand(toolitem);
+				inv.addItem(toolitem);
 				
 				// let the player know what the tool is and how to use it
 				player.sendMessage("Given win condition tool: " + toolitem.getType().name());
@@ -476,14 +493,78 @@ public class AutoReferee extends JavaPlugin
 		return false;
 	}
 
+	private Integer getArbitraryTeam()
+	{
+		// minimum size of any one team, and an array to hold valid teams
+		int minsize = Integer.MAX_VALUE;
+		List<Integer> vteams = new ArrayList<Integer>();
+		
+		// get the number of players on each team: Map<TeamNumber -> NumPlayers>
+		Map<Integer,Integer> count = new HashMap<Integer,Integer>();
+		for (Integer v : playerTeam.values())
+			count.put(v, count.containsKey(v) ? count.get(v)+1 : 1);
+		
+		// determine the size of the smallest team
+		for (Integer c : count.values())
+			if (c < minsize) minsize = c.intValue();
+		
+		// make a list of all teams with this size
+		for (Map.Entry<Integer,Integer> e : count.entrySet())
+			if (e.getValue().intValue() == minsize) vteams.add(e.getKey());
+		
+		// return a random element from this list
+		return vteams.get(new Random().nextInt(vteams.size()));
+	}
+
 	public void addWinCondition(Block block, Team team)
 	{
 		if (block == null || team == null) return;
 		
-		// if only one team owns the region, add it to that team
+		// add the block data to the win-condition listing
 		BlockData bd = BlockData.fromBlock(block);
 		team.winconditions.put(block.getLocation(), bd);
-		getServer().broadcastMessage(bd + " is now a win condition for " + team.getName());
+		
+		String bname = bd.mat.name();
+		switch (block.getType())
+		{
+		case WOOL:
+			DyeColor color = DyeColor.getByData(bd.data);
+			bname = color.name() + " " + bname;
+			break;
+		}
+		
+		// broadcast the update using bname (a reconstructed name for the block)
+		getServer().broadcastMessage(bname + " is now a win condition for " + 
+			team.getName() + " @ " + vectorToCoords(locationToVector(block.getLocation())));
+	}
+
+	public void checkWinConditions(Location aloc)
+	{
+		// this code is only called in BlockPlaceEvent and BlockBreakEvent when
+		// we have confirmed that the state is PLAYING, so we know we are definitely
+		// in a match if this function is being called
+		
+		for (Team t : teams)
+		{
+			// check all win condition blocks (AND together)
+			boolean win = true;
+			for (Map.Entry<Location, BlockData> pair : t.winconditions.entrySet())
+			{
+				BlockData bd = pair.getValue();
+				win &= pair.getKey().equals(aloc) ? bd.mat == Material.AIR : 
+					bd.matches(world.getBlockAt(pair.getKey()));
+			}
+			
+			if (win)
+			{
+				// announce the victory and set the match to completed
+				getServer().broadcastMessage(t.getName() + " WINS!");
+				for (Player p : world.getPlayers())
+					if (playerTeam.containsKey(p.getDisplayName()))
+						p.teleport(world.getSpawnLocation());
+				currentState = eMatchStatus.COMPLETED;
+			}
+		}
 	}
 	
 	public List<Team> locationOwnership(Location loc)
@@ -504,6 +585,16 @@ public class AutoReferee extends JavaPlugin
 		return owners;
 	}
 
+	// simple getter for the start region
+	public CuboidRegion getStartRegion() { return startRegion; }
+	
+	// is location in start region?
+	public boolean inStartRegion(Location loc)
+	{
+		Vector vec = new Vector(loc.getX(), loc.getY(), loc.getZ());
+		return startRegion != null && startRegion.contains(vec);
+	}
+
 	// TRUE = this location *is* within the player's regions
 	// FALSE = this location is *not* within player's regions
 	public Boolean checkPosition(Player player, Location loc)
@@ -518,8 +609,56 @@ public class AutoReferee extends JavaPlugin
 
 	public void checkTeamsReady() 
 	{
-
+		
 	}
+	
+	public void prepareWorld(World w)
+	{
+		// set the current time to the start time
+		w.setTime(startTime);
+		
+		// remove all mobs, animals, and items
+		for (Entity e : w.getEntitiesByClasses(Monster.class, 
+			Animals.class, Item.class)) e.remove();
+		
+		// turn off weather
+		w.setStorm(false);
+	}
+	
+	// ABANDON HOPE, ALL YE WHO ENTER HERE!
+	public static long parseStartTime(String t)
+	{
+		// "Some people, when confronted with a problem, think 'I know, I'll use
+		// regular expressions.' Now they have two problems." -- Jamie Zawinski 
+		Pattern pattern = Pattern.compile("(\\d{1,5})(:(\\d{2}))?((a|p)m?)?", Pattern.CASE_INSENSITIVE);
+		Matcher match = pattern.matcher(t);
+		
+		// if the time matches something sensible
+		if (match.matches()) try
+		{
+			// get the primary value (could be hour, could be entire time in ticks)
+			long prim = Long.parseLong(match.group(1));
+			if (match.group(1).length() > 2 || prim > 24) return prim;
+			
+			// parse am/pm distinction (12am == midnight, 12pm == noon)
+			if (match.group(5) != null)
+				prim = ("p".equals(match.group(5)) ? 12 : 0) + (prim % 12L);
+			
+			// ticks are 1000/hour, group(3) is the minutes portion
+			long ticks = prim * 1000L + (match.group(3) == null ? 0L : 
+				(Long.parseLong(match.group(3)) * 1000L / 60L));
+			
+			// ticks (18000 == midnight, 6000 == noon)
+			return (ticks + 18000L) % 24000L;
+		}
+		catch (NumberFormatException e) {  }; 
+		
+		// default time: 6am
+		return 0L;
+	}
+	
+	public static Vector locationToVector(Location loc)
+	{ return new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()); }
 	
 	public static Vector coordsToVector(String coords)
 	{
@@ -543,13 +682,15 @@ public class AutoReferee extends JavaPlugin
 		Vector v1 = coordsToVector(values[0]), v2 = coordsToVector(values[1]);
 		return (v1 == null || v2 == null ? null : new CuboidRegion(v1, v2));
 	}
+	
+	public static String vectorToCoords(Vector v)
+	{ return v.getBlockX() + "," + v.getBlockY() + "," + v.getBlockZ(); }
 
 	public static String regionToCoords(CuboidRegion reg)
 	{
 		// save region as "minX minY minZ maxX maxY maxZ"
 		Vector mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
-		return mn.getBlockX() + "," + mn.getBlockY() + "," + mn.getBlockZ() +
-			":" + mx.getBlockX() + "," + mx.getBlockY() + "," + mx.getBlockZ();
+		return vectorToCoords(mn) +	":" + vectorToCoords(mx);
 	}
 
 	static class BlockData
@@ -584,7 +725,7 @@ public class AutoReferee extends JavaPlugin
 		@Override public String toString()
 		{
 			String s = Integer.toString(mat.ordinal());
-			return data != -1 ? s : (s + "," + Integer.toString(data));
+			return data == -1 ? s : (s + "," + Integer.toString(data));
 		}
 		
 		static BlockData fromString(String s)
@@ -702,7 +843,8 @@ class Team
 		// convert the win conditions to strings
 		List<String> wcond = new ArrayList<String>();
 		for (Map.Entry<Location, AutoReferee.BlockData> e : winconditions.entrySet())
-			wcond.add(e.getKey().toVector() + ":" + e.getValue());
+			wcond.add(AutoReferee.vectorToCoords(AutoReferee.locationToVector(e.getKey())) 
+				+ ":" + e.getValue());
 
 		// add the win condition list
 		map.put("win-condition", wcond);
