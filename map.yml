@@ -23,8 +23,11 @@ match:
       color: BLUE
       maxsize: 4
   
-  # this would include spawn or any other shared regions
-  shared-regions: []
+  # this is the region around spawn where players are immune to damage
+  start-region: []
+  
+  # this is the time of day the match should start at
+  start-time: 8am
   
   # allow friendly fire: should players take damage from teammates
   allow-ff: false

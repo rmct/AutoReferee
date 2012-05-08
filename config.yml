@@ -1,11 +1,15 @@
 config-version: 1
+keyserver: server.mlm.net
 
 server-mode:
-  online: false
+  console-log: true
+  online: true
   server-key: YOUR-KEY-GOES-HERE
 
-  server-list: []
-  socket-port: 43760
+  server-list:
+    - localhost
 
-tools:
-  win-condition: 284
+config-mode:
+  autosave: true
+  tools:
+    win-condition: 284
