@@ -52,7 +52,7 @@ public class TeamListener implements Listener
 	public void playerJoin(PlayerJoinEvent event)
 	{
 		Player player = event.getPlayer();
-		Integer team = plugin.getTeam(player);
+		Team team = plugin.getTeam(player);
 
 		if (team != null) event.setJoinMessage(event.getJoinMessage()
 			.replace(player.getName(), plugin.colorPlayer(player)));

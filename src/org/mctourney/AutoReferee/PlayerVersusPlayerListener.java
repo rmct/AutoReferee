@@ -105,8 +105,8 @@ public class PlayerVersusPlayerListener implements Listener
 			}
 			
 			// get team affiliations of these players (maybe null)
-			Integer d1team = plugin.getTeam(damager);
-			Integer d2team = plugin.getTeam(damaged);
+			Team d1team = plugin.getTeam(damager);
+			Team d2team = plugin.getTeam(damaged);
 			if (d1team == null && d2team == null) return;
 
 			// if the attacked isn't on a team, or same team (w/ no FF), cancel

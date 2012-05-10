@@ -14,6 +14,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.*;
@@ -44,14 +46,14 @@ public class AutoReferee extends JavaPlugin
 	};
 	
 	private World world;
-	private long startTime = 8000;
+	private long startTime = 8000L;
 
 	// is this plugin in online mode?
 	public boolean onlineMode = false;
 	private RefereeClient conn = null;
 
 	// status always starts with NONE
-	private eMatchStatus currentState = eMatchStatus.PLAYING;
+	private eMatchStatus currentState = eMatchStatus.NONE;
 	public eMatchStatus getState() { return currentState; }
 
 	// all valid teams for this map
@@ -66,51 +68,45 @@ public class AutoReferee extends JavaPlugin
 	protected String matchName = "[Scheduled Match]";
 	public String getMatchName() { return matchName; }
 
-	public Integer teamNameLookup(String name)
+	public Team teamNameLookup(String name)
 	{
 		// is this team name a word?
-		for (int t = 0; t < teams.size(); ++t)
-			if (teams.get(t).match(name))
-				return new Integer(t);
+		for (Team t : teams) if (t.match(name)) return t;
 
 		// is this team name a number?
 		try
 		{
 			// we check that this is a valid team
 			Integer z = Integer.parseInt(name) - 1;
-			return z < teams.size() ? z : null;
+			return z < teams.size() ? teams.get(z) : null;
 		}
 		catch (NumberFormatException e) { return null; }
 	}
 
-	protected HashMap<String, Integer> playerTeam;
-	public Integer getTeam(Player player)
+	protected HashMap<OfflinePlayer, Team> playerTeam;
+	public Team getTeam(Player player)
 	{
 		// get team from player
-		return playerTeam.get(player.getName());
+		return playerTeam.get(player);
 	}
 
 	public ChatColor getTeamColor(Player player)
 	{
 		// if not on a team, don't modify the player name
-		Integer team = getTeam(player);
+		Team team = getTeam(player);
 		if (team == null) return ChatColor.WHITE;
 
 		// get color of the team they are on
-		return teams.get(team).color;
+		return team.color;
 	}
 
-	protected HashMap<Integer, Location> teamSpawn;
 	public Location getPlayerSpawn(Player player)
 	{
 		// get player's team
-		Integer team = getTeam(player);
-
-		// if they are not on a team, or their team does not have a special spawn
-		if (team == null || !teamSpawn.containsKey(team)) return null;
+		Team team = getTeam(player);
 
 		// otherwise, return the appropriate location
-		return teamSpawn.get(team);
+		return team == null ? null : team.spawn;
 	}
 
 	public Logger log = Logger.getLogger("Minecraft");
@@ -132,7 +128,7 @@ public class AutoReferee extends JavaPlugin
 		// events related to safe zones, creating zones, map conditions
 		pm.registerEvents(new ZoneListener(this), this);
 
-		playerTeam = new HashMap<String, Integer>();
+		playerTeam = new HashMap<OfflinePlayer, Team>();
 		actionTaken = new HashMap<Player, eAction>();
 
 		// global configuration object (can't be changed, so don't save onDisable)
@@ -215,14 +211,18 @@ public class AutoReferee extends JavaPlugin
 	public FileConfiguration getMapConfig() { return worldConfig; }
 
 	@SuppressWarnings("unchecked")
-	private void loadWorldConfiguration(World world) 
+	private void loadWorldConfiguration(World w) 
 	{
 		// file stream and configuration object (located in world folder)
-		worldConfigFile = new File(world.getWorldFolder(), "autoreferee.yml");
+		worldConfigFile = new File(w.getWorldFolder(), "autoreferee.yml");
 
 		// notify user if there is no configuration file
-		if (!worldConfigFile.exists())
-			log.info("No configuration file exists for this map. Creating one...");
+		if (!worldConfigFile.exists()) try
+		{
+			log.info("No configuration file exists for this map. " + 
+				"Creating one @ " + worldConfigFile.getCanonicalPath());
+		}
+		catch (IOException e) {  }
 		worldConfig = YamlConfiguration.loadConfiguration(worldConfigFile);
 
 		// load up our default values file, so that we can have a base to work with
@@ -238,7 +238,7 @@ public class AutoReferee extends JavaPlugin
 		teams = new ArrayList<Team>();
 		
 		List<Map<?, ?>> cfgTeams = worldConfig.getMapList("match.teams");
-		for (Map<?, ?> map : cfgTeams) teams.add(Team.fromMap((Map<String, Object>) map, world));
+		for (Map<?, ?> map : cfgTeams) teams.add(Team.fromMap((Map<String, Object>) map, w));
 		
 		// get the start region (safe for both teams, no pvp allowed)
 		if (worldConfig.isString("match.start-region"))
@@ -281,18 +281,19 @@ public class AutoReferee extends JavaPlugin
 
 		return (WorldEditPlugin) plugin;
 	}
-
-	public void prepareTeam(Integer t, List<String> players)
+	
+	public void prepareTeam(Team t, List<String> players)
 	{
 		// null team not allowed
 		if (t == null) return;
 
 		// delete all elements from the map for team 't'
-		Iterator<Map.Entry<String, Integer>> i = playerTeam.entrySet().iterator();
+		Iterator<Map.Entry<OfflinePlayer, Team>> i = playerTeam.entrySet().iterator();
 		while (i.hasNext()) if (t.equals(i.next().getValue())) i.remove();
 
 		// insert all players into their list
-		for (String p : players) playerTeam.put(p, t);
+		Server s = getServer(); for (String p : players)
+			playerTeam.put(s.getOfflinePlayer(p), t);
 	}
 
 	public String colorPlayer(Player player)
@@ -302,44 +303,43 @@ public class AutoReferee extends JavaPlugin
 		return color + player.getName() + ChatColor.WHITE;
 	}
 
-	public void joinTeam(Player player, Integer t)
+	public void joinTeam(Player player, Team t)
 	{
-		// null team not allowed
-		if (t == null) return;
+		// null team not allowed, and quit if they are already on this team
+		if (t == null || t.equals(getTeam(player))) return;
+		
+		// if the match is in progress, no one may join
+		if (currentState == eMatchStatus.PLAYING) return; // ???
 
 		// just in case, announce they are leaving their previous team
 		leaveTeam(player);
 
-		playerTeam.put(player.getName(), t);
-		Team team = teams.get(t);
-
+		playerTeam.put(player, t);
 		getServer().broadcastMessage(colorPlayer(player) + 
-			" has joined " + team.getName());
+			" has joined " + t.getName());
 	}
 
 	public void leaveTeam(Player player)
 	{
-		Integer t = playerTeam.get(player.getName());
+		Team t = getTeam(player);
 		if (t == null) return;
 
-		playerTeam.remove(player.getName());
-		Team team = teams.get(t);
-
+		playerTeam.remove(player);
 		getServer().broadcastMessage(colorPlayer(player) + 
-			" has left " + team.getName());
+			" has left " + t.getName());
 	}
 
 	public boolean playerWhitelisted(Player player)
 	{
 		return player.isOp() || player.hasPermission("autoreferee.referee") ||
-			playerTeam.containsKey(player.getName());
+			playerTeam.containsKey(player);
 	}
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
 	{
 		Player player = (Player) sender;
 
-		if (cmd.getName().equalsIgnoreCase("zone"))
+		if ("zone".equalsIgnoreCase(cmd.getName()))
 		{
 			if (args.length == 0)
 			{
@@ -348,9 +348,11 @@ public class AutoReferee extends JavaPlugin
 				return true;
 			}
 			
-			Integer t = teamNameLookup(args[0]);
-			if ("start".equals(args[0])) t = -1;
-			else if (t == null)
+			// START is a sentinel Team object representing the start region
+			Team t, START = new Team();
+			t = "start".equals(args[0]) ? START : teamNameLookup(args[0]);
+			
+			if (t == null)
 			{
 				// team name is invalid. let the player know
 				player.sendMessage("Not a valid team: " + args[0]);
@@ -367,31 +369,32 @@ public class AutoReferee extends JavaPlugin
 					csel.getNativeMaximumPoint()
 					);
 
-				if (t == -1)
+				// sentinel value represents the start region
+				if (t == START)
 				{
+					// set the start region to the selection
 					startRegion = reg;
 					player.sendMessage("Region now marked as " +
 						"the start region!");
 				}
 				else
 				{
-					Team team = teams.get(t);
-					team.regions.add(reg);
-	
+					// add the region to the team, announce
+					t.regions.add(reg);
 					player.sendMessage("Region now marked as " + 
-						team.getName() + "'s zone!");
+						t.getName() + "'s zone!");
 				}
 			}
 			return true;
 		}
-		if (cmd.getName().equalsIgnoreCase("zones"))
+		if ("zones".equalsIgnoreCase(cmd.getName()))
 		{
 			List<Team> lookupTeams = null;
 
 			// if a team has been specified as an argument
 			if (args.length > 0)
 			{
-				Integer t = teamNameLookup(args[0]);
+				Team t = teamNameLookup(args[0]);
 				if (t == null)
 				{
 					// team name is invalid. let the player know
@@ -400,7 +403,7 @@ public class AutoReferee extends JavaPlugin
 				}
 
 				lookupTeams = new ArrayList<Team>();
-				lookupTeams.add(teams.get(t));
+				lookupTeams.add(t);
 			}
 
 			// otherwise, just print all the teams
@@ -426,13 +429,14 @@ public class AutoReferee extends JavaPlugin
 			return true;
 		}
 
-		if (cmd.getName().equalsIgnoreCase("jointeam") && !onlineMode)
+		if ("jointeam".equalsIgnoreCase(cmd.getName()) && !onlineMode)
 		{
-			Integer t = (args.length > 0) ? teamNameLookup(args[0]) : getArbitraryTeam();
+			Team t = args.length > 0 ? teamNameLookup(args[0]) : getArbitraryTeam();
 			if (t == null)
 			{
 				// team name is invalid. let the player know
-				player.sendMessage("Not a valid team: " + args[0]);
+				if (args.length > 0)
+					player.sendMessage("Not a valid team: " + args[0]);
 				return true;
 			}
 
@@ -446,7 +450,7 @@ public class AutoReferee extends JavaPlugin
 			joinTeam(target, t);
 			return true;
 		}
-		if (cmd.getName().equalsIgnoreCase("leaveteam") && !onlineMode)
+		if ("leaveteam".equalsIgnoreCase(cmd.getName()) && !onlineMode)
 		{
 			Player target = player;
 			if (args.length > 0)
@@ -458,12 +462,12 @@ public class AutoReferee extends JavaPlugin
 			leaveTeam(player);
 			return true;
 		}
-		if (cmd.getName().equalsIgnoreCase("ready"))
+		if ("ready".equalsIgnoreCase(cmd.getName()) && currentState == eMatchStatus.READY)
 		{
 			prepareWorld(world);
 			return true;
 		}
-		if (cmd.getName().equalsIgnoreCase("wincond"))
+		if ("wincond".equalsIgnoreCase(cmd.getName()))
 		{
 			int wincondtool = getConfig().getInt("config-mode.tools.win-condition", 284);
 			
@@ -493,25 +497,27 @@ public class AutoReferee extends JavaPlugin
 		return false;
 	}
 
-	private Integer getArbitraryTeam()
+	private Team getArbitraryTeam()
 	{
 		// minimum size of any one team, and an array to hold valid teams
 		int minsize = Integer.MAX_VALUE;
-		List<Integer> vteams = new ArrayList<Integer>();
+		List<Team> vteams = new ArrayList<Team>();
 		
 		// get the number of players on each team: Map<TeamNumber -> NumPlayers>
-		Map<Integer,Integer> count = new HashMap<Integer,Integer>();
-		for (Integer v : playerTeam.values())
-			count.put(v, count.containsKey(v) ? count.get(v)+1 : 1);
+		Map<Team,Integer> count = new HashMap<Team,Integer>();
+		for (Team t : teams) count.put(t, 0);
+		
+		for (Team t : playerTeam.values())
+			if (count.containsKey(t)) count.put(t, count.get(t)+1);
 		
 		// determine the size of the smallest team
 		for (Integer c : count.values())
 			if (c < minsize) minsize = c.intValue();
-		
+
 		// make a list of all teams with this size
-		for (Map.Entry<Integer,Integer> e : count.entrySet())
+		for (Map.Entry<Team,Integer> e : count.entrySet())
 			if (e.getValue().intValue() == minsize) vteams.add(e.getKey());
-		
+
 		// return a random element from this list
 		return vteams.get(new Random().nextInt(vteams.size()));
 	}
@@ -546,6 +552,9 @@ public class AutoReferee extends JavaPlugin
 		
 		for (Team t : teams)
 		{
+			// if there are no win conditions set, skip this team
+			if (t.winconditions.size() == 0) continue;
+			
 			// check all win condition blocks (AND together)
 			boolean win = true;
 			for (Map.Entry<Location, BlockData> pair : t.winconditions.entrySet())
@@ -560,7 +569,7 @@ public class AutoReferee extends JavaPlugin
 				// announce the victory and set the match to completed
 				getServer().broadcastMessage(t.getName() + " WINS!");
 				for (Player p : world.getPlayers())
-					if (playerTeam.containsKey(p.getDisplayName()))
+					if (playerTeam.containsKey(p))
 						p.teleport(world.getSpawnLocation());
 				currentState = eMatchStatus.COMPLETED;
 			}
@@ -600,16 +609,36 @@ public class AutoReferee extends JavaPlugin
 	public Boolean checkPosition(Player player, Location loc)
 	{
 		// get the player's team (if they are not on a team, ignore them)
-		Integer pteam = playerTeam.get(player.getName());
-		if (pteam == null) return true;
+		Team team = getTeam(player);
+		if (team == null) return true;
 		
 		// is the player's location owned by the player's team?
-		return locationOwnership(loc).contains(teams.get(pteam));
+		return locationOwnership(loc).contains(team);
 	}
 
 	public void checkTeamsReady() 
 	{
+		// if there is no one on the server
+		if (world.getPlayers().size() == 0)
+		{
+			// set all the teams to not ready and status as waiting
+			for ( Team t : teams ) t.ready = false;
+			currentState = eMatchStatus.WAITING; return;
+		}
 		
+		// this function is only useful if we are waiting
+		if (currentState != eMatchStatus.WAITING) return;
+		
+		// if we aren't in online mode, assume we are always ready
+		if (!onlineMode) { currentState = eMatchStatus.READY; return; }
+		
+		// check if all the players are here
+		boolean ready = true;
+		for ( OfflinePlayer p : playerTeam.keySet() ) 
+			ready &= p.isOnline();
+		
+		// set status based on whether the players are online
+		currentState = ready ? eMatchStatus.READY : eMatchStatus.WAITING;
 	}
 	
 	public void prepareWorld(World w)
@@ -619,10 +648,22 @@ public class AutoReferee extends JavaPlugin
 		
 		// remove all mobs, animals, and items
 		for (Entity e : w.getEntitiesByClasses(Monster.class, 
-			Animals.class, Item.class)) e.remove();
+			Animals.class, Item.class, ExperienceOrb.class)) e.remove();
 		
 		// turn off weather
 		w.setStorm(false);
+		
+		// prepare all players for the match
+		for (Player p : w.getPlayers())
+			if (playerTeam.containsKey(p)) preparePlayer(p);
+	}
+	
+	public void preparePlayer(Player p)
+	{
+		p.setHealth    ( 20 ); // 10 hearts
+		p.setFoodLevel ( 20 ); // full food
+		p.setSaturation(  5 ); // saturation depletes hunger
+		p.setExhaustion(  0 ); // exhaustion depletes saturation
 	}
 	
 	// ABANDON HOPE, ALL YE WHO ENTER HERE!
@@ -761,9 +802,15 @@ class Team
 
 	// maximum size of a team (for manual mode only)
 	public int maxSize = 0;
+	
+	// is this team ready to play?
+	public boolean ready = false;
 
 	// list of regions
 	public List<CuboidRegion> regions = null;
+	
+	// location of custom spawn
+	public Location spawn;
 
 	// winconditions, locations mapped to expected block data
 	public Map<Location, AutoReferee.BlockData> winconditions;
