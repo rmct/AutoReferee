@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project name="AutoReferee" default="dist" basedir=".">
+	<!-- source code directory -->
 	<property name="dir.src" location="src" />
-	<property name="dir.lib" location="lib" />
-	<property name="dir.build" location="bin" />
-	<property name="dir.dist" location="dist" />
 
+	<!-- library files to compile against -->
+	<property name="dir.lib" location="lib" />
+
+	<!-- directory to compile java code into -->
+	<property name="dir.build" location="bin" />
+
+	<!-- any files that need to be compiled against -->
 	<path id="classpath">
 		<fileset dir="${dir.lib}" includes="**/*.jar" />
 	</path>
 
+	<!-- cleanup files -->
 	<target name="clean">
 		<delete dir="${dir.build}" />
 	</target>
-	
+
+	<!-- setup build directory -->
 	<target name="init">
 		<mkdir dir="${dir.build}" />
 		<copy includeemptydirs="false" todir="${dir.build}">
@@ -22,13 +29,15 @@
 			</fileset>
 		</copy>
 	</target>
-	
+
+	<!-- build all java code -->
 	<target name="build" depends="init">
 		<echo message="${ant.project.name}: ${ant.file}" />
 		<javac srcdir="${dir.src}" destdir="${dir.build}" classpathref="classpath"  
 			debug="true" debuglevel="lines,vars,source" includeantruntime="false" />
 	</target>
-	
+
+	<!-- generate jar file from compiled code -->
 	<target name="dist" depends="build">
 		<jar jarfile="${ant.project.name}.jar" basedir="${dir.build}" />
 	</target>
