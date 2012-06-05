@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
 import org.bukkit.plugin.Plugin;
@@ -23,66 +24,78 @@ public class PlayerVersusPlayerListener implements Listener
 		allow_ff = plugin.getMapConfig().getBoolean("match.allow-ff");
 	}
 
-	@EventHandler
+	@EventHandler(priority=EventPriority.MONITOR)
 	public void playerDeath(EntityDeathEvent event)
 	{
 		if ((event instanceof PlayerDeathEvent))
 		{
-			PlayerDeathEvent playerdeath = (PlayerDeathEvent) event;
-			Player player = (Player) playerdeath.getEntity();
+			PlayerDeathEvent pdeath = (PlayerDeathEvent) event;
+			Player victim = (Player) pdeath.getEntity();
 
 			// get the player who killed this player (might be null)
-			Player killer = player.getKiller();
-			String dmsg = playerdeath.getDeathMessage();
+			Player killer = victim.getKiller();
+			String dmsg = pdeath.getDeathMessage();
 
 			// if the death was due to intervention by the plugin
 			// let's change the death message to reflect this fact
-			if (plugin.actionTaken.containsKey(player))
+			if (plugin.actionTaken.containsKey(victim.getName()))
 			{
-				switch (plugin.actionTaken.get(player))
+				switch (plugin.actionTaken.get(victim.getName()))
 				{
 					// killed because they entered the void lane
 					case ENTERED_VOIDLANE:
-						dmsg = player.getName() + " entered the void lane.";
+						dmsg = victim.getName() + " entered the void lane.";
 						break;
 				}
 
 				// remove this verdict once we have used it
-				plugin.actionTaken.remove(player);
+				plugin.actionTaken.remove(victim.getName());
 			}
 
 			// color the player's name with his team color
-			dmsg = dmsg.replace(player.getName(), plugin.colorPlayer(player));
+			dmsg = dmsg.replace(victim.getName(), plugin.colorPlayer(victim));
 
 			// if the killer was a player, color their name as well
 			if (killer != null) 
 			{
 				if (plugin.getConfig().getBoolean("server-mode.console.log", false))
 					log.info("[DEATH] " + killer.getDisplayName() 
-						+ " killed " + player.getDisplayName());
+						+ " killed " + victim.getDisplayName());
 				dmsg = dmsg.replace(killer.getName(), plugin.colorPlayer(killer));
 			}
 
 			// update the death message with the changes
-			playerdeath.setDeathMessage(dmsg);
+			pdeath.setDeathMessage(dmsg);
+			
+			// save information about this kill to the logs (register to victim/killer logs)
+			if (plugin.playerData != null)
+			{
+				// register the death of the victim
+				if (plugin.playerData.containsKey(victim))
+					plugin.playerData.get(victim).registerDeath(pdeath);
+				
+				// register the kill for the killer
+				if (plugin.playerData.containsKey(killer))
+					plugin.playerData.get(killer).registerKill(pdeath);
+			}
 		}
 	}
 
-	public Player entityToPlayer(Entity e)
+	public static Player entityToPlayer(Entity e)
 	{
 		// damaging entity is an actual player, easy!
 		if ((e instanceof Player)) return (Player) e;
 
 		// damaging entity is an arrow, then who was bow?
-		if ((e instanceof Arrow))
+		if ((e instanceof Projectile))
 		{
-			LivingEntity shooter = ((Arrow) e).getShooter();
+			LivingEntity shooter = ((Projectile) e).getShooter();
 			if ((shooter instanceof Player)) return (Player) shooter;
 		}
 		return null;
 	}
 
-	@EventHandler
+	@EventHandler(priority=EventPriority.HIGHEST)
 	public void damageDealt(EntityDamageEvent event)
 	{
 		if ((event instanceof EntityDamageByEntityEvent))
@@ -110,12 +123,13 @@ public class PlayerVersusPlayerListener implements Listener
 			if (d1team == null && d2team == null) return;
 
 			// if the attacked isn't on a team, or same team (w/ no FF), cancel
-			if (d2team == null || (d1team == d2team && allow_ff))
-			{ event.setCancelled(true); return; }
+			event.setCancelled(d2team == null || (d1team == d2team && allow_ff));
 
-			log.info(damager.getName() + " dealt damage to " + damaged.getName() 
-				+ " via " + ed.getCause().name());
+			if (event.isCancelled()) return;
 		}
+		
+		if (plugin.playerData != null && plugin.playerData.containsKey(event.getEntity()))
+			plugin.playerData.get(event.getEntity()).registerDamage(event);
 	}
 }
 

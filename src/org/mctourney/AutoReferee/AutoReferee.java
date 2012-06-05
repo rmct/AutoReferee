@@ -21,12 +21,16 @@ import org.bukkit.block.Block;
 import org.bukkit.command.*;
 import org.bukkit.configuration.file.*;
 import org.bukkit.entity.*;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.*;
@@ -57,13 +61,15 @@ public class AutoReferee extends JavaPlugin
 	public eMatchStatus getState() { return currentState; }
 
 	// all valid teams for this map
-	public List<Team> teams = null;
+	public Set<Team> teams = null;
 
 	// a map from a team to a list of cuboid regions that are "safe"
 	private CuboidRegion startRegion;
 
 	// a map from a player to info about why they were killed
-	public HashMap<Player, eAction> actionTaken;
+	protected Map<String, Team> playerTeam;
+	public Map<String, PlayerData> playerData;
+	public Map<String, eAction> actionTaken;
 
 	protected String matchName = "[Scheduled Match]";
 	public String getMatchName() { return matchName; }
@@ -73,24 +79,17 @@ public class AutoReferee extends JavaPlugin
 		// is this team name a word?
 		for (Team t : teams) if (t.match(name)) return t;
 
-		// is this team name a number?
-		try
-		{
-			// we check that this is a valid team
-			Integer z = Integer.parseInt(name) - 1;
-			return z < teams.size() ? teams.get(z) : null;
-		}
-		catch (NumberFormatException e) { return null; }
+		// no team matches the name provided
+		return null;
 	}
 
-	protected HashMap<OfflinePlayer, Team> playerTeam;
-	public Team getTeam(Player player)
+	public Team getTeam(OfflinePlayer player)
 	{
 		// get team from player
-		return playerTeam.get(player);
+		return playerTeam.get(player.getName());
 	}
 
-	public ChatColor getTeamColor(Player player)
+	public ChatColor getTeamColor(OfflinePlayer player)
 	{
 		// if not on a team, don't modify the player name
 		Team team = getTeam(player);
@@ -100,7 +99,7 @@ public class AutoReferee extends JavaPlugin
 		return team.color;
 	}
 
-	public Location getPlayerSpawn(Player player)
+	public Location getPlayerSpawn(OfflinePlayer player)
 	{
 		// get player's team
 		Team team = getTeam(player);
@@ -128,8 +127,8 @@ public class AutoReferee extends JavaPlugin
 		// events related to safe zones, creating zones, map conditions
 		pm.registerEvents(new ZoneListener(this), this);
 
-		playerTeam = new HashMap<OfflinePlayer, Team>();
-		actionTaken = new HashMap<Player, eAction>();
+		playerTeam = new HashMap<String, Team>();
+		actionTaken = new HashMap<String, eAction>();
 
 		// global configuration object (can't be changed, so don't save onDisable)
 		getConfig().options().copyDefaults(true); saveConfig();
@@ -235,7 +234,7 @@ public class AutoReferee extends JavaPlugin
 		worldConfig.options().header(this.getDescription().getFullName());
 		worldConfig.options().copyHeader(false);
 
-		teams = new ArrayList<Team>();
+		teams = new HashSet<Team>();
 		
 		List<Map<?, ?>> cfgTeams = worldConfig.getMapList("match.teams");
 		for (Map<?, ?> map : cfgTeams) teams.add(Team.fromMap((Map<String, Object>) map, w));
@@ -288,38 +287,40 @@ public class AutoReferee extends JavaPlugin
 		if (t == null) return;
 
 		// delete all elements from the map for team 't'
-		Iterator<Map.Entry<OfflinePlayer, Team>> i = playerTeam.entrySet().iterator();
+		Iterator<Map.Entry<String, Team>> i = playerTeam.entrySet().iterator();
 		while (i.hasNext()) if (t.equals(i.next().getValue())) i.remove();
 
 		// insert all players into their list
-		Server s = getServer(); for (String p : players)
-			playerTeam.put(s.getOfflinePlayer(p), t);
+		for (String p : players) playerTeam.put(p, t);
 	}
 
-	public String colorPlayer(Player player)
+	public String colorPlayer(OfflinePlayer player)
 	{
 		// color a player's name with its team's color
 		ChatColor color = getTeamColor(player);
 		return color + player.getName() + ChatColor.WHITE;
 	}
 
-	public void joinTeam(Player player, Team t)
+	public void joinTeam(OfflinePlayer player, Team t)
 	{
 		// null team not allowed, and quit if they are already on this team
-		if (t == null || t.equals(getTeam(player))) return;
+		if (t == null || t == getTeam(player)) return;
 		
 		// if the match is in progress, no one may join
-		if (currentState == eMatchStatus.PLAYING) return; // ???
+		if (currentState.ordinal() >= eMatchStatus.PLAYING.ordinal()) return;
 
 		// just in case, announce they are leaving their previous team
 		leaveTeam(player);
 
-		playerTeam.put(player, t);
+		playerTeam.put(player.getName(), t);
 		getServer().broadcastMessage(colorPlayer(player) + 
 			" has joined " + t.getName());
+		
+		if (player.isOnline() && (player instanceof Player))
+			((Player) player).setPlayerListName(colorPlayer(player));
 	}
 
-	public void leaveTeam(Player player)
+	public void leaveTeam(OfflinePlayer player)
 	{
 		Team t = getTeam(player);
 		if (t == null) return;
@@ -327,6 +328,9 @@ public class AutoReferee extends JavaPlugin
 		playerTeam.remove(player);
 		getServer().broadcastMessage(colorPlayer(player) + 
 			" has left " + t.getName());
+		
+		if (player.isOnline() && (player instanceof Player))
+			((Player) player).setPlayerListName(player.getName());
 	}
 
 	public boolean playerWhitelisted(Player player)
@@ -339,6 +343,22 @@ public class AutoReferee extends JavaPlugin
 	{
 		Player player = (Player) sender;
 
+		if ("autoref".equalsIgnoreCase(cmd.getName()))
+		{
+			if (args.length >= 1 && "save".equalsIgnoreCase(args[0]))
+			{ saveWorldConfiguration(player.getWorld()); return true; }
+			
+			if (args.length >= 1 && "pstats".equalsIgnoreCase(args[0]))
+			{ logPlayerData(); return true; }
+			
+			if (args.length >= 2 && "state".equalsIgnoreCase(args[0])) try
+			{
+				currentState = eMatchStatus.valueOf(args[1]);
+				log.info("Match Status is now " + currentState.name());
+				return true;
+			}
+			catch (Exception e) { return false; }
+		}
 		if ("zone".equalsIgnoreCase(cmd.getName()))
 		{
 			if (args.length == 0)
@@ -389,7 +409,7 @@ public class AutoReferee extends JavaPlugin
 		}
 		if ("zones".equalsIgnoreCase(cmd.getName()))
 		{
-			List<Team> lookupTeams = null;
+			Set<Team> lookupTeams = null;
 
 			// if a team has been specified as an argument
 			if (args.length > 0)
@@ -402,7 +422,7 @@ public class AutoReferee extends JavaPlugin
 					return true;
 				}
 
-				lookupTeams = new ArrayList<Team>();
+				lookupTeams = new HashSet<Team>();
 				lookupTeams.add(t);
 			}
 
@@ -462,9 +482,14 @@ public class AutoReferee extends JavaPlugin
 			leaveTeam(player);
 			return true;
 		}
-		if ("ready".equalsIgnoreCase(cmd.getName()) && currentState == eMatchStatus.READY)
+		// WARNING: using ordinals on enums is typically frowned upon,
+		// but we will consider the enums "partially-ordered"
+		if ("ready".equalsIgnoreCase(cmd.getName()) && 
+			currentState.ordinal() < eMatchStatus.PLAYING.ordinal())
 		{
-			prepareWorld(world);
+			log.info("Readying the server!");
+			prepareWorld(player.getWorld());
+			
 			return true;
 		}
 		if ("wincond".equalsIgnoreCase(cmd.getName()))
@@ -495,6 +520,31 @@ public class AutoReferee extends JavaPlugin
 		}
 
 		return false;
+	}
+
+	private void logPlayerData()
+	{
+		log.info("Player Stats!");
+		for (Map.Entry<String, PlayerData> entry : playerData.entrySet())
+		{
+			String pname = entry.getKey();
+			PlayerData data = entry.getValue();
+			
+			log.info("Stats for " + pname + ": (" + Integer.toString(data.totalKills)
+				+ "/" + Integer.toString(data.totalDeaths) + ")");
+			
+			for (Map.Entry<String, Integer> kill : data.kills.entrySet())
+				log.info("\t" + pname + " killed " + kill.getKey() + " " 
+					+ kill.getValue().toString() + " time(s).");
+			
+			for (Map.Entry<DamageCause, Integer> death : data.deaths.entrySet())
+				log.info("\t" + death.getKey().toString() + " killed " + pname 
+					+ " " + death.getValue().toString() + " time(s).");
+			
+			for (Map.Entry<DamageCause, Integer> damage : data.damage.entrySet())
+				log.info("\t" + damage.getKey().toString() + " caused " + pname 
+					+ " " + damage.getValue().toString() + " damage.");
+		}
 	}
 
 	private Team getArbitraryTeam()
@@ -541,10 +591,10 @@ public class AutoReferee extends JavaPlugin
 		
 		// broadcast the update using bname (a reconstructed name for the block)
 		getServer().broadcastMessage(bname + " is now a win condition for " + 
-			team.getName() + " @ " + vectorToCoords(locationToVector(block.getLocation())));
+			team.getName() + " @ " + vectorToCoords(locationToBlockVector(block.getLocation())));
 	}
 
-	public void checkWinConditions(Location aloc)
+	public void checkWinConditions(World world, Location aloc)
 	{
 		// this code is only called in BlockPlaceEvent and BlockBreakEvent when
 		// we have confirmed that the state is PLAYING, so we know we are definitely
@@ -576,10 +626,10 @@ public class AutoReferee extends JavaPlugin
 		}
 	}
 	
-	public List<Team> locationOwnership(Location loc)
+	public Set<Team> locationOwnership(Location loc)
 	{
 		// teams who own this location
-		List<Team> owners = new ArrayList<Team>();
+		Set<Team> owners = new HashSet<Team>();
 		
 		// convert location to a WorldEdit vector
 		Vector pos = new Vector(loc.getX(), loc.getY(), loc.getZ());
@@ -602,6 +652,43 @@ public class AutoReferee extends JavaPlugin
 	{
 		Vector vec = new Vector(loc.getX(), loc.getY(), loc.getZ());
 		return startRegion != null && startRegion.contains(vec);
+	}
+	
+	public static double distanceToRegion(Location v, CuboidRegion reg)
+	{
+		// not a region, infinite distance away
+		if (reg == null) return Double.POSITIVE_INFINITY;
+		
+		double x = v.getX(), y = v.getY(), z = v.getZ();
+		Vector mx = reg.getMaximumPoint(), mn = reg.getMinimumPoint();
+		
+		return Math.max(
+			Math.max(Math.max(0, x - mx.getX() - 1), Math.max(y - mx.getY() - 1, z - mx.getZ() - 1)),
+			Math.max(Math.max(0, mn.getX() - x), Math.max(mn.getY() - y, mn.getZ() - z))
+		);
+		
+/*		double mxx = x - mx.getX(), mxy = y - mx.getY(), mxz = z - mx.getZ();
+		double mnx = mn.getX() - x, mny = mn.getY() - y, mnz = mn.getZ() - z;
+
+		double mxd = Math.max(Math.max(0, mxx), Math.max(mxy, mxz));
+		double mnd = Math.max(Math.max(0, mnx), Math.max(mny, mnz));
+		distance = Math.min(distance, Math.min(mxd, mnd));
+*/
+	}
+	
+	// distance from the closest owned region
+	public double distanceToClosestRegion(Player p)
+	{ return distanceToClosestRegion(getTeam(p), p.getLocation()); }
+	
+	public double distanceToClosestRegion(Team team, Location loc)
+	{
+		if (team == null) return 0;
+		double distance = distanceToRegion(loc, startRegion);
+		
+		for ( CuboidRegion reg : team.regions ) if (distance > 0)
+			distance = Math.min(distance, distanceToRegion(loc, reg));
+		
+		return distance;
 	}
 
 	// TRUE = this location *is* within the player's regions
@@ -633,9 +720,9 @@ public class AutoReferee extends JavaPlugin
 		if (!onlineMode) { currentState = eMatchStatus.READY; return; }
 		
 		// check if all the players are here
-		boolean ready = true;
-		for ( OfflinePlayer p : playerTeam.keySet() ) 
-			ready &= p.isOnline();
+		boolean ready = true; Server s = getServer();
+		for ( String p : playerTeam.keySet() ) 
+			ready &= s.getOfflinePlayer(p).isOnline();
 		
 		// set status based on whether the players are online
 		currentState = ready ? eMatchStatus.READY : eMatchStatus.WAITING;
@@ -654,8 +741,32 @@ public class AutoReferee extends JavaPlugin
 		w.setStorm(false);
 		
 		// prepare all players for the match
+		playerData = new HashMap<String, PlayerData>();
 		for (Player p : w.getPlayers())
 			if (playerTeam.containsKey(p)) preparePlayer(p);
+		
+		// vanish all players appropriately (p1 = viewer, p2 = subject)
+		for ( Player p1 : w.getPlayers() )
+		{
+			Team t1 = getTeam(p1);
+			for ( Player p2 : w.getPlayers() )
+			{
+				if (p1 == p2) continue;
+				Team t2 = getTeam(p2);
+
+				// subject is not on a team, definitely hide them
+				if (t2 == null) { p1.hidePlayer(p2); continue; }
+				
+				// viewer is not on a team, only show them if the
+				// subject is not a referee
+				if (t1 == null)
+				{
+					if (p2.hasPermission("autoreferee.referee"))
+						p1.showPlayer(p2);
+					else p1.hidePlayer(p2);
+				}
+			}
+		}
 	}
 	
 	public void preparePlayer(Player p)
@@ -664,13 +775,17 @@ public class AutoReferee extends JavaPlugin
 		p.setFoodLevel ( 20 ); // full food
 		p.setSaturation(  5 ); // saturation depletes hunger
 		p.setExhaustion(  0 ); // exhaustion depletes saturation
+		
+		// setup an empty PlayerData object for this player
+		log.info("Making record for: " + p.getName());
+		playerData.put(p.getName(), new PlayerData());
 	}
 	
 	// ABANDON HOPE, ALL YE WHO ENTER HERE!
 	public static long parseStartTime(String t)
 	{
 		// "Some people, when confronted with a problem, think 'I know, I'll use
-		// regular expressions.' Now they have two problems." -- Jamie Zawinski 
+		// regular expressions.' Now they have two problems." -- Jamie Zawinski
 		Pattern pattern = Pattern.compile("(\\d{1,5})(:(\\d{2}))?((a|p)m?)?", Pattern.CASE_INSENSITIVE);
 		Matcher match = pattern.matcher(t);
 		
@@ -699,7 +814,10 @@ public class AutoReferee extends JavaPlugin
 	}
 	
 	public static Vector locationToVector(Location loc)
-	{ return new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()); }
+	{ return new Vector(loc.getX(), loc.getY(), loc.getZ()); }
+	
+	public static BlockVector locationToBlockVector(Location loc)
+	{ return locationToVector(loc).toBlockVector(); }
 	
 	public static Vector coordsToVector(String coords)
 	{
@@ -789,6 +907,126 @@ public class AutoReferee extends JavaPlugin
 		// generate block data object from a CraftBlock
 		static BlockData fromBlock(Block b)
 		{ return new BlockData(b.getType(), b.getData()); }
+	}
+
+	static class PlayerData
+	{
+		// number of times this player has killed other players
+		public Map<String, Integer> kills;
+		public int totalKills = 0;
+
+		// number of times player has died and damage taken
+		public Map<DamageCause, Integer> deaths;
+		public Map<DamageCause, Integer> damage;
+		public int totalDeaths = 0;
+		
+		// constructor for simply setting up the variables
+		public PlayerData()
+		{
+			kills = new HashMap<String, Integer>();
+			deaths = new HashMap<DamageCause, Integer>();
+			damage = new HashMap<DamageCause, Integer>();
+		}
+		
+		// register that we just received this damage
+		public void registerDamage(EntityDamageEvent e)
+		{
+			/*// if this isn't damage by an entity, we don't actually care
+			if (!(e instanceof EntityDamageByEntityEvent)) return;
+			EntityDamageByEntityEvent ed = (EntityDamageByEntityEvent) e;
+			
+			// if the cause of the damage wasn't a player, still don't care
+			if (!(ed.getDamager() instanceof Player)) return;*/
+			
+			DamageCause dc = DamageCause.fromDamageEvent(e);
+			damage.put(dc, e.getDamage() + (damage.containsKey(dc) ? damage.get(dc) : 0));
+		}
+		
+		// register that we just died
+		public void registerDeath(PlayerDeathEvent e)
+		{
+			// get the last damage cause, and mark that as the cause of one death
+			DamageCause dc = DamageCause.fromDamageEvent(e.getEntity().getLastDamageCause());
+			deaths.put(dc, 1 + (deaths.containsKey(dc) ? deaths.get(dc) : 0));
+			++totalDeaths;
+		}
+		
+		// register that we killed the Player who fired this event
+		public void registerKill(PlayerDeathEvent e)
+		{
+			String player = e.getEntity().getName();
+			kills.put(player, 1 + (kills.containsKey(player) ? kills.get(player) : 0));
+			++totalKills;
+		}
+	}
+}
+
+class DamageCause
+{
+	// cause of damage, primary value for damage cause
+	public EntityDamageEvent.DamageCause damageCause;
+	
+	// extra information to accompany damage cause
+	public Object payload = null;
+	
+	// generate a hashcode
+	@Override public int hashCode()
+	{ return (payload == null ? 0 : payload.hashCode()) ^ 
+		damageCause.hashCode(); }
+
+	@Override public boolean equals(Object o)
+	{ return hashCode() == o.hashCode(); }
+	
+	public DamageCause(EntityDamageEvent.DamageCause c, Object p)
+	{ damageCause = c; payload = p; }
+	
+	public static DamageCause fromDamageEvent(EntityDamageEvent e)
+	{
+		EntityDamageEvent.DamageCause c = e.getCause();
+		Object p = null;
+		
+		EntityDamageByEntityEvent edEvent = null;
+		if ((e instanceof EntityDamageByEntityEvent))
+			edEvent = (EntityDamageByEntityEvent) e;
+		
+		switch (c)
+		{
+			case ENTITY_ATTACK:
+			case ENTITY_EXPLOSION:
+				// get the entity that did the killing
+				if (edEvent != null)
+					p = edEvent.getDamager();
+				break;
+
+			case PROJECTILE:
+			case MAGIC:
+				// get the shooter from the projectile
+				if (edEvent != null && edEvent.getDamager() != null)
+					p = ((Projectile) edEvent.getDamager()).getShooter();
+				
+				// change damage cause to ENTITY_ATTACK
+				//c = EntityDamageEvent.DamageCause.ENTITY_ATTACK;
+				break;
+		}
+		
+		if ((p instanceof Monster))
+			p = ((Monster) p).getType();
+		return new DamageCause(c, p);
+	}
+	
+	@Override public String toString()
+	{
+		String damager = null;
+		
+		// generate a 'damager' string for more information
+		if ((payload instanceof Player))
+			damager = ((Player) payload).getName();
+		if ((payload instanceof EntityType))
+			damager = ((EntityType) payload).name();
+		
+		// return a string representing this damage cause
+		return (damager == null ? "" : (damager + "'s "))
+			+ damageCause.name();
 	}
 }
 
@@ -890,7 +1128,7 @@ class Team
 		// convert the win conditions to strings
 		List<String> wcond = new ArrayList<String>();
 		for (Map.Entry<Location, AutoReferee.BlockData> e : winconditions.entrySet())
-			wcond.add(AutoReferee.vectorToCoords(AutoReferee.locationToVector(e.getKey())) 
+			wcond.add(AutoReferee.vectorToCoords(AutoReferee.locationToBlockVector(e.getKey())) 
 				+ ":" + e.getValue());
 
 		// add the win condition list

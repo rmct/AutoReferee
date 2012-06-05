@@ -1,8 +1,6 @@
 package org.mctourney.AutoReferee;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 import org.bukkit.GameMode;
@@ -16,11 +14,15 @@ import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.plugin.Plugin;
+import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 
 public class ZoneListener implements Listener 
 {
 	AutoReferee plugin = null;
 	public Logger log = Logger.getLogger("Minecraft");
+	
+	public static final double SNEAK_DISTANCE = 0.301;
+	public static final double FREEFALL_THRESHOLD = 0.350;
 
 	// convenience for changing defaults
 	enum ToolAction
@@ -45,15 +47,30 @@ public class ZoneListener implements Listener
 	public void playerMove(PlayerMoveEvent event)
 	{
 		Player player = event.getPlayer();
-
+		
+		double d = plugin.distanceToClosestRegion(
+			plugin.getTeam(player), event.getTo());
+		double fallspeed = event.getFrom().getY() - event.getTo().getY();
+		
 		// only kill if they are in survival mode. otherwise, what's the point?
-		if (player.getGameMode() == GameMode.SURVIVAL && 
-				!plugin.checkPosition(player, event.getTo()) &&
-				!plugin.inStartRegion(event.getTo()))
+		if (player.getGameMode() == GameMode.SURVIVAL && d > 0)
 		{
-			// if they were in none of their team's regions, kill them
-			plugin.actionTaken.put(player, AutoReferee.eAction.ENTERED_VOIDLANE);
-			player.setHealth(0);
+//			player.sendMessage("s: " + player.isSneaking());
+//			player.sendMessage("d: " + Double.toString(d));
+//			player.sendMessage("f: " + Double.toString(fallspeed));
+			
+			// player is close enough to not need sneaking to be supported
+			if (d < 0.30);
+			
+			// player is sneaking off the edge and not in freefall
+			else if (player.isSneaking() && d < SNEAK_DISTANCE && fallspeed < FREEFALL_THRESHOLD);
+			
+			else
+			{
+				// if any of the above clauses fail, they are not in a defensible position
+				plugin.actionTaken.put(player.getName(), AutoReferee.eAction.ENTERED_VOIDLANE);
+				if (!player.isDead()) player.setHealth(0);
+			}
 		}
 		
 		// if a player leaves the start region, empty their inventory
@@ -77,7 +94,7 @@ public class ZoneListener implements Listener
 		{ event.setCancelled(true); return; }
 		
 		// we are playing right now, so check win conditions
-		plugin.checkWinConditions(null);
+		plugin.checkWinConditions(event.getBlock().getWorld(), null);
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
@@ -85,6 +102,7 @@ public class ZoneListener implements Listener
 	{
 		// if the match isn't currently in progress, a player should
 		// not be allowed to place or destroy blocks anywhere
+		log.info("Block break, match status: " + plugin.getState().name());
 		if (plugin.getState() != AutoReferee.eMatchStatus.PLAYING)
 		{ event.setCancelled(true); return; }
 		
@@ -96,7 +114,8 @@ public class ZoneListener implements Listener
 		{ event.setCancelled(true); return; }
 		
 		// we are playing right now, so check win conditions (with air location)
-		plugin.checkWinConditions(event.getBlock().getLocation());
+		plugin.checkWinConditions(event.getBlock().getWorld(), 
+				event.getBlock().getLocation());
 	}
 
 	@EventHandler
@@ -132,14 +151,27 @@ public class ZoneListener implements Listener
 				
 				// determine who owns the region that the clicked block is in
 				Block block = event.getClickedBlock();
-				List<Team> owns = plugin.locationOwnership(block.getLocation());
+				Set<Team> owns = plugin.locationOwnership(block.getLocation());
 				
 				// if the region is owned by only one team, make it one of their
 				// win conditions (otherwise, we may need to configure by hand)
-				if (owns.size() == 1) plugin.addWinCondition(block, owns.get(0));
+				if (owns.size() == 1)
+					plugin.addWinCondition(block, (Team)owns.toArray()[0]);
 				
 				break;
 		}
+	}
+	
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void creatureSpawn(CreatureSpawnEvent event)
+	{
+		// if the match hasn't started, cancel
+		if (plugin.getState() != eMatchStatus.PLAYING)
+		{ event.setCancelled(true); return; }
+
+		// if this is in the start region, cancel
+		if (plugin.inStartRegion(event.getLocation()))
+		{ event.setCancelled(true); return; }
 	}
 }
 
