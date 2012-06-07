@@ -107,6 +107,21 @@ public class AutoReferee extends JavaPlugin
 		// otherwise, return the appropriate location
 		return team == null ? null : team.spawn;
 	}
+	
+	public int getVanishLevel(Player p)
+	{
+		// referees have the highest vanish level
+		if (p.hasPermission("autoreferee.referee")) return 200;
+		
+		// if you aren't on a team, you get a vanish level
+		if (getTeam(p) == null) return 100;
+		
+		// streamers are ONLY able to see streamers and players
+		if (p.hasPermission("autoreferee.streamer")) return 1;
+		
+		// players have the lowest level vanish
+		return 0;
+	}
 
 	public Logger log = Logger.getLogger("Minecraft");
 	public void onEnable()
@@ -524,6 +539,9 @@ public class AutoReferee extends JavaPlugin
 
 	private void logPlayerData()
 	{
+		if (playerData == null)
+		{ log.severe("No stats available at this time."); return; }
+		
 		log.info("Player Stats!");
 		for (Map.Entry<String, PlayerData> entry : playerData.entrySet())
 		{
@@ -745,27 +763,12 @@ public class AutoReferee extends JavaPlugin
 		for (Player p : w.getPlayers())
 			if (playerTeam.containsKey(p)) preparePlayer(p);
 		
-		// vanish all players appropriately (p1 = viewer, p2 = subject)
-		for ( Player p1 : w.getPlayers() )
+		// vanish players appropriately
+		for ( Player p1 : w.getPlayers() ) // <--- viewer
+		for ( Player p2 : w.getPlayers() ) // <--- subject
 		{
-			Team t1 = getTeam(p1);
-			for ( Player p2 : w.getPlayers() )
-			{
-				if (p1 == p2) continue;
-				Team t2 = getTeam(p2);
-
-				// subject is not on a team, definitely hide them
-				if (t2 == null) { p1.hidePlayer(p2); continue; }
-				
-				// viewer is not on a team, only show them if the
-				// subject is not a referee
-				if (t1 == null)
-				{
-					if (p2.hasPermission("autoreferee.referee"))
-						p1.showPlayer(p2);
-					else p1.hidePlayer(p2);
-				}
-			}
+			if (getVanishLevel(p1) >= getVanishLevel(p2))
+				p1.showPlayer(p2); else p1.hidePlayer(p2);
 		}
 	}
 	

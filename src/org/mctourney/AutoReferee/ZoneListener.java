@@ -13,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
+import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.plugin.Plugin;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 
@@ -77,40 +78,36 @@ public class ZoneListener implements Listener
 		if (player.getGameMode() == GameMode.SURVIVAL && plugin.inStartRegion(event.getFrom())
 			&& !plugin.inStartRegion(event.getTo())) player.getInventory().clear();
 	}
-
-	@EventHandler(priority=EventPriority.MONITOR)
-	public void blockPlace(BlockPlaceEvent event)
+	
+	public boolean validInteract(Player player, Location loc)
 	{
 		// if the match isn't currently in progress, a player should
 		// not be allowed to place or destroy blocks anywhere
-		if (plugin.getState() != AutoReferee.eMatchStatus.PLAYING)
-		{ event.setCancelled(true); return; }
-		
-		Player player = event.getPlayer();
-		Location loc = event.getBlock().getLocation();
+		if (plugin.getState() != AutoReferee.eMatchStatus.PLAYING) return false;
 
 		// if this block is outside the player's zone, don't place
-		if (!plugin.checkPosition(player, loc))
+		if (!plugin.checkPosition(player, loc)) return false;
+		
+		// seems okay!
+		return true;
+	}
+
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void blockPlace(BlockPlaceEvent event)
+	{
+		// if this block interaction is invalid, cancel the event
+		if (!validInteract(event.getPlayer(), event.getBlock().getLocation()))
 		{ event.setCancelled(true); return; }
 		
 		// we are playing right now, so check win conditions
 		plugin.checkWinConditions(event.getBlock().getWorld(), null);
 	}
 
-	@EventHandler(priority=EventPriority.MONITOR)
+	@EventHandler(priority=EventPriority.HIGHEST)
 	public void blockBreak(BlockBreakEvent event)
 	{
-		// if the match isn't currently in progress, a player should
-		// not be allowed to place or destroy blocks anywhere
-		log.info("Block break, match status: " + plugin.getState().name());
-		if (plugin.getState() != AutoReferee.eMatchStatus.PLAYING)
-		{ event.setCancelled(true); return; }
-		
-		Player player = event.getPlayer();
-		Location loc = event.getBlock().getLocation();
-
-		// if this block is outside the player's zone, don't place
-		if (!plugin.checkPosition(player, loc))
+		// if this block interaction is invalid, cancel the event
+		if (!validInteract(event.getPlayer(), event.getBlock().getLocation()))
 		{ event.setCancelled(true); return; }
 		
 		// we are playing right now, so check win conditions (with air location)
@@ -172,6 +169,13 @@ public class ZoneListener implements Listener
 		// if this is in the start region, cancel
 		if (plugin.inStartRegion(event.getLocation()))
 		{ event.setCancelled(true); return; }
+	}
+	
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void weatherChange(WeatherChangeEvent event)
+	{
+		// cancels event if weather is changing to 'storm'
+		if (event.toWeatherState()) event.setCancelled(true);
 	}
 }
 
