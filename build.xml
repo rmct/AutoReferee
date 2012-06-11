@@ -39,6 +39,18 @@
 
 	<!-- generate jar file from compiled code -->
 	<target name="dist" depends="build">
+		<!-- defaults directory holds yaml default files -->
+		<mkdir dir="${dir.build}/defaults" />
+
+		<!-- copy default files from local defaults directory -->
+		<copy todir="${dir.build}/defaults">
+			<fileset dir="defaults" />
+		</copy>
+
+		<!-- plugin.yml is required at the jar's root -->
+		<copy file="plugin.yml" todir="${dir.build}" />
+
+		<!-- create the jar file directly out of the build directory -->
 		<jar jarfile="${ant.project.name}.jar" basedir="${dir.build}" />
 	</target>
 </project>

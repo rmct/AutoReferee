@@ -1,10 +1,12 @@
 package org.mctourney.AutoReferee;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -38,7 +40,7 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 
 public class AutoReferee extends JavaPlugin
 {
-	// default port for a "master" server
+	// default port for a "master" serveri
 	public static final int DEFAULT_SERVER_PORT = 43760;
 	
 	public enum eAction {
@@ -146,6 +148,9 @@ public class AutoReferee extends JavaPlugin
 		actionTaken = new HashMap<String, eAction>();
 
 		// global configuration object (can't be changed, so don't save onDisable)
+		InputStream configInputStream = getResource("defaults/config.yml");
+		if (configInputStream != null) getConfig().setDefaults(
+			YamlConfiguration.loadConfiguration(configInputStream));
 		getConfig().options().copyDefaults(true); saveConfig();
 
 		// get server list, and attempt to determine whether we are in online mode
@@ -240,7 +245,7 @@ public class AutoReferee extends JavaPlugin
 		worldConfig = YamlConfiguration.loadConfiguration(worldConfigFile);
 
 		// load up our default values file, so that we can have a base to work with
-		InputStream defConfigStream = getResource("map.yml");
+		InputStream defConfigStream = getResource("defaults/map.yml");
 		if (defConfigStream != null) worldConfig.setDefaults(
 			YamlConfiguration.loadConfiguration(defConfigStream));
 
@@ -356,15 +361,24 @@ public class AutoReferee extends JavaPlugin
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
 	{
-		Player player = (Player) sender;
+		// for commands that make sense to be run from the shell, we will make
+		// use of "sender", otherwise, we will ensure that player != null and use "player"
+		Player player = sender instanceof Player ? (Player) sender : null;
 
 		if ("autoref".equalsIgnoreCase(cmd.getName()))
 		{
-			if (args.length >= 1 && "save".equalsIgnoreCase(args[0]))
+			if (args.length >= 1 && "save".equalsIgnoreCase(args[0]) && player != null)
 			{ saveWorldConfiguration(player.getWorld()); return true; }
 			
-			if (args.length >= 1 && "pstats".equalsIgnoreCase(args[0]))
-			{ logPlayerData(); return true; }
+			if (args.length >= 1 && "stats".equalsIgnoreCase(args[0])) try
+			{
+				if (args.length >= 2 && "dump".equalsIgnoreCase(args[1]))
+				{ logPlayerStats(args.length >= 3 ? args[2] : null); }
+
+				else return false;
+				return true;
+			}
+			catch (Exception e) { return false; }
 			
 			if (args.length >= 2 && "state".equalsIgnoreCase(args[0])) try
 			{
@@ -374,7 +388,7 @@ public class AutoReferee extends JavaPlugin
 			}
 			catch (Exception e) { return false; }
 		}
-		if ("zone".equalsIgnoreCase(cmd.getName()))
+		if ("zone".equalsIgnoreCase(cmd.getName()) && player != null)
 		{
 			if (args.length == 0)
 			{
@@ -395,7 +409,6 @@ public class AutoReferee extends JavaPlugin
 			}
 
 			Selection sel = getWorldEdit().getSelection(player);
-
 			if ((sel instanceof CuboidSelection))
 			{
 				CuboidSelection csel = (CuboidSelection) sel;
@@ -433,7 +446,7 @@ public class AutoReferee extends JavaPlugin
 				if (t == null)
 				{
 					// team name is invalid. let the player know
-					player.sendMessage("Not a valid team: " + args[0]);
+					sender.sendMessage("Not a valid team: " + args[0]);
 					return true;
 				}
 
@@ -448,17 +461,17 @@ public class AutoReferee extends JavaPlugin
 			for (Team team : lookupTeams)
 			{
 				// print team-name header
-				player.sendMessage(team.getName() + "'s Regions:");
+				sender.sendMessage(team.getName() + "'s Regions:");
 
 				// print all the regions owned by this team
 				if (team.regions.size() > 0) for (CuboidRegion reg : team.regions)
 				{
 					Vector mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
-					player.sendMessage("   (" + vectorToCoords(mn) + ") => (" + vectorToCoords(mx) + ")");
+					sender.sendMessage("   (" + vectorToCoords(mn) + ") => (" + vectorToCoords(mx) + ")");
 				}
 
 				// if there are no regions, print None
-				else player.sendMessage("   <None>");
+				else sender.sendMessage("   <None>");
 			}
 
 			return true;
@@ -471,16 +484,16 @@ public class AutoReferee extends JavaPlugin
 			{
 				// team name is invalid. let the player know
 				if (args.length > 0)
-					player.sendMessage("Not a valid team: " + args[0]);
+					sender.sendMessage("Not a valid team: " + args[0]);
 				return true;
 			}
 
 			Player target = player;
 			if (args.length > 1)
-			{
 				target = getServer().getPlayer(args[1]);
-				if (target == null) return true;
-			}
+
+			if (target == null)
+			{ sender.sendMessage("Must specify a valid user."); return true; }
 
 			joinTeam(target, t);
 			return true;
@@ -489,17 +502,17 @@ public class AutoReferee extends JavaPlugin
 		{
 			Player target = player;
 			if (args.length > 0)
-			{
 				target = getServer().getPlayer(args[0]);
-				if (target == null) return true;
-			}
 
-			leaveTeam(player);
+			if (target == null)
+			{ sender.sendMessage("Must specify a valid user."); return true; }
+
+			leaveTeam(target);
 			return true;
 		}
 		// WARNING: using ordinals on enums is typically frowned upon,
 		// but we will consider the enums "partially-ordered"
-		if ("ready".equalsIgnoreCase(cmd.getName()) && 
+		if ("ready".equalsIgnoreCase(cmd.getName()) && player != null &&
 			currentState.ordinal() < eMatchStatus.PLAYING.ordinal())
 		{
 			log.info("Readying the server!");
@@ -507,7 +520,7 @@ public class AutoReferee extends JavaPlugin
 			
 			return true;
 		}
-		if ("wincond".equalsIgnoreCase(cmd.getName()))
+		if ("wincond".equalsIgnoreCase(cmd.getName()) && player != null)
 		{
 			int wincondtool = getConfig().getInt("config-mode.tools.win-condition", 284);
 			
@@ -529,7 +542,6 @@ public class AutoReferee extends JavaPlugin
 			// change win-condition setting mode
 			else if (args.length == 2 && "mode".equalsIgnoreCase(args[0]))
 			{
-				
 				return true;
 			}
 		}
@@ -537,32 +549,49 @@ public class AutoReferee extends JavaPlugin
 		return false;
 	}
 
-	private void logPlayerData()
+	private File getLogDirectory()
+	{
+		// create the log directory if it doesn't exist
+		File logdir = new File(getDataFolder(), "logs");
+		if (!logdir.exists()) logdir.mkdir();
+		
+		// return the reference to the log directory
+		return logdir;
+	}
+
+	private void logPlayerStats(String h) throws IOException
 	{
 		if (playerData == null)
 		{ log.severe("No stats available at this time."); return; }
+
+		String hdl = h != null ? h : 
+			new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
 		
-		log.info("Player Stats!");
+		File sfile = new File(getLogDirectory(), hdl + ".log");
+		PrintWriter fw = new PrintWriter(sfile);
+
 		for (Map.Entry<String, PlayerData> entry : playerData.entrySet())
 		{
 			String pname = entry.getKey();
 			PlayerData data = entry.getValue();
 			
-			log.info("Stats for " + pname + ": (" + Integer.toString(data.totalKills)
+			fw.println("Stats for " + pname + ": (" + Integer.toString(data.totalKills)
 				+ "/" + Integer.toString(data.totalDeaths) + ")");
 			
 			for (Map.Entry<String, Integer> kill : data.kills.entrySet())
-				log.info("\t" + pname + " killed " + kill.getKey() + " " 
+				fw.println("\t" + pname + " killed " + kill.getKey() + " " 
 					+ kill.getValue().toString() + " time(s).");
 			
 			for (Map.Entry<DamageCause, Integer> death : data.deaths.entrySet())
-				log.info("\t" + death.getKey().toString() + " killed " + pname 
+				fw.println("\t" + death.getKey().toString() + " killed " + pname 
 					+ " " + death.getValue().toString() + " time(s).");
 			
 			for (Map.Entry<DamageCause, Integer> damage : data.damage.entrySet())
-				log.info("\t" + damage.getKey().toString() + " caused " + pname 
+				fw.println("\t" + damage.getKey().toString() + " caused " + pname 
 					+ " " + damage.getValue().toString() + " damage.");
 		}
+		
+		fw.close();
 	}
 
 	private Team getArbitraryTeam()
@@ -672,6 +701,12 @@ public class AutoReferee extends JavaPlugin
 		return startRegion != null && startRegion.contains(vec);
 	}
 	
+	// wrote this dumb helper function because `distanceToRegion` was looking ugly...
+	public static double multimax( double base, double ... more )
+	{ for ( double x : more ) base = Math.max(base, x); return base; }
+	
+	// distance from region, axially aligned (value less than actual distance, but
+	// appropriate for measurements on cuboid regions)
 	public static double distanceToRegion(Location v, CuboidRegion reg)
 	{
 		// not a region, infinite distance away
@@ -680,18 +715,13 @@ public class AutoReferee extends JavaPlugin
 		double x = v.getX(), y = v.getY(), z = v.getZ();
 		Vector mx = reg.getMaximumPoint(), mn = reg.getMinimumPoint();
 		
-		return Math.max(
-			Math.max(Math.max(0, x - mx.getX() - 1), Math.max(y - mx.getY() - 1, z - mx.getZ() - 1)),
-			Math.max(Math.max(0, mn.getX() - x), Math.max(mn.getY() - y, mn.getZ() - z))
+		// return maximum distance from this region
+		// (max on all sides, axially-aligned)
+		return multimax ( 0
+		,	mn.getX() - x, x - mx.getX() - 1
+		,	mn.getY() - y, y - mx.getY() - 1
+		,	mn.getZ() - z, z - mx.getZ() - 1
 		);
-		
-/*		double mxx = x - mx.getX(), mxy = y - mx.getY(), mxz = z - mx.getZ();
-		double mnx = mn.getX() - x, mny = mn.getY() - y, mnz = mn.getZ() - z;
-
-		double mxd = Math.max(Math.max(0, mxx), Math.max(mxy, mxz));
-		double mnd = Math.max(Math.max(0, mnx), Math.max(mny, mnz));
-		distance = Math.min(distance, Math.min(mxd, mnd));
-*/
 	}
 	
 	// distance from the closest owned region
