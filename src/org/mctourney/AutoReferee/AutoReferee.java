@@ -42,6 +42,7 @@ public class AutoReferee extends JavaPlugin
 {
 	// default port for a "master" serveri
 	public static final int DEFAULT_SERVER_PORT = 43760;
+	public static final int READY_SECONDS = 15;
 	
 	public enum eAction {
 		ENTERED_VOIDLANE,
@@ -73,8 +74,11 @@ public class AutoReferee extends JavaPlugin
 	public Map<String, PlayerData> playerData;
 	public Map<String, eAction> actionTaken;
 
-	protected String matchName = "[Scheduled Match]";
+	protected String matchName = "Scheduled Match";
 	public String getMatchName() { return matchName; }
+	
+	public static void worldBroadcast(World world, String msg)
+	{ for (Player p : world.getPlayers()) p.sendMessage(msg); }
 
 	public Team teamNameLookup(String name)
 	{
@@ -265,7 +269,7 @@ public class AutoReferee extends JavaPlugin
 		
 		// get the time the match is set to start
 		if (worldConfig.isString("match.start-time"))
-			startTime = parseStartTime(worldConfig.getString("match.start-time"));
+			startTime = parseTimeString(worldConfig.getString("match.start-time"));
 	}
 
 	private void saveWorldConfiguration(World world) 
@@ -356,7 +360,7 @@ public class AutoReferee extends JavaPlugin
 	public boolean playerWhitelisted(Player player)
 	{
 		return player.isOp() || player.hasPermission("autoreferee.referee") ||
-			playerTeam.containsKey(player);
+			playerTeam.containsKey(player.getName());
 	}
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
@@ -387,6 +391,69 @@ public class AutoReferee extends JavaPlugin
 				return true;
 			}
 			catch (Exception e) { return false; }
+			
+			if (args.length >= 1 && "wincond".equalsIgnoreCase(args[0]) && player != null)
+			{
+				int wincondtool = getConfig().getInt("config-mode.tools.win-condition", 284);
+				
+				// get the tool for setting win condition
+				if (args.length >= 2 && "tool".equalsIgnoreCase(args[1]))
+				{
+					// get the tool used to set the winconditions
+					ItemStack toolitem = new ItemStack(wincondtool);
+					
+					// add to the inventory and switch to holding it
+					PlayerInventory inv = player.getInventory();
+					inv.addItem(toolitem);
+					
+					// let the player know what the tool is and how to use it
+					player.sendMessage("Given win condition tool: " + toolitem.getType().name());
+					player.sendMessage("Right-click on a block to set it as a win-condition.");
+					return true;
+				}
+			}
+
+			if (args.length >= 1 && "zones".equalsIgnoreCase(args[0]))
+			{
+				Set<Team> lookupTeams = null;
+
+				// if a team has been specified as an argument
+				if (args.length > 1)
+				{
+					Team t = teamNameLookup(args[1]);
+					if (t == null)
+					{
+						// team name is invalid. let the player know
+						sender.sendMessage("Not a valid team: " + args[1]);
+						return true;
+					}
+
+					lookupTeams = new HashSet<Team>();
+					lookupTeams.add(t);
+				}
+
+				// otherwise, just print all the teams
+				else lookupTeams = teams;
+
+				// for all the teams being looked up
+				for (Team team : lookupTeams)
+				{
+					// print team-name header
+					sender.sendMessage(team.getName() + "'s Regions:");
+
+					// print all the regions owned by this team
+					if (team.regions.size() > 0) for (CuboidRegion reg : team.regions)
+					{
+						Vector mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
+						sender.sendMessage("  (" + vectorToCoords(mn) + ") => (" + vectorToCoords(mx) + ")");
+					}
+
+					// if there are no regions, print None
+					else sender.sendMessage("  <None>");
+				}
+
+				return true;
+			}
 		}
 		if ("zone".equalsIgnoreCase(cmd.getName()) && player != null)
 		{
@@ -435,47 +502,6 @@ public class AutoReferee extends JavaPlugin
 			}
 			return true;
 		}
-		if ("zones".equalsIgnoreCase(cmd.getName()))
-		{
-			Set<Team> lookupTeams = null;
-
-			// if a team has been specified as an argument
-			if (args.length > 0)
-			{
-				Team t = teamNameLookup(args[0]);
-				if (t == null)
-				{
-					// team name is invalid. let the player know
-					sender.sendMessage("Not a valid team: " + args[0]);
-					return true;
-				}
-
-				lookupTeams = new HashSet<Team>();
-				lookupTeams.add(t);
-			}
-
-			// otherwise, just print all the teams
-			else lookupTeams = teams;
-
-			// for all the teams being looked up
-			for (Team team : lookupTeams)
-			{
-				// print team-name header
-				sender.sendMessage(team.getName() + "'s Regions:");
-
-				// print all the regions owned by this team
-				if (team.regions.size() > 0) for (CuboidRegion reg : team.regions)
-				{
-					Vector mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
-					sender.sendMessage("   (" + vectorToCoords(mn) + ") => (" + vectorToCoords(mx) + ")");
-				}
-
-				// if there are no regions, print None
-				else sender.sendMessage("   <None>");
-			}
-
-			return true;
-		}
 
 		if ("jointeam".equalsIgnoreCase(cmd.getName()) && !onlineMode)
 		{
@@ -515,35 +541,8 @@ public class AutoReferee extends JavaPlugin
 		if ("ready".equalsIgnoreCase(cmd.getName()) && player != null &&
 			currentState.ordinal() < eMatchStatus.PLAYING.ordinal())
 		{
-			log.info("Readying the server!");
 			prepareWorld(player.getWorld());
-			
 			return true;
-		}
-		if ("wincond".equalsIgnoreCase(cmd.getName()) && player != null)
-		{
-			int wincondtool = getConfig().getInt("config-mode.tools.win-condition", 284);
-			
-			// get the tool for setting win condition
-			if (args.length == 1 && "tool".equalsIgnoreCase(args[0]))
-			{
-				// get the tool used to set the winconditions
-				ItemStack toolitem = new ItemStack(wincondtool);
-				
-				// add to the inventory and switch to holding it
-				PlayerInventory inv = player.getInventory();
-				inv.addItem(toolitem);
-				
-				// let the player know what the tool is and how to use it
-				player.sendMessage("Given win condition tool: " + toolitem.getType().name());
-				player.sendMessage("Right-click on a block to set it as a win-condition.");
-				return true;
-			}
-			// change win-condition setting mode
-			else if (args.length == 2 && "mode".equalsIgnoreCase(args[0]))
-			{
-				return true;
-			}
 		}
 
 		return false;
@@ -666,39 +665,11 @@ public class AutoReferee extends JavaPlugin
 				// announce the victory and set the match to completed
 				getServer().broadcastMessage(t.getName() + " WINS!");
 				for (Player p : world.getPlayers())
-					if (playerTeam.containsKey(p))
+					if (playerTeam.containsKey(p.getName()))
 						p.teleport(world.getSpawnLocation());
 				currentState = eMatchStatus.COMPLETED;
 			}
 		}
-	}
-	
-	public Set<Team> locationOwnership(Location loc)
-	{
-		// teams who own this location
-		Set<Team> owners = new HashSet<Team>();
-		
-		// convert location to a WorldEdit vector
-		Vector pos = new Vector(loc.getX(), loc.getY(), loc.getZ());
-
-		// check all safe regions for that team
-		for (Team team : teams) for (CuboidRegion reg : team.regions)
-		{
-			// if the location is inside the region, add it
-			if (!reg.contains(pos)) owners.add(team);
-		}
-		
-		return owners;
-	}
-
-	// simple getter for the start region
-	public CuboidRegion getStartRegion() { return startRegion; }
-	
-	// is location in start region?
-	public boolean inStartRegion(Location loc)
-	{
-		Vector vec = new Vector(loc.getX(), loc.getY(), loc.getZ());
-		return startRegion != null && startRegion.contains(vec);
 	}
 	
 	// wrote this dumb helper function because `distanceToRegion` was looking ugly...
@@ -723,6 +694,28 @@ public class AutoReferee extends JavaPlugin
 		,	mn.getZ() - z, z - mx.getZ() - 1
 		);
 	}
+	
+	public Set<Team> locationOwnership(Location loc)
+	{
+		// teams who own this location
+		Set<Team> owners = new HashSet<Team>();
+
+		// check all safe regions for that team
+		for (Team team : teams) for (CuboidRegion reg : team.regions)
+		{
+			// if the location is inside the region, add it
+			if (distanceToRegion(loc, reg) < ZoneListener.SNEAK_DISTANCE) owners.add(team);
+		}
+		
+		return owners;
+	}
+
+	// simple getter for the start region
+	public CuboidRegion getStartRegion() { return startRegion; }
+	
+	// is location in start region?
+	public boolean inStartRegion(Location loc)
+	{ return distanceToRegion(loc, startRegion) < ZoneListener.SNEAK_DISTANCE; }
 	
 	// distance from the closest owned region
 	public double distanceToClosestRegion(Player p)
@@ -776,6 +769,40 @@ public class AutoReferee extends JavaPlugin
 		currentState = ready ? eMatchStatus.READY : eMatchStatus.WAITING;
 	}
 	
+	private class MatchStarter implements Runnable
+	{
+		public int task = -1;
+		private int secs = 3;
+		
+		private World world = null;
+		public MatchStarter(World w)
+		{
+			world = w;
+		}
+		
+		public void run()
+		{
+			// if the countdown has ended...
+			if (secs == 0)
+			{
+				// set the current time to the start time (again)
+				world.setTime(startTime);
+				
+				// setup world to go!
+				currentState = eMatchStatus.PLAYING;
+				worldBroadcast(world, ">>> " + ChatColor.GREEN + "GO!");
+				
+				// cancel the task
+				getServer().getScheduler().cancelTask(task);
+			}
+			
+			// report number of seconds remaining
+			else worldBroadcast(world, ">>> " + 
+				ChatColor.GREEN + Integer.toString(secs--) + "...");
+		}
+	}
+	
+	MatchStarter matchStarter = null;
 	public void prepareWorld(World w)
 	{
 		// set the current time to the start time
@@ -785,21 +812,35 @@ public class AutoReferee extends JavaPlugin
 		for (Entity e : w.getEntitiesByClasses(Monster.class, 
 			Animals.class, Item.class, ExperienceOrb.class)) e.remove();
 		
-		// turn off weather
+		// turn off weather forever (or for a long time)
 		w.setStorm(false);
+		w.setWeatherDuration(Integer.MAX_VALUE);
 		
 		// prepare all players for the match
 		playerData = new HashMap<String, PlayerData>();
 		for (Player p : w.getPlayers())
-			if (playerTeam.containsKey(p)) preparePlayer(p);
+			if (playerTeam.containsKey(p.getName())) preparePlayer(p);
 		
 		// vanish players appropriately
-		for ( Player p1 : w.getPlayers() ) // <--- viewer
-		for ( Player p2 : w.getPlayers() ) // <--- subject
+		for ( Player pv : w.getPlayers() ) // <--- viewer
+		for ( Player ps : w.getPlayers() ) // <--- subject
 		{
-			if (getVanishLevel(p1) >= getVanishLevel(p2))
-				p1.showPlayer(p2); else p1.hidePlayer(p2);
+			if (getVanishLevel(pv) >= getVanishLevel(ps))
+				pv.showPlayer(ps); else pv.hidePlayer(ps);
 		}
+		
+		// announce the match starting in X seconds
+		worldBroadcast(w, "Match will begin in "
+			+ Integer.toString(READY_SECONDS) + " seconds.");
+		
+		// cancel any previous match-start task
+		if (matchStarter != null && matchStarter.task != -1)
+			getServer().getScheduler().cancelTask(matchStarter.task);
+		
+		// schedule the task to announce and prepare the match
+		matchStarter = new MatchStarter(w);
+		matchStarter.task = getServer().getScheduler().scheduleSyncRepeatingTask(
+				this, matchStarter, READY_SECONDS * 20L, 20L);
 	}
 	
 	public void preparePlayer(Player p)
@@ -815,7 +856,7 @@ public class AutoReferee extends JavaPlugin
 	}
 	
 	// ABANDON HOPE, ALL YE WHO ENTER HERE!
-	public static long parseStartTime(String t)
+	public static long parseTimeString(String t)
 	{
 		// "Some people, when confronted with a problem, think 'I know, I'll use
 		// regular expressions.' Now they have two problems." -- Jamie Zawinski
@@ -964,13 +1005,7 @@ public class AutoReferee extends JavaPlugin
 		// register that we just received this damage
 		public void registerDamage(EntityDamageEvent e)
 		{
-			/*// if this isn't damage by an entity, we don't actually care
-			if (!(e instanceof EntityDamageByEntityEvent)) return;
-			EntityDamageByEntityEvent ed = (EntityDamageByEntityEvent) e;
-			
-			// if the cause of the damage wasn't a player, still don't care
-			if (!(ed.getDamager() instanceof Player)) return;*/
-			
+			// get the last damage cause, and mark that as the cause of the damage
 			DamageCause dc = DamageCause.fromDamageEvent(e);
 			damage.put(dc, e.getDamage() + (damage.containsKey(dc) ? damage.get(dc) : 0));
 		}

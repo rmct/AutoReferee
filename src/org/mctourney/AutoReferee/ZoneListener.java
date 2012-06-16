@@ -22,7 +22,7 @@ public class ZoneListener implements Listener
 	AutoReferee plugin = null;
 	public Logger log = Logger.getLogger("Minecraft");
 	
-	public static final double SNEAK_DISTANCE = 0.301;
+	public static final double SNEAK_DISTANCE = 0.30001;
 	public static final double FREEFALL_THRESHOLD = 0.350;
 
 	// convenience for changing defaults
@@ -54,17 +54,10 @@ public class ZoneListener implements Listener
 		double fallspeed = event.getFrom().getY() - event.getTo().getY();
 		
 		// only kill if they are in survival mode. otherwise, what's the point?
-		if (player.getGameMode() == GameMode.SURVIVAL && d > 0)
+		if (player.getGameMode() == GameMode.SURVIVAL && d > 0.3)
 		{
-//			player.sendMessage("s: " + player.isSneaking());
-//			player.sendMessage("d: " + Double.toString(d));
-//			player.sendMessage("f: " + Double.toString(fallspeed));
-			
-			// player is close enough to not need sneaking to be supported
-			if (d < 0.30);
-			
 			// player is sneaking off the edge and not in freefall
-			else if (player.isSneaking() && d < SNEAK_DISTANCE && fallspeed < FREEFALL_THRESHOLD);
+			if (player.isSneaking() && d < SNEAK_DISTANCE && fallspeed < FREEFALL_THRESHOLD);
 			
 			else
 			{
@@ -76,7 +69,15 @@ public class ZoneListener implements Listener
 		
 		// if a player leaves the start region, empty their inventory
 		if (player.getGameMode() == GameMode.SURVIVAL && plugin.inStartRegion(event.getFrom())
-			&& !plugin.inStartRegion(event.getTo())) player.getInventory().clear();
+			&& !plugin.inStartRegion(event.getTo()))
+		{
+			if (plugin.getState() != eMatchStatus.PLAYING)
+			{
+				player.teleport(player.getWorld().getSpawnLocation());
+				player.setVelocity(new org.bukkit.util.Vector(0,0,0));
+			}
+			else player.getInventory().clear();
+		}
 	}
 	
 	public boolean validInteract(Player player, Location loc)
@@ -85,7 +86,10 @@ public class ZoneListener implements Listener
 		// not be allowed to place or destroy blocks anywhere
 		if (plugin.getState() != AutoReferee.eMatchStatus.PLAYING) return false;
 
-		// if this block is outside the player's zone, don't place
+		// if this block is inside the start region, not allowed
+		if (plugin.inStartRegion(loc)) return false;
+
+		// if this block is outside the player's zone, not allowed
 		if (!plugin.checkPosition(player, loc)) return false;
 		
 		// seems okay!
