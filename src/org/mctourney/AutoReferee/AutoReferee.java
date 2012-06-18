@@ -153,7 +153,6 @@ public class AutoReferee extends JavaPlugin
 		return true;
 	}
 
-	public Logger log = null;
 	public void onEnable()
 	{
 		log = this.getLogger();
