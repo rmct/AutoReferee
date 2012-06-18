@@ -13,7 +13,7 @@ commands:
   autoref:
     description: AutoReferee configuration
     permission: autoreferee.configure
-    usage: /<command> save|stats|wincond|zones
+    usage: /<command> init|save|stats|wincond|zones
   zone:
     description: Set a region's ownership
     permission: autoreferee.configure

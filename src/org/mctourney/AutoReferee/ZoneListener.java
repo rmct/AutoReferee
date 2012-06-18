@@ -72,7 +72,7 @@ public class ZoneListener implements Listener
 			&& !plugin.inStartRegion(event.getTo()))
 		{
 			// if game isn't going, teleport them back
-			if (plugin.getState() != eMatchStatus.PLAYING)
+			if (plugin.getState(player.getWorld()) != eMatchStatus.PLAYING)
 			{
 				player.teleport(player.getWorld().getSpawnLocation());
 				player.setVelocity(new org.bukkit.util.Vector());
@@ -88,7 +88,8 @@ public class ZoneListener implements Listener
 	{
 		// if the match isn't currently in progress, a player should
 		// not be allowed to place or destroy blocks anywhere
-		if (plugin.getState() != AutoReferee.eMatchStatus.PLAYING) return false;
+		if (plugin.getState(player.getWorld()) != AutoReferee.eMatchStatus.PLAYING)
+			return false;
 
 		// if this block is inside the start region, not allowed
 		if (plugin.inStartRegion(loc)) return false;
@@ -171,7 +172,7 @@ public class ZoneListener implements Listener
 	public void creatureSpawn(CreatureSpawnEvent event)
 	{
 		// if the match hasn't started, cancel
-		if (plugin.getState() != eMatchStatus.PLAYING)
+		if (plugin.getState(event.getLocation().getWorld()) != eMatchStatus.PLAYING)
 		{ event.setCancelled(true); return; }
 
 		// if this is in the start region, cancel
@@ -183,7 +184,8 @@ public class ZoneListener implements Listener
 	public void weatherChange(WeatherChangeEvent event)
 	{
 		// cancels event if weather is changing to 'storm'
-		if (event.toWeatherState()) event.setCancelled(true);
+		if (plugin.matches.containsKey(event.getWorld().getUID()) && 
+			event.toWeatherState()) event.setCancelled(true);
 	}
 }
 

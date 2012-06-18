@@ -2,6 +2,7 @@ package org.mctourney.AutoReferee;
 
 import java.util.Iterator;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -28,7 +29,7 @@ public class TeamListener implements Listener
 
 		// if we are currently playing and speaker on a team, restrict recipients
 		Team t = plugin.getTeam(player);
-		if (plugin.getState() == eMatchStatus.PLAYING && t != null)
+		if (plugin.getState(player.getWorld()) == eMatchStatus.PLAYING && t != null)
 		{
 			Iterator<Player> iter = event.getRecipients().iterator();
 			while (iter.hasNext())
@@ -44,7 +45,8 @@ public class TeamListener implements Listener
 	@EventHandler
 	public void playerRespawn(PlayerRespawnEvent event)
 	{
-		if (plugin.getState() == AutoReferee.eMatchStatus.PLAYING &&
+		World world = event.getPlayer().getWorld();
+		if (plugin.getState(world) == AutoReferee.eMatchStatus.PLAYING &&
 			event.getPlayer().getBedSpawnLocation() == null)
 		{
 			// get the location for the respawn event
@@ -56,12 +58,10 @@ public class TeamListener implements Listener
 	@EventHandler
 	public void playerLogin(PlayerLoginEvent event)
 	{
-		if (plugin.getState() == AutoReferee.eMatchStatus.NONE) return;
-
 		// if they should be whitelisted, let them in, otherwise, block them
 		if (plugin.playerWhitelisted(event.getPlayer())) event.allow();
 		else event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, 
-			"Match in progress: " + plugin.matchName);
+			"You are not scheduled for a match on this server.");
 	}
 
 	@EventHandler
@@ -72,7 +72,7 @@ public class TeamListener implements Listener
 		
 		if (team != null) event.setJoinMessage(event.getJoinMessage()
 			.replace(player.getName(), plugin.colorPlayer(player)));
-		plugin.checkTeamsReady();
+		plugin.checkTeamsReady(player.getWorld());
 		
 		// color the name appropriately
 		player.setPlayerListName(plugin.colorPlayer(player));

@@ -31,7 +31,6 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
@@ -40,6 +39,100 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 
 public class AutoReferee extends JavaPlugin
 {
+	public static class AutoRefMatch
+	{
+		// world this match is taking place on
+		public World world;
+		
+		// time to set the world to at the start of the match
+		public long startTime = 8000L;
+		
+		// status of the match
+		public eMatchStatus currentState = eMatchStatus.NONE;
+		
+		// teams participating in the match
+		public Set<Team> teams = null;
+		
+		// region defined as the "start" region (safe zone)
+		public CuboidRegion startRegion = null;
+		
+		// name of the match
+		public String matchName = "Scheduled Match";
+		
+		// configuration information for the world
+		public File worldConfigFile;
+		public FileConfiguration worldConfig;
+		
+		// task that starts the match
+		public MatchStarter matchStarter = null;
+
+		public AutoRefMatch(World world)
+		{
+			this.world = world;
+			loadWorldConfiguration();
+		}
+		
+		public static boolean isCompatible(World w)
+		{ return new File(w.getWorldFolder(), "autoreferee.yml").exists(); }
+
+		public static AutoReferee plugin;
+		
+		@SuppressWarnings("unchecked")
+		private void loadWorldConfiguration()
+		{
+			// file stream and configuration object (located in world folder)
+			worldConfigFile = new File(world.getWorldFolder(), "autoreferee.yml");
+			worldConfig = YamlConfiguration.loadConfiguration(worldConfigFile);
+
+			// load up our default values file, so that we can have a base to work with
+			InputStream defConfigStream = plugin.getResource("defaults/map.yml");
+			if (defConfigStream != null) worldConfig.setDefaults(
+				YamlConfiguration.loadConfiguration(defConfigStream));
+
+			// make sure any defaults get copied into the map file
+			worldConfig.options().copyDefaults(true);
+			worldConfig.options().header(plugin.getDescription().getFullName());
+			worldConfig.options().copyHeader(false);
+
+			teams = new HashSet<Team>();
+			
+			List<Map<?, ?>> cfgTeams = worldConfig.getMapList("match.teams");
+			for (Map<?, ?> map : cfgTeams) teams.add(Team.fromMap((Map<String, Object>) map, this));
+			
+			// get the start region (safe for both teams, no pvp allowed)
+			if (worldConfig.isString("match.start-region"))
+				startRegion = coordsToRegion(worldConfig.getString("match.start-region"));
+			
+			// get the time the match is set to start
+			if (worldConfig.isString("match.start-time"))
+				startTime = parseTimeString(worldConfig.getString("match.start-time"));
+		}
+
+		private void saveWorldConfiguration() 
+		{
+			// if there is no configuration object or file, nothin' doin'...
+			if (worldConfigFile == null || worldConfig == null) return;
+
+			// create and save the team data list
+			List<Map<String, Object>> teamData = new ArrayList<Map<String, Object>>();
+			for (Team t : teams) teamData.add(t.toMap());
+			worldConfig.set("match.teams", teamData);
+			
+			// save the start region
+			if (startRegion != null)
+				worldConfig.set("match.start-region", regionToCoords(startRegion));
+
+			// save the configuration file back to the original filename
+			try { worldConfig.save(worldConfigFile); }
+
+			// log errors, report which world did not save
+			catch (java.io.IOException e)
+			{ plugin.log.info("Could not save world config: " + world.getName()); }
+		}
+	}
+	
+	public Map<UUID, AutoRefMatch> matches = null;
+
 	// default port for a "master" server
 	public static final int DEFAULT_SERVER_PORT = 43760;
 
@@ -55,42 +148,47 @@ public class AutoReferee extends JavaPlugin
 	};
 	
 	public Logger log = null;
-	private World world;
-	private long startTime = 8000L;
-
+	
 	// is this plugin in online mode?
 	public boolean onlineMode = false;
 	private RefereeClient conn = null;
 
-	// status always starts with NONE
-	private eMatchStatus currentState = eMatchStatus.NONE;
-	public eMatchStatus getState() { return currentState; }
-
-	// all valid teams for this map
-	public Set<Team> teams = null;
-
-	// a map from a team to a list of cuboid regions that are "safe"
-	private CuboidRegion startRegion;
+	public eMatchStatus getState(World w)
+	{
+		AutoRefMatch m = matches.get(w.getUID());
+		return m == null ? eMatchStatus.NONE : m.currentState;
+	}
 
 	// a map from a player to info about why they were killed
 	protected Map<String, Team> playerTeam;
 	public Map<String, AutoRefPlayer> playerData;
 	public Map<String, eAction> actionTaken;
 
-	protected String matchName = "Scheduled Match";
-	public String getMatchName() { return matchName; }
+	public String getMatchName(World w)
+	{
+		AutoRefMatch m = matches.get(w.getUID());
+		return m == null ? null : m.matchName;
+	}
 	
 	public static void worldBroadcast(World world, String msg)
 	{ for (Player p : world.getPlayers()) p.sendMessage(msg); }
 
-	public Team teamNameLookup(String name)
+	public Team teamNameLookup(AutoRefMatch m, String name)
 	{
+		// if passed a null match, return null
+		if (m == null) return null;
+		
+		// if there is no match on that world, forget it
 		// is this team name a word?
-		for (Team t : teams) if (t.match(name)) return t;
+		for (Team t : m.teams)
+			if (t.match(name)) return t;
 
 		// no team matches the name provided
 		return null;
 	}
+
+	public Team teamNameLookup(World w, String name)
+	{ return teamNameLookup(matches.get(w.getUID()), name);	}
 
 	public Team getTeam(OfflinePlayer player)
 	{
@@ -132,9 +230,15 @@ public class AutoReferee extends JavaPlugin
 		return 0;
 	}
 
+	public FileConfiguration getMapConfig(World w)
+	{
+		AutoRefMatch m = matches.get(w.getUID());
+		return m == null ? null : m.worldConfig;
+	}
+
 	private boolean checkPlugins(PluginManager pm)
 	{
-		boolean foundOtherPlugin = false;
+	/*	boolean foundOtherPlugin = false;
 		for ( Plugin p : pm.getPlugins() ) if (p != this)
 		{
 			if (!foundOtherPlugin)
@@ -151,18 +255,16 @@ public class AutoReferee extends JavaPlugin
 		// return true if all other plugins are disabled
 		for ( Plugin p : pm.getPlugins() )
 			if (p != this && p.isEnabled()) return false;
-		return true;
+	*/	return true;
 	}
 
 	public void onEnable()
 	{
+		WorldListener worldListener;
+		AutoRefMatch.plugin = this;
+		
 		log = this.getLogger();
 		PluginManager pm = getServer().getPluginManager();
-
-		// load main world's configuration file BEFORE the listeners
-		// (some listeners will cache the map configuration settings)
-		world = getServer().getWorlds().get(0);
-		loadWorldConfiguration(world);
 
 		// events related to team management, chat, whitelists, respawn
 		pm.registerEvents(new TeamListener(this), this);
@@ -173,6 +275,10 @@ public class AutoReferee extends JavaPlugin
 		// events related to safe zones, creating zones, map conditions
 		pm.registerEvents(new ZoneListener(this), this);
 
+		// events related to worlds
+		pm.registerEvents(worldListener = new WorldListener(this), this);
+
+		matches = new HashMap<UUID, AutoRefMatch>();
 		playerTeam = new HashMap<String, Team>();
 		actionTaken = new HashMap<String, eAction>();
 
@@ -196,6 +302,10 @@ public class AutoReferee extends JavaPlugin
 
 		// update online mode to represent whether or not we have a connection
 		onlineMode = (conn != null);
+		
+		// process initial world(s), just in case
+		for ( World w : getServer().getWorlds() )
+			worldListener.processWorld(w);
 	}
 
 	public boolean makeServerConnection(List<?> serverList)
@@ -245,79 +355,9 @@ public class AutoReferee extends JavaPlugin
 
 	public void onDisable()
 	{
-		// if autosaving is on, save the world config file
-		if (getConfig().getBoolean("config-mode.autosave", false))
-			saveWorldConfiguration(world);
-
 		// if there is a socket connection, close it
 		if (conn != null) conn.close();
 		log.info("AutoReferee disabled.");
-	}
-
-	private File worldConfigFile = null;
-	private FileConfiguration worldConfig = null;
-
-	public FileConfiguration getMapConfig() { return worldConfig; }
-
-	@SuppressWarnings("unchecked")
-	private void loadWorldConfiguration(World w) 
-	{
-		// file stream and configuration object (located in world folder)
-		worldConfigFile = new File(w.getWorldFolder(), "autoreferee.yml");
-
-		// notify user if there is no configuration file
-		if (!worldConfigFile.exists()) try
-		{
-			log.info("No configuration file exists for this map. " + 
-				"Creating one @ " + worldConfigFile.getCanonicalPath());
-		}
-		catch (IOException e) {  }
-		worldConfig = YamlConfiguration.loadConfiguration(worldConfigFile);
-
-		// load up our default values file, so that we can have a base to work with
-		InputStream defConfigStream = getResource("defaults/map.yml");
-		if (defConfigStream != null) worldConfig.setDefaults(
-			YamlConfiguration.loadConfiguration(defConfigStream));
-
-		// make sure any defaults get copied into the map file
-		worldConfig.options().copyDefaults(true);
-		worldConfig.options().header(this.getDescription().getFullName());
-		worldConfig.options().copyHeader(false);
-
-		teams = new HashSet<Team>();
-		
-		List<Map<?, ?>> cfgTeams = worldConfig.getMapList("match.teams");
-		for (Map<?, ?> map : cfgTeams) teams.add(Team.fromMap((Map<String, Object>) map, w));
-		
-		// get the start region (safe for both teams, no pvp allowed)
-		if (worldConfig.isString("match.start-region"))
-			startRegion = coordsToRegion(worldConfig.getString("match.start-region"));
-		
-		// get the time the match is set to start
-		if (worldConfig.isString("match.start-time"))
-			startTime = parseTimeString(worldConfig.getString("match.start-time"));
-	}
-
-	private void saveWorldConfiguration(World world) 
-	{
-		// if there is no configuration object or file, nothin' doin'...
-		if (worldConfigFile == null || worldConfig == null) return;
-
-		// create and save the team data list
-		List<Map<String, Object>> teamData = new ArrayList<Map<String, Object>>();
-		for (Team t : teams) teamData.add(t.toMap());
-		worldConfig.set("match.teams", teamData);
-		
-		// save the start region
-		if (startRegion != null)
-			worldConfig.set("match.start-region", regionToCoords(startRegion));
-
-		// save the configuration file back to the original filename
-		try { worldConfig.save(worldConfigFile); }
-
-		// log errors, report which world did not save
-		catch (java.io.IOException e)
-		{ log.info("Could not save world config: " + world.getName()); }
 	}
 
 	private WorldEditPlugin getWorldEdit()
@@ -357,7 +397,7 @@ public class AutoReferee extends JavaPlugin
 		if (t == null || t == getTeam(player)) return;
 		
 		// if the match is in progress, no one may join
-		if (currentState.ordinal() >= eMatchStatus.PLAYING.ordinal()) return;
+		if (t.match.currentState.ordinal() >= eMatchStatus.PLAYING.ordinal()) return;
 
 		// just in case, announce they are leaving their previous team
 		leaveTeam(player);
@@ -391,16 +431,33 @@ public class AutoReferee extends JavaPlugin
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
 	{
-		// for commands that make sense to be run from the shell, we will make
-		// use of "sender", otherwise, we will ensure that player != null and use "player"
-		Player player = sender instanceof Player ? (Player) sender : null;
-
+		if (!(sender instanceof Player)) return false;		
+		Player player = (Player) sender;
+		
+		World world = player.getWorld();
+		AutoRefMatch m = matches.get(world.getUID());
+		
 		if ("autoref".equalsIgnoreCase(cmd.getName()))
 		{
-			if (args.length >= 1 && "save".equalsIgnoreCase(args[0]) && player != null)
-			{ saveWorldConfiguration(player.getWorld()); return true; }
+			if (args.length >= 1 && "save".equalsIgnoreCase(args[0]) && m != null)
+			{ m.saveWorldConfiguration(); return true; }
+
+			if (args.length >= 1 && "init".equalsIgnoreCase(args[0]))
+			{
+				// if there is not yet a match object for this map
+				if (m == null)
+				{
+					m = new AutoRefMatch(world);
+					matches.put(world.getUID(), m);
+					m.saveWorldConfiguration();
+				}
+				else player.sendMessage("AutoReferee already initialized for " + 
+					m.worldConfig.getString("map.name", "this map") + ".");
+				
+				return true;
+			}
 			
-			if (args.length >= 1 && "stats".equalsIgnoreCase(args[0])) try
+			if (args.length >= 1 && "stats".equalsIgnoreCase(args[0]) && m != null) try
 			{
 				if (args.length >= 2 && "dump".equalsIgnoreCase(args[1]))
 				{ logPlayerStats(args.length >= 3 ? args[2] : null); }
@@ -410,15 +467,16 @@ public class AutoReferee extends JavaPlugin
 			}
 			catch (Exception e) { return false; }
 			
-			if (args.length >= 2 && "state".equalsIgnoreCase(args[0])) try
+			if (args.length >= 2 && "state".equalsIgnoreCase(args[0]) && m != null) try
 			{
-				currentState = eMatchStatus.valueOf(args[1]);
-				log.info("Match Status is now " + currentState.name());
+				m.currentState = eMatchStatus.valueOf(args[1]);
+				log.info("Match Status is now " + m.currentState.name());
+				
 				return true;
 			}
 			catch (Exception e) { return false; }
 			
-			if (args.length >= 1 && "wincond".equalsIgnoreCase(args[0]) && player != null)
+			if (args.length >= 1 && "wincond".equalsIgnoreCase(args[0]))
 			{
 				int wincondtool = getConfig().getInt("config-mode.tools.win-condition", 284);
 				
@@ -439,14 +497,14 @@ public class AutoReferee extends JavaPlugin
 				}
 			}
 
-			if (args.length >= 1 && "zones".equalsIgnoreCase(args[0]))
+			if (args.length >= 1 && "zones".equalsIgnoreCase(args[0]) && m != null)
 			{
 				Set<Team> lookupTeams = null;
 
 				// if a team has been specified as an argument
 				if (args.length > 1)
 				{
-					Team t = teamNameLookup(args[1]);
+					Team t = teamNameLookup(m, args[1]);
 					if (t == null)
 					{
 						// team name is invalid. let the player know
@@ -459,7 +517,10 @@ public class AutoReferee extends JavaPlugin
 				}
 
 				// otherwise, just print all the teams
-				else lookupTeams = teams;
+				else lookupTeams = m.teams;
+				
+				// sanity check...
+				if (lookupTeams == null) return false;
 
 				// for all the teams being looked up
 				for (Team team : lookupTeams)
@@ -481,7 +542,8 @@ public class AutoReferee extends JavaPlugin
 				return true;
 			}
 		}
-		if ("zone".equalsIgnoreCase(cmd.getName()) && player != null)
+		
+		if ("zone".equalsIgnoreCase(cmd.getName()) && m != null)
 		{
 			if (args.length == 0)
 			{
@@ -492,7 +554,7 @@ public class AutoReferee extends JavaPlugin
 			
 			// START is a sentinel Team object representing the start region
 			Team t, START = new Team();
-			t = "start".equals(args[0]) ? START : teamNameLookup(args[0]);
+			t = "start".equals(args[0]) ? START : teamNameLookup(m, args[0]);
 			
 			if (t == null)
 			{
@@ -514,7 +576,7 @@ public class AutoReferee extends JavaPlugin
 				if (t == START)
 				{
 					// set the start region to the selection
-					startRegion = reg;
+					m.startRegion = reg;
 					player.sendMessage("Region now marked as " +
 						"the start region!");
 				}
@@ -529,9 +591,9 @@ public class AutoReferee extends JavaPlugin
 			return true;
 		}
 
-		if ("jointeam".equalsIgnoreCase(cmd.getName()) && !onlineMode)
+		if ("jointeam".equalsIgnoreCase(cmd.getName()) && m != null && !onlineMode)
 		{
-			Team t = args.length > 0 ? teamNameLookup(args[0]) : getArbitraryTeam();
+			Team t = args.length > 0 ? teamNameLookup(m, args[0]) : getArbitraryTeam(m);
 			if (t == null)
 			{
 				// team name is invalid. let the player know
@@ -550,7 +612,7 @@ public class AutoReferee extends JavaPlugin
 			joinTeam(target, t);
 			return true;
 		}
-		if ("leaveteam".equalsIgnoreCase(cmd.getName()) && !onlineMode)
+		if ("leaveteam".equalsIgnoreCase(cmd.getName()) && m != null && !onlineMode)
 		{
 			Player target = player;
 			if (args.length > 0)
@@ -564,8 +626,8 @@ public class AutoReferee extends JavaPlugin
 		}
 		// WARNING: using ordinals on enums is typically frowned upon,
 		// but we will consider the enums "partially-ordered"
-		if ("ready".equalsIgnoreCase(cmd.getName()) && player != null &&
-			currentState.ordinal() < eMatchStatus.PLAYING.ordinal())
+		if ("ready".equalsIgnoreCase(cmd.getName()) && m != null &&
+			m.currentState.ordinal() < eMatchStatus.PLAYING.ordinal())
 		{
 			prepareWorld(player.getWorld());
 			return true;
@@ -619,7 +681,7 @@ public class AutoReferee extends JavaPlugin
 		fw.close();
 	}
 
-	private Team getArbitraryTeam()
+	private Team getArbitraryTeam(AutoRefMatch m)
 	{
 		// minimum size of any one team, and an array to hold valid teams
 		int minsize = Integer.MAX_VALUE;
@@ -627,7 +689,7 @@ public class AutoReferee extends JavaPlugin
 		
 		// get the number of players on each team: Map<TeamNumber -> NumPlayers>
 		Map<Team,Integer> count = new HashMap<Team,Integer>();
-		for (Team t : teams) count.put(t, 0);
+		for (Team t : m.teams) count.put(t, 0);
 		
 		for (Team t : playerTeam.values())
 			if (count.containsKey(t)) count.put(t, count.get(t)+1);
@@ -672,7 +734,8 @@ public class AutoReferee extends JavaPlugin
 		// we have confirmed that the state is PLAYING, so we know we are definitely
 		// in a match if this function is being called
 		
-		for (Team t : teams)
+		AutoRefMatch m = matches.get(world.getUID());
+		if (m != null) for (Team t : m.teams)
 		{
 			// if there are no win conditions set, skip this team
 			if (t.winconditions.size() == 0) continue;
@@ -689,11 +752,11 @@ public class AutoReferee extends JavaPlugin
 			if (win)
 			{
 				// announce the victory and set the match to completed
-				getServer().broadcastMessage(t.getName() + " WINS!");
+				getServer().broadcastMessage(t.getName() + " Wins!");
 				for (Player p : world.getPlayers())
 					if (playerTeam.containsKey(p.getName()))
 						p.teleport(world.getSpawnLocation());
-				currentState = eMatchStatus.COMPLETED;
+				m.currentState = eMatchStatus.COMPLETED;
 			}
 		}
 	}
@@ -727,21 +790,31 @@ public class AutoReferee extends JavaPlugin
 		Set<Team> owners = new HashSet<Team>();
 
 		// check all safe regions for that team
-		for (Team team : teams) for (CuboidRegion reg : team.regions)
+		AutoRefMatch m = matches.get(loc.getWorld().getUID());
+		if (m != null) for (Team team : m.teams)
+			for (CuboidRegion reg : team.regions)
 		{
 			// if the location is inside the region, add it
-			if (distanceToRegion(loc, reg) < ZoneListener.SNEAK_DISTANCE) owners.add(team);
+			if (distanceToRegion(loc, reg) < ZoneListener.SNEAK_DISTANCE) 
+				owners.add(team);
 		}
 		
 		return owners;
 	}
 
 	// simple getter for the start region
-	public CuboidRegion getStartRegion() { return startRegion; }
+	public CuboidRegion getStartRegion(World w)
+	{
+		AutoRefMatch m = matches.get(w.getUID());
+		return m == null ? null : m.startRegion;
+	}
 	
 	// is location in start region?
 	public boolean inStartRegion(Location loc)
-	{ return distanceToRegion(loc, startRegion) < ZoneListener.SNEAK_DISTANCE; }
+	{
+		CuboidRegion reg = getStartRegion(loc.getWorld());
+		return distanceToRegion(loc, reg) < ZoneListener.SNEAK_DISTANCE;
+	}
 	
 	// distance from the closest owned region
 	public double distanceToClosestRegion(Player p)
@@ -750,7 +823,7 @@ public class AutoReferee extends JavaPlugin
 	public double distanceToClosestRegion(Team team, Location loc)
 	{
 		if (team == null) return 0;
-		double distance = distanceToRegion(loc, startRegion);
+		double distance = distanceToRegion(loc, getStartRegion(loc.getWorld()));
 		
 		for ( CuboidRegion reg : team.regions ) if (distance > 0)
 			distance = Math.min(distance, distanceToRegion(loc, reg));
@@ -770,21 +843,23 @@ public class AutoReferee extends JavaPlugin
 		return locationOwnership(loc).contains(team);
 	}
 
-	public void checkTeamsReady() 
+	public void checkTeamsReady(AutoRefMatch m) 
 	{
+		if (m == null) return;
+		
 		// if there is no one on the server
-		if (world.getPlayers().size() == 0)
+		if (m.world.getPlayers().size() == 0)
 		{
 			// set all the teams to not ready and status as waiting
-			for ( Team t : teams ) t.ready = false;
-			currentState = eMatchStatus.WAITING; return;
+			for ( Team t : m.teams ) t.ready = false;
+			m.currentState = eMatchStatus.WAITING; return;
 		}
 		
 		// this function is only useful if we are waiting
-		if (currentState != eMatchStatus.WAITING) return;
+		if (m.currentState != eMatchStatus.WAITING) return;
 		
 		// if we aren't in online mode, assume we are always ready
-		if (!onlineMode) { currentState = eMatchStatus.READY; return; }
+		if (!onlineMode) { m.currentState = eMatchStatus.READY; return; }
 		
 		// check if all the players are here
 		boolean ready = true; Server s = getServer();
@@ -792,18 +867,21 @@ public class AutoReferee extends JavaPlugin
 			ready &= s.getOfflinePlayer(p).isOnline();
 		
 		// set status based on whether the players are online
-		currentState = ready ? eMatchStatus.READY : eMatchStatus.WAITING;
+		m.currentState = ready ? eMatchStatus.READY : eMatchStatus.WAITING;
 	}
+
+	public void checkTeamsReady(World w) 
+	{ checkTeamsReady(matches.get(w.getUID())); }
 	
 	private class MatchStarter implements Runnable
 	{
 		public int task = -1;
 		private int secs = 3;
 		
-		private World world = null;
-		public MatchStarter(World w)
+		private AutoRefMatch match = null;
+		public MatchStarter(AutoRefMatch m)
 		{
-			world = w;
+			match = m;
 		}
 		
 		public void run()
@@ -812,27 +890,29 @@ public class AutoReferee extends JavaPlugin
 			if (secs == 0)
 			{
 				// set the current time to the start time (again)
-				world.setTime(startTime);
+				match.world.setTime(match.startTime);
 				
 				// setup world to go!
-				currentState = eMatchStatus.PLAYING;
-				worldBroadcast(world, ">>> " + ChatColor.GREEN + "GO!");
+				match.currentState = eMatchStatus.PLAYING;
+				worldBroadcast(match.world, ">>> " + ChatColor.GREEN + "GO!");
 				
 				// cancel the task
 				getServer().getScheduler().cancelTask(task);
 			}
 			
 			// report number of seconds remaining
-			else worldBroadcast(world, ">>> " + 
+			else worldBroadcast(match.world, ">>> " + 
 				ChatColor.GREEN + Integer.toString(secs--) + "...");
 		}
 	}
 	
-	MatchStarter matchStarter = null;
 	public void prepareWorld(World w)
 	{
+		AutoRefMatch match = matches.get(w.getUID());
+		if (match == null) return;
+		
 		// set the current time to the start time
-		w.setTime(startTime);
+		w.setTime(match.startTime);
 		
 		// remove all mobs, animals, and items
 		for (Entity e : w.getEntitiesByClasses(Monster.class, 
@@ -860,13 +940,13 @@ public class AutoReferee extends JavaPlugin
 			+ Integer.toString(READY_SECONDS) + " seconds.");
 		
 		// cancel any previous match-start task
-		if (matchStarter != null && matchStarter.task != -1)
-			getServer().getScheduler().cancelTask(matchStarter.task);
+		if (match.matchStarter != null && match.matchStarter.task != -1)
+			getServer().getScheduler().cancelTask(match.matchStarter.task);
 		
 		// schedule the task to announce and prepare the match
-		matchStarter = new MatchStarter(w);
-		matchStarter.task = getServer().getScheduler().scheduleSyncRepeatingTask(
-				this, matchStarter, READY_SECONDS * 20L, 20L);
+		match.matchStarter = new MatchStarter(match);
+		match.matchStarter.task = getServer().getScheduler().scheduleSyncRepeatingTask(
+				this, match.matchStarter, READY_SECONDS * 20L, 20L);
 	}
 	
 	public void preparePlayer(Player p)
@@ -1129,6 +1209,9 @@ public class AutoReferee extends JavaPlugin
 
 	static class Team
 	{
+		// reference to the match
+		public AutoRefMatch match = null;
+		
 		// team's name, may or may not be color-related
 		public String name = null;
 	
@@ -1156,11 +1239,14 @@ public class AutoReferee extends JavaPlugin
 	
 		// a factory for processing config maps
 		@SuppressWarnings("unchecked")
-		public static Team fromMap(Map<String, Object> conf, World w)
+		public static Team fromMap(Map<String, Object> conf, AutoRefMatch match)
 		{
 			Team newTeam = new Team();
 			newTeam.color = ChatColor.WHITE;
 			newTeam.maxSize = 0;
+			
+			newTeam.match = match;
+			World w = match.world;
 	
 			// get name from map
 			if (!conf.containsKey("name")) return null;

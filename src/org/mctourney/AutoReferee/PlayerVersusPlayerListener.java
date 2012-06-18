@@ -1,5 +1,6 @@
 package org.mctourney.AutoReferee;
 
+import org.bukkit.World;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -14,13 +15,9 @@ public class PlayerVersusPlayerListener implements Listener
 {
 	AutoReferee plugin = null;
 
-	// is friendly-fire allowed on this map?
-	boolean allow_ff = false;
-
 	public PlayerVersusPlayerListener(Plugin p)
 	{
 		plugin = (AutoReferee) p;
-		allow_ff = plugin.getMapConfig().getBoolean("match.allow-ff");
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
@@ -97,6 +94,9 @@ public class PlayerVersusPlayerListener implements Listener
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void damageDealt(EntityDamageEvent event)
 	{
+		World world = event.getEntity().getWorld();
+		//AutoRefMatch match = plugin.matches.get(world.getUID());
+		
 		if ((event instanceof EntityDamageByEntityEvent))
 		{
 			EntityDamageByEntityEvent ed = (EntityDamageByEntityEvent) event;
@@ -111,7 +111,7 @@ public class PlayerVersusPlayerListener implements Listener
 			{
 				// if the match is in progress and player is in start region
 				// cancel any damage dealt to the player
-				if (plugin.getState() == eMatchStatus.PLAYING && 
+				if (plugin.getState(world) == eMatchStatus.PLAYING && 
 						plugin.inStartRegion(damaged.getLocation()))
 				{ event.setCancelled(true); return; }
 			}
@@ -122,7 +122,8 @@ public class PlayerVersusPlayerListener implements Listener
 			if (d1team == null && d2team == null) return;
 
 			// if the attacked isn't on a team, or same team (w/ no FF), cancel
-			event.setCancelled(d2team == null || (d1team == d2team && allow_ff));
+			event.setCancelled(d2team == null || (d1team == d2team && 
+				plugin.getMapConfig(world).getBoolean("match.allow-ff")));
 
 			if (event.isCancelled()) return;
 		}
