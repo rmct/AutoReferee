@@ -54,6 +54,7 @@ public class AutoReferee extends JavaPlugin
 		NONE, WAITING, READY, PLAYING, COMPLETED,
 	};
 	
+	public Logger log = null;
 	private World world;
 	private long startTime = 8000L;
 
