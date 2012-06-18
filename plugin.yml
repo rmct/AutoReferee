@@ -13,15 +13,11 @@ commands:
   autoref:
     description: AutoReferee configuration
     permission: autoreferee.configure
-    usage: /<command> save|
+    usage: /<command> save|stats|wincond|zones
   zone:
     description: Set a region's ownership
     permission: autoreferee.configure
     usage: /<command> <teamname>|start
-  zones:
-    description: List all zones for a given team
-    permission: autoreferee.configure
-    usage: /<command> <teamname>
   jointeam:
     description: Set player's team
     permission: autoreferee.referee
@@ -34,7 +30,3 @@ commands:
     description: Prepare world for match
     permission: autoreferee.referee
     usage: /<command>
-  wincond:
-    description: Setup win conditions
-    permission: autoreferee.configure
-    usage: /<command> [tool|mode|team] [teamname]
