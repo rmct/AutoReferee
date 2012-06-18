@@ -1,7 +1,6 @@
 package org.mctourney.AutoReferee;
 
 import java.util.Iterator;
-import java.util.logging.Logger;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -9,12 +8,13 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 import org.bukkit.plugin.Plugin;
+
+import org.mctourney.AutoReferee.AutoReferee.*;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 
 public class TeamListener implements Listener 
 {
 	AutoReferee plugin = null;
-	public Logger log = Logger.getLogger("Minecraft");
 
 	public TeamListener(Plugin p)
 	{ plugin = (AutoReferee) p; }
@@ -83,4 +83,3 @@ public class TeamListener implements Listener
 	{
 	}
 }
-

@@ -1,7 +1,6 @@
 package org.mctourney.AutoReferee;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -15,12 +14,13 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.plugin.Plugin;
+
+import org.mctourney.AutoReferee.AutoReferee.*;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 
 public class ZoneListener implements Listener 
 {
 	AutoReferee plugin = null;
-	public Logger log = Logger.getLogger("Minecraft");
 	
 	public static final double SNEAK_DISTANCE = 0.30001;
 	public static final double FREEFALL_THRESHOLD = 0.350;
@@ -67,15 +67,19 @@ public class ZoneListener implements Listener
 			}
 		}
 		
-		// if a player leaves the start region, empty their inventory
+		// if a player leaves the start region... 
 		if (player.getGameMode() == GameMode.SURVIVAL && plugin.inStartRegion(event.getFrom())
 			&& !plugin.inStartRegion(event.getTo()))
 		{
+			// if game isn't going, teleport them back
 			if (plugin.getState() != eMatchStatus.PLAYING)
 			{
 				player.teleport(player.getWorld().getSpawnLocation());
-				player.setVelocity(new org.bukkit.util.Vector(0,0,0));
+				player.setVelocity(new org.bukkit.util.Vector());
+				player.setFallDistance(0.0f);
 			}
+			
+			// if game is being played, empty their inventory
 			else player.getInventory().clear();
 		}
 	}

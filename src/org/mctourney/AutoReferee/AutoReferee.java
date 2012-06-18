@@ -40,8 +40,10 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 
 public class AutoReferee extends JavaPlugin
 {
-	// default port for a "master" serveri
+	// default port for a "master" server
 	public static final int DEFAULT_SERVER_PORT = 43760;
+
+	// number of seconds for a match to be readied
 	public static final int READY_SECONDS = 15;
 	
 	public enum eAction {
@@ -71,7 +73,7 @@ public class AutoReferee extends JavaPlugin
 
 	// a map from a player to info about why they were killed
 	protected Map<String, Team> playerTeam;
-	public Map<String, PlayerData> playerData;
+	public Map<String, AutoRefPlayer> playerData;
 	public Map<String, eAction> actionTaken;
 
 	protected String matchName = "Scheduled Match";
@@ -129,10 +131,33 @@ public class AutoReferee extends JavaPlugin
 		return 0;
 	}
 
-	public Logger log = Logger.getLogger("Minecraft");
+	private boolean checkPlugins(PluginManager pm)
+	{
+		boolean foundOtherPlugin = false;
+		for ( Plugin p : pm.getPlugins() ) if (p != this)
+		{
+			if (!foundOtherPlugin)
+				log.severe("No other plugins may be loaded in online mode...");
+			log.severe("Agressively disabling plugin: " + p.getName());
+
+			pm.disablePlugin(p);
+			String pStatus = p.isEnabled() ? "NOT disabled" : "disabled";
+			log.severe(p.getName() + " is " + pStatus + ".");
+
+			foundOtherPlugin = true;
+		}
+
+		// return true if all other plugins are disabled
+		for ( Plugin p : pm.getPlugins() )
+			if (p != this && p.isEnabled()) return false;
+		return true;
+	}
+
+	public Logger log = null;
 	public void onEnable()
 	{
-		PluginManager pm = getServer().getPluginManager(); 
+		log = this.getLogger();
+		PluginManager pm = getServer().getPluginManager();
 
 		// load main world's configuration file BEFORE the listeners
 		// (some listeners will cache the map configuration settings)
@@ -162,6 +187,7 @@ public class AutoReferee extends JavaPlugin
 		onlineMode = !(serverList.size() == 0 || !getConfig().getBoolean("server-mode.online", true));
 
 		// wrap up, debug to follow this message
+		if (onlineMode) onlineMode = checkPlugins(pm);
 		log.info("AutoReferee loaded successfully.");
 
 		// connect to server, or let the server operator know to set up the match manually
@@ -569,10 +595,10 @@ public class AutoReferee extends JavaPlugin
 		File sfile = new File(getLogDirectory(), hdl + ".log");
 		PrintWriter fw = new PrintWriter(sfile);
 
-		for (Map.Entry<String, PlayerData> entry : playerData.entrySet())
+		for (Map.Entry<String, AutoRefPlayer> entry : playerData.entrySet())
 		{
 			String pname = entry.getKey();
-			PlayerData data = entry.getValue();
+			AutoRefPlayer data = entry.getValue();
 			
 			fw.println("Stats for " + pname + ": (" + Integer.toString(data.totalKills)
 				+ "/" + Integer.toString(data.totalDeaths) + ")");
@@ -817,7 +843,7 @@ public class AutoReferee extends JavaPlugin
 		w.setWeatherDuration(Integer.MAX_VALUE);
 		
 		// prepare all players for the match
-		playerData = new HashMap<String, PlayerData>();
+		playerData = new HashMap<String, AutoRefPlayer>();
 		for (Player p : w.getPlayers())
 			if (playerTeam.containsKey(p.getName())) preparePlayer(p);
 		
@@ -852,7 +878,7 @@ public class AutoReferee extends JavaPlugin
 		
 		// setup an empty PlayerData object for this player
 		log.info("Making record for: " + p.getName());
-		playerData.put(p.getName(), new PlayerData());
+		playerData.put(p.getName(), new AutoRefPlayer(p));
 	}
 	
 	// ABANDON HOPE, ALL YE WHO ENTER HERE!
@@ -983,8 +1009,11 @@ public class AutoReferee extends JavaPlugin
 		{ return new BlockData(b.getType(), b.getData()); }
 	}
 
-	static class PlayerData
+	static class AutoRefPlayer
 	{
+		// stored player reference
+		protected Player player;
+		
 		// number of times this player has killed other players
 		public Map<String, Integer> kills;
 		public int totalKills = 0;
@@ -995,11 +1024,12 @@ public class AutoReferee extends JavaPlugin
 		public int totalDeaths = 0;
 		
 		// constructor for simply setting up the variables
-		public PlayerData()
+		public AutoRefPlayer(Player p)
 		{
 			kills = new HashMap<String, Integer>();
 			deaths = new HashMap<DamageCause, Integer>();
 			damage = new HashMap<DamageCause, Integer>();
+			player = p;
 		}
 		
 		// register that we just received this damage
@@ -1022,199 +1052,199 @@ public class AutoReferee extends JavaPlugin
 		// register that we killed the Player who fired this event
 		public void registerKill(PlayerDeathEvent e)
 		{
-			String player = e.getEntity().getName();
-			kills.put(player, 1 + (kills.containsKey(player) ? kills.get(player) : 0));
+			String pname = e.getEntity().getName();
+			kills.put(pname, 1 + (kills.containsKey(pname) ? kills.get(pname) : 0));
 			++totalKills;
 		}
 	}
-}
-
-class DamageCause
-{
-	// cause of damage, primary value for damage cause
-	public EntityDamageEvent.DamageCause damageCause;
 	
-	// extra information to accompany damage cause
-	public Object payload = null;
-	
-	// generate a hashcode
-	@Override public int hashCode()
-	{ return (payload == null ? 0 : payload.hashCode()) ^ 
-		damageCause.hashCode(); }
-
-	@Override public boolean equals(Object o)
-	{ return hashCode() == o.hashCode(); }
-	
-	public DamageCause(EntityDamageEvent.DamageCause c, Object p)
-	{ damageCause = c; payload = p; }
-	
-	public static DamageCause fromDamageEvent(EntityDamageEvent e)
+	static class DamageCause
 	{
-		EntityDamageEvent.DamageCause c = e.getCause();
-		Object p = null;
+		// cause of damage, primary value for damage cause
+		public EntityDamageEvent.DamageCause damageCause;
 		
-		EntityDamageByEntityEvent edEvent = null;
-		if ((e instanceof EntityDamageByEntityEvent))
-			edEvent = (EntityDamageByEntityEvent) e;
+		// extra information to accompany damage cause
+		public Object payload = null;
 		
-		switch (c)
+		// generate a hashcode
+		@Override public int hashCode()
+		{ return (payload == null ? 0 : payload.hashCode()) ^ 
+			damageCause.hashCode(); }
+
+		@Override public boolean equals(Object o)
+		{ return hashCode() == o.hashCode(); }
+		
+		public DamageCause(EntityDamageEvent.DamageCause c, Object p)
+		{ damageCause = c; payload = p; }
+		
+		public static DamageCause fromDamageEvent(EntityDamageEvent e)
 		{
-			case ENTITY_ATTACK:
-			case ENTITY_EXPLOSION:
-				// get the entity that did the killing
-				if (edEvent != null)
-					p = edEvent.getDamager();
-				break;
-
-			case PROJECTILE:
-			case MAGIC:
-				// get the shooter from the projectile
-				if (edEvent != null && edEvent.getDamager() != null)
-					p = ((Projectile) edEvent.getDamager()).getShooter();
-				
-				// change damage cause to ENTITY_ATTACK
-				//c = EntityDamageEvent.DamageCause.ENTITY_ATTACK;
-				break;
-		}
-		
-		if ((p instanceof Monster))
-			p = ((Monster) p).getType();
-		return new DamageCause(c, p);
-	}
-	
-	@Override public String toString()
-	{
-		String damager = null;
-		
-		// generate a 'damager' string for more information
-		if ((payload instanceof Player))
-			damager = ((Player) payload).getName();
-		if ((payload instanceof EntityType))
-			damager = ((EntityType) payload).name();
-		
-		// return a string representing this damage cause
-		return (damager == null ? "" : (damager + "'s "))
-			+ damageCause.name();
-	}
-}
-
-class Team
-{
-	// team's name, may or may not be color-related
-	public String name = null;
-
-	// color to use for members of this team
-	public ChatColor color = null;
-
-	// maximum size of a team (for manual mode only)
-	public int maxSize = 0;
-	
-	// is this team ready to play?
-	public boolean ready = false;
-
-	// list of regions
-	public List<CuboidRegion> regions = null;
-	
-	// location of custom spawn
-	public Location spawn;
-
-	// winconditions, locations mapped to expected block data
-	public Map<Location, AutoReferee.BlockData> winconditions;
-
-	// does a provided search string match this team?
-	public boolean match(String needle)
-	{ return -1 != name.toLowerCase().indexOf(needle.toLowerCase()); }
-
-	// a factory for processing config maps
-	@SuppressWarnings("unchecked")
-	public static Team fromMap(Map<String, Object> conf, World w)
-	{
-		Team newTeam = new Team();
-		newTeam.color = ChatColor.WHITE;
-		newTeam.maxSize = 0;
-
-		// get name from map
-		if (!conf.containsKey("name")) return null;
-		newTeam.name = (String) conf.get("name");
-
-		// get the color from the map
-		if (conf.containsKey("color"))
-		{
-			String clr = ((String) conf.get("color")).toUpperCase();
-			try { newTeam.color = ChatColor.valueOf(clr); }
-			catch (IllegalArgumentException e) { }
-		}
-
-		// get the max size from the map
-		if (conf.containsKey("maxsize"))
-		{
-			Integer msz = (Integer) conf.get("maxsize");
-			if (msz != null) newTeam.maxSize = msz.intValue();
-		}
-
-		newTeam.regions = new ArrayList<CuboidRegion>();
-		if (conf.containsKey("regions"))
-		{
-			List<String> coordstrings = (List<String>) conf.get("regions");
-			if (coordstrings != null) for (String coords : coordstrings)
+			EntityDamageEvent.DamageCause c = e.getCause();
+			Object p = null;
+			
+			EntityDamageByEntityEvent edEvent = null;
+			if ((e instanceof EntityDamageByEntityEvent))
+				edEvent = (EntityDamageByEntityEvent) e;
+			
+			switch (c)
 			{
-				CuboidRegion creg = AutoReferee.coordsToRegion(coords);
-				if (creg != null) newTeam.regions.add(creg);
+				case ENTITY_ATTACK:
+				case ENTITY_EXPLOSION:
+					// get the entity that did the killing
+					if (edEvent != null)
+						p = edEvent.getDamager();
+					break;
+
+				case PROJECTILE:
+				case MAGIC:
+					// get the shooter from the projectile
+					if (edEvent != null && edEvent.getDamager() != null)
+						p = ((Projectile) edEvent.getDamager()).getShooter();
+					
+					// change damage cause to ENTITY_ATTACK
+					//c = EntityDamageEvent.DamageCause.ENTITY_ATTACK;
+					break;
 			}
+			
+			if ((p instanceof Monster))
+				p = ((Monster) p).getType();
+			return new DamageCause(c, p);
 		}
-
-		newTeam.winconditions = new HashMap<Location, AutoReferee.BlockData>();
-		if (conf.containsKey("win-condition"))
-		{
-			List<String> wclist = (List<String>) conf.get("win-condition");
-			if (wclist != null) for (String wc : wclist)
-			{
-				String[] wcparts = wc.split(":");
-				
-				Vector v = AutoReferee.coordsToVector(wcparts[0]);
-				Location loc = new Location(w, v.getBlockX(), v.getBlockY(), v.getBlockZ());
-				newTeam.winconditions.put(loc, AutoReferee.BlockData.fromString(wcparts[1]));
-			}
-		}
-
-		return newTeam;
-	}
-
-	public Map<String, Object> toMap()
-	{
-		Map<String, Object> map = new HashMap<String, Object>();
-
-		// add name to the map
-		map.put("name", name);
-
-		// add string representation of the color
-		map.put("color", color.name());
-
-		// add the maximum team size
-		map.put("maxsize", new Integer(maxSize));
 		
-		// convert the win conditions to strings
-		List<String> wcond = new ArrayList<String>();
-		for (Map.Entry<Location, AutoReferee.BlockData> e : winconditions.entrySet())
-			wcond.add(AutoReferee.vectorToCoords(AutoReferee.locationToBlockVector(e.getKey())) 
-				+ ":" + e.getValue());
-
-		// add the win condition list
-		map.put("win-condition", wcond);
-
-		// convert regions to strings
-		List<String> regstr = new ArrayList<String>();
-		for (CuboidRegion reg : regions)
-			regstr.add(AutoReferee.regionToCoords(reg));
-
-		// add the region list
-		map.put("regions", regstr);
-
-		// return the map
-		return map;
+		@Override public String toString()
+		{
+			String damager = null;
+			
+			// generate a 'damager' string for more information
+			if ((payload instanceof Player))
+				damager = ((Player) payload).getName();
+			if ((payload instanceof EntityType))
+				damager = ((EntityType) payload).name();
+			
+			// return a string representing this damage cause
+			return (damager == null ? "" : (damager + "'s "))
+				+ damageCause.name();
+		}
 	}
 
-	public String getName()
-	{ return color + name + ChatColor.WHITE; }
+	static class Team
+	{
+		// team's name, may or may not be color-related
+		public String name = null;
+	
+		// color to use for members of this team
+		public ChatColor color = null;
+	
+		// maximum size of a team (for manual mode only)
+		public int maxSize = 0;
+		
+		// is this team ready to play?
+		public boolean ready = false;
+	
+		// list of regions
+		public List<CuboidRegion> regions = null;
+		
+		// location of custom spawn
+		public Location spawn;
+	
+		// win-conditions, locations mapped to expected block data
+		public Map<Location, BlockData> winconditions;
+	
+		// does a provided search string match this team?
+		public boolean match(String needle)
+		{ return -1 != name.toLowerCase().indexOf(needle.toLowerCase()); }
+	
+		// a factory for processing config maps
+		@SuppressWarnings("unchecked")
+		public static Team fromMap(Map<String, Object> conf, World w)
+		{
+			Team newTeam = new Team();
+			newTeam.color = ChatColor.WHITE;
+			newTeam.maxSize = 0;
+	
+			// get name from map
+			if (!conf.containsKey("name")) return null;
+			newTeam.name = (String) conf.get("name");
+	
+			// get the color from the map
+			if (conf.containsKey("color"))
+			{
+				String clr = ((String) conf.get("color")).toUpperCase();
+				try { newTeam.color = ChatColor.valueOf(clr); }
+				catch (IllegalArgumentException e) { }
+			}
+	
+			// get the max size from the map
+			if (conf.containsKey("maxsize"))
+			{
+				Integer msz = (Integer) conf.get("maxsize");
+				if (msz != null) newTeam.maxSize = msz.intValue();
+			}
+	
+			newTeam.regions = new ArrayList<CuboidRegion>();
+			if (conf.containsKey("regions"))
+			{
+				List<String> coordstrings = (List<String>) conf.get("regions");
+				if (coordstrings != null) for (String coords : coordstrings)
+				{
+					CuboidRegion creg = AutoReferee.coordsToRegion(coords);
+					if (creg != null) newTeam.regions.add(creg);
+				}
+			}
+	
+			newTeam.winconditions = new HashMap<Location, AutoReferee.BlockData>();
+			if (conf.containsKey("win-condition"))
+			{
+				List<String> wclist = (List<String>) conf.get("win-condition");
+				if (wclist != null) for (String wc : wclist)
+				{
+					String[] wcparts = wc.split(":");
+					
+					Vector v = AutoReferee.coordsToVector(wcparts[0]);
+					Location loc = new Location(w, v.getBlockX(), v.getBlockY(), v.getBlockZ());
+					newTeam.winconditions.put(loc, AutoReferee.BlockData.fromString(wcparts[1]));
+				}
+			}
+	
+			return newTeam;
+		}
+	
+		public Map<String, Object> toMap()
+		{
+			Map<String, Object> map = new HashMap<String, Object>();
+	
+			// add name to the map
+			map.put("name", name);
+	
+			// add string representation of the color
+			map.put("color", color.name());
+	
+			// add the maximum team size
+			map.put("maxsize", new Integer(maxSize));
+			
+			// convert the win conditions to strings
+			List<String> wcond = new ArrayList<String>();
+			for (Map.Entry<Location, AutoReferee.BlockData> e : winconditions.entrySet())
+				wcond.add(AutoReferee.vectorToCoords(AutoReferee.locationToBlockVector(e.getKey())) 
+					+ ":" + e.getValue());
+	
+			// add the win condition list
+			map.put("win-condition", wcond);
+	
+			// convert regions to strings
+			List<String> regstr = new ArrayList<String>();
+			for (CuboidRegion reg : regions)
+				regstr.add(AutoReferee.regionToCoords(reg));
+	
+			// add the region list
+			map.put("regions", regstr);
+	
+			// return the map
+			return map;
+		}
+	
+		public String getName()
+		{ return color + name + ChatColor.WHITE; }
+	}
 }
 

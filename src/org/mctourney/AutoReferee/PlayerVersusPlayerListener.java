@@ -1,19 +1,18 @@
 package org.mctourney.AutoReferee;
 
-import java.util.logging.Logger;
-
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
 import org.bukkit.plugin.Plugin;
+
+import org.mctourney.AutoReferee.AutoReferee.*;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 
 public class PlayerVersusPlayerListener implements Listener
 {
 	AutoReferee plugin = null;
-	public Logger log = Logger.getLogger("Minecraft");
 
 	// is friendly-fire allowed on this map?
 	boolean allow_ff = false;
@@ -59,7 +58,7 @@ public class PlayerVersusPlayerListener implements Listener
 			if (killer != null) 
 			{
 				if (plugin.getConfig().getBoolean("server-mode.console.log", false))
-					log.info("[DEATH] " + killer.getDisplayName() 
+					plugin.log.info("[DEATH] " + killer.getDisplayName() 
 						+ " killed " + victim.getDisplayName());
 				dmsg = dmsg.replace(killer.getName(), plugin.colorPlayer(killer));
 			}
@@ -132,4 +131,3 @@ public class PlayerVersusPlayerListener implements Listener
 			plugin.playerData.get(event.getEntity()).registerDamage(event);
 	}
 }
-
