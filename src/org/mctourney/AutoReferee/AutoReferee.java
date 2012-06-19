@@ -31,6 +31,9 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import org.mctourney.AutoReferee.util.*;
+
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
@@ -260,7 +263,6 @@ public class AutoReferee extends JavaPlugin
 
 	public void onEnable()
 	{
-		WorldListener worldListener;
 		AutoRefMatch.plugin = this;
 		
 		log = this.getLogger();
@@ -276,7 +278,8 @@ public class AutoReferee extends JavaPlugin
 		pm.registerEvents(new ZoneListener(this), this);
 
 		// events related to worlds
-		pm.registerEvents(worldListener = new WorldListener(this), this);
+		WorldListener worldListener = new WorldListener(this);
+		pm.registerEvents(worldListener, this);
 
 		matches = new HashMap<UUID, AutoRefMatch>();
 		playerTeam = new HashMap<String, Team>();
@@ -304,8 +307,7 @@ public class AutoReferee extends JavaPlugin
 		onlineMode = (conn != null);
 		
 		// process initial world(s), just in case
-		for ( World w : getServer().getWorlds() )
-			worldListener.processWorld(w);
+		for ( World w : getServer().getWorlds() ) processWorld(w);
 	}
 
 	public boolean makeServerConnection(List<?> serverList)
@@ -360,6 +362,28 @@ public class AutoReferee extends JavaPlugin
 		log.info("AutoReferee disabled.");
 	}
 
+	public void processWorld(World w)
+	{
+		// if this map isn't compatible with AutoReferee, quit...
+		if (matches.containsKey(w.getUID()) ||
+			!AutoRefMatch.isCompatible(w)) return;
+		
+		AutoRefMatch match = new AutoRefMatch(w);
+		matches.put(w.getUID(), match);
+	}
+	
+	public boolean createMatchWorld(String worldName) throws IOException
+	{
+		File mapLibrary = new File("maps");
+		if (!mapLibrary.exists() || !mapLibrary.isDirectory())
+			mapLibrary.mkdir();
+		
+		File mapMaster = new File(mapLibrary, worldName);
+		if (!mapMaster.exists()) return false;
+		
+		return true;
+	}
+	
 	private WorldEditPlugin getWorldEdit()
 	{
 		Plugin plugin = getServer().getPluginManager().getPlugin("WorldEdit");
