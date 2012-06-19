@@ -181,8 +181,7 @@ public class AutoReferee extends JavaPlugin
 		pm.registerEvents(new ZoneListener(this), this);
 
 		// events related to worlds
-		WorldListener worldListener = new WorldListener(this);
-		pm.registerEvents(worldListener, this);
+		pm.registerEvents(new WorldListener(this), this);
 
 		playerTeam = new HashMap<String, AutoRefTeam>();
 		actionTaken = new HashMap<String, eAction>();

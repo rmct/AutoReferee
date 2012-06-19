@@ -18,19 +18,15 @@ Copyright (c) 2012 RMCT <http://www.reddit.com/r/mctourney>
     <url>https://github.com/rmct/AutoReferee</url>
     <developerConnection>scm:git:git@github.com:rmct/AutoReferee.git</developerConnection>
   </scm>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
   
   <repositories>
     <repository>
-      <id>sk89q-mvn2</id>
-      <url>http://mvn2.sk89q.com/repo</url>
-    </repository>
-    <repository>
       <id>bukkit-repo</id>
       <url>http://repo.bukkit.org/content/groups/public/</url>
+    </repository>
+    <repository>
+      <id>sk89q-mvn2</id>
+      <url>http://mvn2.sk89q.com/repo</url>
     </repository>
   </repositories>
 
