@@ -12,6 +12,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
+
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
@@ -19,6 +21,7 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.command.*;
 import org.bukkit.configuration.file.*;
@@ -143,7 +146,7 @@ public class AutoReferee extends JavaPlugin
 
 	private boolean checkPlugins(PluginManager pm)
 	{
-	/*	boolean foundOtherPlugin = false;
+		boolean foundOtherPlugin = false;
 		for ( Plugin p : pm.getPlugins() ) if (p != this)
 		{
 			if (!foundOtherPlugin)
@@ -160,7 +163,7 @@ public class AutoReferee extends JavaPlugin
 		// return true if all other plugins are disabled
 		for ( Plugin p : pm.getPlugins() )
 			if (p != this && p.isEnabled()) return false;
-	*/	return true;
+		return true;
 	}
 
 	public void onEnable()
@@ -206,6 +209,11 @@ public class AutoReferee extends JavaPlugin
 
 		// update online mode to represent whether or not we have a connection
 		onlineMode = (conn != null);
+		
+		// setup the map library folder
+		File mapLibrary = new File("maps");
+		if (mapLibrary.exists() && !mapLibrary.isDirectory()) mapLibrary.delete();
+		if (!mapLibrary.exists()) mapLibrary.mkdir();
 		
 		// process initial world(s), just in case
 		for ( World w : getServer().getWorlds() ) processWorld(w);
@@ -269,22 +277,69 @@ public class AutoReferee extends JavaPlugin
 		if (matches.containsKey(w.getUID()) ||
 			!AutoRefMatch.isCompatible(w)) return;
 		
+		log.info("Processing new world: " + w.getUID().toString());
+		
 		AutoRefMatch match = new AutoRefMatch(w);
 		matches.put(w.getUID(), match);
 	}
 	
-	public boolean createMatchWorld(String worldName) throws IOException
+	public boolean createMatchWorld(String worldName, Long checksum) throws IOException
 	{
-		File mapLibrary = new File("maps");
-		if (!mapLibrary.exists() || !mapLibrary.isDirectory())
-			mapLibrary.mkdir();
+		// assume worldName exists
+		if (worldName == null) return false;
 		
-		File mapMaster = new File(mapLibrary, worldName);
-		if (!mapMaster.exists()) return false;
+		// if there is no map library, quit
+		File mapLibrary = new File("maps"), mapMaster = null;
+		if (!mapLibrary.exists()) return false;
+		
+		// find the map being requested
+		for (File f : mapLibrary.listFiles())
+		{
+			// skip non-directories
+			if (!f.isDirectory()) continue;
+			
+			// if it doesn't have an autoreferee config file
+			File cfgFile = new File(f, "autoreferee.yml");
+			if (!cfgFile.exists()) continue;
+			
+			// check the map name, if it matches, this is the one we want
+			FileConfiguration cfg = YamlConfiguration.loadConfiguration(cfgFile);
+			if (!worldName.equals(cfg.getString("map.name"))) continue;
+			
+			// compute the checksum of the directory, make sure it matches
+			if (checksum != null &&	recursiveCRC32(f) != checksum) continue;
+			
+			// this is the map we want
+			mapMaster = f; break;
+		}
+		
+		// no such map was found, sorry...
+		if (mapMaster == null) return false;
+		
+		// create the temporary directory where this map will be
+		File destWorld = File.createTempFile("world-", "", new File("."));
+		if (!destWorld.delete() && !destWorld.mkdir())
+			throw new IOException("Could not make temporary directory.");
+		
+		// copy the files over and fire up the world
+		FileUtils.copyDirectory(mapMaster, destWorld);
+		getServer().createWorld(WorldCreator.name(destWorld.getName()));
 		
 		return true;
 	}
 	
+	private static long recursiveCRC32(File file) throws IOException
+	{
+		if (file.isDirectory())
+		{
+			long checksum = 0L;
+			for (File f : file.listFiles())
+				checksum ^= recursiveCRC32(f);
+			return checksum;
+		}
+		else return FileUtils.checksumCRC32(file);
+	}
+
 	private WorldEditPlugin getWorldEdit()
 	{
 		Plugin plugin = getServer().getPluginManager().getPlugin("WorldEdit");
@@ -381,6 +436,13 @@ public class AutoReferee extends JavaPlugin
 				
 				return true;
 			}
+
+			if (args.length >= 2 && "load".equalsIgnoreCase(args[0])) try
+			{
+				createMatchWorld("Memento Mori", null);
+				return true;
+			}
+			catch (Exception e) { return false; }
 			
 			if (args.length >= 1 && "stats".equalsIgnoreCase(args[0]) && m != null) try
 			{

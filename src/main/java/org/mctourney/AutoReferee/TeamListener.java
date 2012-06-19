@@ -28,16 +28,21 @@ public class TeamListener implements Listener
 
 		// if we are currently playing and speaker on a team, restrict recipients
 		AutoRefTeam t = plugin.getTeam(player);
-		if (plugin.getState(player.getWorld()) == eMatchStatus.PLAYING && t != null)
+		
+		Iterator<Player> iter = event.getRecipients().iterator();
+		while (iter.hasNext())
 		{
-			Iterator<Player> iter = event.getRecipients().iterator();
-			while (iter.hasNext())
-			{
-				// if listener is on a team, and its not the same team as the
-				// speaker, remove them from the recipients list
-				AutoRefTeam ot = plugin.getTeam(iter.next());
-				if (ot != null && ot != t) iter.remove();
-			}
+			Player recipient = iter.next();
+			
+			// if the listener is in a different world
+			if (recipient.getWorld() != player.getWorld())
+			{ iter.remove(); continue; }
+			
+			// if listener is on a team, and its not the same team as the
+			// speaker, remove them from the recipients list
+			AutoRefTeam oteam = plugin.getTeam(recipient);
+			if (plugin.getState(player.getWorld()) == eMatchStatus.PLAYING &&
+				oteam != null && oteam != t) { iter.remove(); continue; }
 		}
 	}
 
