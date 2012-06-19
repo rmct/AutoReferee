@@ -10,6 +10,5 @@ server-mode:
     - localhost
 
 config-mode:
-  autosave: true
   tools:
     win-condition: 284

@@ -17,6 +17,7 @@
 	<!-- cleanup files -->
 	<target name="clean">
 		<delete dir="${dir.build}" />
+		<delete file="${ant.project.name}.jar" />
 	</target>
 
 	<!-- setup build directory -->
