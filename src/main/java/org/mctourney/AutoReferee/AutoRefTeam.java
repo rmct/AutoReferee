@@ -8,10 +8,8 @@ import java.util.Map;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.mctourney.AutoReferee.util.BlockData;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.regions.CuboidRegion;
+import org.mctourney.AutoReferee.util.*;
 
 class AutoRefTeam
 {
@@ -92,9 +90,9 @@ class AutoRefTeam
 			{
 				String[] wcparts = wc.split(":");
 				
-				Vector v = AutoReferee.coordsToVector(wcparts[0]);
-				Location loc = new Location(w, v.getBlockX(), v.getBlockY(), v.getBlockZ());
-				newTeam.winconditions.put(loc, BlockData.fromString(wcparts[1]));
+				BlockVector3 v = new BlockVector3(AutoReferee.coordsToVector(wcparts[0]));
+				newTeam.winconditions.put(new Location(w, v.x, v.y, v.z), 
+					BlockData.fromString(wcparts[1]));
 			}
 		}
 

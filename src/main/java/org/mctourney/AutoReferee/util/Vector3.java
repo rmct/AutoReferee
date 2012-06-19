@@ -9,4 +9,11 @@ public class Vector3
 	
 	public Vector3(BlockVector3 v)
 	{ this.x = v.x; this.y = v.y; this.z = v.z; }
+	
+	public Vector3(com.sk89q.worldedit.Vector v)
+	{
+		this.x = v.getX();
+		this.y = v.getY();
+		this.z = v.getZ();
+	}
 }

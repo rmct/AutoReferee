@@ -11,10 +11,11 @@ import java.util.Set;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+
 import org.mctourney.AutoReferee.AutoReferee.MatchStarter;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 
-import com.sk89q.worldedit.regions.CuboidRegion;
+import org.mctourney.AutoReferee.util.CuboidRegion;
 
 public class AutoRefMatch
 {

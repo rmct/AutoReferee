@@ -31,11 +31,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import org.mctourney.AutoReferee.util.*;
 
-import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.*;
-import com.sk89q.worldedit.regions.CuboidRegion;
 
 public class AutoReferee extends JavaPlugin
 {
@@ -169,6 +166,7 @@ public class AutoReferee extends JavaPlugin
 	public void onEnable()
 	{
 		AutoRefMatch.plugin = this;
+		matches = new HashMap<UUID, AutoRefMatch>();
 		
 		log = this.getLogger();
 		PluginManager pm = getServer().getPluginManager();
@@ -186,7 +184,6 @@ public class AutoReferee extends JavaPlugin
 		WorldListener worldListener = new WorldListener(this);
 		pm.registerEvents(worldListener, this);
 
-		matches = new HashMap<UUID, AutoRefMatch>();
 		playerTeam = new HashMap<String, AutoRefTeam>();
 		actionTaken = new HashMap<String, eAction>();
 
@@ -460,7 +457,7 @@ public class AutoReferee extends JavaPlugin
 					// print all the regions owned by this team
 					if (team.regions.size() > 0) for (CuboidRegion reg : team.regions)
 					{
-						Vector mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
+						Vector3 mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
 						sender.sendMessage("  (" + vectorToCoords(mn) + ") => (" + vectorToCoords(mx) + ")");
 					}
 
@@ -474,6 +471,14 @@ public class AutoReferee extends JavaPlugin
 		
 		if ("zone".equalsIgnoreCase(cmd.getName()) && m != null)
 		{
+			WorldEditPlugin worldEdit = getWorldEdit();
+			if (worldEdit == null)
+			{
+				// world edit not installed
+				player.sendMessage("This method requires WorldEdit installed and running.");
+				return true;
+			}
+			
 			if (args.length == 0)
 			{
 				// command is invalid. let the player know
@@ -491,15 +496,15 @@ public class AutoReferee extends JavaPlugin
 				player.sendMessage("Not a valid team: " + args[0]);
 				return true;
 			}
-
-			Selection sel = getWorldEdit().getSelection(player);
+			
+			Selection sel = worldEdit.getSelection(player);
 			if ((sel instanceof CuboidSelection))
 			{
 				CuboidSelection csel = (CuboidSelection) sel;
 				CuboidRegion reg = new CuboidRegion(
-					csel.getNativeMinimumPoint(), 
-					csel.getNativeMaximumPoint()
-					);
+					new Vector3(csel.getNativeMinimumPoint()), 
+					new Vector3(csel.getNativeMaximumPoint())
+				);
 
 				// sentinel value represents the start region
 				if (t == START)
@@ -702,14 +707,14 @@ public class AutoReferee extends JavaPlugin
 		if (reg == null) return Double.POSITIVE_INFINITY;
 		
 		double x = v.getX(), y = v.getY(), z = v.getZ();
-		Vector mx = reg.getMaximumPoint(), mn = reg.getMinimumPoint();
+		Vector3 mx = reg.getMaximumPoint(), mn = reg.getMinimumPoint();
 		
 		// return maximum distance from this region
 		// (max on all sides, axially-aligned)
 		return multimax ( 0
-		,	mn.getX() - x, x - mx.getX() - 1
-		,	mn.getY() - y, y - mx.getY() - 1
-		,	mn.getZ() - z, z - mx.getZ() - 1
+		,	mn.x - x, x - mx.x - 1
+		,	mn.y - y, y - mx.y - 1
+		,	mn.z - z, z - mx.z - 1
 		);
 	}
 	
@@ -922,18 +927,18 @@ public class AutoReferee extends JavaPlugin
 		return 0L;
 	}
 	
-	public static Vector locationToVector(Location loc)
-	{ return new Vector(loc.getX(), loc.getY(), loc.getZ()); }
+	public static Vector3 locationToVector(Location loc)
+	{ return new Vector3(loc.getX(), loc.getY(), loc.getZ()); }
 	
-	public static BlockVector locationToBlockVector(Location loc)
-	{ return locationToVector(loc).toBlockVector(); }
+	public static BlockVector3 locationToBlockVector(Location loc)
+	{ return new BlockVector3(locationToVector(loc)); }
 	
-	public static Vector coordsToVector(String coords)
+	public static Vector3 coordsToVector(String coords)
 	{
 		try
 		{
 			String[] values = coords.split(",");
-			return new Vector( // vector 1
+			return new Vector3( // vector 1
 				Integer.parseInt(values[0]),
 				Integer.parseInt(values[1]),
 				Integer.parseInt(values[2]));
@@ -947,17 +952,20 @@ public class AutoReferee extends JavaPlugin
 		String[] values = coords.split(":");
 		
 		// generate the region by the two vectors
-		Vector v1 = coordsToVector(values[0]), v2 = coordsToVector(values[1]);
+		Vector3 v1 = coordsToVector(values[0]), v2 = coordsToVector(values[1]);
 		return (v1 == null || v2 == null ? null : new CuboidRegion(v1, v2));
 	}
 	
-	public static String vectorToCoords(Vector v)
-	{ return v.getBlockX() + "," + v.getBlockY() + "," + v.getBlockZ(); }
+	public static String vectorToCoords(Vector3 v)
+	{ return vectorToCoords(new BlockVector3(v)); }
+	
+	public static String vectorToCoords(BlockVector3 v)
+	{ return v.x + "," + v.y + "," + v.z; }
 
 	public static String regionToCoords(CuboidRegion reg)
 	{
 		// save region as "minX minY minZ maxX maxY maxZ"
-		Vector mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
+		Vector3 mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
 		return vectorToCoords(mn) +	":" + vectorToCoords(mx);
 	}
 }
