@@ -62,4 +62,29 @@ Copyright (c) 2012 RMCT <http://www.reddit.com/r/mctourney>
       <scope>test</scope>
     </dependency>
   </dependencies>
+  
+  <build>
+    <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+
+    <!-- Resources -->
+    <resources>
+      <resource>
+        <targetPath>.</targetPath>
+        <filtering>true</filtering>
+        <directory>${basedir}/src/main/resources/</directory>
+        <includes>
+          <include>plugin.yml</include>
+        </includes>
+      </resource>
+      <resource>
+        <targetPath>defaults/</targetPath>
+        <filtering>true</filtering>
+        <directory>${basedir}/src/main/resources/</directory>
+        <includes>
+          <include>map.yml</include>
+          <include>config.yml</include>
+        </includes>
+      </resource>
+    </resources>
+  </build>
 </project>
