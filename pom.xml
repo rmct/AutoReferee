@@ -1,0 +1,65 @@
+<!--
+Maven build file for AutoReferee
+Copyright (c) 2012 RMCT <http://www.reddit.com/r/mctourney>
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.mctourney.AutoReferee</groupId>
+  <artifactId>AutoReferee</artifactId>
+  <version>0.3</version>
+  <name>AutoReferee</name>
+  <url>http://www.reddit.com/r/mctourney</url>
+  <description>Bukkit plugin for automatically refereeing competitive Minecraft matches.</description>
+  
+  <scm>
+    <connection>scm:git:git://github.com/rmct/AutoReferee.git</connection>
+    <url>https://github.com/rmct/AutoReferee</url>
+    <developerConnection>scm:git:git@github.com:rmct/AutoReferee.git</developerConnection>
+  </scm>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  
+  <repositories>
+    <repository>
+      <id>sk89q-mvn2</id>
+      <url>http://mvn2.sk89q.com/repo</url>
+    </repository>
+    <repository>
+      <id>bukkit-repo</id>
+      <url>http://repo.bukkit.org/content/groups/public/</url>
+    </repository>
+  </repositories>
+
+  <dependencies>    
+    <!-- Required component -->
+    <dependency>
+      <groupId>com.sk89q</groupId>
+      <artifactId>worldedit</artifactId>
+      <version>5.3</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.spout</groupId>
+          <artifactId>spoutapi</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- Bukkit -->
+    <dependency>
+      <groupId>org.bukkit</groupId>
+      <artifactId>bukkit</artifactId>
+      <version>1.2.5-R1.2</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>
