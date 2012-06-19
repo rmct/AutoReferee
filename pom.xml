@@ -1,6 +1,7 @@
 <!--
-Maven build file for AutoReferee
-Copyright (c) 2012 RMCT <http://www.reddit.com/r/mctourney>
+  Maven build file for AutoReferee
+  Copyright (c) 2012 RMCT <http://www.reddit.com/r/mctourney>
+  Licensed under GPL 3.0
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -52,6 +53,12 @@ Copyright (c) 2012 RMCT <http://www.reddit.com/r/mctourney>
     </dependency>
     
     <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.0.1</version>
+    </dependency>
+    
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
@@ -82,5 +89,29 @@ Copyright (c) 2012 RMCT <http://www.reddit.com/r/mctourney>
         </includes>
       </resource>
     </resources>
+    
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <minimizeJar>true</minimizeJar>
+              <artifactSet>
+                <includes>
+                  <include>commons-io:commons-io</include>
+                </includes>
+              </artifactSet>
+            </configuration>           
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
 </project>
