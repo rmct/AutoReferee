@@ -46,7 +46,7 @@ class AutoRefTeam
 	public static AutoRefTeam fromMap(Map<String, Object> conf, AutoRefMatch match)
 	{
 		AutoRefTeam newTeam = new AutoRefTeam();
-		newTeam.color = ChatColor.WHITE;
+		newTeam.color = ChatColor.RESET;
 		newTeam.maxSize = 0;
 		
 		newTeam.match = match;
@@ -134,5 +134,5 @@ class AutoRefTeam
 	}
 
 	public String getName()
-	{ return color + name + ChatColor.WHITE; }
+	{ return color + name + ChatColor.RESET; }
 }

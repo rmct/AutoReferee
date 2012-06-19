@@ -108,7 +108,7 @@ public class AutoReferee extends JavaPlugin
 	{
 		// if not on a team, don't modify the player name
 		AutoRefTeam team = getTeam(player);
-		if (team == null) return ChatColor.WHITE;
+		if (team == null) return ChatColor.RESET;
 
 		// get color of the team they are on
 		return team.color;
@@ -369,7 +369,7 @@ public class AutoReferee extends JavaPlugin
 	{
 		// color a player's name with its team's color
 		ChatColor color = getTeamColor(player);
-		return color + player.getName() + ChatColor.WHITE;
+		return color + player.getName() + ChatColor.RESET;
 	}
 
 	public void joinTeam(OfflinePlayer player, AutoRefTeam t)
