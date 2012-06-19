@@ -41,6 +41,9 @@ public class AutoRefMatch
 	public File worldConfigFile;
 	public FileConfiguration worldConfig;
 	
+	// basic variables loaded from file
+	public boolean allowFriendlyFire = false;
+	
 	// task that starts the match
 	public MatchStarter matchStarter = null;
 
@@ -84,6 +87,9 @@ public class AutoRefMatch
 		// get the time the match is set to start
 		if (worldConfig.isString("match.start-time"))
 			startTime = AutoReferee.parseTimeString(worldConfig.getString("match.start-time"));
+		
+		// get the extra settings cached
+		allowFriendlyFire = worldConfig.getBoolean("match.allow-ff", false);
 	}
 
 	void saveWorldConfiguration() 

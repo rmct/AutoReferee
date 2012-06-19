@@ -94,7 +94,8 @@ public class PlayerVersusPlayerListener implements Listener
 	public void damageDealt(EntityDamageEvent event)
 	{
 		World world = event.getEntity().getWorld();
-		//AutoRefMatch match = plugin.matches.get(world.getUID());
+		AutoRefMatch match = plugin.matches.get(world.getUID());
+		if (match == null) return;
 		
 		if ((event instanceof EntityDamageByEntityEvent))
 		{
@@ -121,8 +122,8 @@ public class PlayerVersusPlayerListener implements Listener
 			if (d1team == null && d2team == null) return;
 
 			// if the attacked isn't on a team, or same team (w/ no FF), cancel
-			event.setCancelled(d2team == null || (d1team == d2team && 
-				plugin.getMapConfig(world).getBoolean("match.allow-ff")));
+			event.setCancelled(d2team == null ||
+				(d1team == d2team && match.allowFriendlyFire));
 
 			if (event.isCancelled()) return;
 		}
