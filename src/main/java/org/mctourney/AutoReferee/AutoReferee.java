@@ -277,8 +277,6 @@ public class AutoReferee extends JavaPlugin
 		if (matches.containsKey(w.getUID()) ||
 			!AutoRefMatch.isCompatible(w)) return;
 		
-		log.info("Processing new world: " + w.getUID().toString());
-		
 		AutoRefMatch match = new AutoRefMatch(w);
 		matches.put(w.getUID(), match);
 	}
@@ -327,6 +325,9 @@ public class AutoReferee extends JavaPlugin
 		
 		return true;
 	}
+	
+	public boolean createMatchWorld(String worldName) throws IOException
+	{ return createMatchWorld(worldName, null); }
 	
 	private static long recursiveCRC32(File file) throws IOException
 	{
@@ -439,7 +440,6 @@ public class AutoReferee extends JavaPlugin
 
 			if (args.length >= 2 && "load".equalsIgnoreCase(args[0])) try
 			{
-				createMatchWorld("Memento Mori", null);
 				return true;
 			}
 			catch (Exception e) { return false; }
