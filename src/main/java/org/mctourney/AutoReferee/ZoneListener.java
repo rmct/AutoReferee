@@ -15,7 +15,6 @@ import org.bukkit.event.player.*;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.plugin.Plugin;
 
-import org.mctourney.AutoReferee.AutoReferee.*;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 
 public class ZoneListener implements Listener 
@@ -157,12 +156,12 @@ public class ZoneListener implements Listener
 				
 				// determine who owns the region that the clicked block is in
 				Block block = event.getClickedBlock();
-				Set<Team> owns = plugin.locationOwnership(block.getLocation());
+				Set<AutoRefTeam> owns = plugin.locationOwnership(block.getLocation());
 				
 				// if the region is owned by only one team, make it one of their
 				// win conditions (otherwise, we may need to configure by hand)
 				if (owns.size() == 1)
-					plugin.addWinCondition(block, (Team)owns.toArray()[0]);
+					plugin.addWinCondition(block, (AutoRefTeam)owns.toArray()[0]);
 				
 				break;
 		}

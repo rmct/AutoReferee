@@ -10,7 +10,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 import org.bukkit.plugin.Plugin;
 
-import org.mctourney.AutoReferee.AutoReferee.*;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 
 public class TeamListener implements Listener 
@@ -28,7 +27,7 @@ public class TeamListener implements Listener
 		event.setFormat("<" + plugin.colorPlayer(player) + "> " + event.getMessage());
 
 		// if we are currently playing and speaker on a team, restrict recipients
-		Team t = plugin.getTeam(player);
+		AutoRefTeam t = plugin.getTeam(player);
 		if (plugin.getState(player.getWorld()) == eMatchStatus.PLAYING && t != null)
 		{
 			Iterator<Player> iter = event.getRecipients().iterator();
@@ -36,7 +35,7 @@ public class TeamListener implements Listener
 			{
 				// if listener is on a team, and its not the same team as the
 				// speaker, remove them from the recipients list
-				Team ot = plugin.getTeam(iter.next());
+				AutoRefTeam ot = plugin.getTeam(iter.next());
 				if (ot != null && ot != t) iter.remove();
 			}
 		}
@@ -68,7 +67,7 @@ public class TeamListener implements Listener
 	public void playerJoin(PlayerJoinEvent event)
 	{
 		Player player = event.getPlayer();
-		Team team = plugin.getTeam(player);
+		AutoRefTeam team = plugin.getTeam(player);
 		
 		if (team != null) event.setJoinMessage(event.getJoinMessage()
 			.replace(player.getName(), plugin.colorPlayer(player)));

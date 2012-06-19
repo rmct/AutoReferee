@@ -8,7 +8,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
 import org.bukkit.plugin.Plugin;
 
-import org.mctourney.AutoReferee.AutoReferee.*;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 
 public class PlayerVersusPlayerListener implements Listener
@@ -117,8 +116,8 @@ public class PlayerVersusPlayerListener implements Listener
 			}
 			
 			// get team affiliations of these players (maybe null)
-			Team d1team = plugin.getTeam(damager);
-			Team d2team = plugin.getTeam(damaged);
+			AutoRefTeam d1team = plugin.getTeam(damager);
+			AutoRefTeam d2team = plugin.getTeam(damaged);
 			if (d1team == null && d2team == null) return;
 
 			// if the attacked isn't on a team, or same team (w/ no FF), cancel

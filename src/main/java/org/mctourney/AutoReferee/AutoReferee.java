@@ -23,14 +23,13 @@ import org.bukkit.block.Block;
 import org.bukkit.command.*;
 import org.bukkit.configuration.file.*;
 import org.bukkit.entity.*;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import org.mctourney.AutoReferee.util.*;
 
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
@@ -40,98 +39,6 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 
 public class AutoReferee extends JavaPlugin
 {
-	public static class AutoRefMatch
-	{
-		// world this match is taking place on
-		public World world;
-		
-		// time to set the world to at the start of the match
-		public long startTime = 8000L;
-		
-		// status of the match
-		public eMatchStatus currentState = eMatchStatus.NONE;
-		
-		// teams participating in the match
-		public Set<Team> teams = null;
-		
-		// region defined as the "start" region (safe zone)
-		public CuboidRegion startRegion = null;
-		
-		// name of the match
-		public String matchName = "Scheduled Match";
-		
-		// configuration information for the world
-		public File worldConfigFile;
-		public FileConfiguration worldConfig;
-		
-		// task that starts the match
-		public MatchStarter matchStarter = null;
-
-		public AutoRefMatch(World world)
-		{
-			this.world = world;
-			loadWorldConfiguration();
-		}
-		
-		public static boolean isCompatible(World w)
-		{ return new File(w.getWorldFolder(), "autoreferee.yml").exists(); }
-
-		public static AutoReferee plugin;
-		
-		@SuppressWarnings("unchecked")
-		private void loadWorldConfiguration()
-		{
-			// file stream and configuration object (located in world folder)
-			worldConfigFile = new File(world.getWorldFolder(), "autoreferee.yml");
-			worldConfig = YamlConfiguration.loadConfiguration(worldConfigFile);
-
-			// load up our default values file, so that we can have a base to work with
-			InputStream defConfigStream = plugin.getResource("defaults/map.yml");
-			if (defConfigStream != null) worldConfig.setDefaults(
-				YamlConfiguration.loadConfiguration(defConfigStream));
-
-			// make sure any defaults get copied into the map file
-			worldConfig.options().copyDefaults(true);
-			worldConfig.options().header(plugin.getDescription().getFullName());
-			worldConfig.options().copyHeader(false);
-
-			teams = new HashSet<Team>();
-			
-			List<Map<?, ?>> cfgTeams = worldConfig.getMapList("match.teams");
-			for (Map<?, ?> map : cfgTeams) teams.add(Team.fromMap((Map<String, Object>) map, this));
-			
-			// get the start region (safe for both teams, no pvp allowed)
-			if (worldConfig.isString("match.start-region"))
-				startRegion = coordsToRegion(worldConfig.getString("match.start-region"));
-			
-			// get the time the match is set to start
-			if (worldConfig.isString("match.start-time"))
-				startTime = parseTimeString(worldConfig.getString("match.start-time"));
-		}
-
-		private void saveWorldConfiguration() 
-		{
-			// if there is no configuration object or file, nothin' doin'...
-			if (worldConfigFile == null || worldConfig == null) return;
-
-			// create and save the team data list
-			List<Map<String, Object>> teamData = new ArrayList<Map<String, Object>>();
-			for (Team t : teams) teamData.add(t.toMap());
-			worldConfig.set("match.teams", teamData);
-			
-			// save the start region
-			if (startRegion != null)
-				worldConfig.set("match.start-region", regionToCoords(startRegion));
-
-			// save the configuration file back to the original filename
-			try { worldConfig.save(worldConfigFile); }
-
-			// log errors, report which world did not save
-			catch (java.io.IOException e)
-			{ plugin.log.info("Could not save world config: " + world.getName()); }
-		}
-	}
-	
 	public Map<UUID, AutoRefMatch> matches = null;
 
 	// default port for a "master" server
@@ -161,7 +68,7 @@ public class AutoReferee extends JavaPlugin
 	}
 
 	// a map from a player to info about why they were killed
-	protected Map<String, Team> playerTeam;
+	protected Map<String, AutoRefTeam> playerTeam;
 	public Map<String, AutoRefPlayer> playerData;
 	public Map<String, eAction> actionTaken;
 
@@ -174,24 +81,24 @@ public class AutoReferee extends JavaPlugin
 	public static void worldBroadcast(World world, String msg)
 	{ for (Player p : world.getPlayers()) p.sendMessage(msg); }
 
-	public Team teamNameLookup(AutoRefMatch m, String name)
+	public AutoRefTeam teamNameLookup(AutoRefMatch m, String name)
 	{
 		// if passed a null match, return null
 		if (m == null) return null;
 		
 		// if there is no match on that world, forget it
 		// is this team name a word?
-		for (Team t : m.teams)
+		for (AutoRefTeam t : m.teams)
 			if (t.match(name)) return t;
 
 		// no team matches the name provided
 		return null;
 	}
 
-	public Team teamNameLookup(World w, String name)
+	public AutoRefTeam teamNameLookup(World w, String name)
 	{ return teamNameLookup(matches.get(w.getUID()), name);	}
 
-	public Team getTeam(OfflinePlayer player)
+	public AutoRefTeam getTeam(OfflinePlayer player)
 	{
 		// get team from player
 		return playerTeam.get(player.getName());
@@ -200,7 +107,7 @@ public class AutoReferee extends JavaPlugin
 	public ChatColor getTeamColor(OfflinePlayer player)
 	{
 		// if not on a team, don't modify the player name
-		Team team = getTeam(player);
+		AutoRefTeam team = getTeam(player);
 		if (team == null) return ChatColor.WHITE;
 
 		// get color of the team they are on
@@ -210,7 +117,7 @@ public class AutoReferee extends JavaPlugin
 	public Location getPlayerSpawn(OfflinePlayer player)
 	{
 		// get player's team
-		Team team = getTeam(player);
+		AutoRefTeam team = getTeam(player);
 
 		// otherwise, return the appropriate location
 		return team == null ? null : team.spawn;
@@ -280,7 +187,7 @@ public class AutoReferee extends JavaPlugin
 		pm.registerEvents(worldListener, this);
 
 		matches = new HashMap<UUID, AutoRefMatch>();
-		playerTeam = new HashMap<String, Team>();
+		playerTeam = new HashMap<String, AutoRefTeam>();
 		actionTaken = new HashMap<String, eAction>();
 
 		// global configuration object (can't be changed, so don't save onDisable)
@@ -393,13 +300,13 @@ public class AutoReferee extends JavaPlugin
 		return (WorldEditPlugin) plugin;
 	}
 	
-	public void prepareTeam(Team t, List<String> players)
+	public void prepareTeam(AutoRefTeam t, List<String> players)
 	{
 		// null team not allowed
 		if (t == null) return;
 
 		// delete all elements from the map for team 't'
-		Iterator<Map.Entry<String, Team>> i = playerTeam.entrySet().iterator();
+		Iterator<Map.Entry<String, AutoRefTeam>> i = playerTeam.entrySet().iterator();
 		while (i.hasNext()) if (t.equals(i.next().getValue())) i.remove();
 
 		// insert all players into their list
@@ -413,7 +320,7 @@ public class AutoReferee extends JavaPlugin
 		return color + player.getName() + ChatColor.WHITE;
 	}
 
-	public void joinTeam(OfflinePlayer player, Team t)
+	public void joinTeam(OfflinePlayer player, AutoRefTeam t)
 	{
 		// null team not allowed, and quit if they are already on this team
 		if (t == null || t == getTeam(player)) return;
@@ -434,7 +341,7 @@ public class AutoReferee extends JavaPlugin
 
 	public void leaveTeam(OfflinePlayer player)
 	{
-		Team t = getTeam(player);
+		AutoRefTeam t = getTeam(player);
 		if (t == null) return;
 
 		playerTeam.remove(player);
@@ -521,12 +428,12 @@ public class AutoReferee extends JavaPlugin
 
 			if (args.length >= 1 && "zones".equalsIgnoreCase(args[0]) && m != null)
 			{
-				Set<Team> lookupTeams = null;
+				Set<AutoRefTeam> lookupTeams = null;
 
 				// if a team has been specified as an argument
 				if (args.length > 1)
 				{
-					Team t = teamNameLookup(m, args[1]);
+					AutoRefTeam t = teamNameLookup(m, args[1]);
 					if (t == null)
 					{
 						// team name is invalid. let the player know
@@ -534,7 +441,7 @@ public class AutoReferee extends JavaPlugin
 						return true;
 					}
 
-					lookupTeams = new HashSet<Team>();
+					lookupTeams = new HashSet<AutoRefTeam>();
 					lookupTeams.add(t);
 				}
 
@@ -545,7 +452,7 @@ public class AutoReferee extends JavaPlugin
 				if (lookupTeams == null) return false;
 
 				// for all the teams being looked up
-				for (Team team : lookupTeams)
+				for (AutoRefTeam team : lookupTeams)
 				{
 					// print team-name header
 					sender.sendMessage(team.getName() + "'s Regions:");
@@ -575,7 +482,7 @@ public class AutoReferee extends JavaPlugin
 			}
 			
 			// START is a sentinel Team object representing the start region
-			Team t, START = new Team();
+			AutoRefTeam t, START = new AutoRefTeam();
 			t = "start".equals(args[0]) ? START : teamNameLookup(m, args[0]);
 			
 			if (t == null)
@@ -615,7 +522,7 @@ public class AutoReferee extends JavaPlugin
 
 		if ("jointeam".equalsIgnoreCase(cmd.getName()) && m != null && !onlineMode)
 		{
-			Team t = args.length > 0 ? teamNameLookup(m, args[0]) : getArbitraryTeam(m);
+			AutoRefTeam t = args.length > 0 ? teamNameLookup(m, args[0]) : getArbitraryTeam(m);
 			if (t == null)
 			{
 				// team name is invalid. let the player know
@@ -691,11 +598,11 @@ public class AutoReferee extends JavaPlugin
 				fw.println("\t" + pname + " killed " + kill.getKey() + " " 
 					+ kill.getValue().toString() + " time(s).");
 			
-			for (Map.Entry<DamageCause, Integer> death : data.deaths.entrySet())
+			for (Map.Entry<AutoRefPlayer.DamageCause, Integer> death : data.deaths.entrySet())
 				fw.println("\t" + death.getKey().toString() + " killed " + pname 
 					+ " " + death.getValue().toString() + " time(s).");
 			
-			for (Map.Entry<DamageCause, Integer> damage : data.damage.entrySet())
+			for (Map.Entry<AutoRefPlayer.DamageCause, Integer> damage : data.damage.entrySet())
 				fw.println("\t" + damage.getKey().toString() + " caused " + pname 
 					+ " " + damage.getValue().toString() + " damage.");
 		}
@@ -703,17 +610,17 @@ public class AutoReferee extends JavaPlugin
 		fw.close();
 	}
 
-	private Team getArbitraryTeam(AutoRefMatch m)
+	private AutoRefTeam getArbitraryTeam(AutoRefMatch m)
 	{
 		// minimum size of any one team, and an array to hold valid teams
 		int minsize = Integer.MAX_VALUE;
-		List<Team> vteams = new ArrayList<Team>();
+		List<AutoRefTeam> vteams = new ArrayList<AutoRefTeam>();
 		
 		// get the number of players on each team: Map<TeamNumber -> NumPlayers>
-		Map<Team,Integer> count = new HashMap<Team,Integer>();
-		for (Team t : m.teams) count.put(t, 0);
+		Map<AutoRefTeam,Integer> count = new HashMap<AutoRefTeam,Integer>();
+		for (AutoRefTeam t : m.teams) count.put(t, 0);
 		
-		for (Team t : playerTeam.values())
+		for (AutoRefTeam t : playerTeam.values())
 			if (count.containsKey(t)) count.put(t, count.get(t)+1);
 		
 		// determine the size of the smallest team
@@ -721,14 +628,14 @@ public class AutoReferee extends JavaPlugin
 			if (c < minsize) minsize = c.intValue();
 
 		// make a list of all teams with this size
-		for (Map.Entry<Team,Integer> e : count.entrySet())
+		for (Map.Entry<AutoRefTeam,Integer> e : count.entrySet())
 			if (e.getValue().intValue() == minsize) vteams.add(e.getKey());
 
 		// return a random element from this list
 		return vteams.get(new Random().nextInt(vteams.size()));
 	}
 
-	public void addWinCondition(Block block, Team team)
+	public void addWinCondition(Block block, AutoRefTeam team)
 	{
 		if (block == null || team == null) return;
 		
@@ -757,7 +664,7 @@ public class AutoReferee extends JavaPlugin
 		// in a match if this function is being called
 		
 		AutoRefMatch m = matches.get(world.getUID());
-		if (m != null) for (Team t : m.teams)
+		if (m != null) for (AutoRefTeam t : m.teams)
 		{
 			// if there are no win conditions set, skip this team
 			if (t.winconditions.size() == 0) continue;
@@ -806,14 +713,14 @@ public class AutoReferee extends JavaPlugin
 		);
 	}
 	
-	public Set<Team> locationOwnership(Location loc)
+	public Set<AutoRefTeam> locationOwnership(Location loc)
 	{
 		// teams who own this location
-		Set<Team> owners = new HashSet<Team>();
+		Set<AutoRefTeam> owners = new HashSet<AutoRefTeam>();
 
 		// check all safe regions for that team
 		AutoRefMatch m = matches.get(loc.getWorld().getUID());
-		if (m != null) for (Team team : m.teams)
+		if (m != null) for (AutoRefTeam team : m.teams)
 			for (CuboidRegion reg : team.regions)
 		{
 			// if the location is inside the region, add it
@@ -842,7 +749,7 @@ public class AutoReferee extends JavaPlugin
 	public double distanceToClosestRegion(Player p)
 	{ return distanceToClosestRegion(getTeam(p), p.getLocation()); }
 	
-	public double distanceToClosestRegion(Team team, Location loc)
+	public double distanceToClosestRegion(AutoRefTeam team, Location loc)
 	{
 		if (team == null) return 0;
 		double distance = distanceToRegion(loc, getStartRegion(loc.getWorld()));
@@ -858,7 +765,7 @@ public class AutoReferee extends JavaPlugin
 	public Boolean checkPosition(Player player, Location loc)
 	{
 		// get the player's team (if they are not on a team, ignore them)
-		Team team = getTeam(player);
+		AutoRefTeam team = getTeam(player);
 		if (team == null) return true;
 		
 		// is the player's location owned by the player's team?
@@ -873,7 +780,7 @@ public class AutoReferee extends JavaPlugin
 		if (m.world.getPlayers().size() == 0)
 		{
 			// set all the teams to not ready and status as waiting
-			for ( Team t : m.teams ) t.ready = false;
+			for ( AutoRefTeam t : m.teams ) t.ready = false;
 			m.currentState = eMatchStatus.WAITING; return;
 		}
 		
@@ -895,7 +802,7 @@ public class AutoReferee extends JavaPlugin
 	public void checkTeamsReady(World w) 
 	{ checkTeamsReady(matches.get(w.getUID())); }
 	
-	private class MatchStarter implements Runnable
+	class MatchStarter implements Runnable
 	{
 		public int task = -1;
 		private int secs = 3;
@@ -1052,307 +959,6 @@ public class AutoReferee extends JavaPlugin
 		// save region as "minX minY minZ maxX maxY maxZ"
 		Vector mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
 		return vectorToCoords(mn) +	":" + vectorToCoords(mx);
-	}
-
-	static class BlockData
-	{
-		public Material mat;
-		public byte data;
-
-		// material value and metadata (-1 = no metadata)
-		public BlockData(Material m, byte d) { mat = m; data = d; }
-
-		@Override public int hashCode()
-		{ return mat.hashCode() ^ new Byte(data).hashCode(); }
-
-		@Override public boolean equals(Object o)
-		{
-			// if the object is a mismatched type, its not equal
-			if (o == null || !(o instanceof BlockData)) return false;
-			
-			// otherwise, check that the data is all equivalent
-			BlockData ob = (BlockData) o; 
-			return ob.mat.equals(mat) && ob.data == data;
-		}
-
-		// does this block data match the given block?
-		public boolean matches(Block b)
-		{
-			// matches if materials and metadata are same
-			return (b != null && b.getType().equals(mat)
-				&& (data == -1 || data == b.getData()));
-		}
-
-		@Override public String toString()
-		{
-			String s = Integer.toString(mat.ordinal());
-			return data == -1 ? s : (s + "," + Integer.toString(data));
-		}
-		
-		static BlockData fromString(String s)
-		{
-			// format: mat[,data]
-			String[] units = s.split(",", 2);
-			
-			try 
-			{
-				// parse out the material (and potentially meta-data)
-				Material mat = Material.getMaterial(Integer.parseInt(units[0]));
-				byte data = units.length < 2 ? -1 : Byte.parseByte(units[1]);
-				return new BlockData(mat, data);
-			}
-			
-			// if there is a problem with parsing a material, assume the worst
-			catch (NumberFormatException e) { return null; }
-		}
-		
-		// generate block data object from a CraftBlock
-		static BlockData fromBlock(Block b)
-		{ return new BlockData(b.getType(), b.getData()); }
-	}
-
-	static class AutoRefPlayer
-	{
-		// stored player reference
-		protected Player player;
-		
-		// number of times this player has killed other players
-		public Map<String, Integer> kills;
-		public int totalKills = 0;
-
-		// number of times player has died and damage taken
-		public Map<DamageCause, Integer> deaths;
-		public Map<DamageCause, Integer> damage;
-		public int totalDeaths = 0;
-		
-		// constructor for simply setting up the variables
-		public AutoRefPlayer(Player p)
-		{
-			kills = new HashMap<String, Integer>();
-			deaths = new HashMap<DamageCause, Integer>();
-			damage = new HashMap<DamageCause, Integer>();
-			player = p;
-		}
-		
-		// register that we just received this damage
-		public void registerDamage(EntityDamageEvent e)
-		{
-			// get the last damage cause, and mark that as the cause of the damage
-			DamageCause dc = DamageCause.fromDamageEvent(e);
-			damage.put(dc, e.getDamage() + (damage.containsKey(dc) ? damage.get(dc) : 0));
-		}
-		
-		// register that we just died
-		public void registerDeath(PlayerDeathEvent e)
-		{
-			// get the last damage cause, and mark that as the cause of one death
-			DamageCause dc = DamageCause.fromDamageEvent(e.getEntity().getLastDamageCause());
-			deaths.put(dc, 1 + (deaths.containsKey(dc) ? deaths.get(dc) : 0));
-			++totalDeaths;
-		}
-		
-		// register that we killed the Player who fired this event
-		public void registerKill(PlayerDeathEvent e)
-		{
-			String pname = e.getEntity().getName();
-			kills.put(pname, 1 + (kills.containsKey(pname) ? kills.get(pname) : 0));
-			++totalKills;
-		}
-	}
-	
-	static class DamageCause
-	{
-		// cause of damage, primary value for damage cause
-		public EntityDamageEvent.DamageCause damageCause;
-		
-		// extra information to accompany damage cause
-		public Object payload = null;
-		
-		// generate a hashcode
-		@Override public int hashCode()
-		{ return (payload == null ? 0 : payload.hashCode()) ^ 
-			damageCause.hashCode(); }
-
-		@Override public boolean equals(Object o)
-		{ return hashCode() == o.hashCode(); }
-		
-		public DamageCause(EntityDamageEvent.DamageCause c, Object p)
-		{ damageCause = c; payload = p; }
-		
-		public static DamageCause fromDamageEvent(EntityDamageEvent e)
-		{
-			EntityDamageEvent.DamageCause c = e.getCause();
-			Object p = null;
-			
-			EntityDamageByEntityEvent edEvent = null;
-			if ((e instanceof EntityDamageByEntityEvent))
-				edEvent = (EntityDamageByEntityEvent) e;
-			
-			switch (c)
-			{
-				case ENTITY_ATTACK:
-				case ENTITY_EXPLOSION:
-					// get the entity that did the killing
-					if (edEvent != null)
-						p = edEvent.getDamager();
-					break;
-
-				case PROJECTILE:
-				case MAGIC:
-					// get the shooter from the projectile
-					if (edEvent != null && edEvent.getDamager() != null)
-						p = ((Projectile) edEvent.getDamager()).getShooter();
-					
-					// change damage cause to ENTITY_ATTACK
-					//c = EntityDamageEvent.DamageCause.ENTITY_ATTACK;
-					break;
-			}
-			
-			if ((p instanceof Monster))
-				p = ((Monster) p).getType();
-			return new DamageCause(c, p);
-		}
-		
-		@Override public String toString()
-		{
-			String damager = null;
-			
-			// generate a 'damager' string for more information
-			if ((payload instanceof Player))
-				damager = ((Player) payload).getName();
-			if ((payload instanceof EntityType))
-				damager = ((EntityType) payload).name();
-			
-			// return a string representing this damage cause
-			return (damager == null ? "" : (damager + "'s "))
-				+ damageCause.name();
-		}
-	}
-
-	static class Team
-	{
-		// reference to the match
-		public AutoRefMatch match = null;
-		
-		// team's name, may or may not be color-related
-		public String name = null;
-	
-		// color to use for members of this team
-		public ChatColor color = null;
-	
-		// maximum size of a team (for manual mode only)
-		public int maxSize = 0;
-		
-		// is this team ready to play?
-		public boolean ready = false;
-	
-		// list of regions
-		public List<CuboidRegion> regions = null;
-		
-		// location of custom spawn
-		public Location spawn;
-	
-		// win-conditions, locations mapped to expected block data
-		public Map<Location, BlockData> winconditions;
-	
-		// does a provided search string match this team?
-		public boolean match(String needle)
-		{ return -1 != name.toLowerCase().indexOf(needle.toLowerCase()); }
-	
-		// a factory for processing config maps
-		@SuppressWarnings("unchecked")
-		public static Team fromMap(Map<String, Object> conf, AutoRefMatch match)
-		{
-			Team newTeam = new Team();
-			newTeam.color = ChatColor.WHITE;
-			newTeam.maxSize = 0;
-			
-			newTeam.match = match;
-			World w = match.world;
-	
-			// get name from map
-			if (!conf.containsKey("name")) return null;
-			newTeam.name = (String) conf.get("name");
-	
-			// get the color from the map
-			if (conf.containsKey("color"))
-			{
-				String clr = ((String) conf.get("color")).toUpperCase();
-				try { newTeam.color = ChatColor.valueOf(clr); }
-				catch (IllegalArgumentException e) { }
-			}
-	
-			// get the max size from the map
-			if (conf.containsKey("maxsize"))
-			{
-				Integer msz = (Integer) conf.get("maxsize");
-				if (msz != null) newTeam.maxSize = msz.intValue();
-			}
-	
-			newTeam.regions = new ArrayList<CuboidRegion>();
-			if (conf.containsKey("regions"))
-			{
-				List<String> coordstrings = (List<String>) conf.get("regions");
-				if (coordstrings != null) for (String coords : coordstrings)
-				{
-					CuboidRegion creg = AutoReferee.coordsToRegion(coords);
-					if (creg != null) newTeam.regions.add(creg);
-				}
-			}
-	
-			newTeam.winconditions = new HashMap<Location, AutoReferee.BlockData>();
-			if (conf.containsKey("win-condition"))
-			{
-				List<String> wclist = (List<String>) conf.get("win-condition");
-				if (wclist != null) for (String wc : wclist)
-				{
-					String[] wcparts = wc.split(":");
-					
-					Vector v = AutoReferee.coordsToVector(wcparts[0]);
-					Location loc = new Location(w, v.getBlockX(), v.getBlockY(), v.getBlockZ());
-					newTeam.winconditions.put(loc, AutoReferee.BlockData.fromString(wcparts[1]));
-				}
-			}
-	
-			return newTeam;
-		}
-	
-		public Map<String, Object> toMap()
-		{
-			Map<String, Object> map = new HashMap<String, Object>();
-	
-			// add name to the map
-			map.put("name", name);
-	
-			// add string representation of the color
-			map.put("color", color.name());
-	
-			// add the maximum team size
-			map.put("maxsize", new Integer(maxSize));
-			
-			// convert the win conditions to strings
-			List<String> wcond = new ArrayList<String>();
-			for (Map.Entry<Location, AutoReferee.BlockData> e : winconditions.entrySet())
-				wcond.add(AutoReferee.vectorToCoords(AutoReferee.locationToBlockVector(e.getKey())) 
-					+ ":" + e.getValue());
-	
-			// add the win condition list
-			map.put("win-condition", wcond);
-	
-			// convert regions to strings
-			List<String> regstr = new ArrayList<String>();
-			for (CuboidRegion reg : regions)
-				regstr.add(AutoReferee.regionToCoords(reg));
-	
-			// add the region list
-			map.put("regions", regstr);
-	
-			// return the map
-			return map;
-		}
-	
-		public String getName()
-		{ return color + name + ChatColor.WHITE; }
 	}
 }
 
