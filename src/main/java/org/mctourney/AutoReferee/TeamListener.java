@@ -69,20 +69,6 @@ public class TeamListener implements Listener
 	}
 
 	@EventHandler
-	public void playerJoin(PlayerJoinEvent event)
-	{
-		Player player = event.getPlayer();
-		AutoRefTeam team = plugin.getTeam(player);
-		
-		if (team != null) event.setJoinMessage(event.getJoinMessage()
-			.replace(player.getName(), plugin.colorPlayer(player)));
-		plugin.checkTeamsReady(player.getWorld());
-		
-		// color the name appropriately
-		player.setPlayerListName(plugin.colorPlayer(player));
-	}
-
-	@EventHandler
 	public void playerQuit(PlayerQuitEvent event)
 	{
 	}

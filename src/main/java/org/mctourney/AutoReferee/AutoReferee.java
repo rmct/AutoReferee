@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
@@ -281,14 +282,18 @@ public class AutoReferee extends JavaPlugin
 		matches.put(w.getUID(), match);
 	}
 	
-	public boolean createMatchWorld(String worldName, Long checksum) throws IOException
+	public static String normalizeMapName(String m)
+	{ return m == null ? null : m.toLowerCase().replaceAll("[^0-9a-z]+", ""); }
+
+	private File getMapFolder(String worldName, Long checksum) throws IOException
 	{
 		// assume worldName exists
-		if (worldName == null) return false;
+		if (worldName == null) return null;
+		worldName = normalizeMapName(worldName);
 		
 		// if there is no map library, quit
-		File mapLibrary = new File("maps"), mapMaster = null;
-		if (!mapLibrary.exists()) return false;
+		File mapLibrary = new File("maps");
+		if (!mapLibrary.exists()) return null;
 		
 		// find the map being requested
 		for (File f : mapLibrary.listFiles())
@@ -302,25 +307,32 @@ public class AutoReferee extends JavaPlugin
 			
 			// check the map name, if it matches, this is the one we want
 			FileConfiguration cfg = YamlConfiguration.loadConfiguration(cfgFile);
-			if (!worldName.equals(cfg.getString("map.name"))) continue;
+			String cMapName = normalizeMapName(cfg.getString("map.name"));
+			if (!worldName.equals(cMapName)) continue;
 			
 			// compute the checksum of the directory, make sure it matches
 			if (checksum != null &&	recursiveCRC32(f) != checksum) continue;
 			
 			// this is the map we want
-			mapMaster = f; break;
+			return f;
 		}
 		
-		// no such map was found, sorry...
-		if (mapMaster == null) return false;
+		// no map matches
+		return null;
+	}
+	
+	public boolean createMatchWorld(String worldName, Long checksum) throws IOException
+	{
+		// get the folder associated with this world name
+		File mapFolder = getMapFolder(worldName, checksum);
+		if (mapFolder == null) return false;
 		
 		// create the temporary directory where this map will be
-		File destWorld = File.createTempFile("world-", "", new File("."));
-		if (!destWorld.delete() && !destWorld.mkdir())
-			throw new IOException("Could not make temporary directory.");
+		File destWorld = new File("world-" + Long.toHexString(new Date().getTime()));
+		if (!destWorld.mkdir()) throw new IOException("Could not make temporary directory.");
 		
 		// copy the files over and fire up the world
-		FileUtils.copyDirectory(mapMaster, destWorld);
+		FileUtils.copyDirectory(mapFolder, destWorld);
 		getServer().createWorld(WorldCreator.name(destWorld.getName()));
 		
 		return true;
@@ -439,7 +451,30 @@ public class AutoReferee extends JavaPlugin
 			}
 
 			if (args.length >= 2 && "load".equalsIgnoreCase(args[0])) try
-			{
+			{	
+				// get generate a map name from the args
+				String mapName = StringUtils.join(args, " ", 1, args.length);
+				
+				// if there is a map folder, print the CRC
+				if (createMatchWorld(mapName, null))
+					log.info("New world created for [" + mapName + "]");
+				else log.info("No such map: [" + mapName + "]");
+				
+				return true;
+			}
+			catch (Exception e) { return false; }
+
+			if (args.length >= 2 && args[0].toLowerCase().startsWith("crc")) try
+			{	
+				// get map folder from the name provided
+				String mapName = StringUtils.join(args, " ", 1, args.length);
+				File mapFolder = getMapFolder(mapName, null);
+				
+				// if there is a map folder, print the CRC
+				if (null != mapFolder) log.info("CRC32 for [" + mapName + 
+					"]: " + Long.toHexString(recursiveCRC32(mapFolder)));
+				else log.info("No such map: [" + mapName + "]");
+				
 				return true;
 			}
 			catch (Exception e) { return false; }

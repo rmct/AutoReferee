@@ -69,6 +69,11 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+    	<groupId>org.apache.commons</groupId>
+    	<artifactId>commons-lang3</artifactId>
+    	<version>3.1</version>
+    </dependency>
   </dependencies>
   
   <build>
@@ -110,6 +115,7 @@
               <minimizeJar>true</minimizeJar>
               <artifactSet>
                 <includes>
+                  <include>org.apache.commons:commons-lang3</include>
                   <include>commons-io:commons-io</include>
                 </includes>
               </artifactSet>
