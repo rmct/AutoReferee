@@ -12,11 +12,16 @@ softdepend:
 commands:
   autoref:
     description: AutoReferee configuration
-    permission: autoreferee.configure
-    usage: /<command> init|save|stats|wincond|zones
+    permission: autoreferee.admin
+    usage: /<command> [action] [args...]
+    permission-message: Only admins have access to AutoReferee configuration.
   zone:
     description: Set a region's ownership
-    permission: autoreferee.configure
+    permission: autoreferee.admin
+    usage: /<command> <teamname>|start
+  zones:
+    description: Show a list of all zones
+    permission: autoreferee.player
     usage: /<command> <teamname>|start
   jointeam:
     description: Set player's team
@@ -30,3 +35,22 @@ commands:
     description: Prepare world for match
     permission: autoreferee.referee
     usage: /<command>
+
+permissions:
+  autoreferee.*:
+    description: Access to all AutoReferee features
+    children:
+      autoreferee.admin: true
+  autoreferee.admin:
+    description: AutoReferee administrators
+    default: op
+    children:
+      autoreferee.referee: true
+  autoreferee.referee:
+    description: AutoReferee referees
+    default: false
+    children:
+      autoreferee.player: true
+  autoreferee.player:
+    description: AutoReferee players
+    default: true

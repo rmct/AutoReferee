@@ -1,6 +1,7 @@
 package org.mctourney.AutoReferee;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -8,9 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import org.mctourney.AutoReferee.AutoReferee.MatchStarter;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
@@ -42,6 +45,7 @@ public class AutoRefMatch
 	public FileConfiguration worldConfig;
 	
 	// basic variables loaded from file
+	public String mapName = null;
 	public boolean allowFriendlyFire = false;
 	
 	// task that starts the match
@@ -82,17 +86,18 @@ public class AutoRefMatch
 		
 		// get the start region (safe for both teams, no pvp allowed)
 		if (worldConfig.isString("match.start-region"))
-			startRegion = AutoReferee.coordsToRegion(worldConfig.getString("match.start-region"));
+			startRegion = CuboidRegion.fromCoords(worldConfig.getString("match.start-region"));
 		
 		// get the time the match is set to start
 		if (worldConfig.isString("match.start-time"))
 			startTime = AutoReferee.parseTimeString(worldConfig.getString("match.start-time"));
 		
 		// get the extra settings cached
+		mapName = worldConfig.getString("map.name", "<Untitled>");
 		allowFriendlyFire = worldConfig.getBoolean("match.allow-ff", false);
 	}
 
-	void saveWorldConfiguration() 
+	public void saveWorldConfiguration() 
 	{
 		// if there is no configuration object or file, nothin' doin'...
 		if (worldConfigFile == null || worldConfig == null) return;
@@ -104,7 +109,7 @@ public class AutoRefMatch
 		
 		// save the start region
 		if (startRegion != null)
-			worldConfig.set("match.start-region", AutoReferee.regionToCoords(startRegion));
+			worldConfig.set("match.start-region", startRegion.toCoords());
 
 		// save the configuration file back to the original filename
 		try { worldConfig.save(worldConfigFile); }
@@ -112,5 +117,72 @@ public class AutoRefMatch
 		// log errors, report which world did not save
 		catch (java.io.IOException e)
 		{ plugin.log.info("Could not save world config: " + world.getName()); }
+	}
+
+	public void broadcast(String msg)
+	{ for (Player p : world.getPlayers()) p.sendMessage(msg); }
+
+	public static String normalizeMapName(String m)
+	{ return m == null ? null : m.toLowerCase().replaceAll("[^0-9a-z]+", ""); }
+
+	public static File getMapFolder(String worldName, Long checksum) throws IOException
+	{
+		// assume worldName exists
+		if (worldName == null) return null;
+		worldName = AutoRefMatch.normalizeMapName(worldName);
+		
+		// if there is no map library, quit
+		File mapLibrary = getMapLibrary();
+		if (!mapLibrary.exists()) return null;
+		
+		// find the map being requested
+		for (File f : mapLibrary.listFiles())
+		{
+			// skip non-directories
+			if (!f.isDirectory()) continue;
+			
+			// if it doesn't have an autoreferee config file
+			File cfgFile = new File(f, AutoReferee.CFG_FILENAME);
+			if (!cfgFile.exists()) continue;
+			
+			// check the map name, if it matches, this is the one we want
+			FileConfiguration cfg = YamlConfiguration.loadConfiguration(cfgFile);
+			String cMapName = AutoRefMatch.normalizeMapName(cfg.getString("map.name"));
+			if (!worldName.equals(cMapName)) continue;
+			
+			// compute the checksum of the directory, make sure it matches
+			if (checksum != null &&	recursiveCRC32(f) != checksum) continue;
+			
+			// this is the map we want
+			return f;
+		}
+		
+		// no map matches
+		return null;
+	}
+
+	public static long recursiveCRC32(File file) throws IOException
+	{
+		if (file.isDirectory())
+		{
+			long checksum = 0L;
+			for (File f : file.listFiles())
+				checksum ^= recursiveCRC32(f);
+			return checksum;
+		}
+		else return FileUtils.checksumCRC32(file);
+	}
+
+	public static File getMapLibrary()
+	{
+		// maps library is a folder called `maps/`
+		File m = new File("maps");
+		
+		// if it doesn't exist, make the directory
+		if (m.exists() && !m.isDirectory()) m.delete();
+		if (!m.exists()) m.mkdir();
+		
+		// return the maps library
+		return m;
 	}
 }

@@ -77,7 +77,7 @@ class AutoRefTeam
 			List<String> coordstrings = (List<String>) conf.get("regions");
 			if (coordstrings != null) for (String coords : coordstrings)
 			{
-				CuboidRegion creg = AutoReferee.coordsToRegion(coords);
+				CuboidRegion creg = CuboidRegion.fromCoords(coords);
 				if (creg != null) newTeam.regions.add(creg);
 			}
 		}
@@ -90,7 +90,7 @@ class AutoRefTeam
 			{
 				String[] wcparts = wc.split(":");
 				
-				BlockVector3 v = new BlockVector3(AutoReferee.coordsToVector(wcparts[0]));
+				BlockVector3 v = new BlockVector3(Vector3.fromCoords(wcparts[0]));
 				newTeam.winconditions.put(new Location(w, v.x, v.y, v.z), 
 					BlockData.fromString(wcparts[1]));
 			}
@@ -115,7 +115,7 @@ class AutoRefTeam
 		// convert the win conditions to strings
 		List<String> wcond = new ArrayList<String>();
 		for (Map.Entry<Location, BlockData> e : winconditions.entrySet())
-			wcond.add(AutoReferee.vectorToCoords(AutoReferee.locationToBlockVector(e.getKey())) 
+			wcond.add(BlockVector3.fromLocation(e.getKey()).toCoords() 
 				+ ":" + e.getValue());
 
 		// add the win condition list
@@ -123,8 +123,7 @@ class AutoRefTeam
 
 		// convert regions to strings
 		List<String> regstr = new ArrayList<String>();
-		for (CuboidRegion reg : regions)
-			regstr.add(AutoReferee.regionToCoords(reg));
+		for (CuboidRegion reg : regions) regstr.add(reg.toCoords());
 
 		// add the region list
 		map.put("regions", regstr);

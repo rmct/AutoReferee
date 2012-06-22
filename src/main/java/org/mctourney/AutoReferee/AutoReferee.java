@@ -13,10 +13,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang.StringUtils;
 
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -40,6 +42,8 @@ import com.sk89q.worldedit.bukkit.selections.*;
 
 public class AutoReferee extends JavaPlugin
 {
+	public static final String CFG_FILENAME = "autoreferee.yml";
+
 	public Map<UUID, AutoRefMatch> matches = null;
 
 	// default port for a "master" server
@@ -69,7 +73,7 @@ public class AutoReferee extends JavaPlugin
 	}
 
 	// a map from a player to info about why they were killed
-	protected Map<String, AutoRefTeam> playerTeam;
+	public Map<String, AutoRefTeam> playerTeam;
 	public Map<String, AutoRefPlayer> playerData;
 	public Map<String, eAction> actionTaken;
 
@@ -79,9 +83,6 @@ public class AutoReferee extends JavaPlugin
 		return m == null ? null : m.matchName;
 	}
 	
-	public static void worldBroadcast(World world, String msg)
-	{ for (Player p : world.getPlayers()) p.sendMessage(msg); }
-
 	public AutoRefTeam teamNameLookup(AutoRefMatch m, String name)
 	{
 		// if passed a null match, return null
@@ -142,7 +143,7 @@ public class AutoReferee extends JavaPlugin
 	public FileConfiguration getMapConfig(World w)
 	{
 		AutoRefMatch m = matches.get(w.getUID());
-		return m == null ? null : m.worldConfig;
+		return m == null ? new YamlConfiguration() : m.worldConfig;
 	}
 
 	private boolean checkPlugins(PluginManager pm)
@@ -212,9 +213,7 @@ public class AutoReferee extends JavaPlugin
 		onlineMode = (conn != null);
 		
 		// setup the map library folder
-		File mapLibrary = new File("maps");
-		if (mapLibrary.exists() && !mapLibrary.isDirectory()) mapLibrary.delete();
-		if (!mapLibrary.exists()) mapLibrary.mkdir();
+		AutoRefMatch.getMapLibrary();
 		
 		// process initial world(s), just in case
 		for ( World w : getServer().getWorlds() ) processWorld(w);
@@ -282,50 +281,11 @@ public class AutoReferee extends JavaPlugin
 		matches.put(w.getUID(), match);
 	}
 	
-	public static String normalizeMapName(String m)
-	{ return m == null ? null : m.toLowerCase().replaceAll("[^0-9a-z]+", ""); }
-
-	private File getMapFolder(String worldName, Long checksum) throws IOException
-	{
-		// assume worldName exists
-		if (worldName == null) return null;
-		worldName = normalizeMapName(worldName);
-		
-		// if there is no map library, quit
-		File mapLibrary = new File("maps");
-		if (!mapLibrary.exists()) return null;
-		
-		// find the map being requested
-		for (File f : mapLibrary.listFiles())
-		{
-			// skip non-directories
-			if (!f.isDirectory()) continue;
-			
-			// if it doesn't have an autoreferee config file
-			File cfgFile = new File(f, "autoreferee.yml");
-			if (!cfgFile.exists()) continue;
-			
-			// check the map name, if it matches, this is the one we want
-			FileConfiguration cfg = YamlConfiguration.loadConfiguration(cfgFile);
-			String cMapName = normalizeMapName(cfg.getString("map.name"));
-			if (!worldName.equals(cMapName)) continue;
-			
-			// compute the checksum of the directory, make sure it matches
-			if (checksum != null &&	recursiveCRC32(f) != checksum) continue;
-			
-			// this is the map we want
-			return f;
-		}
-		
-		// no map matches
-		return null;
-	}
-	
-	public boolean createMatchWorld(String worldName, Long checksum) throws IOException
+	public World createMatchWorld(String worldName, Long checksum) throws IOException
 	{
 		// get the folder associated with this world name
-		File mapFolder = getMapFolder(worldName, checksum);
-		if (mapFolder == null) return false;
+		File mapFolder = AutoRefMatch.getMapFolder(worldName, checksum);
+		if (mapFolder == null) return null;
 		
 		// create the temporary directory where this map will be
 		File destWorld = new File("world-" + Long.toHexString(new Date().getTime()));
@@ -333,26 +293,12 @@ public class AutoReferee extends JavaPlugin
 		
 		// copy the files over and fire up the world
 		FileUtils.copyDirectory(mapFolder, destWorld);
-		getServer().createWorld(WorldCreator.name(destWorld.getName()));
-		
-		return true;
+		return getServer().createWorld(WorldCreator.name(destWorld.getName()));
 	}
 	
-	public boolean createMatchWorld(String worldName) throws IOException
+	public World createMatchWorld(String worldName) throws IOException
 	{ return createMatchWorld(worldName, null); }
 	
-	private static long recursiveCRC32(File file) throws IOException
-	{
-		if (file.isDirectory())
-		{
-			long checksum = 0L;
-			for (File f : file.listFiles())
-				checksum ^= recursiveCRC32(f);
-			return checksum;
-		}
-		else return FileUtils.checksumCRC32(file);
-	}
-
 	private WorldEditPlugin getWorldEdit()
 	{
 		Plugin plugin = getServer().getPluginManager().getPlugin("WorldEdit");
@@ -409,7 +355,7 @@ public class AutoReferee extends JavaPlugin
 		if (t == null) return;
 
 		playerTeam.remove(player);
-		getServer().broadcastMessage(colorPlayer(player) + 
+		t.match.broadcast(colorPlayer(player) + 
 			" has left " + t.getName());
 		
 		if (player.isOnline() && (player instanceof Player))
@@ -418,8 +364,9 @@ public class AutoReferee extends JavaPlugin
 
 	public boolean playerWhitelisted(Player player)
 	{
-		return player.isOp() || player.hasPermission("autoreferee.referee") ||
-			playerTeam.containsKey(player.getName());
+		if (player.hasPermission("autoreferee.referee")) return true;
+		if (player.hasPermission("autoreferee.admin")) return true;
+		return player.isOp() || playerTeam.containsKey(player.getName());
 	}
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
@@ -454,27 +401,61 @@ public class AutoReferee extends JavaPlugin
 			{	
 				// get generate a map name from the args
 				String mapName = StringUtils.join(args, " ", 1, args.length);
+				World mw = createMatchWorld(mapName, null);
 				
 				// if there is a map folder, print the CRC
-				if (createMatchWorld(mapName, null))
-					log.info("New world created for [" + mapName + "]");
-				else log.info("No such map: [" + mapName + "]");
+				if (mw == null) log.info("No such map: [" + mapName + "]");
+				else
+				{
+					log.info("World created for [" + mapName + "]");
+					player.teleport(mw.getSpawnLocation());
+				}
 				
 				return true;
 			}
 			catch (Exception e) { return false; }
 
 			if (args.length >= 2 && args[0].toLowerCase().startsWith("crc")) try
-			{	
+			{
 				// get map folder from the name provided
 				String mapName = StringUtils.join(args, " ", 1, args.length);
-				File mapFolder = getMapFolder(mapName, null);
+				File mapFolder = AutoRefMatch.getMapFolder(mapName, null);
 				
 				// if there is a map folder, print the CRC
-				if (null != mapFolder) log.info("CRC32 for [" + mapName + 
-					"]: " + Long.toHexString(recursiveCRC32(mapFolder)));
-				else log.info("No such map: [" + mapName + "]");
+				if (null != mapFolder) 
+				{
+					long checksum = AutoRefMatch.recursiveCRC32(mapFolder);
+					File cfgFile = new File(mapFolder, CFG_FILENAME);
+					if (!cfgFile.exists()) return true;
+					
+					mapName = YamlConfiguration.loadConfiguration(cfgFile)
+						.getString("map.name", "<Untitled>");
+					log.info(mapName + ": [" + Long.toHexString(checksum) + "]");
+				}
+				else log.info("No such map: " + mapName);
 				
+				return true;
+			}
+			catch (Exception e) { return false; }
+
+			if (args.length >= 1 && "archive".equalsIgnoreCase(args[0]) && m != null) try
+			{
+				// save the world and configuration first
+				world.save();
+				m.saveWorldConfiguration();
+				
+				File mapLibrary = AutoRefMatch.getMapLibrary();
+				if (!mapLibrary.exists()) return true;
+				
+				// archive folder is "<username>-<timestamp>/"
+				String folderName = player.getName() + "-" + 
+					Long.toHexString(new Date().getTime());
+				File archiveFolder = new File(mapLibrary, folderName);
+				if (!archiveFolder.exists()) archiveFolder.mkdir();
+				
+				archiveMapData(world.getWorldFolder(), archiveFolder);
+				long checksum = AutoRefMatch.recursiveCRC32(archiveFolder);
+				log.info(m.mapName + ": [" + Long.toHexString(checksum) + "]");
 				return true;
 			}
 			catch (Exception e) { return false; }
@@ -518,51 +499,51 @@ public class AutoReferee extends JavaPlugin
 					return true;
 				}
 			}
+		}
 
-			if (args.length >= 1 && "zones".equalsIgnoreCase(args[0]) && m != null)
+		if ("zones".equalsIgnoreCase(cmd.getName()) && m != null)
+		{
+			Set<AutoRefTeam> lookupTeams = null;
+
+			// if a team has been specified as an argument
+			if (args.length > 1)
 			{
-				Set<AutoRefTeam> lookupTeams = null;
-
-				// if a team has been specified as an argument
-				if (args.length > 1)
+				AutoRefTeam t = teamNameLookup(m, args[1]);
+				if (t == null)
 				{
-					AutoRefTeam t = teamNameLookup(m, args[1]);
-					if (t == null)
-					{
-						// team name is invalid. let the player know
-						sender.sendMessage("Not a valid team: " + args[1]);
-						return true;
-					}
-
-					lookupTeams = new HashSet<AutoRefTeam>();
-					lookupTeams.add(t);
+					// team name is invalid. let the player know
+					sender.sendMessage("Not a valid team: " + args[1]);
+					return true;
 				}
 
-				// otherwise, just print all the teams
-				else lookupTeams = m.teams;
-				
-				// sanity check...
-				if (lookupTeams == null) return false;
-
-				// for all the teams being looked up
-				for (AutoRefTeam team : lookupTeams)
-				{
-					// print team-name header
-					sender.sendMessage(team.getName() + "'s Regions:");
-
-					// print all the regions owned by this team
-					if (team.regions.size() > 0) for (CuboidRegion reg : team.regions)
-					{
-						Vector3 mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
-						sender.sendMessage("  (" + vectorToCoords(mn) + ") => (" + vectorToCoords(mx) + ")");
-					}
-
-					// if there are no regions, print None
-					else sender.sendMessage("  <None>");
-				}
-
-				return true;
+				lookupTeams = new HashSet<AutoRefTeam>();
+				lookupTeams.add(t);
 			}
+
+			// otherwise, just print all the teams
+			else lookupTeams = m.teams;
+			
+			// sanity check...
+			if (lookupTeams == null) return false;
+
+			// for all the teams being looked up
+			for (AutoRefTeam team : lookupTeams)
+			{
+				// print team-name header
+				sender.sendMessage(team.getName() + "'s Regions:");
+
+				// print all the regions owned by this team
+				if (team.regions.size() > 0) for (CuboidRegion reg : team.regions)
+				{
+					Vector3 mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
+					sender.sendMessage("  (" + mn.toCoords() + ") => (" + mx.toCoords() + ")");
+				}
+
+				// if there are no regions, print None
+				else sender.sendMessage("  <None>");
+			}
+
+			return true;
 		}
 		
 		if ("zone".equalsIgnoreCase(cmd.getName()) && m != null)
@@ -666,6 +647,25 @@ public class AutoReferee extends JavaPlugin
 		return false;
 	}
 
+	private void archiveMapData(File worldFolder, File archiveFolder) throws IOException
+	{
+		// (1) copy the configuration file:
+		FileUtils.copyFileToDirectory(
+			new File(worldFolder, CFG_FILENAME), archiveFolder);
+		
+		// (2) copy the level.dat:
+		FileUtils.copyFileToDirectory(
+			new File(worldFolder, "level.dat"), archiveFolder);
+		
+		// (3) copy the region folder (only the .mca files):
+		FileUtils.copyDirectory(new File(worldFolder, "region"), 
+			new File(archiveFolder, "region"), 
+			FileFilterUtils.suffixFileFilter(".mca"));
+		
+		// (4) make an empty data folder:
+		new File(archiveFolder, "data").mkdir();
+	}
+
 	private File getLogDirectory()
 	{
 		// create the log directory if it doesn't exist
@@ -755,7 +755,7 @@ public class AutoReferee extends JavaPlugin
 		
 		// broadcast the update using bname (a reconstructed name for the block)
 		getServer().broadcastMessage(bname + " is now a win condition for " + 
-			team.getName() + " @ " + vectorToCoords(locationToBlockVector(block.getLocation())));
+			team.getName() + " @ " + BlockVector3.fromLocation(block.getLocation()).toCoords());
 	}
 
 	public void checkWinConditions(World world, Location aloc)
@@ -784,8 +784,12 @@ public class AutoReferee extends JavaPlugin
 				// announce the victory and set the match to completed
 				getServer().broadcastMessage(t.getName() + " Wins!");
 				for (Player p : world.getPlayers())
+				{
 					if (playerTeam.containsKey(p.getName()))
 						p.teleport(world.getSpawnLocation());
+					p.setGameMode(GameMode.CREATIVE);
+				}
+				
 				m.currentState = eMatchStatus.COMPLETED;
 			}
 		}
@@ -924,15 +928,15 @@ public class AutoReferee extends JavaPlugin
 				
 				// setup world to go!
 				match.currentState = eMatchStatus.PLAYING;
-				worldBroadcast(match.world, ">>> " + ChatColor.GREEN + "GO!");
+				match.broadcast(">>> " + ChatColor.GREEN + "GO!");
 				
 				// cancel the task
 				getServer().getScheduler().cancelTask(task);
 			}
 			
 			// report number of seconds remaining
-			else worldBroadcast(match.world, ">>> " + 
-				ChatColor.GREEN + Integer.toString(secs--) + "...");
+			else match.broadcast(">>> " + ChatColor.GREEN + 
+				Integer.toString(secs--) + "...");
 		}
 	}
 	
@@ -966,7 +970,7 @@ public class AutoReferee extends JavaPlugin
 		}
 		
 		// announce the match starting in X seconds
-		worldBroadcast(w, "Match will begin in "
+		match.broadcast("Match will begin in "
 			+ Integer.toString(READY_SECONDS) + " seconds.");
 		
 		// cancel any previous match-start task
@@ -1021,48 +1025,6 @@ public class AutoReferee extends JavaPlugin
 		
 		// default time: 6am
 		return 0L;
-	}
-	
-	public static Vector3 locationToVector(Location loc)
-	{ return new Vector3(loc.getX(), loc.getY(), loc.getZ()); }
-	
-	public static BlockVector3 locationToBlockVector(Location loc)
-	{ return new BlockVector3(locationToVector(loc)); }
-	
-	public static Vector3 coordsToVector(String coords)
-	{
-		try
-		{
-			String[] values = coords.split(",");
-			return new Vector3( // vector 1
-				Integer.parseInt(values[0]),
-				Integer.parseInt(values[1]),
-				Integer.parseInt(values[2]));
-		}
-		catch (Exception e) { return null; }
-	}
-
-	public static CuboidRegion coordsToRegion(String coords)
-	{
-		// split the region coordinates into two corners
-		String[] values = coords.split(":");
-		
-		// generate the region by the two vectors
-		Vector3 v1 = coordsToVector(values[0]), v2 = coordsToVector(values[1]);
-		return (v1 == null || v2 == null ? null : new CuboidRegion(v1, v2));
-	}
-	
-	public static String vectorToCoords(Vector3 v)
-	{ return vectorToCoords(new BlockVector3(v)); }
-	
-	public static String vectorToCoords(BlockVector3 v)
-	{ return v.x + "," + v.y + "," + v.z; }
-
-	public static String regionToCoords(CuboidRegion reg)
-	{
-		// save region as "minX minY minZ maxX maxY maxZ"
-		Vector3 mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
-		return vectorToCoords(mn) +	":" + vectorToCoords(mx);
 	}
 }
 

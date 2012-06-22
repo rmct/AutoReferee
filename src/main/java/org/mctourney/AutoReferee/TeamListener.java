@@ -62,14 +62,23 @@ public class TeamListener implements Listener
 	@EventHandler
 	public void playerLogin(PlayerLoginEvent event)
 	{
+		Player player = event.getPlayer();
+		
 		// if they should be whitelisted, let them in, otherwise, block them
-		if (plugin.playerWhitelisted(event.getPlayer())) event.allow();
+		if (plugin.playerWhitelisted(player)) event.allow();
 		else event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, 
 			"You are not scheduled for a match on this server.");
+		
+		// if this player needs to be in a specific world, put them there
+		AutoRefTeam team = plugin.getTeam(player);
+		if (team != null && team.match != null && team.match.world != null)
+			player.teleport(team.match.world.getSpawnLocation());
 	}
 
 	@EventHandler
 	public void playerQuit(PlayerQuitEvent event)
 	{
+		// re-check world ready
+		plugin.checkTeamsReady(event.getPlayer().getWorld());
 	}
 }
