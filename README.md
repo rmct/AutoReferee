@@ -1,3 +1,5 @@
+![Travis Build Status for AutoReferee](https://secure.travis-ci.org/rmct/AutoReferee.png?branch=master)
+
 For _Bukkit R5+_
 
 **AutoReferee**, in cooperation with [_RMCT_](http://www.reddit.com/r/mctourney) and _Major League Mining_: A plugin to automatically referee Race-for-Wool (and other competitive Minecraft) matches. Automatically handles whitelists, teams, regions, end conditions, and optionally interfaces with a central server to report match statistics and results.
