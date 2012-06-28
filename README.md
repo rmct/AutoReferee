@@ -1,4 +1,4 @@
-![Travis Build Status for AutoReferee](https://secure.travis-ci.org/rmct/AutoReferee.png?branch=master)
+[![Travis Build Status for AutoReferee](https://secure.travis-ci.org/rmct/AutoReferee.png?branch=master)](http://travis-ci.org/#!/rmct/AutoReferee)
 
 For _Bukkit R5+_
 
