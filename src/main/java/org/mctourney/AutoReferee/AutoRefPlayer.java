@@ -1,6 +1,5 @@
 package org.mctourney.AutoReferee;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.entity.EntityType;
@@ -10,6 +9,8 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+
+import com.google.common.collect.Maps;
 
 class AutoRefPlayer
 {
@@ -97,9 +98,9 @@ class AutoRefPlayer
 	// constructor for simply setting up the variables
 	public AutoRefPlayer(Player p)
 	{
-		kills = new HashMap<String, Integer>();
-		deaths = new HashMap<AutoRefPlayer.DamageCause, Integer>();
-		damage = new HashMap<AutoRefPlayer.DamageCause, Integer>();
+		kills = Maps.newHashMap();
+		deaths = Maps.newHashMap();
+		damage = Maps.newHashMap();
 		player = p;
 	}
 	

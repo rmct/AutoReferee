@@ -17,7 +17,6 @@ import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang.StringUtils;
 
 import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -25,7 +24,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
-import org.bukkit.block.Block;
 import org.bukkit.command.*;
 import org.bukkit.configuration.file.*;
 import org.bukkit.entity.*;
@@ -37,6 +35,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import org.mctourney.AutoReferee.util.*;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.*;
 
@@ -49,8 +49,9 @@ public class AutoReferee extends JavaPlugin
 	// default port for a "master" server
 	public static final int DEFAULT_SERVER_PORT = 43760;
 
-	// number of seconds for a match to be readied
+	// number of seconds for each phase
 	public static final int READY_SECONDS = 15;
+	public static final int COMPLETED_SECONDS = 180;
 	
 	public enum eAction {
 		ENTERED_VOIDLANE,
@@ -61,6 +62,7 @@ public class AutoReferee extends JavaPlugin
 	};
 	
 	public Logger log = null;
+	public World lobby = null;
 	
 	// is this plugin in online mode?
 	public boolean onlineMode = false;
@@ -91,7 +93,7 @@ public class AutoReferee extends JavaPlugin
 		// if there is no match on that world, forget it
 		// is this team name a word?
 		for (AutoRefTeam t : m.teams)
-			if (t.match(name)) return t;
+			if (t.matches(name)) return t;
 
 		// no team matches the name provided
 		return null;
@@ -169,9 +171,9 @@ public class AutoReferee extends JavaPlugin
 	}
 
 	public void onEnable()
-	{
+	{		
 		AutoRefMatch.plugin = this;
-		matches = new HashMap<UUID, AutoRefMatch>();
+		matches = Maps.newHashMap();
 		
 		log = this.getLogger();
 		PluginManager pm = getServer().getPluginManager();
@@ -188,8 +190,8 @@ public class AutoReferee extends JavaPlugin
 		// events related to worlds
 		pm.registerEvents(new WorldListener(this), this);
 
-		playerTeam = new HashMap<String, AutoRefTeam>();
-		actionTaken = new HashMap<String, eAction>();
+		playerTeam = Maps.newHashMap();
+		actionTaken = Maps.newHashMap();
 
 		// global configuration object (can't be changed, so don't save onDisable)
 		InputStream configInputStream = getResource("defaults/config.yml");
@@ -198,12 +200,16 @@ public class AutoReferee extends JavaPlugin
 		getConfig().options().copyDefaults(true); saveConfig();
 
 		// get server list, and attempt to determine whether we are in online mode
-		List<?> serverList = getConfig().getList("server-mode.server-list", new ArrayList<String>());
+		List<?> serverList = getConfig().getList("server-mode.server-list", Lists.newArrayList());
 		onlineMode = !(serverList.size() == 0 || !getConfig().getBoolean("server-mode.online", true));
 
 		// wrap up, debug to follow this message
 		if (onlineMode) onlineMode = checkPlugins(pm);
 		log.info("AutoReferee loaded successfully.");
+		
+		// save the "lobby" world as a sort of drop-zone for discharged players
+		lobby = !getConfig().isString("lobby-world") ? getServer().getWorlds().get(0)
+			: getServer().getWorld(getConfig().getString("lobby-world"));
 
 		// connect to server, or let the server operator know to set up the match manually
 		if (!makeServerConnection(serverList))
@@ -269,6 +275,15 @@ public class AutoReferee extends JavaPlugin
 		// if there is a socket connection, close it
 		if (conn != null) conn.close();
 		log.info("AutoReferee disabled.");
+	}
+	
+	public void playerDone(Player p)
+	{
+		// if the server is in online mode, remove them
+		if (onlineMode) p.kickPlayer("Thank you for playing!");
+		
+		// otherwise, take them back to the lobby
+		else p.teleport(lobby.getSpawnLocation());
 	}
 
 	public void processWorld(World w)
@@ -604,7 +619,7 @@ public class AutoReferee extends JavaPlugin
 
 		if ("jointeam".equalsIgnoreCase(cmd.getName()) && m != null && !onlineMode)
 		{
-			AutoRefTeam t = args.length > 0 ? teamNameLookup(m, args[0]) : getArbitraryTeam(m);
+			AutoRefTeam t = args.length > 0 ? teamNameLookup(m, args[0]) : m.getArbitraryTeam();
 			if (t == null)
 			{
 				// team name is invalid. let the player know
@@ -710,54 +725,32 @@ public class AutoReferee extends JavaPlugin
 		
 		fw.close();
 	}
-
-	private AutoRefTeam getArbitraryTeam(AutoRefMatch m)
+	
+	private void reportStatistics(AutoRefMatch m)
 	{
-		// minimum size of any one team, and an array to hold valid teams
-		int minsize = Integer.MAX_VALUE;
-		List<AutoRefTeam> vteams = new ArrayList<AutoRefTeam>();
-		
-		// get the number of players on each team: Map<TeamNumber -> NumPlayers>
-		Map<AutoRefTeam,Integer> count = new HashMap<AutoRefTeam,Integer>();
-		for (AutoRefTeam t : m.teams) count.put(t, 0);
-		
-		for (AutoRefTeam t : playerTeam.values())
-			if (count.containsKey(t)) count.put(t, count.get(t)+1);
-		
-		// determine the size of the smallest team
-		for (Integer c : count.values())
-			if (c < minsize) minsize = c.intValue();
-
-		// make a list of all teams with this size
-		for (Map.Entry<AutoRefTeam,Integer> e : count.entrySet())
-			if (e.getValue().intValue() == minsize) vteams.add(e.getKey());
-
-		// return a random element from this list
-		return vteams.get(new Random().nextInt(vteams.size()));
+		// TODO
 	}
 
-	public void addWinCondition(Block block, AutoRefTeam team)
+	// helper class for terminating world, synchronous task
+	class MatchTerminator implements Runnable
 	{
-		if (block == null || team == null) return;
-		
-		// add the block data to the win-condition listing
-		BlockData bd = BlockData.fromBlock(block);
-		team.winconditions.put(block.getLocation(), bd);
-		
-		String bname = bd.mat.name();
-		switch (block.getType())
+		private AutoRefMatch match;
+
+		public MatchTerminator(AutoRefMatch m)
 		{
-		case WOOL:
-			DyeColor color = DyeColor.getByData(bd.data);
-			bname = color.name() + " " + bname;
-			break;
+			match = m;
 		}
 		
-		// broadcast the update using bname (a reconstructed name for the block)
-		getServer().broadcastMessage(bname + " is now a win condition for " + 
-			team.getName() + " @ " + BlockVector3.fromLocation(block.getLocation()).toCoords());
+		public void run()
+		{
+			// first, handle all the players
+			for (Player p : match.world.getPlayers()) playerDone(p);
+			
+			// then, cleanup the match object (swallow exceptions)
+			try { match.destroy(); } catch (Exception e) {  };
+		}
 	}
-
+	
 	public void checkWinConditions(World world, Location aloc)
 	{
 		// this code is only called in BlockPlaceEvent and BlockBreakEvent when
@@ -768,11 +761,11 @@ public class AutoReferee extends JavaPlugin
 		if (m != null) for (AutoRefTeam t : m.teams)
 		{
 			// if there are no win conditions set, skip this team
-			if (t.winconditions.size() == 0) continue;
+			if (t.winConditions.size() == 0) continue;
 			
 			// check all win condition blocks (AND together)
 			boolean win = true;
-			for (Map.Entry<Location, BlockData> pair : t.winconditions.entrySet())
+			for (Map.Entry<Location, BlockData> pair : t.winConditions.entrySet())
 			{
 				BlockData bd = pair.getValue();
 				win &= pair.getKey().equals(aloc) ? bd.mat == Material.AIR : 
@@ -782,7 +775,7 @@ public class AutoReferee extends JavaPlugin
 			if (win)
 			{
 				// announce the victory and set the match to completed
-				getServer().broadcastMessage(t.getName() + " Wins!");
+				m.broadcast(t.getName() + " Wins!");
 				for (Player p : world.getPlayers())
 				{
 					if (playerTeam.containsKey(p.getName()))
@@ -791,10 +784,17 @@ public class AutoReferee extends JavaPlugin
 				}
 				
 				m.currentState = eMatchStatus.COMPLETED;
+				reportStatistics(m);
+				
+				int termDelay = getConfig().getInt(
+					"server-mode.delay-seconds.completed", COMPLETED_SECONDS);
+				
+				getServer().getScheduler().scheduleSyncDelayedTask(
+					this, new MatchTerminator(m), termDelay * 20L);
 			}
 		}
 	}
-	
+
 	// wrote this dumb helper function because `distanceToRegion` was looking ugly...
 	public static double multimax( double base, double ... more )
 	{ for ( double x : more ) base = Math.max(base, x); return base; }
@@ -907,6 +907,7 @@ public class AutoReferee extends JavaPlugin
 	public void checkTeamsReady(World w) 
 	{ checkTeamsReady(matches.get(w.getUID())); }
 	
+	// helper class for starting match, synchronous task
 	class MatchStarter implements Runnable
 	{
 		public int task = -1;
@@ -927,8 +928,8 @@ public class AutoReferee extends JavaPlugin
 				match.world.setTime(match.startTime);
 				
 				// setup world to go!
-				match.currentState = eMatchStatus.PLAYING;
 				match.broadcast(">>> " + ChatColor.GREEN + "GO!");
+				match.start();
 				
 				// cancel the task
 				getServer().getScheduler().cancelTask(task);
@@ -957,7 +958,7 @@ public class AutoReferee extends JavaPlugin
 		w.setWeatherDuration(Integer.MAX_VALUE);
 		
 		// prepare all players for the match
-		playerData = new HashMap<String, AutoRefPlayer>();
+		playerData = Maps.newHashMap();
 		for (Player p : w.getPlayers())
 			if (playerTeam.containsKey(p.getName())) preparePlayer(p);
 		
@@ -969,9 +970,12 @@ public class AutoReferee extends JavaPlugin
 				pv.showPlayer(ps); else pv.hidePlayer(ps);
 		}
 		
+		int readyDelay = getConfig().getInt(
+			"server-mode.delay-seconds.ready", READY_SECONDS);
+		
 		// announce the match starting in X seconds
 		match.broadcast("Match will begin in "
-			+ Integer.toString(READY_SECONDS) + " seconds.");
+			+ Integer.toString(readyDelay) + " seconds.");
 		
 		// cancel any previous match-start task
 		if (match.matchStarter != null && match.matchStarter.task != -1)
@@ -980,7 +984,7 @@ public class AutoReferee extends JavaPlugin
 		// schedule the task to announce and prepare the match
 		match.matchStarter = new MatchStarter(match);
 		match.matchStarter.task = getServer().getScheduler().scheduleSyncRepeatingTask(
-				this, match.matchStarter, READY_SECONDS * 20L, 20L);
+				this, match.matchStarter, readyDelay * 20L, 20L);
 	}
 	
 	public void preparePlayer(Player p)

@@ -1,17 +1,22 @@
 package org.mctourney.AutoReferee;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.material.Colorable;
 
 import org.mctourney.AutoReferee.util.*;
 
-class AutoRefTeam
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+public class AutoRefTeam
 {
 	// reference to the match
 	public AutoRefMatch match = null;
@@ -35,10 +40,11 @@ class AutoRefTeam
 	public Location spawn;
 
 	// win-conditions, locations mapped to expected block data
-	public Map<Location, BlockData> winconditions;
+	public Map<Location, BlockData> winConditions;
+	public Map<BlockData, Inventory> targetChests;
 
 	// does a provided search string match this team?
-	public boolean match(String needle)
+	public boolean matches(String needle)
 	{ return -1 != name.toLowerCase().indexOf(needle.toLowerCase()); }
 
 	// a factory for processing config maps
@@ -71,7 +77,7 @@ class AutoRefTeam
 			if (msz != null) newTeam.maxSize = msz.intValue();
 		}
 
-		newTeam.regions = new ArrayList<CuboidRegion>();
+		newTeam.regions = Lists.newArrayList();
 		if (conf.containsKey("regions"))
 		{
 			List<String> coordstrings = (List<String>) conf.get("regions");
@@ -82,7 +88,8 @@ class AutoRefTeam
 			}
 		}
 
-		newTeam.winconditions = new HashMap<Location, BlockData>();
+		newTeam.winConditions = Maps.newHashMap();
+		newTeam.targetChests = Maps.newHashMap();
 		if (conf.containsKey("win-condition"))
 		{
 			List<String> wclist = (List<String>) conf.get("win-condition");
@@ -91,7 +98,7 @@ class AutoRefTeam
 				String[] wcparts = wc.split(":");
 				
 				BlockVector3 v = new BlockVector3(Vector3.fromCoords(wcparts[0]));
-				newTeam.winconditions.put(new Location(w, v.x, v.y, v.z), 
+				newTeam.winConditions.put(new Location(w, v.x, v.y, v.z), 
 					BlockData.fromString(wcparts[1]));
 			}
 		}
@@ -101,7 +108,7 @@ class AutoRefTeam
 
 	public Map<String, Object> toMap()
 	{
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = Maps.newHashMap();
 
 		// add name to the map
 		map.put("name", name);
@@ -113,8 +120,8 @@ class AutoRefTeam
 		map.put("maxsize", new Integer(maxSize));
 		
 		// convert the win conditions to strings
-		List<String> wcond = new ArrayList<String>();
-		for (Map.Entry<Location, BlockData> e : winconditions.entrySet())
+		List<String> wcond = Lists.newArrayList();
+		for (Map.Entry<Location, BlockData> e : winConditions.entrySet())
 			wcond.add(BlockVector3.fromLocation(e.getKey()).toCoords() 
 				+ ":" + e.getValue());
 
@@ -122,7 +129,7 @@ class AutoRefTeam
 		map.put("win-condition", wcond);
 
 		// convert regions to strings
-		List<String> regstr = new ArrayList<String>();
+		List<String> regstr = Lists.newArrayList();
 		for (CuboidRegion reg : regions) regstr.add(reg.toCoords());
 
 		// add the region list
@@ -134,4 +141,25 @@ class AutoRefTeam
 
 	public String getName()
 	{ return color + name + ChatColor.RESET; }
+
+	public void addWinCondition(Block block)
+	{
+		// if the block is null, forget it
+		if (block == null) return;
+		
+		// add the block data to the win-condition listing
+		BlockData bd = BlockData.fromBlock(block);
+		winConditions.put(block.getLocation(), bd);
+		
+		String bname = bd.mat.name().replaceAll("_+", " ");
+		if ((block.getType().getNewData((byte) 0) instanceof Colorable))
+		{
+			DyeColor color = DyeColor.getByData(bd.data);
+			bname = color.name() + " " + bname;
+		}
+		
+		// broadcast the update using bname (a reconstructed name for the block)
+		match.broadcast(bname + " is now a win condition for " + getName() + 
+			" @ " + BlockVector3.fromLocation(block.getLocation()).toCoords());
+	}
 }

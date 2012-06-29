@@ -1,21 +1,28 @@
 package org.mctourney.AutoReferee;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.player.*;
 import org.bukkit.event.weather.WeatherChangeEvent;
+import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
+
+import com.google.common.collect.Maps;
 
 public class ZoneListener implements Listener 
 {
@@ -28,19 +35,41 @@ public class ZoneListener implements Listener
 	enum ToolAction
 	{
 		TOOL_WINCOND,
+		TOOL_STARTMECH,
 	}
 
 	private Map<Integer, ToolAction> toolMap;
+	
+	public static int parseTool(String s, int def)
+	{
+		// if no string was passed, return default
+		if (s == null) return def;
+		
+		// check to see if this is a material name
+		Material mat = Material.getMaterial(s);
+		if (mat != null) return mat.getId();
+		
+		// try to parse as an integer
+		try { return Integer.parseInt(s); }
+		catch (Exception e) { return def; }
+	}
 
 	public ZoneListener(Plugin p)
 	{
 		plugin = (AutoReferee) p;
-		toolMap = new HashMap<Integer, ToolAction>();
+		toolMap = Maps.newHashMap();
 
-		// tools.win-condition: 284 (golden shovel)
-		toolMap.put(plugin.getConfig().getInt(
-			"config-mode.tools.win-condition", 284), 
+		// tools.win-condition: golden shovel
+		toolMap.put(parseTool(plugin.getConfig().getString(
+			"config-mode.tools.win-condition", null),
+				Material.GOLD_SPADE.getId()), 
 			ToolAction.TOOL_WINCOND);
+
+		// tools.start-mechanism: golden axe
+		toolMap.put(parseTool(plugin.getConfig().getString(
+			"config-mode.tools.start-mechanism", null),
+				Material.GOLD_AXE.getId()), 
+			ToolAction.TOOL_STARTMECH);
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
@@ -122,6 +151,31 @@ public class ZoneListener implements Listener
 		plugin.checkWinConditions(event.getBlock().getWorld(), 
 				event.getBlock().getLocation());
 	}
+	
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void blockInteract(PlayerInteractEvent event)
+	{
+		// if there is no block, drop out
+		if (!event.hasBlock()) return;
+		
+		// if this block interaction is invalid, cancel the event
+		if (!validInteract(event.getPlayer(), event.getClickedBlock().getLocation()))
+		{ event.setCancelled(true); return; }
+		
+		// we are playing right now, so check win conditions (with air location)
+		plugin.checkWinConditions(event.getClickedBlock().getWorld(), null);
+	}
+	
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void entityInteract(PlayerInteractEntityEvent event)
+	{
+		// if this block interaction is invalid, cancel the event
+		if (!validInteract(event.getPlayer(), event.getRightClicked().getLocation()))
+		{ event.setCancelled(true); return; }
+		
+		// we are playing right now, so check win conditions (with air location)
+		plugin.checkWinConditions(event.getRightClicked().getWorld(), null);
+	}
 
 	@EventHandler
 	public void endermanPickup(EntityChangeBlockEvent event)
@@ -134,6 +188,12 @@ public class ZoneListener implements Listener
 	@EventHandler
 	public void toolUsage(PlayerInteractEvent event)
 	{
+		AutoRefMatch match = plugin.matches.get(
+			event.getPlayer().getWorld().getUID());
+		
+		Block block;
+		BlockState blockState;
+		
 		// this event is not an "item" event
 		if (!event.hasItem()) return;
 
@@ -151,25 +211,52 @@ public class ZoneListener implements Listener
 				if (!event.hasBlock()) return;
 				
 				// if the player doesn't have configure permissions, nothing
-				if (!event.getPlayer().hasPermission(
-					"autoreferee.configure")) return;
+				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
 				
 				// determine who owns the region that the clicked block is in
-				Block block = event.getClickedBlock();
+				block = event.getClickedBlock();
 				Set<AutoRefTeam> owns = plugin.locationOwnership(block.getLocation());
 				
 				// if the region is owned by only one team, make it one of their
 				// win conditions (otherwise, we may need to configure by hand)
-				if (owns.size() == 1)
-					plugin.addWinCondition(block, (AutoRefTeam)owns.toArray()[0]);
+				if (owns.size() == 1) for (AutoRefTeam team : owns)
+					team.addWinCondition(block);
 				
 				break;
+				
+			// this is the tool built for setting start mechanisms
+			case TOOL_STARTMECH:
+				
+				// if there is no block involved in this event, nothing
+				if (!event.hasBlock()) return;
+				
+				// if the player doesn't have configure permissions, nothing
+				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
+				
+				// determine who owns the region that the clicked block is in
+				block = event.getClickedBlock();
+				blockState = block.getState();
+				
+				if (blockState.getData() instanceof Redstone)
+					match.addStartMech(block, true);
+				
+				break;
+				
+			// this isn't one of our tools...
+			default: return;
 		}
+		
+		// cancel the event, since it was one of our tools being used properly
+		event.setCancelled(true);
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void creatureSpawn(CreatureSpawnEvent event)
 	{
+		if (event.getEntityType() == EntityType.SLIME && 
+			event.getSpawnReason() == SpawnReason.NATURAL)
+		{ event.setCancelled(true); return; }
+		
 		// if the match hasn't started, cancel
 		if (plugin.getState(event.getLocation().getWorld()) != eMatchStatus.PLAYING)
 		{ event.setCancelled(true); return; }

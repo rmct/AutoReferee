@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
@@ -130,5 +131,11 @@ public class PlayerVersusPlayerListener implements Listener
 		
 		if (plugin.playerData != null && plugin.playerData.containsKey(event.getEntity()))
 			plugin.playerData.get(event.getEntity()).registerDamage(event);
+	}
+	
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void explosionPrime(ExplosionPrimeEvent event)
+	{
+		//event.
 	}
 }

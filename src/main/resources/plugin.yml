@@ -45,7 +45,11 @@ permissions:
     description: AutoReferee administrators
     default: op
     children:
+      autoreferee.configure: true
       autoreferee.referee: true
+  autoreferee.configure:
+    description: AutoReferee configuration
+    default: false
   autoreferee.referee:
     description: AutoReferee referees
     default: false

@@ -8,7 +8,11 @@ server-mode:
 
   server-list:
     - localhost
+  delay-seconds:
+    ready: 15
+    completed: 180
 
 config-mode:
   tools:
     win-condition: 284
+    start-mechanism: 286

@@ -1,6 +1,7 @@
 package org.mctourney.AutoReferee.util;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 
 public class Vector3
 {
@@ -37,4 +38,7 @@ public class Vector3
 
 	public static Vector3 fromLocation(Location loc)
 	{ return new Vector3(loc.getX(), loc.getY(), loc.getZ()); }
+	
+	public Location toLocation(World world)
+	{ return new Location(world, x, y, z); }
 }
