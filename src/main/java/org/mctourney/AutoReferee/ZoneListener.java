@@ -15,12 +15,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.weather.WeatherChangeEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
+import org.mctourney.AutoReferee.util.BlockData;
 
 import com.google.common.collect.Maps;
 
@@ -76,33 +80,23 @@ public class ZoneListener implements Listener
 	public void playerMove(PlayerMoveEvent event)
 	{
 		Player player = event.getPlayer();
+		AutoRefMatch match = plugin.getMatch(player.getWorld());
+		if (match == null) return;
 		
-		double d = plugin.distanceToClosestRegion(
-			plugin.getTeam(player), event.getTo());
+		AutoRefTeam team = plugin.getTeam(player);
+		if (team == null) return;
+		
+		double d = team.distanceToClosestRegion(event.getTo());
 		double fallspeed = event.getFrom().getY() - event.getTo().getY();
 		
-		// only kill if they are in survival mode. otherwise, what's the point?
-		if (player.getGameMode() == GameMode.SURVIVAL && d > 0.3)
-		{
-			// player is sneaking off the edge and not in freefall
-			if (player.isSneaking() && d < SNEAK_DISTANCE && fallspeed < FREEFALL_THRESHOLD);
-			
-			else
-			{
-				// if any of the above clauses fail, they are not in a defensible position
-				plugin.actionTaken.put(player.getName(), AutoReferee.eAction.ENTERED_VOIDLANE);
-				if (!player.isDead()) player.setHealth(0);
-			}
-		}
-		
 		// if a player leaves the start region... 
-		if (player.getGameMode() == GameMode.SURVIVAL && plugin.inStartRegion(event.getFrom())
-			&& !plugin.inStartRegion(event.getTo()))
+		if (player.getGameMode() == GameMode.SURVIVAL && match.getPlayer(player) != null && 
+			match.inStartRegion(event.getFrom()) && !match.inStartRegion(event.getTo()))
 		{
 			// if game isn't going, teleport them back
-			if (plugin.getState(player.getWorld()) != eMatchStatus.PLAYING)
+			if (match.getCurrentState() != eMatchStatus.PLAYING)
 			{
-				player.teleport(player.getWorld().getSpawnLocation());
+				player.teleport(match.getPlayerSpawn(player));
 				player.setVelocity(new org.bukkit.util.Vector());
 				player.setFallDistance(0.0f);
 			}
@@ -110,20 +104,43 @@ public class ZoneListener implements Listener
 			// if game is being played, empty their inventory
 			else player.getInventory().clear();
 		}
+		
+		// only kill if they are in survival mode. otherwise, what's the point?
+		else if (player.getGameMode() == GameMode.SURVIVAL && d > 0.3)
+		{
+			// player is sneaking off the edge and not in freefall
+			if (player.isSneaking() && d < SNEAK_DISTANCE && fallspeed < FREEFALL_THRESHOLD);
+			
+			else
+			{
+				// if any of the above clauses fail, they are not in a defensible position
+				plugin.setDeathReason(player, AutoReferee.eAction.ENTERED_VOIDLANE);
+				if (!player.isDead()) player.setHealth(0);
+			}
+		}
 	}
 	
 	public boolean validInteract(Player player, Location loc)
 	{
+		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+		AutoRefTeam team = plugin.getTeam(player);
+		
+		// no match for this world, not our business
+		if (match == null) return true;
+		
+		// if the player or the match are not under our control, allowed
+		if (match.getCurrentState() == eMatchStatus.NONE) return true;
+		
 		// if the match isn't currently in progress, a player should
 		// not be allowed to place or destroy blocks anywhere
-		if (plugin.getState(player.getWorld()) != AutoReferee.eMatchStatus.PLAYING)
+		if (match.getCurrentState() != eMatchStatus.PLAYING)
 			return false;
 
 		// if this block is inside the start region, not allowed
-		if (plugin.inStartRegion(loc)) return false;
+		if (match.inStartRegion(loc)) return false;
 
 		// if this block is outside the player's zone, not allowed
-		if (!plugin.checkPosition(player, loc)) return false;
+		if (team == null || !team.checkPosition(loc)) return false;
 		
 		// seems okay!
 		return true;
@@ -132,24 +149,31 @@ public class ZoneListener implements Listener
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void blockPlace(BlockPlaceEvent event)
 	{
+		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
+		if (match == null) return;
+		
 		// if this block interaction is invalid, cancel the event
 		if (!validInteract(event.getPlayer(), event.getBlock().getLocation()))
 		{ event.setCancelled(true); return; }
 		
 		// we are playing right now, so check win conditions
-		plugin.checkWinConditions(event.getBlock().getWorld(), null);
+		if (match.getCurrentState() == eMatchStatus.PLAYING)
+			match.checkWinConditions(null);
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void blockBreak(BlockBreakEvent event)
 	{
+		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
+		if (match == null) return;
+		
 		// if this block interaction is invalid, cancel the event
 		if (!validInteract(event.getPlayer(), event.getBlock().getLocation()))
 		{ event.setCancelled(true); return; }
 		
 		// we are playing right now, so check win conditions (with air location)
-		plugin.checkWinConditions(event.getBlock().getWorld(), 
-				event.getBlock().getLocation());
+		if (match.getCurrentState() == eMatchStatus.PLAYING)
+			match.checkWinConditions(event.getBlock().getLocation());
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
@@ -158,38 +182,44 @@ public class ZoneListener implements Listener
 		// if there is no block, drop out
 		if (!event.hasBlock()) return;
 		
+		AutoRefMatch match = plugin.getMatch(event.getClickedBlock().getWorld());
+		if (match == null) return;
+		
 		// if this block interaction is invalid, cancel the event
 		if (!validInteract(event.getPlayer(), event.getClickedBlock().getLocation()))
 		{ event.setCancelled(true); return; }
 		
-		// we are playing right now, so check win conditions (with air location)
-		plugin.checkWinConditions(event.getClickedBlock().getWorld(), null);
+		// we are playing right now, so check win conditions
+		if (match.getCurrentState() == eMatchStatus.PLAYING)
+			match.checkWinConditions(null);
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void entityInteract(PlayerInteractEntityEvent event)
 	{
+		AutoRefMatch match = plugin.getMatch(event.getRightClicked().getWorld());
+		if (match == null) return;
+		
 		// if this block interaction is invalid, cancel the event
 		if (!validInteract(event.getPlayer(), event.getRightClicked().getLocation()))
 		{ event.setCancelled(true); return; }
 		
-		// we are playing right now, so check win conditions (with air location)
-		plugin.checkWinConditions(event.getRightClicked().getWorld(), null);
+		// we are playing right now, so check win conditions
+		if (match.getCurrentState() == eMatchStatus.PLAYING)
+			match.checkWinConditions(null);
 	}
 
-	@EventHandler
-	public void endermanPickup(EntityChangeBlockEvent event)
+	@EventHandler(priority=EventPriority.MONITOR)
+	public void objectiveTrack(InventoryClickEvent event)
 	{
-		// don't let endermen pick up blocks, as a rule
-		if (event.getEntity() instanceof Enderman)
-			event.setCancelled(true);
+		// TODO
 	}
 
 	@EventHandler
 	public void toolUsage(PlayerInteractEvent event)
 	{
-		AutoRefMatch match = plugin.matches.get(
-			event.getPlayer().getWorld().getUID());
+		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
+		if (match == null) return;
 		
 		Block block;
 		BlockState blockState;
@@ -215,12 +245,16 @@ public class ZoneListener implements Listener
 				
 				// determine who owns the region that the clicked block is in
 				block = event.getClickedBlock();
-				Set<AutoRefTeam> owns = plugin.locationOwnership(block.getLocation());
+				Set<AutoRefTeam> owns = match.locationOwnership(block.getLocation());
 				
 				// if the region is owned by only one team, make it one of their
 				// win conditions (otherwise, we may need to configure by hand)
 				if (owns.size() == 1) for (AutoRefTeam team : owns)
-					team.addWinCondition(block);
+				{
+					if (block.getState() instanceof InventoryHolder)
+						team.addSourceInventory(block);
+					else team.addWinCondition(block);
+				}
 				
 				break;
 				
@@ -253,25 +287,41 @@ public class ZoneListener implements Listener
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void creatureSpawn(CreatureSpawnEvent event)
 	{
+		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
+		if (match == null) return;
+		
 		if (event.getEntityType() == EntityType.SLIME && 
 			event.getSpawnReason() == SpawnReason.NATURAL)
 		{ event.setCancelled(true); return; }
 		
 		// if the match hasn't started, cancel
-		if (plugin.getState(event.getLocation().getWorld()) != eMatchStatus.PLAYING)
+		if (match.getCurrentState() != eMatchStatus.PLAYING)
 		{ event.setCancelled(true); return; }
 
 		// if this is in the start region, cancel
-		if (plugin.inStartRegion(event.getLocation()))
+		if (match.inStartRegion(event.getLocation()))
 		{ event.setCancelled(true); return; }
+	}
+
+	@EventHandler
+	public void endermanPickup(EntityChangeBlockEvent event)
+	{
+		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
+		if (match == null) return;
+		
+		// don't let endermen pick up blocks, as a rule
+		if (event.getEntity() instanceof Enderman)
+			event.setCancelled(true);
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void weatherChange(WeatherChangeEvent event)
 	{
+		AutoRefMatch match = plugin.getMatch(event.getWorld());
+		
 		// cancels event if weather is changing to 'storm'
-		if (plugin.matches.containsKey(event.getWorld().getUID()) && 
-			event.toWeatherState()) event.setCancelled(true);
+		if (match != null && event.toWeatherState())
+			event.setCancelled(true);
 	}
 }
 

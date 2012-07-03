@@ -1,7 +1,9 @@
 package org.mctourney.AutoReferee;
 
+import java.io.PrintWriter;
 import java.util.Map;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
@@ -10,10 +12,12 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
-import com.google.common.collect.Maps;
+import org.apache.commons.collections.map.DefaultedMap;
 
 class AutoRefPlayer
 {
+	public static AutoReferee plugin = null;
+	
 	static class DamageCause
 	{
 		// cause of damage, primary value for damage cause
@@ -83,12 +87,14 @@ class AutoRefPlayer
 		}
 	}
 
-	// stored player reference
+	// stored references
 	protected Player player;
+	protected AutoRefTeam team;
 	
 	// number of times this player has killed other players
 	public Map<String, Integer> kills;
 	public int totalKills = 0;
+	public int shotsFired, shotsHit;
 
 	// number of times player has died and damage taken
 	public Map<AutoRefPlayer.DamageCause, Integer> deaths;
@@ -96,36 +102,111 @@ class AutoRefPlayer
 	public int totalDeaths = 0;
 	
 	// constructor for simply setting up the variables
-	public AutoRefPlayer(Player p)
+	@SuppressWarnings("unchecked")
+	public AutoRefPlayer(Player p, AutoRefTeam t)
 	{
-		kills = Maps.newHashMap();
-		deaths = Maps.newHashMap();
-		damage = Maps.newHashMap();
-		player = p;
+		// detailed statistics
+		kills  = new DefaultedMap(0);
+		deaths = new DefaultedMap(0);
+		damage = new DefaultedMap(0);
+		
+		// accuracy information
+		shotsFired = shotsHit = 0;
+		
+		// save the player and team as references
+		this.player = p;
+		this.team = t;
 	}
 	
+	public AutoRefPlayer(Player p)
+	{ this(p, plugin.getTeam(p)); }
+
+	@Override
+	public int hashCode()
+	{ return player.hashCode(); }
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if (!(o instanceof AutoRefPlayer)) return false;
+		return player.equals(((AutoRefPlayer) o).player);
+	}
+	
+	public String getName()
+	{
+		if (team == null) return player.getName();
+		return team.getColor() + player.getName() + ChatColor.RESET;
+	}
+	
+	public void heal()
+	{
+		player.setHealth    ( 20 ); // 10 hearts
+		player.setFoodLevel ( 20 ); // full food
+		player.setSaturation(  5 ); // saturation depletes hunger
+		player.setExhaustion(  0 ); // exhaustion depletes saturation
+	}
+
 	// register that we just received this damage
 	public void registerDamage(EntityDamageEvent e)
 	{
+		// sanity check...
+		if (e.getEntity() != player) return;
+		
 		// get the last damage cause, and mark that as the cause of the damage
 		AutoRefPlayer.DamageCause dc = AutoRefPlayer.DamageCause.fromDamageEvent(e);
-		damage.put(dc, e.getDamage() + (damage.containsKey(dc) ? damage.get(dc) : 0));
+		damage.put(dc, e.getDamage() + damage.get(dc));
 	}
 	
 	// register that we just died
 	public void registerDeath(PlayerDeathEvent e)
 	{
+		// sanity check...
+		if (e.getEntity() != player) return;
+		
 		// get the last damage cause, and mark that as the cause of one death
 		AutoRefPlayer.DamageCause dc = AutoRefPlayer.DamageCause.fromDamageEvent(e.getEntity().getLastDamageCause());
-		deaths.put(dc, 1 + (deaths.containsKey(dc) ? deaths.get(dc) : 0));
+		deaths.put(dc, 1 + deaths.get(dc));
 		++totalDeaths;
 	}
 	
 	// register that we killed the Player who fired this event
 	public void registerKill(PlayerDeathEvent e)
 	{
+		// sanity check...
+		if (e.getEntity().getKiller() != player) return;
+		
+		// get the name of the player who died, record one kill against them
 		String pname = e.getEntity().getName();
-		kills.put(pname, 1 + (kills.containsKey(pname) ? kills.get(pname) : 0));
+		kills.put(pname, 1 + kills.get(pname));
 		++totalKills;
+	}
+
+	public boolean isReady()
+	{
+		return team.getMatch().getWorld() == player.getWorld();
+	}
+	
+	public void writeStats(PrintWriter fw)
+	{
+		String pname = this.player.getName();
+		String accuracyInfo = "";
+		
+		if (shotsFired > 0) accuracyInfo = " (" + 
+			Integer.toString(100 * shotsHit / shotsFired) + "% accuracy)";
+		
+		fw.println("Stats for " + pname + ": (" + Integer.toString(this.totalKills)
+			+ ":" + Integer.toString(this.totalDeaths) + " KDR)" + accuracyInfo);
+		
+		for (Map.Entry<String, Integer> kill : this.kills.entrySet())
+			fw.println("\t" + pname + " killed " + kill.getKey() + " " 
+				+ kill.getValue().toString() + " time(s).");
+		
+		for (Map.Entry<DamageCause, Integer> death : this.deaths.entrySet())
+			fw.println("\t" + death.getKey().toString() + " killed " + pname 
+				+ " " + death.getValue().toString() + " time(s).");
+		
+		for (Map.Entry<DamageCause, Integer> damage : this.damage.entrySet())
+			fw.println("\t" + damage.getKey().toString() + " caused " + pname 
+				+ " " + damage.getValue().toString() + " damage.");
 	}
 }

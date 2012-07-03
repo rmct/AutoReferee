@@ -69,10 +69,17 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
-    	<groupId>org.apache.commons</groupId>
-    	<artifactId>commons-lang3</artifactId>
-    	<version>3.1</version>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>3.2</version>
     </dependency>
   </dependencies>
   
@@ -117,6 +124,7 @@
                 <includes>
                   <include>org.apache.commons:commons-lang3</include>
                   <include>commons-io:commons-io</include>
+                  <include>commons-collections:commons-collections</include>
                 </includes>
               </artifactSet>
             </configuration>           

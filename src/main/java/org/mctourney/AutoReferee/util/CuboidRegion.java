@@ -1,5 +1,7 @@
 package org.mctourney.AutoReferee.util;
 
+import org.bukkit.Location;
+
 public class CuboidRegion
 {
 	public double x1, y1, z1;
@@ -39,5 +41,25 @@ public class CuboidRegion
 		// save region as "minX minY minZ maxX maxY maxZ"
 		return getMinimumPoint().toCoords() + ":" + 
 			getMaximumPoint().toCoords();
+	}
+
+	// wrote this dumb helper function because `distanceToRegion` was looking ugly...
+	public static double multimax( double base, double ... more )
+	{ for ( double x : more ) base = Math.max(base, x); return base; }
+
+	// distance from region, axially aligned (value less than actual distance, but
+	// appropriate for measurements on cuboid regions)
+	public double distanceToRegion(Location v)
+	{
+		double x = v.getX(), y = v.getY(), z = v.getZ();
+		Vector3 mx = getMaximumPoint(), mn = getMinimumPoint();
+		
+		// return maximum distance from this region
+		// (max on all sides, axially-aligned)
+		return CuboidRegion.multimax ( 0
+		,	mn.x - x, x - mx.x - 1
+		,	mn.y - y, y - mx.y - 1
+		,	mn.z - z, z - mx.z - 1
+		);
 	}
 }

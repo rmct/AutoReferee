@@ -1,15 +1,14 @@
 package org.mctourney.AutoReferee;
 
-import org.bukkit.World;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
+import org.mctourney.AutoReferee.AutoReferee.eAction;
 
 public class PlayerVersusPlayerListener implements Listener
 {
@@ -23,7 +22,8 @@ public class PlayerVersusPlayerListener implements Listener
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void playerDeath(EntityDeathEvent event)
 	{
-		if ((event instanceof PlayerDeathEvent))
+		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
+		if (match != null && (event instanceof PlayerDeathEvent))
 		{
 			PlayerDeathEvent pdeath = (PlayerDeathEvent) event;
 			Player victim = (Player) pdeath.getEntity();
@@ -34,22 +34,17 @@ public class PlayerVersusPlayerListener implements Listener
 
 			// if the death was due to intervention by the plugin
 			// let's change the death message to reflect this fact
-			if (plugin.actionTaken.containsKey(victim.getName()))
+			eAction deathReason = plugin.getDeathReason(victim);
+			if (deathReason != null) switch (deathReason)
 			{
-				switch (plugin.actionTaken.get(victim.getName()))
-				{
-					// killed because they entered the void lane
-					case ENTERED_VOIDLANE:
-						dmsg = victim.getName() + " entered the void lane.";
-						break;
-				}
-
-				// remove this verdict once we have used it
-				plugin.actionTaken.remove(victim.getName());
+				// killed because they entered the void lane
+				case ENTERED_VOIDLANE:
+					dmsg = victim.getName() + " entered the void lane.";
+					break;
 			}
 
 			// color the player's name with his team color
-			dmsg = dmsg.replace(victim.getName(), plugin.colorPlayer(victim));
+			dmsg = dmsg.replace(victim.getName(), match.getPlayerName(victim));
 
 			// if the killer was a player, color their name as well
 			if (killer != null) 
@@ -57,23 +52,19 @@ public class PlayerVersusPlayerListener implements Listener
 				if (plugin.getConfig().getBoolean("server-mode.console.log", false))
 					plugin.log.info("[DEATH] " + killer.getDisplayName() 
 						+ " killed " + victim.getDisplayName());
-				dmsg = dmsg.replace(killer.getName(), plugin.colorPlayer(killer));
+				dmsg = dmsg.replace(killer.getName(), match.getPlayerName(killer));
 			}
 
 			// update the death message with the changes
 			pdeath.setDeathMessage(dmsg);
 			
-			// save information about this kill to the logs (register to victim/killer logs)
-			if (plugin.playerData != null)
-			{
-				// register the death of the victim
-				if (plugin.playerData.containsKey(victim))
-					plugin.playerData.get(victim).registerDeath(pdeath);
-				
-				// register the kill for the killer
-				if (plugin.playerData.containsKey(killer))
-					plugin.playerData.get(killer).registerKill(pdeath);
-			}
+			// register the death of the victim
+			AutoRefPlayer vdata = match.getPlayer(victim);
+			if (vdata != null) vdata.registerDeath(pdeath);
+			
+			// register the kill for the killer
+			AutoRefPlayer kdata = match.getPlayer(killer); 
+			if (kdata != null) kdata.registerKill(pdeath);
 		}
 	}
 
@@ -94,10 +85,9 @@ public class PlayerVersusPlayerListener implements Listener
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void damageDealt(EntityDamageEvent event)
 	{
-		World world = event.getEntity().getWorld();
-		AutoRefMatch match = plugin.matches.get(world.getUID());
+		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
 		if (match == null) return;
-		
+
 		if ((event instanceof EntityDamageByEntityEvent))
 		{
 			EntityDamageByEntityEvent ed = (EntityDamageByEntityEvent) event;
@@ -112,8 +102,8 @@ public class PlayerVersusPlayerListener implements Listener
 			{
 				// if the match is in progress and player is in start region
 				// cancel any damage dealt to the player
-				if (plugin.getState(world) == eMatchStatus.PLAYING && 
-						plugin.inStartRegion(damaged.getLocation()))
+				if (match.getCurrentState() == eMatchStatus.PLAYING && 
+						match.inStartRegion(damaged.getLocation()))
 				{ event.setCancelled(true); return; }
 			}
 			
@@ -128,9 +118,13 @@ public class PlayerVersusPlayerListener implements Listener
 
 			if (event.isCancelled()) return;
 		}
-		
-		if (plugin.playerData != null && plugin.playerData.containsKey(event.getEntity()))
-			plugin.playerData.get(event.getEntity()).registerDamage(event);
+
+		// save player data if the damaged entity was a player	
+		if (event.getEntityType() == EntityType.PLAYER)
+		{
+			AutoRefPlayer pdata = match.getPlayer((Player) event.getEntity());	
+			if (pdata != null) pdata.registerDamage(event);
+		}
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST)

@@ -1,12 +1,10 @@
 package org.mctourney.AutoReferee;
 
 import java.io.File;
-import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -15,13 +13,9 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.text.StrMatcher;
+import org.apache.commons.lang.text.StrTokenizer;
 
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.command.*;
@@ -44,15 +38,9 @@ public class AutoReferee extends JavaPlugin
 {
 	public static final String CFG_FILENAME = "autoreferee.yml";
 
-	public Map<UUID, AutoRefMatch> matches = null;
-
 	// default port for a "master" server
 	public static final int DEFAULT_SERVER_PORT = 43760;
 
-	// number of seconds for each phase
-	public static final int READY_SECONDS = 15;
-	public static final int COMPLETED_SECONDS = 180;
-	
 	public enum eAction {
 		ENTERED_VOIDLANE,
 	};
@@ -68,86 +56,59 @@ public class AutoReferee extends JavaPlugin
 	public boolean onlineMode = false;
 	private RefereeClient conn = null;
 
-	public eMatchStatus getState(World w)
-	{
-		AutoRefMatch m = matches.get(w.getUID());
-		return m == null ? eMatchStatus.NONE : m.currentState;
-	}
-
-	// a map from a player to info about why they were killed
-	public Map<String, AutoRefTeam> playerTeam;
-	public Map<String, AutoRefPlayer> playerData;
-	public Map<String, eAction> actionTaken;
-
-	public String getMatchName(World w)
-	{
-		AutoRefMatch m = matches.get(w.getUID());
-		return m == null ? null : m.matchName;
-	}
+	// get the match associated with the world
+	private Map<UUID, AutoRefMatch> matches = null;
 	
-	public AutoRefTeam teamNameLookup(AutoRefMatch m, String name)
-	{
-		// if passed a null match, return null
-		if (m == null) return null;
-		
-		// if there is no match on that world, forget it
-		// is this team name a word?
-		for (AutoRefTeam t : m.teams)
-			if (t.matches(name)) return t;
+	public AutoRefMatch getMatch(World w)
+	{ return matches.get(w.getUID()); }
 
-		// no team matches the name provided
+	public void addMatch(AutoRefMatch match)
+	{ matches.put(match.getWorld().getUID(), match); }
+
+	public void clearMatch(AutoRefMatch match)
+	{ matches.remove(match.getWorld().getUID()); }
+
+	public AutoRefTeam getTeam(Player pl)
+	{
+		// go through all the matches
+		for (AutoRefMatch match : matches.values())
+		{
+			// if the player is on a team for this match...
+			AutoRefTeam team = match.getPlayerTeam(pl);
+			if (team != null) return team;
+		}
+		
+		// this player is on no known teams
 		return null;
 	}
 
-	public AutoRefTeam teamNameLookup(World w, String name)
-	{ return teamNameLookup(matches.get(w.getUID()), name);	}
-
-	public AutoRefTeam getTeam(OfflinePlayer player)
+	public AutoRefTeam getExpectedTeam(Player pl)
 	{
-		// get team from player
-		return playerTeam.get(player.getName());
+		AutoRefTeam actualTeam = getTeam(pl);
+		if (actualTeam != null) return actualTeam;
+		
+		// go through all the matches
+		for (AutoRefMatch match : matches.values())
+		{
+			// if the player is expected for any of these teams
+			for (AutoRefTeam team : match.getTeams())
+				if (team.getExpectedPlayers().contains(pl))
+					return team;
+		}
+		
+		// this player is expected on no known teams
+		return null;
 	}
 
-	public ChatColor getTeamColor(OfflinePlayer player)
-	{
-		// if not on a team, don't modify the player name
-		AutoRefTeam team = getTeam(player);
-		if (team == null) return ChatColor.RESET;
-
-		// get color of the team they are on
-		return team.color;
-	}
-
-	public Location getPlayerSpawn(OfflinePlayer player)
-	{
-		// get player's team
-		AutoRefTeam team = getTeam(player);
-
-		// otherwise, return the appropriate location
-		return team == null ? null : team.spawn;
-	}
+	// player name -> death reason
+	private Map<String, eAction> actionTaken;
 	
-	public int getVanishLevel(Player p)
-	{
-		// referees have the highest vanish level
-		if (p.hasPermission("autoreferee.referee")) return 200;
-		
-		// if you aren't on a team, you get a vanish level
-		if (getTeam(p) == null) return 100;
-		
-		// streamers are ONLY able to see streamers and players
-		if (p.hasPermission("autoreferee.streamer")) return 1;
-		
-		// players have the lowest level vanish
-		return 0;
-	}
-
-	public FileConfiguration getMapConfig(World w)
-	{
-		AutoRefMatch m = matches.get(w.getUID());
-		return m == null ? new YamlConfiguration() : m.worldConfig;
-	}
-
+	public void setDeathReason(Player player, eAction action)
+	{ actionTaken.put(player.getName(), action); }
+	
+	public eAction getDeathReason(Player player)
+	{ return actionTaken.remove(player.getName()); }
+	
 	private boolean checkPlugins(PluginManager pm)
 	{
 		boolean foundOtherPlugin = false;
@@ -171,9 +132,11 @@ public class AutoReferee extends JavaPlugin
 	}
 
 	public void onEnable()
-	{		
+	{
+		// store a reference to the plugin in the classes
 		AutoRefMatch.plugin = this;
-		matches = Maps.newHashMap();
+		AutoRefTeam.plugin = this;
+		AutoRefPlayer.plugin = this;
 		
 		log = this.getLogger();
 		PluginManager pm = getServer().getPluginManager();
@@ -190,8 +153,8 @@ public class AutoReferee extends JavaPlugin
 		// events related to worlds
 		pm.registerEvents(new WorldListener(this), this);
 
-		playerTeam = Maps.newHashMap();
 		actionTaken = Maps.newHashMap();
+		matches = Maps.newHashMap();
 
 		// global configuration object (can't be changed, so don't save onDisable)
 		InputStream configInputStream = getResource("defaults/config.yml");
@@ -204,7 +167,6 @@ public class AutoReferee extends JavaPlugin
 		onlineMode = !(serverList.size() == 0 || !getConfig().getBoolean("server-mode.online", true));
 
 		// wrap up, debug to follow this message
-		if (onlineMode) onlineMode = checkPlugins(pm);
 		log.info("AutoReferee loaded successfully.");
 		
 		// save the "lobby" world as a sort of drop-zone for discharged players
@@ -217,12 +179,13 @@ public class AutoReferee extends JavaPlugin
 
 		// update online mode to represent whether or not we have a connection
 		onlineMode = (conn != null);
+		if (onlineMode) onlineMode = checkPlugins(pm);
 		
 		// setup the map library folder
 		AutoRefMatch.getMapLibrary();
 		
 		// process initial world(s), just in case
-		for ( World w : getServer().getWorlds() ) processWorld(w);
+		for ( World w : getServer().getWorlds() ) AutoRefMatch.setupWorld(w);
 	}
 
 	public boolean makeServerConnection(List<?> serverList)
@@ -286,16 +249,6 @@ public class AutoReferee extends JavaPlugin
 		else p.teleport(lobby.getSpawnLocation());
 	}
 
-	public void processWorld(World w)
-	{
-		// if this map isn't compatible with AutoReferee, quit...
-		if (matches.containsKey(w.getUID()) ||
-			!AutoRefMatch.isCompatible(w)) return;
-		
-		AutoRefMatch match = new AutoRefMatch(w);
-		matches.put(w.getUID(), match);
-	}
-	
 	public World createMatchWorld(String worldName, Long checksum) throws IOException
 	{
 		// get the folder associated with this world name
@@ -324,64 +277,12 @@ public class AutoReferee extends JavaPlugin
 
 		return (WorldEditPlugin) plugin;
 	}
-	
-	public void prepareTeam(AutoRefTeam t, List<String> players)
-	{
-		// null team not allowed
-		if (t == null) return;
-
-		// delete all elements from the map for team 't'
-		Iterator<Map.Entry<String, AutoRefTeam>> i = playerTeam.entrySet().iterator();
-		while (i.hasNext()) if (t.equals(i.next().getValue())) i.remove();
-
-		// insert all players into their list
-		for (String p : players) playerTeam.put(p, t);
-	}
-
-	public String colorPlayer(OfflinePlayer player)
-	{
-		// color a player's name with its team's color
-		ChatColor color = getTeamColor(player);
-		return color + player.getName() + ChatColor.RESET;
-	}
-
-	public void joinTeam(OfflinePlayer player, AutoRefTeam t)
-	{
-		// null team not allowed, and quit if they are already on this team
-		if (t == null || t == getTeam(player)) return;
-		
-		// if the match is in progress, no one may join
-		if (t.match.currentState.ordinal() >= eMatchStatus.PLAYING.ordinal()) return;
-
-		// just in case, announce they are leaving their previous team
-		leaveTeam(player);
-
-		playerTeam.put(player.getName(), t);
-		getServer().broadcastMessage(colorPlayer(player) + 
-			" has joined " + t.getName());
-		
-		if (player.isOnline() && (player instanceof Player))
-			((Player) player).setPlayerListName(colorPlayer(player));
-	}
-
-	public void leaveTeam(OfflinePlayer player)
-	{
-		AutoRefTeam t = getTeam(player);
-		if (t == null) return;
-
-		playerTeam.remove(player);
-		t.match.broadcast(colorPlayer(player) + 
-			" has left " + t.getName());
-		
-		if (player.isOnline() && (player instanceof Player))
-			((Player) player).setPlayerListName(player.getName());
-	}
 
 	public boolean playerWhitelisted(Player player)
 	{
-		if (player.hasPermission("autoreferee.referee")) return true;
 		if (player.hasPermission("autoreferee.admin")) return true;
-		return player.isOp() || playerTeam.containsKey(player.getName());
+		if (player.hasPermission("autoreferee.referee")) return true;
+		return getExpectedTeam(player) != null;
 	}
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
@@ -390,24 +291,28 @@ public class AutoReferee extends JavaPlugin
 		Player player = (Player) sender;
 		
 		World world = player.getWorld();
-		AutoRefMatch m = matches.get(world.getUID());
+		AutoRefMatch match = getMatch(world);
+		
+		// reparse the args properly using the string tokenizer from org.apache.commons
+		args = new StrTokenizer(StringUtils.join(args, ' '), StrMatcher.splitMatcher(), 
+			StrMatcher.quoteMatcher()).setTrimmerMatcher(StrMatcher.trimMatcher()).getTokenArray();
 		
 		if ("autoref".equalsIgnoreCase(cmd.getName()))
 		{
-			if (args.length >= 1 && "save".equalsIgnoreCase(args[0]) && m != null)
-			{ m.saveWorldConfiguration(); return true; }
+			if (args.length >= 1 && "save".equalsIgnoreCase(args[0]) && match != null)
+			{ match.saveWorldConfiguration(); return true; }
 
 			if (args.length >= 1 && "init".equalsIgnoreCase(args[0]))
 			{
 				// if there is not yet a match object for this map
-				if (m == null)
+				if (match == null)
 				{
-					m = new AutoRefMatch(world);
-					matches.put(world.getUID(), m);
-					m.saveWorldConfiguration();
+					addMatch(match = new AutoRefMatch(world));
+					match.saveWorldConfiguration();
+					match.setCurrentState(eMatchStatus.NONE);
 				}
 				else player.sendMessage("AutoReferee already initialized for " + 
-					m.worldConfig.getString("map.name", "this map") + ".");
+					match.worldConfig.getString("map.name", "this map") + ".");
 				
 				return true;
 			}
@@ -415,14 +320,15 @@ public class AutoReferee extends JavaPlugin
 			if (args.length >= 2 && "load".equalsIgnoreCase(args[0])) try
 			{	
 				// get generate a map name from the args
-				String mapName = StringUtils.join(args, " ", 1, args.length);
+				String mapName = args[1];
 				World mw = createMatchWorld(mapName, null);
 				
 				// if there is a map folder, print the CRC
 				if (mw == null) log.info("No such map: [" + mapName + "]");
 				else
 				{
-					log.info("World created for [" + mapName + "]");
+					log.info("World created for [" + mapName + 
+						"] at the request of " + player.getName());
 					player.teleport(mw.getSpawnLocation());
 				}
 				
@@ -433,7 +339,7 @@ public class AutoReferee extends JavaPlugin
 			if (args.length >= 2 && args[0].toLowerCase().startsWith("crc")) try
 			{
 				// get map folder from the name provided
-				String mapName = StringUtils.join(args, " ", 1, args.length);
+				String mapName = args[1];
 				File mapFolder = AutoRefMatch.getMapFolder(mapName, null);
 				
 				// if there is a map folder, print the CRC
@@ -453,11 +359,11 @@ public class AutoReferee extends JavaPlugin
 			}
 			catch (Exception e) { return false; }
 
-			if (args.length >= 1 && "archive".equalsIgnoreCase(args[0]) && m != null) try
+			if (args.length >= 1 && "archive".equalsIgnoreCase(args[0]) && match != null) try
 			{
 				// save the world and configuration first
 				world.save();
-				m.saveWorldConfiguration();
+				match.saveWorldConfiguration();
 				
 				File mapLibrary = AutoRefMatch.getMapLibrary();
 				if (!mapLibrary.exists()) return true;
@@ -465,30 +371,31 @@ public class AutoReferee extends JavaPlugin
 				// archive folder is "<username>-<timestamp>/"
 				String folderName = player.getName() + "-" + 
 					Long.toHexString(new Date().getTime());
+				
 				File archiveFolder = new File(mapLibrary, folderName);
 				if (!archiveFolder.exists()) archiveFolder.mkdir();
 				
 				archiveMapData(world.getWorldFolder(), archiveFolder);
 				long checksum = AutoRefMatch.recursiveCRC32(archiveFolder);
-				log.info(m.mapName + ": [" + Long.toHexString(checksum) + "]");
+				log.info(match.getMapName() + ": [" + Long.toHexString(checksum) + "]");
 				return true;
 			}
 			catch (Exception e) { return false; }
 			
-			if (args.length >= 1 && "stats".equalsIgnoreCase(args[0]) && m != null) try
+			if (args.length >= 1 && "stats".equalsIgnoreCase(args[0]) && match != null) try
 			{
 				if (args.length >= 2 && "dump".equalsIgnoreCase(args[1]))
-				{ logPlayerStats(args.length >= 3 ? args[2] : null); }
+				{ match.logPlayerStats(args.length >= 3 ? args[2] : null); }
 
 				else return false;
 				return true;
 			}
 			catch (Exception e) { return false; }
 			
-			if (args.length >= 2 && "state".equalsIgnoreCase(args[0]) && m != null) try
+			if (args.length >= 2 && "state".equalsIgnoreCase(args[0]) && match != null) try
 			{
-				m.currentState = eMatchStatus.valueOf(args[1]);
-				log.info("Match Status is now " + m.currentState.name());
+				match.setCurrentState(eMatchStatus.valueOf(args[1].toUpperCase()));
+				log.info("Match Status is now " + match.getCurrentState().name());
 				
 				return true;
 			}
@@ -516,14 +423,14 @@ public class AutoReferee extends JavaPlugin
 			}
 		}
 
-		if ("zones".equalsIgnoreCase(cmd.getName()) && m != null)
+		if ("zones".equalsIgnoreCase(cmd.getName()) && match != null)
 		{
 			Set<AutoRefTeam> lookupTeams = null;
 
 			// if a team has been specified as an argument
 			if (args.length > 1)
 			{
-				AutoRefTeam t = teamNameLookup(m, args[1]);
+				AutoRefTeam t = match.teamNameLookup(args[1]);
 				if (t == null)
 				{
 					// team name is invalid. let the player know
@@ -536,7 +443,7 @@ public class AutoReferee extends JavaPlugin
 			}
 
 			// otherwise, just print all the teams
-			else lookupTeams = m.teams;
+			else lookupTeams = match.getTeams();
 			
 			// sanity check...
 			if (lookupTeams == null) return false;
@@ -548,7 +455,7 @@ public class AutoReferee extends JavaPlugin
 				sender.sendMessage(team.getName() + "'s Regions:");
 
 				// print all the regions owned by this team
-				if (team.regions.size() > 0) for (CuboidRegion reg : team.regions)
+				if (team.getRegions().size() > 0) for (CuboidRegion reg : team.getRegions())
 				{
 					Vector3 mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
 					sender.sendMessage("  (" + mn.toCoords() + ") => (" + mx.toCoords() + ")");
@@ -561,7 +468,7 @@ public class AutoReferee extends JavaPlugin
 			return true;
 		}
 		
-		if ("zone".equalsIgnoreCase(cmd.getName()) && m != null)
+		if ("zone".equalsIgnoreCase(cmd.getName()) && match != null)
 		{
 			WorldEditPlugin worldEdit = getWorldEdit();
 			if (worldEdit == null)
@@ -579,13 +486,13 @@ public class AutoReferee extends JavaPlugin
 			}
 			
 			// START is a sentinel Team object representing the start region
-			AutoRefTeam t, START = new AutoRefTeam();
-			t = "start".equals(args[0]) ? START : teamNameLookup(m, args[0]);
+			AutoRefTeam t, START = new AutoRefTeam(); String tname = args[0];
+			t = "start".equals(tname) ? START : match.teamNameLookup(tname);
 			
 			if (t == null)
 			{
 				// team name is invalid. let the player know
-				player.sendMessage("Not a valid team: " + args[0]);
+				player.sendMessage("Not a valid team: " + tname);
 				return true;
 			}
 			
@@ -602,14 +509,14 @@ public class AutoReferee extends JavaPlugin
 				if (t == START)
 				{
 					// set the start region to the selection
-					m.startRegion = reg;
+					match.setStartRegion(reg);
 					player.sendMessage("Region now marked as " +
 						"the start region!");
 				}
 				else
 				{
 					// add the region to the team, announce
-					t.regions.add(reg);
+					t.getRegions().add(reg);
 					player.sendMessage("Region now marked as " + 
 						t.getName() + "'s zone!");
 				}
@@ -617,10 +524,18 @@ public class AutoReferee extends JavaPlugin
 			return true;
 		}
 
-		if ("jointeam".equalsIgnoreCase(cmd.getName()) && m != null && !onlineMode)
+		if ("ready".equalsIgnoreCase(cmd.getName()) && match != null)
 		{
-			AutoRefTeam t = args.length > 0 ? teamNameLookup(m, args[0]) : m.getArbitraryTeam();
-			if (t == null)
+			match.prepareMatch();
+		}
+		if ("jointeam".equalsIgnoreCase(cmd.getName()) && match != null && !onlineMode)
+		{
+			// get the target team
+			AutoRefTeam team = args.length > 0 
+				? match.teamNameLookup(args[0]) 
+				: match.getArbitraryTeam();
+			
+			if (team == null)
 			{
 				// team name is invalid. let the player know
 				if (args.length > 0)
@@ -635,10 +550,10 @@ public class AutoReferee extends JavaPlugin
 			if (target == null)
 			{ sender.sendMessage("Must specify a valid user."); return true; }
 
-			joinTeam(target, t);
+			team.join(target);
 			return true;
 		}
-		if ("leaveteam".equalsIgnoreCase(cmd.getName()) && m != null && !onlineMode)
+		if ("leaveteam".equalsIgnoreCase(cmd.getName()) && match != null && !onlineMode)
 		{
 			Player target = player;
 			if (args.length > 0)
@@ -647,15 +562,15 @@ public class AutoReferee extends JavaPlugin
 			if (target == null)
 			{ sender.sendMessage("Must specify a valid user."); return true; }
 
-			leaveTeam(target);
+			match.leaveTeam(target);
 			return true;
 		}
 		// WARNING: using ordinals on enums is typically frowned upon,
 		// but we will consider the enums "partially-ordered"
-		if ("ready".equalsIgnoreCase(cmd.getName()) && m != null &&
-			m.currentState.ordinal() < eMatchStatus.PLAYING.ordinal())
+		if ("ready".equalsIgnoreCase(cmd.getName()) && match != null &&
+			match.getCurrentState().ordinal() < eMatchStatus.PLAYING.ordinal())
 		{
-			prepareWorld(player.getWorld());
+			match.prepareMatch();
 			return true;
 		}
 
@@ -681,7 +596,7 @@ public class AutoReferee extends JavaPlugin
 		new File(archiveFolder, "data").mkdir();
 	}
 
-	private File getLogDirectory()
+	File getLogDirectory()
 	{
 		// create the log directory if it doesn't exist
 		File logdir = new File(getDataFolder(), "logs");
@@ -689,314 +604,6 @@ public class AutoReferee extends JavaPlugin
 		
 		// return the reference to the log directory
 		return logdir;
-	}
-
-	private void logPlayerStats(String h) throws IOException
-	{
-		if (playerData == null)
-		{ log.severe("No stats available at this time."); return; }
-
-		String hdl = h != null ? h : 
-			new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-		
-		File sfile = new File(getLogDirectory(), hdl + ".log");
-		PrintWriter fw = new PrintWriter(sfile);
-
-		for (Map.Entry<String, AutoRefPlayer> entry : playerData.entrySet())
-		{
-			String pname = entry.getKey();
-			AutoRefPlayer data = entry.getValue();
-			
-			fw.println("Stats for " + pname + ": (" + Integer.toString(data.totalKills)
-				+ "/" + Integer.toString(data.totalDeaths) + ")");
-			
-			for (Map.Entry<String, Integer> kill : data.kills.entrySet())
-				fw.println("\t" + pname + " killed " + kill.getKey() + " " 
-					+ kill.getValue().toString() + " time(s).");
-			
-			for (Map.Entry<AutoRefPlayer.DamageCause, Integer> death : data.deaths.entrySet())
-				fw.println("\t" + death.getKey().toString() + " killed " + pname 
-					+ " " + death.getValue().toString() + " time(s).");
-			
-			for (Map.Entry<AutoRefPlayer.DamageCause, Integer> damage : data.damage.entrySet())
-				fw.println("\t" + damage.getKey().toString() + " caused " + pname 
-					+ " " + damage.getValue().toString() + " damage.");
-		}
-		
-		fw.close();
-	}
-	
-	private void reportStatistics(AutoRefMatch m)
-	{
-		// TODO
-	}
-
-	// helper class for terminating world, synchronous task
-	class MatchTerminator implements Runnable
-	{
-		private AutoRefMatch match;
-
-		public MatchTerminator(AutoRefMatch m)
-		{
-			match = m;
-		}
-		
-		public void run()
-		{
-			// first, handle all the players
-			for (Player p : match.world.getPlayers()) playerDone(p);
-			
-			// then, cleanup the match object (swallow exceptions)
-			try { match.destroy(); } catch (Exception e) {  };
-		}
-	}
-	
-	public void checkWinConditions(World world, Location aloc)
-	{
-		// this code is only called in BlockPlaceEvent and BlockBreakEvent when
-		// we have confirmed that the state is PLAYING, so we know we are definitely
-		// in a match if this function is being called
-		
-		AutoRefMatch m = matches.get(world.getUID());
-		if (m != null) for (AutoRefTeam t : m.teams)
-		{
-			// if there are no win conditions set, skip this team
-			if (t.winConditions.size() == 0) continue;
-			
-			// check all win condition blocks (AND together)
-			boolean win = true;
-			for (Map.Entry<Location, BlockData> pair : t.winConditions.entrySet())
-			{
-				BlockData bd = pair.getValue();
-				win &= pair.getKey().equals(aloc) ? bd.mat == Material.AIR : 
-					bd.matches(world.getBlockAt(pair.getKey()));
-			}
-			
-			if (win)
-			{
-				// announce the victory and set the match to completed
-				m.broadcast(t.getName() + " Wins!");
-				for (Player p : world.getPlayers())
-				{
-					if (playerTeam.containsKey(p.getName()))
-						p.teleport(world.getSpawnLocation());
-					p.setGameMode(GameMode.CREATIVE);
-				}
-				
-				m.currentState = eMatchStatus.COMPLETED;
-				reportStatistics(m);
-				
-				int termDelay = getConfig().getInt(
-					"server-mode.delay-seconds.completed", COMPLETED_SECONDS);
-				
-				getServer().getScheduler().scheduleSyncDelayedTask(
-					this, new MatchTerminator(m), termDelay * 20L);
-			}
-		}
-	}
-
-	// wrote this dumb helper function because `distanceToRegion` was looking ugly...
-	public static double multimax( double base, double ... more )
-	{ for ( double x : more ) base = Math.max(base, x); return base; }
-	
-	// distance from region, axially aligned (value less than actual distance, but
-	// appropriate for measurements on cuboid regions)
-	public static double distanceToRegion(Location v, CuboidRegion reg)
-	{
-		// not a region, infinite distance away
-		if (reg == null) return Double.POSITIVE_INFINITY;
-		
-		double x = v.getX(), y = v.getY(), z = v.getZ();
-		Vector3 mx = reg.getMaximumPoint(), mn = reg.getMinimumPoint();
-		
-		// return maximum distance from this region
-		// (max on all sides, axially-aligned)
-		return multimax ( 0
-		,	mn.x - x, x - mx.x - 1
-		,	mn.y - y, y - mx.y - 1
-		,	mn.z - z, z - mx.z - 1
-		);
-	}
-	
-	public Set<AutoRefTeam> locationOwnership(Location loc)
-	{
-		// teams who own this location
-		Set<AutoRefTeam> owners = new HashSet<AutoRefTeam>();
-
-		// check all safe regions for that team
-		AutoRefMatch m = matches.get(loc.getWorld().getUID());
-		if (m != null) for (AutoRefTeam team : m.teams)
-			for (CuboidRegion reg : team.regions)
-		{
-			// if the location is inside the region, add it
-			if (distanceToRegion(loc, reg) < ZoneListener.SNEAK_DISTANCE) 
-				owners.add(team);
-		}
-		
-		return owners;
-	}
-
-	// simple getter for the start region
-	public CuboidRegion getStartRegion(World w)
-	{
-		AutoRefMatch m = matches.get(w.getUID());
-		return m == null ? null : m.startRegion;
-	}
-	
-	// is location in start region?
-	public boolean inStartRegion(Location loc)
-	{
-		CuboidRegion reg = getStartRegion(loc.getWorld());
-		return distanceToRegion(loc, reg) < ZoneListener.SNEAK_DISTANCE;
-	}
-	
-	// distance from the closest owned region
-	public double distanceToClosestRegion(Player p)
-	{ return distanceToClosestRegion(getTeam(p), p.getLocation()); }
-	
-	public double distanceToClosestRegion(AutoRefTeam team, Location loc)
-	{
-		if (team == null) return 0;
-		double distance = distanceToRegion(loc, getStartRegion(loc.getWorld()));
-		
-		for ( CuboidRegion reg : team.regions ) if (distance > 0)
-			distance = Math.min(distance, distanceToRegion(loc, reg));
-		
-		return distance;
-	}
-
-	// TRUE = this location *is* within the player's regions
-	// FALSE = this location is *not* within player's regions
-	public Boolean checkPosition(Player player, Location loc)
-	{
-		// get the player's team (if they are not on a team, ignore them)
-		AutoRefTeam team = getTeam(player);
-		if (team == null) return true;
-		
-		// is the player's location owned by the player's team?
-		return locationOwnership(loc).contains(team);
-	}
-
-	public void checkTeamsReady(AutoRefMatch m) 
-	{
-		if (m == null) return;
-		
-		// if there is no one on the server
-		if (m.world.getPlayers().size() == 0)
-		{
-			// set all the teams to not ready and status as waiting
-			for ( AutoRefTeam t : m.teams ) t.ready = false;
-			m.currentState = eMatchStatus.WAITING; return;
-		}
-		
-		// this function is only useful if we are waiting
-		if (m.currentState != eMatchStatus.WAITING) return;
-		
-		// if we aren't in online mode, assume we are always ready
-		if (!onlineMode) { m.currentState = eMatchStatus.READY; return; }
-		
-		// check if all the players are here
-		boolean ready = true; Server s = getServer();
-		for ( String p : playerTeam.keySet() ) 
-			ready &= s.getOfflinePlayer(p).isOnline();
-		
-		// set status based on whether the players are online
-		m.currentState = ready ? eMatchStatus.READY : eMatchStatus.WAITING;
-	}
-
-	public void checkTeamsReady(World w) 
-	{ checkTeamsReady(matches.get(w.getUID())); }
-	
-	// helper class for starting match, synchronous task
-	class MatchStarter implements Runnable
-	{
-		public int task = -1;
-		private int secs = 3;
-		
-		private AutoRefMatch match = null;
-		public MatchStarter(AutoRefMatch m)
-		{
-			match = m;
-		}
-		
-		public void run()
-		{
-			// if the countdown has ended...
-			if (secs == 0)
-			{
-				// set the current time to the start time (again)
-				match.world.setTime(match.startTime);
-				
-				// setup world to go!
-				match.broadcast(">>> " + ChatColor.GREEN + "GO!");
-				match.start();
-				
-				// cancel the task
-				getServer().getScheduler().cancelTask(task);
-			}
-			
-			// report number of seconds remaining
-			else match.broadcast(">>> " + ChatColor.GREEN + 
-				Integer.toString(secs--) + "...");
-		}
-	}
-	
-	public void prepareWorld(World w)
-	{
-		AutoRefMatch match = matches.get(w.getUID());
-		if (match == null) return;
-		
-		// set the current time to the start time
-		w.setTime(match.startTime);
-		
-		// remove all mobs, animals, and items
-		for (Entity e : w.getEntitiesByClasses(Monster.class, 
-			Animals.class, Item.class, ExperienceOrb.class)) e.remove();
-		
-		// turn off weather forever (or for a long time)
-		w.setStorm(false);
-		w.setWeatherDuration(Integer.MAX_VALUE);
-		
-		// prepare all players for the match
-		playerData = Maps.newHashMap();
-		for (Player p : w.getPlayers())
-			if (playerTeam.containsKey(p.getName())) preparePlayer(p);
-		
-		// vanish players appropriately
-		for ( Player pv : w.getPlayers() ) // <--- viewer
-		for ( Player ps : w.getPlayers() ) // <--- subject
-		{
-			if (getVanishLevel(pv) >= getVanishLevel(ps))
-				pv.showPlayer(ps); else pv.hidePlayer(ps);
-		}
-		
-		int readyDelay = getConfig().getInt(
-			"server-mode.delay-seconds.ready", READY_SECONDS);
-		
-		// announce the match starting in X seconds
-		match.broadcast("Match will begin in "
-			+ Integer.toString(readyDelay) + " seconds.");
-		
-		// cancel any previous match-start task
-		if (match.matchStarter != null && match.matchStarter.task != -1)
-			getServer().getScheduler().cancelTask(match.matchStarter.task);
-		
-		// schedule the task to announce and prepare the match
-		match.matchStarter = new MatchStarter(match);
-		match.matchStarter.task = getServer().getScheduler().scheduleSyncRepeatingTask(
-				this, match.matchStarter, readyDelay * 20L, 20L);
-	}
-	
-	public void preparePlayer(Player p)
-	{
-		p.setHealth    ( 20 ); // 10 hearts
-		p.setFoodLevel ( 20 ); // full food
-		p.setSaturation(  5 ); // saturation depletes hunger
-		p.setExhaustion(  0 ); // exhaustion depletes saturation
-		
-		// setup an empty PlayerData object for this player
-		log.info("Making record for: " + p.getName());
-		playerData.put(p.getName(), new AutoRefPlayer(p));
 	}
 	
 	// ABANDON HOPE, ALL YE WHO ENTER HERE!

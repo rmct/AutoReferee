@@ -3,47 +3,85 @@ package org.mctourney.AutoReferee;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Animals;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.material.*;
+import org.bukkit.scheduler.BukkitScheduler;
 
-import org.mctourney.AutoReferee.AutoReferee.MatchStarter;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 
+import org.mctourney.AutoReferee.util.BlockData;
 import org.mctourney.AutoReferee.util.CuboidRegion;
 import org.mctourney.AutoReferee.util.Vector3;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Maps;
+import org.apache.commons.io.FileUtils;
 
 public class AutoRefMatch
 {
 	// world this match is taking place on
-	public World world;
-	
+	private World world;
+
+	public World getWorld()
+	{ return world; }
+
 	// time to set the world to at the start of the match
-	public long startTime = 8000L;
+	private long startTime = 8000L;
+	
+	public long getStartTime()
+	{ return startTime; }
+
+	public void setStartTime(long startTime)
+	{ this.startTime = startTime; }
 	
 	// status of the match
-	public eMatchStatus currentState = eMatchStatus.NONE;
+	private eMatchStatus currentState = eMatchStatus.NONE;
+
+	public eMatchStatus getCurrentState()
+	{ return currentState; }
+
+	public void setCurrentState(eMatchStatus currentState)
+	{ this.currentState = currentState; }
 	
 	// teams participating in the match
-	public Set<AutoRefTeam> teams = null;
+	private Set<AutoRefTeam> teams = null;
+
+	public Set<AutoRefTeam> getTeams()
+	{ return teams; }
 	
 	// region defined as the "start" region (safe zone)
-	public CuboidRegion startRegion = null;
+	private CuboidRegion startRegion = null;
+
+	public CuboidRegion getStartRegion()
+	{ return startRegion; }
+
+	public void setStartRegion(CuboidRegion startRegion)
+	{ this.startRegion = startRegion; }
 	
 	// name of the match
 	public String matchName = "Scheduled Match";
@@ -53,12 +91,19 @@ public class AutoRefMatch
 	public FileConfiguration worldConfig;
 	
 	// basic variables loaded from file
-	public String mapName = null;
+	private String mapName = null;
 	public boolean allowFriendlyFire = false;
+
+	public String getMapName() 
+	{ return mapName; }
 	
 	// task that starts the match
-	public MatchStarter matchStarter = null;
+	public AutoRefMatch.MatchStarter matchStarter = null;
 	public Set<StartMechanism> startMechanisms = null;
+
+	// number of seconds for each phase
+	public static final int READY_SECONDS = 15;
+	public static final int COMPLETED_SECONDS = 180;
 
 	public AutoRefMatch(World world)
 	{
@@ -94,14 +139,8 @@ public class AutoRefMatch
 		for (Map<?, ?> map : worldConfig.getMapList("match.teams"))
 			teams.add(AutoRefTeam.fromMap((Map<String, Object>) map, this));
 		
-		for (String sMech : worldConfig.getStringList("match.start-mechanisms"))
-		{
-			String[] p = sMech.split(":");
-			boolean state = Boolean.parseBoolean(p[1]);
-			
-			startMechanisms.add(new StartMechanism(world.getBlockAt(
-				Vector3.fromCoords(p[0]).toLocation(world)), state));
-		}
+		for (String sm : worldConfig.getStringList("match.start-mechanisms"))
+			startMechanisms.add(StartMechanism.unserialize(world, sm));
 		
 		// get the start region (safe for both teams, no pvp allowed)
 		if (worldConfig.isString("match.start-region"))
@@ -127,9 +166,9 @@ public class AutoRefMatch
 		worldConfig.set("match.teams", teamData);
 		
 		// save the start mechanisms
-		List<String> sMechs = Lists.newArrayList();
-		for ( StartMechanism sMech : startMechanisms ) sMechs.add(sMech.toString());
-		worldConfig.set("match.start-mechanisms", sMechs);
+		List<String> smList = Lists.newArrayList();
+		for ( StartMechanism sm : startMechanisms ) smList.add(sm.serialize());
+		worldConfig.set("match.start-mechanisms", smList);
 		
 		// save the start region
 		if (startRegion != null)
@@ -141,6 +180,14 @@ public class AutoRefMatch
 		// log errors, report which world did not save
 		catch (java.io.IOException e)
 		{ plugin.log.info("Could not save world config: " + world.getName()); }
+	}
+
+	public Set<AutoRefPlayer> getPlayers()
+	{
+		Set<AutoRefPlayer> players = Sets.newHashSet();
+		for (AutoRefTeam team : teams)
+			players.addAll(team.getPlayers());
+		return players;
 	}
 
 	public void broadcast(String msg)
@@ -212,23 +259,7 @@ public class AutoRefMatch
 
 	public void destroy() throws IOException
 	{
-		plugin.matches.remove(world.getUID());
-		
-		Iterator<Map.Entry<String, AutoRefPlayer>> iterP = 
-			plugin.playerData.entrySet().iterator();
-		while (iterP.hasNext())
-		{
-			Map.Entry<String, AutoRefPlayer> e = iterP.next();
-			if (world == e.getValue().player.getWorld()) iterP.remove();
-		}
-		
-		Iterator<Map.Entry<String, AutoRefTeam>> iterT = 
-			plugin.playerTeam.entrySet().iterator();
-		while (iterT.hasNext())
-		{
-			Map.Entry<String, AutoRefTeam> e = iterT.next();
-			if (teams.contains(e.getValue())) iterT.remove();
-		}
+		plugin.clearMatch(this);
 		
 		File worldFolder = world.getWorldFolder();
 		plugin.getServer().unloadWorld(world, false);
@@ -237,7 +268,7 @@ public class AutoRefMatch
 			FileUtils.deleteDirectory(worldFolder);
 	}
 
-	AutoRefTeam getArbitraryTeam()
+	public AutoRefTeam getArbitraryTeam()
 	{
 		// minimum size of any one team, and an array to hold valid teams
 		int minsize = Integer.MAX_VALUE;
@@ -247,7 +278,7 @@ public class AutoRefMatch
 		Map<AutoRefTeam,Integer> count = Maps.newHashMap();
 		for (AutoRefTeam t : teams) count.put(t, 0);
 		
-		for (AutoRefTeam t : plugin.playerTeam.values())
+		for (AutoRefTeam t : teams)
 			if (count.containsKey(t)) count.put(t, count.get(t)+1);
 		
 		// determine the size of the smallest team
@@ -262,62 +293,382 @@ public class AutoRefMatch
 		return vteams.get(new Random().nextInt(vteams.size()));
 	}
 
-	class StartMechanism
+	static class StartMechanism
 	{
-		public Block block = null;
+		public Location loc = null;
+		public BlockState blockState = null;
 		public boolean state = true;
 		
 		public StartMechanism(Block block, boolean state)
-		{ this.block = block; this.state = state; }
+		{
+			this.state = state;
+			this.loc = block.getLocation(); 
+			this.blockState = block.getState();
+		}
 		
 		public StartMechanism(Block block)
-		{ this.block = block; this.state = true; }
+		{ this(block, true); }
 		
 		@Override public int hashCode()
-		{ return block.hashCode(); }
+		{ return loc.hashCode() ^ blockState.hashCode(); }
 		
 		@Override public boolean equals(Object o)
 		{ return (o instanceof StartMechanism) && 
-			block.equals(((StartMechanism)o).block); }
+			hashCode() == o.hashCode(); }
+		
+		public String serialize()
+		{ return Vector3.fromLocation(loc).toCoords() + ":" + Boolean.toString(state); }
+		
+		public static StartMechanism unserialize(World w, String sm)
+		{
+			String[] p = sm.split(":");
+
+			Block block = w.getBlockAt(Vector3.fromCoords(p[0]).toLocation(w));
+			boolean state = Boolean.parseBoolean(p[1]);
+
+			return new StartMechanism(block, state);
+		}
 		
 		@Override public String toString()
-		{ return Vector3.fromLocation(block.getLocation()).toCoords() + 
-			":" + Boolean.toString(state); }
+		{ return blockState.getType().name() + "(" + Vector3.fromLocation(loc).toCoords() + 
+			"):" + Boolean.toString(state); }
 	}
 
 	public void addStartMech(Block block, boolean state)
 	{
-		startMechanisms.add(new StartMechanism(block, state));
-		broadcast(block.getState().getType().name() + " @ " + 
-			block.getLocation().toString() + " is a start mechanism.");
+		StartMechanism sm = new StartMechanism(block, state);
+		startMechanisms.add(sm);
+		plugin.log.info(sm.toString() + " is a start mechanism.");
 	}
 
 	public void start()
 	{
+		// set the current state to playing
 		currentState = eMatchStatus.PLAYING;
-		for (StartMechanism sMech : startMechanisms)
+
+		// loop through all the redstone mechanisms required to start
+		for (StartMechanism sm : startMechanisms)
 		{
-			BlockState blockState = sMech.block.getState();
-			MaterialData mdata = blockState.getData();
-			
-			switch (blockState.getType())
+			MaterialData mdata = sm.blockState.getData();
+		
+			// switch on the type of block
+			switch (sm.blockState.getType())
 			{
 			case LEVER:
-				((Lever) mdata).setPowered(sMech.state);
+				// flip the lever to the correct state
+				((Lever) mdata).setPowered(sm.state);
 				break;
 				
 			case STONE_BUTTON:
-				((Button) mdata).setPowered(sMech.state);
+				// press (or depress) the button
+				((Button) mdata).setPowered(sm.state);
 				break;
 				
 			case WOOD_PLATE:
 			case STONE_PLATE:
-				((PressurePlate) mdata).setData((byte) 0x1);
+				// press (or depress) the pressure plate
+				((PressurePlate) mdata).setData((byte)(sm.state ? 0x1 : 0x0));
 				break;
 			}
 			
-			blockState.setData(mdata);
-			blockState.update(true);
+			// save the block state and fire an update
+			sm.blockState.setData(mdata);
+			sm.blockState.update(true);
 		}
+	}
+
+	// helper class for starting match, synchronous task
+	static class MatchStarter implements Runnable
+	{
+		public int task = -1;
+		private int secs = 3;
+		
+		private AutoRefMatch match = null;
+		public MatchStarter(AutoRefMatch m)
+		{
+			match = m;
+		}
+		
+		public void run()
+		{
+			// if the countdown has ended...
+			if (secs == 0)
+			{
+				// set the current time to the start time (again)
+				match.world.setTime(match.startTime);
+				
+				// setup world to go!
+				match.broadcast(">>> " + ChatColor.GREEN + "GO!");
+				match.start();
+				
+				// cancel the task
+				plugin.getServer().getScheduler().cancelTask(task);
+			}
+			
+			// report number of seconds remaining
+			else match.broadcast(">>> " + ChatColor.GREEN + 
+				Integer.toString(secs--) + "...");
+		}
+	}
+
+	public int getVanishLevel(Player p)
+	{
+		// referees have the highest vanish level
+		if (p.hasPermission("autoreferee.referee")) return 200;
+		
+		// if you aren't on a team, you get a vanish level
+		if (getPlayerTeam(p) == null) return 100;
+		
+		// streamers are ONLY able to see streamers and players
+		if (p.hasPermission("autoreferee.streamer")) return 1;
+		
+		// players have the lowest level vanish
+		return 0;
+	}
+
+	// prepare this world to start
+	public void prepareMatch()
+	{
+		BukkitScheduler scheduler = plugin.getServer().getScheduler();
+		
+		// set the current time to the start time
+		world.setTime(this.startTime);
+		
+		// remove all mobs, animals, and items
+		for (Entity e : world.getEntitiesByClasses(Monster.class, 
+			Animals.class, Item.class, ExperienceOrb.class)) e.remove();
+		
+		// turn off weather forever (or for a long time)
+		world.setStorm(false);
+		world.setWeatherDuration(Integer.MAX_VALUE);
+		
+		// prepare all players for the match
+		for (AutoRefPlayer apl : getPlayers())
+			apl.heal(); // TODO
+		
+		// vanish players appropriately
+		for ( Player view : world.getPlayers() ) // <--- viewer
+		for ( Player subj : world.getPlayers() ) // <--- subject
+		{
+			if (getVanishLevel(view) >= getVanishLevel(subj))
+				view.showPlayer(subj); else view.hidePlayer(subj);
+		}
+		
+		int readyDelay = plugin.getConfig().getInt(
+			"server-mode.delay-seconds.ready", AutoRefMatch.READY_SECONDS);
+		
+		// announce the match starting in X seconds
+		this.broadcast("Match will begin in "
+			+ Integer.toString(readyDelay) + " seconds.");
+		
+		// cancel any previous match-start task
+		if (this.matchStarter != null && this.matchStarter.task != -1)
+			scheduler.cancelTask(this.matchStarter.task);
+		
+		// schedule the task to announce and prepare the match
+		this.matchStarter = new MatchStarter(this);
+		this.matchStarter.task = scheduler.scheduleSyncRepeatingTask(
+				plugin, this.matchStarter, readyDelay * 20L, 20L);
+	}
+
+	public void checkTeamsReady() 
+	{
+		if (this == null) return;
+		
+		// if there are no players on the server
+		if (getPlayers().size() == 0)
+		{
+			// set all the teams to not ready and status as waiting
+			for ( AutoRefTeam t : teams ) t.setReady(false);
+			currentState = eMatchStatus.WAITING; return;
+		}
+		
+		// this function is only useful if we are waiting
+		if (currentState != eMatchStatus.WAITING) return;
+		
+		// if we aren't in online mode, assume we are always ready
+		if (!plugin.onlineMode) { setCurrentState(eMatchStatus.READY); return; }
+		
+		// check if all the players are here
+		boolean ready = true;
+		for ( OfflinePlayer opl : getExpectedPlayers() )
+			ready &= opl.isOnline() && getPlayer(opl.getPlayer()) != null &&
+				getPlayer(opl.getPlayer()).isReady();
+		
+		// set status based on whether the players are online
+		currentState = ready ? eMatchStatus.READY : eMatchStatus.WAITING;
+	}
+
+	public static void setupWorld(World w)
+	{
+		// if this map isn't compatible with AutoReferee, quit...
+		if (plugin.getMatch(w) != null || !isCompatible(w)) return;
+		plugin.addMatch(new AutoRefMatch(w));
+	}
+
+	// helper class for terminating world, synchronous task
+	class MatchTerminator implements Runnable
+	{
+		public void run()
+		{
+			// first, handle all the players
+			for (Player p : world.getPlayers()) plugin.playerDone(p);
+			
+			// then, cleanup the match object (swallow exceptions)
+			try { destroy(); } catch (Exception e) {  };
+		}
+	}
+	
+	public void checkWinConditions(Location aloc)
+	{
+		// this code is only called in BlockPlaceEvent and BlockBreakEvent when
+		// we have confirmed that the state is PLAYING, so we know we are definitely
+		// in a match if this function is being called
+		
+		for (AutoRefTeam t : this.teams)
+		{
+			// if there are no win conditions set, skip this team
+			if (t.winConditions.size() == 0) continue;
+			
+			// check all win condition blocks (AND together)
+			boolean win = true;
+			for (Map.Entry<Location, BlockData> pair : t.winConditions.entrySet())
+			{
+				BlockData bd = pair.getValue();
+				win &= pair.getKey().equals(aloc) ? bd.getMaterial() == Material.AIR : 
+					bd.matches(world.getBlockAt(pair.getKey()));
+			}
+			
+			if (win)
+			{
+				// announce the victory and set the match to completed
+				this.broadcast(t.getName() + " Wins!");
+				for (AutoRefPlayer apl : getPlayers())
+				{
+					apl.player.teleport(world.getSpawnLocation());
+					apl.player.setGameMode(GameMode.CREATIVE);
+				}
+				
+				this.currentState = AutoReferee.eMatchStatus.COMPLETED;
+				logPlayerStats(null);
+				
+				int termDelay = plugin.getConfig().getInt(
+					"server-mode.delay-seconds.completed", COMPLETED_SECONDS);
+				
+				plugin.getServer().getScheduler().scheduleSyncDelayedTask(
+					plugin, new MatchTerminator(), termDelay * 20L);
+			}
+		}
+	}
+
+	public AutoRefTeam teamNameLookup(String name)
+	{
+		// if there is no match on that world, forget it
+		// is this team name a word?
+		for (AutoRefTeam t : teams)
+			if (t.matches(name)) return t;
+	
+		// no team matches the name provided
+		return null;
+	}
+	
+	// get all expected players
+	public Set<OfflinePlayer> getExpectedPlayers()
+	{
+		Set<OfflinePlayer> eps = Sets.newHashSet();
+		for (AutoRefTeam team : teams)
+			eps.addAll(team.getExpectedPlayers());
+		return eps;
+	}
+	
+	// returns the team for the expected player
+	public AutoRefTeam expectedTeam(OfflinePlayer opl)
+	{
+		for (AutoRefTeam team : teams)
+			if (team.getExpectedPlayers().contains(opl)) return team;
+		return null;
+	}
+	
+	// returns if the player is meant to join this match
+	public boolean isPlayerExpected(OfflinePlayer opl)
+	{ return expectedTeam(opl) != null; }
+	
+	public void leaveTeam(Player pl)
+	{ for (AutoRefTeam team : teams) team.leave(pl); }
+	
+	public AutoRefPlayer getPlayer(Player pl)
+	{
+		for (AutoRefTeam team : teams)
+		{
+			AutoRefPlayer apl = team.getPlayer(pl);
+			if (apl != null) return apl;
+		}
+		return null;
+	}
+	
+	public AutoRefTeam getPlayerTeam(Player pl)
+	{
+		for (AutoRefTeam team : teams)
+			if (team.getPlayer(pl) != null) return team;
+		return null;
+	}
+	
+	public String getPlayerName(Player pl)
+	{
+		AutoRefPlayer apl = getPlayer(pl);
+		return (apl == null) ? pl.getName() : apl.getName();
+	}
+	
+	public Location getPlayerSpawn(Player pl)
+	{
+		AutoRefTeam team = getPlayerTeam(pl);
+		if (team != null) return team.getSpawnLocation();
+		return world.getSpawnLocation();
+	}
+
+	void logPlayerStats(String h)
+	{
+		String hdl = h != null ? h : 
+			new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+		
+		try
+		{
+			File sfile = new File(plugin.getLogDirectory(), hdl + ".log");
+			PrintWriter fw = new PrintWriter(sfile);
+			
+			for (AutoRefPlayer apl : getPlayers()) apl.writeStats(fw);
+			fw.close();
+		}
+		catch (IOException e)
+		{ plugin.log.severe("Could not write player stat logfile."); }
+	}
+
+	// distance from the closest owned region
+	public double distanceToClosestRegion(Player p)
+	{
+		AutoRefTeam team = getPlayerTeam(p);
+		if (team != null) return team.distanceToClosestRegion(p.getLocation());
+		return Double.MAX_VALUE;
+	}
+
+	// is location in start region?
+	public boolean inStartRegion(Location loc)
+	{ return startRegion.distanceToRegion(loc) < ZoneListener.SNEAK_DISTANCE; }
+
+	public Set<AutoRefTeam> locationOwnership(Location loc)
+	{
+		// teams who own this location
+		Set<AutoRefTeam> owners = new HashSet<AutoRefTeam>();
+	
+		// check all safe regions for that team
+		for (AutoRefTeam team : teams)
+			for (CuboidRegion reg : team.getRegions())
+		{
+			// if the location is inside the region, add it
+			if (reg.distanceToRegion(loc) < ZoneListener.SNEAK_DISTANCE) 
+				owners.add(team);
+		}
+		
+		return owners;
 	}
 }

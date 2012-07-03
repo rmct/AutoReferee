@@ -24,7 +24,10 @@ public class TeamListener implements Listener
 	{
 		// typical chat message format, swap out with colored version
 		Player player = event.getPlayer();
-		event.setFormat("<" + plugin.colorPlayer(player) + "> " + event.getMessage());
+		AutoRefMatch match = plugin.getMatch(player.getWorld());
+		
+		if (match == null) return;
+		event.setFormat("<" + match.getPlayerName(player) + "> " + event.getMessage());
 
 		// if we are currently playing and speaker on a team, restrict recipients
 		AutoRefTeam t = plugin.getTeam(player);
@@ -41,7 +44,7 @@ public class TeamListener implements Listener
 			// if listener is on a team, and its not the same team as the
 			// speaker, remove them from the recipients list
 			AutoRefTeam oteam = plugin.getTeam(recipient);
-			if (plugin.getState(player.getWorld()) == eMatchStatus.PLAYING &&
+			if (match.getCurrentState() == eMatchStatus.PLAYING &&
 				oteam != null && oteam != t) { iter.remove(); continue; }
 		}
 	}
@@ -50,11 +53,13 @@ public class TeamListener implements Listener
 	public void playerRespawn(PlayerRespawnEvent event)
 	{
 		World world = event.getPlayer().getWorld();
-		if (plugin.getState(world) == AutoReferee.eMatchStatus.PLAYING &&
+		AutoRefMatch match = plugin.getMatch(world);
+		
+		if (match.getCurrentState() == AutoReferee.eMatchStatus.PLAYING &&
 			event.getPlayer().getBedSpawnLocation() == null)
 		{
 			// get the location for the respawn event
-			Location spawn = plugin.getPlayerSpawn(event.getPlayer());
+			Location spawn = match.getPlayerSpawn(event.getPlayer());
 			if (spawn != null) event.setRespawnLocation(spawn);
 		}
 	}
@@ -63,6 +68,7 @@ public class TeamListener implements Listener
 	public void playerLogin(PlayerLoginEvent event)
 	{
 		Player player = event.getPlayer();
+		plugin.log.info(player.getName() + " should be logging in now.");
 		
 		// if they should be whitelisted, let them in, otherwise, block them
 		if (plugin.playerWhitelisted(player)) event.allow();
@@ -70,15 +76,15 @@ public class TeamListener implements Listener
 			"You are not scheduled for a match on this server.");
 		
 		// if this player needs to be in a specific world, put them there
-		AutoRefTeam team = plugin.getTeam(player);
-		if (team != null && team.match != null && team.match.world != null)
-			player.teleport(team.match.world.getSpawnLocation());
+		AutoRefTeam team = plugin.getExpectedTeam(player);
+		if (team != null) team.join(player);
 	}
 
 	@EventHandler
 	public void playerQuit(PlayerQuitEvent event)
 	{
 		// re-check world ready
-		plugin.checkTeamsReady(event.getPlayer().getWorld());
+		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
+		if (match != null) match.checkTeamsReady();
 	}
 }
