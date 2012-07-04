@@ -153,6 +153,9 @@ public class AutoReferee extends JavaPlugin
 		// events related to worlds
 		pm.registerEvents(new WorldListener(this), this);
 
+		// events related to tracking objectives during a match
+		pm.registerEvents(new ObjectiveTracker(this), this);
+
 		actionTaken = Maps.newHashMap();
 		matches = Maps.newHashMap();
 

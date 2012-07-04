@@ -1,24 +1,29 @@
 package org.mctourney.AutoReferee.util;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 
-public class BlockVector3 
+public class BlockVector3 extends Vector3
 {
-	public int x, y, z;
+	public int bx, by, bz;
 	
 	public BlockVector3(int x, int y, int z)
-	{ this.x = x; this.y = y; this.z = z; }
+	{ super(0, 0, 0); bx = x; by = y; bz = z; }
 	
 	public BlockVector3(Vector3 v)
-	{
-		this.x = (int) v.x;
-		this.y = (int) v.y;
-		this.z = (int) v.z;
-	}
+	{ this((int)v.x, (int)v.y, (int)v.z); }
 
+	@Override
 	public String toCoords()
-	{ return x + "," + y + "," + z; }
+	{ return bx + "," + by + "," + bz; }
+
+	public static BlockVector3 fromCoords(String coords)
+	{ return new BlockVector3(Vector3.fromCoords(coords)); }
 
 	public static BlockVector3 fromLocation(Location loc)
 	{ return new BlockVector3(Vector3.fromLocation(loc)); }
+
+	@Override
+	public Location toLocation(World world)
+	{ return new Location(world, bx, by, bz); }
 }

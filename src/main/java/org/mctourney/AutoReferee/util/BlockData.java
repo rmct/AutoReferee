@@ -2,6 +2,7 @@ package org.mctourney.AutoReferee.util;
 
 import java.util.Map;
 
+import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -65,7 +66,9 @@ public class BlockData
 		if ((getMaterial().getNewData((byte) 0) instanceof Colorable))
 		{
 			DyeColor color = DyeColor.getByData(getData());
-			bname = color.name() + " " + bname;
+			ChatColor nameColor = ChatColorConverter.fromDyeColor(color);
+			return nameColor + color.name() + " " + bname + ChatColor.RESET;
+			
 		}
 		return bname;
 	}

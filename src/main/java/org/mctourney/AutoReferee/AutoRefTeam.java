@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -13,7 +12,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.material.Colorable;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 import org.mctourney.AutoReferee.util.*;
@@ -141,17 +139,27 @@ public class AutoRefTeam
 		}
 
 		newTeam.winConditions = Maps.newHashMap();
-		newTeam.targetChests = Maps.newHashMap();
 		if (conf.containsKey("win-condition"))
 		{
-			List<String> wclist = (List<String>) conf.get("win-condition");
-			if (wclist != null) for (String wc : wclist)
+			List<String> slist = (List<String>) conf.get("win-condition");
+			if (slist != null) for (String s : slist)
 			{
-				String[] wcparts = wc.split(":");
+				String[] sp = s.split(":");
 				
-				BlockVector3 v = new BlockVector3(Vector3.fromCoords(wcparts[0]));
-				newTeam.winConditions.put(new Location(w, v.x, v.y, v.z), 
-					BlockData.fromString(wcparts[1]));
+				BlockVector3 v = BlockVector3.fromCoords(sp[0]);
+				newTeam.addWinCondition(w.getBlockAt(v.toLocation(w)), 
+					BlockData.fromString(sp[1]));
+			}
+		}
+		
+		newTeam.targetChests = Maps.newHashMap();
+		if (conf.containsKey("target-container"))
+		{
+			List<String> slist = (List<String>) conf.get("target-container");
+			if (slist != null) for (String s : slist)
+			{
+				newTeam.addSourceInventory(
+					w.getBlockAt(BlockVector3.fromCoords(s).toLocation(w)));
 			}
 		}
 
@@ -180,6 +188,14 @@ public class AutoRefTeam
 
 		// add the win condition list
 		map.put("win-condition", wcond);
+		
+		// convert the target containers to strings
+		List<String> tcon = Lists.newArrayList();
+		for (Map.Entry<BlockData, SourceInventory> e : targetChests.entrySet())
+			tcon.add(BlockVector3.fromLocation(e.getValue().location).toCoords());
+
+		// add the target container list
+		map.put("target-container", tcon);
 
 		// convert regions to strings
 		List<String> regstr = Lists.newArrayList();
@@ -300,6 +316,13 @@ public class AutoRefTeam
 		
 		// add the block data to the win-condition listing
 		BlockData bd = BlockData.fromBlock(block);
+		this.addWinCondition(block, bd);
+	}
+	
+	public void addWinCondition(Block block, BlockData bd)
+	{
+		// if the block is null, forget it
+		if (block == null || bd == null) return;
 		winConditions.put(block.getLocation(), bd);
 		
 		// broadcast the update

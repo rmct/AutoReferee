@@ -8,24 +8,25 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.entity.*;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.*;
-import org.bukkit.event.entity.*;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
-import org.mctourney.AutoReferee.util.BlockData;
-
 import com.google.common.collect.Maps;
 
 public class ZoneListener implements Listener 
@@ -209,12 +210,6 @@ public class ZoneListener implements Listener
 			match.checkWinConditions(null);
 	}
 
-	@EventHandler(priority=EventPriority.MONITOR)
-	public void objectiveTrack(InventoryClickEvent event)
-	{
-		// TODO
-	}
-
 	@EventHandler
 	public void toolUsage(PlayerInteractEvent event)
 	{
@@ -310,7 +305,7 @@ public class ZoneListener implements Listener
 		if (match == null) return;
 		
 		// don't let endermen pick up blocks, as a rule
-		if (event.getEntity() instanceof Enderman)
+		if (event.getEntityType() == EntityType.ENDERMAN)
 			event.setCancelled(true);
 	}
 	

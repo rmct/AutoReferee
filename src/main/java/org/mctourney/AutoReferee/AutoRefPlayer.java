@@ -2,6 +2,7 @@ package org.mctourney.AutoReferee;
 
 import java.io.PrintWriter;
 import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.EntityType;
@@ -11,8 +12,13 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.mctourney.AutoReferee.util.BlockData;
 
 import org.apache.commons.collections.map.DefaultedMap;
+
+import com.google.common.collect.Sets;
 
 class AutoRefPlayer
 {
@@ -100,6 +106,9 @@ class AutoRefPlayer
 	public Map<AutoRefPlayer.DamageCause, Integer> deaths;
 	public Map<AutoRefPlayer.DamageCause, Integer> damage;
 	public int totalDeaths = 0;
+	
+	// tracking objective items
+	private Set<BlockData> carrying;
 	
 	// constructor for simply setting up the variables
 	@SuppressWarnings("unchecked")
@@ -209,4 +218,15 @@ class AutoRefPlayer
 			fw.println("\t" + damage.getKey().toString() + " caused " + pname 
 				+ " " + damage.getValue().toString() + " damage.");
 	}
+
+	public void updateCarrying(Inventory inv)
+	{
+		carrying = Sets.newHashSet();
+		for (ItemStack item : inv)
+			carrying.add(BlockData.fromItemStack(item));
+		carrying.retainAll(team.winConditions.values());
+	}
+	
+	public Set<BlockData> getCarrying()
+	{ return carrying; }
 }
