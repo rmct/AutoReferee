@@ -7,7 +7,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
@@ -55,12 +58,11 @@ public class TeamListener implements Listener
 		World world = event.getPlayer().getWorld();
 		AutoRefMatch match = plugin.getMatch(world);
 		
-		if (match.getCurrentState() == AutoReferee.eMatchStatus.PLAYING &&
-			event.getPlayer().getBedSpawnLocation() == null)
+		if (match != null && event.getPlayer().getBedSpawnLocation() == null)
 		{
 			// get the location for the respawn event
 			Location spawn = match.getPlayerSpawn(event.getPlayer());
-			if (spawn != null) event.setRespawnLocation(spawn);
+			event.setRespawnLocation(spawn == null ? world.getSpawnLocation() : spawn);
 		}
 	}
 

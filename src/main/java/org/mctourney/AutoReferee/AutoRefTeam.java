@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -211,13 +212,13 @@ public class AutoRefTeam
 	public AutoRefPlayer getPlayer(String name)
 	{
 		if (name != null) for (AutoRefPlayer apl : players)
-			if (name.equalsIgnoreCase(apl.player.getName()))
+			if (name.equalsIgnoreCase(apl.getPlayer().getName()))
 				return apl;
 		return null;
 	}
 
 	public AutoRefPlayer getPlayer(Player pl)
-	{ return getPlayer(pl.getName()); }
+	{ return pl == null ? null : getPlayer(pl.getName()); }
 
 	public void join(Player pl)
 	{
@@ -226,9 +227,11 @@ public class AutoRefTeam
 		
 		// null team not allowed, and quit if they are already on this team
 		if (players.contains(apl)) return;
-		
 		players.add(apl);
+		
+		// prepare the player
 		pl.teleport(getSpawnLocation());
+		pl.setGameMode(GameMode.SURVIVAL);
 		
 		// if the match is in progress, no one may join
 		if (match.getCurrentState().ordinal() >= eMatchStatus.PLAYING.ordinal()) return;
@@ -328,5 +331,11 @@ public class AutoRefTeam
 		// broadcast the update
 		match.broadcast(bd.getName() + " is now a win condition for " + getName() + 
 			" @ " + BlockVector3.fromLocation(block.getLocation()).toCoords());
+	}
+
+	public void updateCarrying(AutoRefPlayer apl, Set<BlockData> carrying, Set<BlockData> newCarrying)
+	{
+		// TODO: perhaps store team-level carrying information?
+		match.updateCarrying(apl, carrying, newCarrying);
 	}
 }

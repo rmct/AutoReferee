@@ -130,6 +130,7 @@
                   <include>org.apache.commons:commons-lang3</include>
                   <include>commons-io:commons-io</include>
                   <include>commons-collections:commons-collections</include>
+    	          <include>com.google.code.gson:gson</include>
                 </includes>
               </artifactSet>
             </configuration>           

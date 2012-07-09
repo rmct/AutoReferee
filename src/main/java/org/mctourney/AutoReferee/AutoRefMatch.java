@@ -93,12 +93,13 @@ public class AutoRefMatch
 	// basic variables loaded from file
 	private String mapName = null;
 	public boolean allowFriendlyFire = false;
+	public boolean allowCraft = false;
 
 	public String getMapName() 
 	{ return mapName; }
 	
 	// task that starts the match
-	public AutoRefMatch.MatchStarter matchStarter = null;
+	public AutoRefMatch.MatchStartTask matchStarter = null;
 	public Set<StartMechanism> startMechanisms = null;
 
 	// number of seconds for each phase
@@ -153,6 +154,7 @@ public class AutoRefMatch
 		// get the extra settings cached
 		mapName = worldConfig.getString("map.name", "<Untitled>");
 		allowFriendlyFire = worldConfig.getBoolean("match.allow-ff", false);
+		allowCraft = worldConfig.getBoolean("match.allow-craft", false);
 	}
 
 	public void saveWorldConfiguration() 
@@ -188,6 +190,15 @@ public class AutoRefMatch
 		for (AutoRefTeam team : teams)
 			players.addAll(team.getPlayers());
 		return players;
+	}
+
+	public Set<Player> getReferees()
+	{
+		Set<Player> refs = Sets.newHashSet();
+		for (Player p : world.getPlayers())
+			if (p.hasPermission("autoreferee.referee")) refs.add(p);
+		refs.removeAll(getPlayers());
+		return refs;
 	}
 
 	public void broadcast(String msg)
@@ -343,8 +354,24 @@ public class AutoRefMatch
 
 	public void start()
 	{
-		// set the current state to playing
-		currentState = eMatchStatus.PLAYING;
+		// set up the world time one last time
+		world.setTime(startTime);
+		
+		for (AutoRefPlayer apl : getPlayers())
+		{
+			// heal the players one last time
+			apl.heal();
+			
+			// clear their inventories
+			apl.getPlayer().getInventory().clear();
+			
+			// update the status of their objectives
+			apl.updateCarrying();
+		}
+		
+		// remove all mobs, animals, and items (again)
+		for (Entity e : world.getEntitiesByClasses(Monster.class, 
+			Animals.class, Item.class, ExperienceOrb.class)) e.remove();
 
 		// loop through all the redstone mechanisms required to start
 		for (StartMechanism sm : startMechanisms)
@@ -375,16 +402,19 @@ public class AutoRefMatch
 			sm.blockState.setData(mdata);
 			sm.blockState.update(true);
 		}
+		
+		// set the current state to playing
+		currentState = eMatchStatus.PLAYING;
 	}
 
 	// helper class for starting match, synchronous task
-	static class MatchStarter implements Runnable
+	static class MatchStartTask implements Runnable
 	{
 		public int task = -1;
 		private int secs = 3;
 		
 		private AutoRefMatch match = null;
-		public MatchStarter(AutoRefMatch m)
+		public MatchStartTask(AutoRefMatch m)
 		{
 			match = m;
 		}
@@ -394,12 +424,9 @@ public class AutoRefMatch
 			// if the countdown has ended...
 			if (secs == 0)
 			{
-				// set the current time to the start time (again)
-				match.world.setTime(match.startTime);
-				
 				// setup world to go!
-				match.broadcast(">>> " + ChatColor.GREEN + "GO!");
 				match.start();
+				match.broadcast(">>> " + ChatColor.GREEN + "GO!");
 				
 				// cancel the task
 				plugin.getServer().getScheduler().cancelTask(task);
@@ -443,8 +470,7 @@ public class AutoRefMatch
 		world.setWeatherDuration(Integer.MAX_VALUE);
 		
 		// prepare all players for the match
-		for (AutoRefPlayer apl : getPlayers())
-			apl.heal(); // TODO
+		for (AutoRefPlayer apl : getPlayers()) apl.heal();
 		
 		// vanish players appropriately
 		for ( Player view : world.getPlayers() ) // <--- viewer
@@ -466,21 +492,19 @@ public class AutoRefMatch
 			scheduler.cancelTask(this.matchStarter.task);
 		
 		// schedule the task to announce and prepare the match
-		this.matchStarter = new MatchStarter(this);
+		this.matchStarter = new MatchStartTask(this);
 		this.matchStarter.task = scheduler.scheduleSyncRepeatingTask(
 				plugin, this.matchStarter, readyDelay * 20L, 20L);
 	}
 
 	public void checkTeamsReady() 
 	{
-		if (this == null) return;
-		
 		// if there are no players on the server
 		if (getPlayers().size() == 0)
 		{
 			// set all the teams to not ready and status as waiting
 			for ( AutoRefTeam t : teams ) t.setReady(false);
-			currentState = eMatchStatus.WAITING; return;
+			setCurrentState(eMatchStatus.WAITING); return;
 		}
 		
 		// this function is only useful if we are waiting
@@ -507,7 +531,7 @@ public class AutoRefMatch
 	}
 
 	// helper class for terminating world, synchronous task
-	class MatchTerminator implements Runnable
+	class MatchEndTask implements Runnable
 	{
 		public void run()
 		{
@@ -525,7 +549,7 @@ public class AutoRefMatch
 		// we have confirmed that the state is PLAYING, so we know we are definitely
 		// in a match if this function is being called
 		
-		for (AutoRefTeam t : this.teams)
+		if (currentState == eMatchStatus.PLAYING) for (AutoRefTeam t : this.teams)
 		{
 			// if there are no win conditions set, skip this team
 			if (t.winConditions.size() == 0) continue;
@@ -545,8 +569,8 @@ public class AutoRefMatch
 				this.broadcast(t.getName() + " Wins!");
 				for (AutoRefPlayer apl : getPlayers())
 				{
-					apl.player.teleport(world.getSpawnLocation());
-					apl.player.setGameMode(GameMode.CREATIVE);
+					apl.getPlayer().teleport(world.getSpawnLocation());
+					apl.getPlayer().setGameMode(GameMode.CREATIVE);
 				}
 				
 				this.currentState = AutoReferee.eMatchStatus.COMPLETED;
@@ -556,7 +580,7 @@ public class AutoRefMatch
 					"server-mode.delay-seconds.completed", COMPLETED_SECONDS);
 				
 				plugin.getServer().getScheduler().scheduleSyncDelayedTask(
-					plugin, new MatchTerminator(), termDelay * 20L);
+					plugin, new MatchEndTask(), termDelay * 20L);
 			}
 		}
 	}
@@ -670,5 +694,24 @@ public class AutoRefMatch
 		}
 		
 		return owners;
+	}
+
+	public void updateCarrying(AutoRefPlayer apl, Set<BlockData> carrying, Set<BlockData> newCarrying)
+	{
+		// this will be the set of all plugin channel messages
+		String pname = apl.getPlayer().getName();
+		Set<byte[]> pmsg = Sets.newHashSet();
+		
+		Set<BlockData> add = Sets.newHashSet(newCarrying);
+		add.removeAll(carrying);
+
+		Set<BlockData> rem = Sets.newHashSet(carrying);
+		rem.removeAll(newCarrying);
+		
+		for (BlockData bd : add) pmsg.add((pname + ":+" + bd.toString()).getBytes());
+		for (BlockData bd : rem) pmsg.add((pname + ":-" + bd.toString()).getBytes());
+		
+		for (Player ref : getReferees()) for (byte[] msg : pmsg)
+			ref.sendPluginMessage(plugin, AutoReferee.REFEREE_PLUGIN_CHANNEL, msg);
 	}
 }

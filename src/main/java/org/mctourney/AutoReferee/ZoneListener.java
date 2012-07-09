@@ -27,6 +27,7 @@ import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
+
 import com.google.common.collect.Maps;
 
 public class ZoneListener implements Listener 
@@ -112,11 +113,11 @@ public class ZoneListener implements Listener
 			// player is sneaking off the edge and not in freefall
 			if (player.isSneaking() && d < SNEAK_DISTANCE && fallspeed < FREEFALL_THRESHOLD);
 			
-			else
+			// if any of the above clauses fail, they are not in a defensible position
+			else if (!player.isDead())
 			{
-				// if any of the above clauses fail, they are not in a defensible position
-				plugin.setDeathReason(player, AutoReferee.eAction.ENTERED_VOIDLANE);
-				if (!player.isDead()) player.setHealth(0);
+				player.setLastDamageCause(AutoRefPlayer.VOID_DEATH);
+				player.setHealth(0);
 			}
 		}
 	}
@@ -147,67 +148,36 @@ public class ZoneListener implements Listener
 		return true;
 	}
 
-	@EventHandler(priority=EventPriority.HIGHEST)
+	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void blockPlace(BlockPlaceEvent event)
 	{
-		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
-		if (match == null) return;
-		
 		// if this block interaction is invalid, cancel the event
 		if (!validInteract(event.getPlayer(), event.getBlock().getLocation()))
 		{ event.setCancelled(true); return; }
-		
-		// we are playing right now, so check win conditions
-		if (match.getCurrentState() == eMatchStatus.PLAYING)
-			match.checkWinConditions(null);
 	}
 
-	@EventHandler(priority=EventPriority.HIGHEST)
+	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void blockBreak(BlockBreakEvent event)
 	{
-		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
-		if (match == null) return;
-		
 		// if this block interaction is invalid, cancel the event
 		if (!validInteract(event.getPlayer(), event.getBlock().getLocation()))
 		{ event.setCancelled(true); return; }
-		
-		// we are playing right now, so check win conditions (with air location)
-		if (match.getCurrentState() == eMatchStatus.PLAYING)
-			match.checkWinConditions(event.getBlock().getLocation());
 	}
 	
-	@EventHandler(priority=EventPriority.HIGHEST)
+	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void blockInteract(PlayerInteractEvent event)
 	{
-		// if there is no block, drop out
-		if (!event.hasBlock()) return;
-		
-		AutoRefMatch match = plugin.getMatch(event.getClickedBlock().getWorld());
-		if (match == null) return;
-		
 		// if this block interaction is invalid, cancel the event
 		if (!validInteract(event.getPlayer(), event.getClickedBlock().getLocation()))
 		{ event.setCancelled(true); return; }
-		
-		// we are playing right now, so check win conditions
-		if (match.getCurrentState() == eMatchStatus.PLAYING)
-			match.checkWinConditions(null);
 	}
 	
-	@EventHandler(priority=EventPriority.HIGHEST)
+	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void entityInteract(PlayerInteractEntityEvent event)
 	{
-		AutoRefMatch match = plugin.getMatch(event.getRightClicked().getWorld());
-		if (match == null) return;
-		
 		// if this block interaction is invalid, cancel the event
 		if (!validInteract(event.getPlayer(), event.getRightClicked().getLocation()))
 		{ event.setCancelled(true); return; }
-		
-		// we are playing right now, so check win conditions
-		if (match.getCurrentState() == eMatchStatus.PLAYING)
-			match.checkWinConditions(null);
 	}
 
 	@EventHandler

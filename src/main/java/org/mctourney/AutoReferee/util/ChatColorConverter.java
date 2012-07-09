@@ -16,7 +16,7 @@ public abstract class ChatColorConverter
 		dyeColorMap.put(DyeColor.BLACK, ChatColor.BLACK);
 		dyeColorMap.put(DyeColor.BLUE, ChatColor.DARK_BLUE);
 		dyeColorMap.put(DyeColor.BROWN, ChatColor.GOLD);
-		dyeColorMap.put(DyeColor.CYAN, ChatColor.BLUE);
+		dyeColorMap.put(DyeColor.CYAN, ChatColor.AQUA);
 		dyeColorMap.put(DyeColor.GRAY, ChatColor.GRAY);
 		dyeColorMap.put(DyeColor.GREEN, ChatColor.DARK_GREEN);
 		dyeColorMap.put(DyeColor.LIGHT_BLUE, ChatColor.BLUE);

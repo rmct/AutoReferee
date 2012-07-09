@@ -24,6 +24,9 @@ class AutoRefPlayer
 {
 	public static AutoReferee plugin = null;
 	
+	public static final EntityDamageEvent VOID_DEATH = 
+		new EntityDamageEvent(null, EntityDamageEvent.DamageCause.VOID, 0);
+	
 	static class DamageCause
 	{
 		// cause of damage, primary value for damage cause
@@ -94,8 +97,8 @@ class AutoRefPlayer
 	}
 
 	// stored references
-	protected Player player;
-	protected AutoRefTeam team;
+	private Player player;
+	private AutoRefTeam team;
 	
 	// number of times this player has killed other players
 	public Map<String, Integer> kills;
@@ -123,8 +126,11 @@ class AutoRefPlayer
 		shotsFired = shotsHit = 0;
 		
 		// save the player and team as references
-		this.player = p;
-		this.team = t;
+		this.setPlayer(p);
+		this.setTeam(t);
+		
+		// setup the carrying array
+		this.carrying = Sets.newHashSet();
 	}
 	
 	public AutoRefPlayer(Player p)
@@ -132,34 +138,34 @@ class AutoRefPlayer
 
 	@Override
 	public int hashCode()
-	{ return player.hashCode(); }
+	{ return getPlayer().hashCode(); }
 
 	@Override
 	public boolean equals(Object o)
 	{
 		if (!(o instanceof AutoRefPlayer)) return false;
-		return player.equals(((AutoRefPlayer) o).player);
+		return getPlayer().equals(((AutoRefPlayer) o).getPlayer());
 	}
 	
 	public String getName()
 	{
-		if (team == null) return player.getName();
-		return team.getColor() + player.getName() + ChatColor.RESET;
+		if (getTeam() == null) return getPlayer().getName();
+		return getTeam().getColor() + getPlayer().getName() + ChatColor.RESET;
 	}
 	
 	public void heal()
 	{
-		player.setHealth    ( 20 ); // 10 hearts
-		player.setFoodLevel ( 20 ); // full food
-		player.setSaturation(  5 ); // saturation depletes hunger
-		player.setExhaustion(  0 ); // exhaustion depletes saturation
+		getPlayer().setHealth    ( 20 ); // 10 hearts
+		getPlayer().setFoodLevel ( 20 ); // full food
+		getPlayer().setSaturation(  5 ); // saturation depletes hunger
+		getPlayer().setExhaustion(  0 ); // exhaustion depletes saturation
 	}
 
 	// register that we just received this damage
 	public void registerDamage(EntityDamageEvent e)
 	{
 		// sanity check...
-		if (e.getEntity() != player) return;
+		if (e.getEntity() != getPlayer()) return;
 		
 		// get the last damage cause, and mark that as the cause of the damage
 		AutoRefPlayer.DamageCause dc = AutoRefPlayer.DamageCause.fromDamageEvent(e);
@@ -170,7 +176,7 @@ class AutoRefPlayer
 	public void registerDeath(PlayerDeathEvent e)
 	{
 		// sanity check...
-		if (e.getEntity() != player) return;
+		if (e.getEntity() != getPlayer()) return;
 		
 		// get the last damage cause, and mark that as the cause of one death
 		AutoRefPlayer.DamageCause dc = AutoRefPlayer.DamageCause.fromDamageEvent(e.getEntity().getLastDamageCause());
@@ -182,7 +188,7 @@ class AutoRefPlayer
 	public void registerKill(PlayerDeathEvent e)
 	{
 		// sanity check...
-		if (e.getEntity().getKiller() != player) return;
+		if (e.getEntity().getKiller() != getPlayer()) return;
 		
 		// get the name of the player who died, record one kill against them
 		String pname = e.getEntity().getName();
@@ -192,12 +198,12 @@ class AutoRefPlayer
 
 	public boolean isReady()
 	{
-		return team.getMatch().getWorld() == player.getWorld();
+		return getTeam().getMatch().getWorld() == getPlayer().getWorld();
 	}
 	
 	public void writeStats(PrintWriter fw)
 	{
-		String pname = this.player.getName();
+		String pname = this.getPlayer().getName();
 		String accuracyInfo = "";
 		
 		if (shotsFired > 0) accuracyInfo = " (" + 
@@ -219,14 +225,36 @@ class AutoRefPlayer
 				+ " " + damage.getValue().toString() + " damage.");
 	}
 
+	public void updateCarrying()
+	{ updateCarrying(getPlayer().getInventory()); }
+
 	public void updateCarrying(Inventory inv)
 	{
-		carrying = Sets.newHashSet();
-		for (ItemStack item : inv)
-			carrying.add(BlockData.fromItemStack(item));
-		carrying.retainAll(team.winConditions.values());
+		Set<BlockData> newCarrying = Sets.newHashSet();
+		if (getTeam() != null)
+		{
+			if (inv != null) for (ItemStack itm : inv)
+				if (itm != null) newCarrying.add(BlockData.fromItemStack(itm));
+			newCarrying.retainAll(getTeam().winConditions.values());
+			
+			if (newCarrying != carrying)
+				getTeam().updateCarrying(this, carrying, newCarrying);
+		}
+		carrying = newCarrying;
 	}
 	
 	public Set<BlockData> getCarrying()
 	{ return carrying; }
+
+	public Player getPlayer()
+	{ return player; }
+
+	private void setPlayer(Player player)
+	{ this.player = player; }
+
+	public AutoRefTeam getTeam()
+	{ return team; }
+
+	private void setTeam(AutoRefTeam team)
+	{ this.team = team; }
 }

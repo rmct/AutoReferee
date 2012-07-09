@@ -5,7 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,34 +20,44 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrMatcher;
 import org.apache.commons.lang.text.StrTokenizer;
 
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
-import org.bukkit.command.*;
-import org.bukkit.configuration.file.*;
-import org.bukkit.entity.*;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.messaging.Messenger;
 
-import org.mctourney.AutoReferee.util.*;
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
+import com.sk89q.worldedit.bukkit.selections.Selection;
+
+import org.mctourney.AutoReferee.util.CuboidRegion;
+import org.mctourney.AutoReferee.util.Vector3;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldedit.bukkit.selections.*;
+import com.google.common.collect.Sets;
 
 public class AutoReferee extends JavaPlugin
 {
+	// plugin channel prefix - identifies all channels as belonging to AutoReferee
+	private static final String PLUGIN_CHANNEL_PREFIX = "autoreferee:";
+	
+	// plugin channels (referee)
+	public static final String REFEREE_PLUGIN_CHANNEL = PLUGIN_CHANNEL_PREFIX + "referee"; 
+	
+	// name of the stored map configuration file
 	public static final String CFG_FILENAME = "autoreferee.yml";
 
 	// default port for a "master" server
 	public static final int DEFAULT_SERVER_PORT = 43760;
-
-	public enum eAction {
-		ENTERED_VOIDLANE,
-	};
 
 	public enum eMatchStatus {
 		NONE, WAITING, READY, PLAYING, COMPLETED,
@@ -99,15 +113,6 @@ public class AutoReferee extends JavaPlugin
 		// this player is expected on no known teams
 		return null;
 	}
-
-	// player name -> death reason
-	private Map<String, eAction> actionTaken;
-	
-	public void setDeathReason(Player player, eAction action)
-	{ actionTaken.put(player.getName(), action); }
-	
-	public eAction getDeathReason(Player player)
-	{ return actionTaken.remove(player.getName()); }
 	
 	private boolean checkPlugins(PluginManager pm)
 	{
@@ -156,7 +161,6 @@ public class AutoReferee extends JavaPlugin
 		// events related to tracking objectives during a match
 		pm.registerEvents(new ObjectiveTracker(this), this);
 
-		actionTaken = Maps.newHashMap();
 		matches = Maps.newHashMap();
 
 		// global configuration object (can't be changed, so don't save onDisable)
@@ -189,6 +193,8 @@ public class AutoReferee extends JavaPlugin
 		
 		// process initial world(s), just in case
 		for ( World w : getServer().getWorlds() ) AutoRefMatch.setupWorld(w);
+		
+		setupPluginChannels();
 	}
 
 	public boolean makeServerConnection(List<?> serverList)
@@ -241,6 +247,15 @@ public class AutoReferee extends JavaPlugin
 		// if there is a socket connection, close it
 		if (conn != null) conn.close();
 		log.info("AutoReferee disabled.");
+	}
+
+	private void setupPluginChannels() 
+	{
+		Messenger msgr = getServer().getMessenger();
+
+		msgr.registerOutgoingPluginChannel(this, REFEREE_PLUGIN_CHANNEL);
+		msgr.registerIncomingPluginChannel(this, REFEREE_PLUGIN_CHANNEL, 
+			new RefereeChannelListener(this));
 	}
 	
 	public void playerDone(Player p)
@@ -395,23 +410,25 @@ public class AutoReferee extends JavaPlugin
 			}
 			catch (Exception e) { return false; }
 			
-			if (args.length >= 2 && "state".equalsIgnoreCase(args[0]) && match != null) try
+			if (args.length >= 1 && "state".equalsIgnoreCase(args[0]) && match != null) try
 			{
-				match.setCurrentState(eMatchStatus.valueOf(args[1].toUpperCase()));
+				if (args.length >= 2)
+					match.setCurrentState(eMatchStatus.valueOf(args[1].toUpperCase()));
 				log.info("Match Status is now " + match.getCurrentState().name());
 				
 				return true;
 			}
 			catch (Exception e) { return false; }
 			
-			if (args.length >= 1 && "wincond".equalsIgnoreCase(args[0]))
+			if (args.length >= 1 && "tool".equalsIgnoreCase(args[0]))
 			{
-				int wincondtool = getConfig().getInt("config-mode.tools.win-condition", 284);
-				
 				// get the tool for setting win condition
-				if (args.length >= 2 && "tool".equalsIgnoreCase(args[1]))
+				if (args.length >= 2 && "wincond".equalsIgnoreCase(args[1]))
 				{
-					// get the tool used to set the winconditions
+					// get the tool used to set the win conditions
+					int wincondtool = ZoneListener.parseTool(
+						getConfig().getString("config-mode.tools.win-condition", null), 
+							Material.GOLD_SPADE.getId());
 					ItemStack toolitem = new ItemStack(wincondtool);
 					
 					// add to the inventory and switch to holding it
@@ -421,6 +438,25 @@ public class AutoReferee extends JavaPlugin
 					// let the player know what the tool is and how to use it
 					player.sendMessage("Given win condition tool: " + toolitem.getType().name());
 					player.sendMessage("Right-click on a block to set it as a win-condition.");
+					player.sendMessage("Right-click on a chest/container to set it as an objective source.");
+					return true;
+				}
+				// get the tool for setting starting mechanisms
+				if (args.length >= 2 && "startmech".equalsIgnoreCase(args[1]))
+				{
+					// get the tool used to set the starting mechanisms
+					int mechtool = ZoneListener.parseTool(
+						getConfig().getString("config-mode.tools.start-mechanism", null), 
+							Material.GOLD_AXE.getId());
+					ItemStack toolitem = new ItemStack(mechtool);
+					
+					// add to the inventory and switch to holding it
+					PlayerInventory inv = player.getInventory();
+					inv.addItem(toolitem);
+					
+					// let the player know what the tool is and how to use it
+					player.sendMessage("Given start mechanism tool: " + toolitem.getType().name());
+					player.sendMessage("Right-click on a device to set it as a starting mechanism.");
 					return true;
 				}
 			}
@@ -441,7 +477,7 @@ public class AutoReferee extends JavaPlugin
 					return true;
 				}
 
-				lookupTeams = new HashSet<AutoRefTeam>();
+				lookupTeams = Sets.newHashSet();
 				lookupTeams.add(t);
 			}
 
@@ -526,17 +562,11 @@ public class AutoReferee extends JavaPlugin
 			}
 			return true;
 		}
-
-		if ("ready".equalsIgnoreCase(cmd.getName()) && match != null)
-		{
-			match.prepareMatch();
-		}
 		if ("jointeam".equalsIgnoreCase(cmd.getName()) && match != null && !onlineMode)
 		{
 			// get the target team
-			AutoRefTeam team = args.length > 0 
-				? match.teamNameLookup(args[0]) 
-				: match.getArbitraryTeam();
+			AutoRefTeam team = args.length > 0 ? match.teamNameLookup(args[0]) : 
+				match.getArbitraryTeam();
 			
 			if (team == null)
 			{
@@ -546,24 +576,38 @@ public class AutoReferee extends JavaPlugin
 				return true;
 			}
 
-			Player target = player;
-			if (args.length > 1)
-				target = getServer().getPlayer(args[1]);
+			// get the target player to affect (no arg = command sender)
+			Player target = args.length > 1 ? 
+				getServer().getPlayer(args[1]) : player;
 
 			if (target == null)
 			{ sender.sendMessage("Must specify a valid user."); return true; }
+				
+			if (target != player && !player.hasPermission("autoreferee.configure"))
+			{ sender.sendMessage("You do not have permission."); return true; }
 
-			team.join(target);
+			// get previous team, if this is the same team, do nothing
+			AutoRefTeam pteam = match.getPlayerTeam(target);
+			if (team != pteam)
+			{
+				// if this is a different team, leave previous team
+				if (pteam != null) pteam.leave(player);
+				team.join(target);
+			}
+			
 			return true;
 		}
 		if ("leaveteam".equalsIgnoreCase(cmd.getName()) && match != null && !onlineMode)
 		{
-			Player target = player;
-			if (args.length > 0)
-				target = getServer().getPlayer(args[0]);
+			// get the target player to affect (no arg = command sender)
+			Player target = args.length > 1 ? 
+				getServer().getPlayer(args[1]) : player;
 
 			if (target == null)
 			{ sender.sendMessage("Must specify a valid user."); return true; }
+			
+			if (target != player && !player.hasPermission("autoreferee.configure"))
+			{ sender.sendMessage("You do not have permission."); return true; }
 
 			match.leaveTeam(target);
 			return true;

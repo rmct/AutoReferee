@@ -1,14 +1,21 @@
 package org.mctourney.AutoReferee;
 
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.*;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
-import org.mctourney.AutoReferee.AutoReferee.eAction;
 
 public class PlayerVersusPlayerListener implements Listener
 {
@@ -34,14 +41,8 @@ public class PlayerVersusPlayerListener implements Listener
 
 			// if the death was due to intervention by the plugin
 			// let's change the death message to reflect this fact
-			eAction deathReason = plugin.getDeathReason(victim);
-			if (deathReason != null) switch (deathReason)
-			{
-				// killed because they entered the void lane
-				case ENTERED_VOIDLANE:
-					dmsg = victim.getName() + " entered the void lane.";
-					break;
-			}
+			if (victim.getLastDamageCause() == AutoRefPlayer.VOID_DEATH)
+				dmsg = victim.getName() + " entered the void lane.";
 
 			// color the player's name with his team color
 			dmsg = dmsg.replace(victim.getName(), match.getPlayerName(victim));
@@ -130,6 +131,7 @@ public class PlayerVersusPlayerListener implements Listener
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void explosionPrime(ExplosionPrimeEvent event)
 	{
-		//event.
+		// TODO: Waiting on BUKKIT-1858
+		
 	}
 }
