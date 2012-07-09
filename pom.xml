@@ -7,7 +7,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.mctourney.AutoReferee</groupId>
+  <groupId>org.mctourney.autoreferee</groupId>
   <artifactId>AutoReferee</artifactId>
   <version>0.3</version>
   <name>AutoReferee</name>
@@ -80,6 +80,11 @@
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
       <version>3.2</version>
+    </dependency>
+    <dependency>
+    	<groupId>com.google.code.gson</groupId>
+    	<artifactId>gson</artifactId>
+    	<version>2.2.2</version>
     </dependency>
   </dependencies>
   

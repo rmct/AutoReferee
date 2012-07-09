@@ -7,3 +7,5 @@ For _Bukkit R5+_
 **Mapmakers:** Once you have built your map and configured it for use with Autoreferee, the plugin will place a special configuration file directly into your world folder for you to package and distribute with your map. The configuration file configures AutoReferee automatically when your map is loaded. Please refer to the documentation regarding this configuration file.
 
 _Note:_ This plugin uses [WorldEdit](http://wiki.sk89q.com/wiki/WorldEdit) for map configuration. Server operators need not run WorldEdit on their server, but to configure a map for use with **AutoReferee**, WorldEdit is required.
+
+[Download In-dev JAR](https://rmct.ci.cloudbees.com/job/AutoReferee/lastSuccessfulBuild/artifact/target/)
