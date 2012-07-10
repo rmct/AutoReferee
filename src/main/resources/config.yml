@@ -1,16 +1,15 @@
-config-version: 1
-keyserver: server.mlm.net
+config-version: 2
+console-log: true
 
 server-mode:
-  console-log: true
   online: true
-  server-key: YOUR-KEY-GOES-HERE
+  keyserver: server.mlm.net
+  key: YOUR-KEY-GOES-HERE
+  query-server: localhost
 
-  server-list:
-    - localhost
-  delay-seconds:
-    ready: 15
-    completed: 180
+delay-seconds:
+  ready: 15
+  completed: 180
 
 config-mode:
   tools:
