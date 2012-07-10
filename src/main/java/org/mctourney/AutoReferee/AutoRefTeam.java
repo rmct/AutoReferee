@@ -53,9 +53,21 @@ public class AutoRefTeam
 	
 	// team's name, may or may not be color-related
 	private String name = null;
+	private String customName = null;
+
+	// determine the name provided back from this team
+	private String getRawName()
+	{
+		if (customName != null)
+			return customName;
+		return name;
+	}
+	
+	public void setName(String name)
+	{ customName = name; }
 
 	public String getName()
-	{ return color + name + ChatColor.RESET; }
+	{ return color + getRawName() + ChatColor.RESET; }
 
 	// color to use for members of this team
 	private ChatColor color = null;
@@ -96,7 +108,15 @@ public class AutoRefTeam
 
 	// does a provided search string match this team?
 	public boolean matches(String needle)
-	{ return -1 != name.toLowerCase().indexOf(needle.toLowerCase()); }
+	{
+		if (needle == null) return false;
+		needle = needle.toLowerCase();
+
+		String a = name.toLowerCase(), b = customName.toLowerCase();
+		if (a != null && -1 != needle.indexOf(a)) return true;
+		if (b != null && -1 != needle.indexOf(b)) return true;
+		return false;
+	}
 
 	// a factory for processing config maps
 	@SuppressWarnings("unchecked")

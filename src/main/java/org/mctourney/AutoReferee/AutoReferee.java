@@ -3,14 +3,15 @@ package org.mctourney.AutoReferee;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,35 +45,48 @@ import org.mctourney.AutoReferee.util.Vector3;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class AutoReferee extends JavaPlugin
 {
 	// plugin channel prefix - identifies all channels as belonging to AutoReferee
-	private static final String PLUGIN_CHANNEL_PREFIX = "autoreferee:";
+	private static final String PLUGIN_CHANNEL_PREFIX = "autoref:";
 	
 	// plugin channels (referee)
-	public static final String REFEREE_PLUGIN_CHANNEL = PLUGIN_CHANNEL_PREFIX + "referee"; 
+	public static final String REFEREE_PLUGIN_CHANNEL = PLUGIN_CHANNEL_PREFIX + "referee";
 	
 	// name of the stored map configuration file
 	public static final String CFG_FILENAME = "autoreferee.yml";
 
 	// default port for a "master" server
 	public static final int DEFAULT_SERVER_PORT = 43760;
+	private static final int PLUGIN_CFG_VERSION = 2;
 
 	public enum eMatchStatus {
 		NONE, WAITING, READY, PLAYING, COMPLETED,
 	};
 	
-	public Logger log = null;
-	public World lobby = null;
-	
+	private World lobby = null;
+
+	public World getLobbyWorld()
+	{ return lobby; }
+
+	public void setLobbyWorld(World w)
+	{ this.lobby = w; }
+
 	// is this plugin in online mode?
-	public boolean onlineMode = false;
-	private RefereeClient conn = null;
+	private boolean autoMode = false;
+	
+	public boolean isAutoMode()
+	{ return autoMode; }
+
+	public void setAutoMode(boolean m)
+	{ this.autoMode = m; }
 
 	// get the match associated with the world
 	private Map<UUID, AutoRefMatch> matches = null;
-	
+
 	public AutoRefMatch getMatch(World w)
 	{ return matches.get(w.getUID()); }
 
@@ -120,12 +134,12 @@ public class AutoReferee extends JavaPlugin
 		for ( Plugin p : pm.getPlugins() ) if (p != this)
 		{
 			if (!foundOtherPlugin)
-				log.severe("No other plugins may be loaded in online mode...");
-			log.severe("Agressively disabling plugin: " + p.getName());
+				getLogger().severe("No other plugins may be loaded in online mode...");
+			getLogger().severe("Agressively disabling plugin: " + p.getName());
 
 			pm.disablePlugin(p);
 			String pStatus = p.isEnabled() ? "NOT disabled" : "disabled";
-			log.severe(p.getName() + " is " + pStatus + ".");
+			getLogger().severe(p.getName() + " is " + pStatus + ".");
 
 			foundOtherPlugin = true;
 		}
@@ -143,7 +157,6 @@ public class AutoReferee extends JavaPlugin
 		AutoRefTeam.plugin = this;
 		AutoRefPlayer.plugin = this;
 		
-		log = this.getLogger();
 		PluginManager pm = getServer().getPluginManager();
 
 		// events related to team management, chat, whitelists, respawn
@@ -168,25 +181,32 @@ public class AutoReferee extends JavaPlugin
 		if (configInputStream != null) getConfig().setDefaults(
 			YamlConfiguration.loadConfiguration(configInputStream));
 		getConfig().options().copyDefaults(true); saveConfig();
+		
+		// ensure we are dealing with the right type of config file
+		int configVersion = getConfig().getInt("config-version", -1);
+		if (configVersion != PLUGIN_CFG_VERSION)
+			getLogger().severe(String.format("!!! Incorrect config-version (expected %d, got %d)",
+				PLUGIN_CFG_VERSION, configVersion));
 
 		// get server list, and attempt to determine whether we are in online mode
-		List<?> serverList = getConfig().getList("server-mode.server-list", Lists.newArrayList());
-		onlineMode = !(serverList.size() == 0 || !getConfig().getBoolean("server-mode.online", true));
+		String qserver = getConfig().getString("server-mode.query-server", null);
+		setAutoMode(getServer().getOnlineMode() && qserver != null && 
+			this.getConfig().getBoolean("server-mode.online", true));
 
 		// wrap up, debug to follow this message
-		log.info("AutoReferee loaded successfully.");
+		getLogger().info("AutoReferee loaded successfully.");
 		
 		// save the "lobby" world as a sort of drop-zone for discharged players
-		lobby = !getConfig().isString("lobby-world") ? getServer().getWorlds().get(0)
-			: getServer().getWorld(getConfig().getString("lobby-world"));
+		String lobbyname = getConfig().getString("lobby-world", null);
+		World lobbyworld = lobbyname == null ? null : getServer().getWorld(lobbyname);
+		setLobbyWorld(lobbyworld == null ? getServer().getWorlds().get(0) : lobbyworld);
 
 		// connect to server, or let the server operator know to set up the match manually
-		if (!makeServerConnection(serverList))
-			log.info("AutoReferee is running in OFFLINE mode. All setup must be done manually.");
+		if (!makeServerConnection(qserver))
+			getLogger().info("AutoReferee is running in OFFLINE mode. All setup must be done manually.");
 
 		// update online mode to represent whether or not we have a connection
-		onlineMode = (conn != null);
-		if (onlineMode) onlineMode = checkPlugins(pm);
+		if (isAutoMode()) setAutoMode(checkPlugins(pm));
 		
 		// setup the map library folder
 		AutoRefMatch.getMapLibrary();
@@ -197,46 +217,25 @@ public class AutoReferee extends JavaPlugin
 		setupPluginChannels();
 	}
 
-	public boolean makeServerConnection(List<?> serverList)
+	public boolean makeServerConnection(String qserver)
 	{
 		// if we are not in online mode, stop right here
-		if (!onlineMode) return false;
+		if (!isAutoMode()) return false;
 		
 		// get default key and server key
-		String defkey = getConfig().getDefaults().getString("server-mode.server-key");
-		String key = getConfig().getString("server-mode.server-key", null);
+		String defkey = getConfig().getDefaults().getString("server-mode.key");
+		String key = getConfig().getString("server-mode.key", null);
 		
 		// if there is no server key listed, or it is set to the default key
 		if (key == null || key.equals(defkey))
 		{
 			// reference the keyserver to remind operator to get a server key
-			log.severe("Please get a server key from " + getConfig().getString("keyserver"));
+			getLogger().severe("Please get a server key from " + 
+				getConfig().getString("server-mode.keyserver"));
 			return false;
 		}
 		
-		for (Object obj : serverList) if (obj instanceof String)
-		{
-			// split the server address on the colon, to get the port
-			String[] serv = ((String) obj).split(":", 2);
-			String addr = serv[0]; int port = DEFAULT_SERVER_PORT;
-			
-			// if provided parse the port out of the server address
-			if (serv.length > 1) try { port = Integer.parseInt(serv[1]); }
-			catch (NumberFormatException e) {  }
-			
-			try
-			{
-				// create a socket and a client connection
-				Socket socket = new Socket(addr, port);
-				socket.setKeepAlive(true);
-				conn = new RefereeClient(this, socket);
-			
-				// successful connection, return success
-				new Thread(conn).start(); return true;
-			}
-			catch (UnknownHostException e) {  }
-			catch (IOException e) {  }
-		}
+		// TODO - qserver
 		
 		// none worked, return failure
 		return false;
@@ -244,9 +243,7 @@ public class AutoReferee extends JavaPlugin
 
 	public void onDisable()
 	{
-		// if there is a socket connection, close it
-		if (conn != null) conn.close();
-		log.info("AutoReferee disabled.");
+		getLogger().info("AutoReferee disabled.");
 	}
 
 	private void setupPluginChannels() 
@@ -261,14 +258,19 @@ public class AutoReferee extends JavaPlugin
 	public void playerDone(Player p)
 	{
 		// if the server is in online mode, remove them
-		if (onlineMode) p.kickPlayer("Thank you for playing!");
+		if (isAutoMode()) p.kickPlayer("Thank you for playing!");
 		
 		// otherwise, take them back to the lobby
-		else p.teleport(lobby.getSpawnLocation());
+		else p.teleport(getLobbyWorld().getSpawnLocation());
 	}
 
 	public World createMatchWorld(String worldName, Long checksum) throws IOException
 	{
+		File existingWorld = new File(worldName);
+		if (existingWorld.exists() && existingWorld.isDirectory() &&
+			new File(existingWorld, AutoReferee.CFG_FILENAME).exists())
+				return getServer().createWorld(WorldCreator.name(worldName));
+		
 		// get the folder associated with this world name
 		File mapFolder = AutoRefMatch.getMapFolder(worldName, checksum);
 		if (mapFolder == null) return null;
@@ -284,6 +286,36 @@ public class AutoReferee extends JavaPlugin
 	
 	public World createMatchWorld(String worldName) throws IOException
 	{ return createMatchWorld(worldName, null); }
+	
+	public AutoRefMatch createMatch(MatchParams params) throws IOException
+	{
+		AutoRefMatch m = new AutoRefMatch(createMatchWorld(params.getMap(), params.getChecksum()));
+		Iterator<AutoRefTeam> teamiter = m.getTeams().iterator();
+		for (MatchParams.TeamInfo teaminfo : params.getTeams())
+		{
+			if (!teamiter.hasNext()) break;
+			AutoRefTeam team = teamiter.next();
+			
+			team.setName(teaminfo.getName());
+			for (String name : teaminfo.getPlayers())
+				team.addExpectedPlayer(name);
+		}
+	   	return m;
+	}
+	
+	public boolean parseMatchInitialization(String json) // TODO
+	{
+		Type type = new TypeToken<List<MatchParams>>() {}.getType();
+		List<MatchParams> paramList = new Gson().fromJson(json, type);
+		
+		try
+		{
+			for (MatchParams params : paramList)
+				this.addMatch(createMatch(params));
+		}
+		catch (IOException e) { return false; }
+		return true;
+	}
 	
 	private WorldEditPlugin getWorldEdit()
 	{
@@ -339,13 +371,22 @@ public class AutoReferee extends JavaPlugin
 			{	
 				// get generate a map name from the args
 				String mapName = args[1];
-				World mw = createMatchWorld(mapName, null);
+				World mw;
+
+				Long checksum = null;
+				if (args.length >= 3) checksum = Long.valueOf(args[2], 16);
+
+				File existingWorld = new File(mapName);
+				if (existingWorld.exists() && existingWorld.isDirectory() &&
+					new File(existingWorld, AutoReferee.CFG_FILENAME).exists())
+						mw = getServer().createWorld(WorldCreator.name(mapName));
+				else mw = createMatchWorld(mapName, checksum);
 				
 				// if there is a map folder, print the CRC
-				if (mw == null) log.info("No such map: [" + mapName + "]");
+				if (mw == null) getLogger().info("No such map: [" + mapName + "]");
 				else
 				{
-					log.info("World created for [" + mapName + 
+					getLogger().info("World created for [" + mapName + 
 						"] at the request of " + player.getName());
 					player.teleport(mw.getSpawnLocation());
 				}
@@ -369,9 +410,9 @@ public class AutoReferee extends JavaPlugin
 					
 					mapName = YamlConfiguration.loadConfiguration(cfgFile)
 						.getString("map.name", "<Untitled>");
-					log.info(mapName + ": [" + Long.toHexString(checksum) + "]");
+					getLogger().info(mapName + ": [" + Long.toHexString(checksum) + "]");
 				}
-				else log.info("No such map: " + mapName);
+				else getLogger().info("No such map: " + mapName);
 				
 				return true;
 			}
@@ -395,7 +436,7 @@ public class AutoReferee extends JavaPlugin
 				
 				archiveMapData(world.getWorldFolder(), archiveFolder);
 				long checksum = AutoRefMatch.recursiveCRC32(archiveFolder);
-				log.info(match.getMapName() + ": [" + Long.toHexString(checksum) + "]");
+				getLogger().info(match.getMapName() + ": [" + Long.toHexString(checksum) + "]");
 				return true;
 			}
 			catch (Exception e) { return false; }
@@ -414,7 +455,7 @@ public class AutoReferee extends JavaPlugin
 			{
 				if (args.length >= 2)
 					match.setCurrentState(eMatchStatus.valueOf(args[1].toUpperCase()));
-				log.info("Match Status is now " + match.getCurrentState().name());
+				getLogger().info("Match Status is now " + match.getCurrentState().name());
 				
 				return true;
 			}
@@ -562,7 +603,7 @@ public class AutoReferee extends JavaPlugin
 			}
 			return true;
 		}
-		if ("jointeam".equalsIgnoreCase(cmd.getName()) && match != null && !onlineMode)
+		if ("jointeam".equalsIgnoreCase(cmd.getName()) && match != null && !isAutoMode())
 		{
 			// get the target team
 			AutoRefTeam team = args.length > 0 ? match.teamNameLookup(args[0]) : 
@@ -597,7 +638,7 @@ public class AutoReferee extends JavaPlugin
 			
 			return true;
 		}
-		if ("leaveteam".equalsIgnoreCase(cmd.getName()) && match != null && !onlineMode)
+		if ("leaveteam".equalsIgnoreCase(cmd.getName()) && match != null && !isAutoMode())
 		{
 			// get the target player to affect (no arg = command sender)
 			Player target = args.length > 1 ? 
@@ -686,3 +727,42 @@ public class AutoReferee extends JavaPlugin
 	}
 }
 
+
+// unserialized match initialization parameters
+class MatchParams
+{
+	public static class TeamInfo
+	{
+		private String name;
+		
+		public String getName()
+		{ return name; }
+		
+		private List<String> players;
+
+		public List<String> getPlayers()
+		{ return Collections.unmodifiableList(players); }
+	}
+	
+	// info about all the teams
+	private List<TeamInfo> teams;
+	
+	public List<TeamInfo> getTeams()
+	{ return Collections.unmodifiableList(teams); }
+
+	// match tag for reporting
+	private String tag;
+	
+	public String getTag()
+	{ return tag; }
+	
+	// map name and checksum
+	private String map;
+	private Long checksum;
+	
+	public String getMap()
+	{ return map; }
+	
+	public Long getChecksum()
+	{ return checksum; }
+}

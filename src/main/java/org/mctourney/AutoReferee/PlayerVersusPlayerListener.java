@@ -11,8 +11,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
@@ -50,8 +52,8 @@ public class PlayerVersusPlayerListener implements Listener
 			// if the killer was a player, color their name as well
 			if (killer != null) 
 			{
-				if (plugin.getConfig().getBoolean("server-mode.console.log", false))
-					plugin.log.info("[DEATH] " + killer.getDisplayName() 
+				if (plugin.getConfig().getBoolean("console-log", false))
+					plugin.getLogger().info("[DEATH] " + killer.getDisplayName() 
 						+ " killed " + victim.getDisplayName());
 				dmsg = dmsg.replace(killer.getName(), match.getPlayerName(killer));
 			}
@@ -127,11 +129,39 @@ public class PlayerVersusPlayerListener implements Listener
 			if (pdata != null) pdata.registerDamage(event);
 		}
 	}
+
+	@EventHandler
+	public void playerBowFire(EntityShootBowEvent event)
+	{
+		// if the entity is not a player, we don't care
+		if (event.getEntityType() != EntityType.PLAYER) return;
+		
+		Player player = (Player) event.getEntity();
+		AutoRefMatch match = plugin.getMatch(player.getWorld());
+		if (match == null) return;
+		
+		AutoRefPlayer apl = match.getPlayer(player);
+		if (apl != null) ++apl.shotsFired;
+	}
+
+	@EventHandler
+	public void playerArrowHit(ProjectileHitEvent event)
+	{
+		if ((event.getEntityType() == EntityType.ARROW) && 
+			(event.getEntity().getShooter() instanceof Player))
+		{
+			Player player = (Player) event.getEntity().getShooter();
+			AutoRefMatch match = plugin.getMatch(player.getWorld());
+			if (match == null) return;
+			
+			AutoRefPlayer apl = match.getPlayer(player);
+			if (apl != null) ++apl.shotsHit;
+		}
+	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void explosionPrime(ExplosionPrimeEvent event)
 	{
-		// TODO: Waiting on BUKKIT-1858
-		
+		// TODO: Waiting on BUKKIT-770
 	}
 }

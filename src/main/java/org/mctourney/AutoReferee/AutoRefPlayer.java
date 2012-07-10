@@ -198,7 +198,7 @@ class AutoRefPlayer
 
 	public boolean isReady()
 	{
-		return getTeam().getMatch().getWorld() == getPlayer().getWorld();
+		return getPlayer().getWorld() == getTeam().getMatch().getWorld();
 	}
 	
 	public void writeStats(PrintWriter fw)

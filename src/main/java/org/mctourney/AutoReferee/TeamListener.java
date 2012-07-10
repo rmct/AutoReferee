@@ -33,7 +33,7 @@ public class TeamListener implements Listener
 		event.setFormat("<" + match.getPlayerName(player) + "> " + event.getMessage());
 
 		// if we are currently playing and speaker on a team, restrict recipients
-		AutoRefTeam t = plugin.getTeam(player);
+		AutoRefTeam t = match.getPlayerTeam(player);
 		
 		Iterator<Player> iter = event.getRecipients().iterator();
 		while (iter.hasNext())
@@ -46,7 +46,7 @@ public class TeamListener implements Listener
 			
 			// if listener is on a team, and its not the same team as the
 			// speaker, remove them from the recipients list
-			AutoRefTeam oteam = plugin.getTeam(recipient);
+			AutoRefTeam oteam = match.getPlayerTeam(recipient);
 			if (match.getCurrentState() == eMatchStatus.PLAYING &&
 				oteam != null && oteam != t) { iter.remove(); continue; }
 		}
@@ -66,16 +66,17 @@ public class TeamListener implements Listener
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority=EventPriority.HIGHEST)
 	public void playerLogin(PlayerLoginEvent event)
 	{
 		Player player = event.getPlayer();
-		plugin.log.info(player.getName() + " should be logging in now.");
-		
-		// if they should be whitelisted, let them in, otherwise, block them
-		if (plugin.playerWhitelisted(player)) event.allow();
-		else event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, 
-			"You are not scheduled for a match on this server.");
+		if (plugin.isAutoMode())
+		{
+			// if they should be whitelisted, let them in, otherwise, block them
+			if (plugin.playerWhitelisted(player)) event.allow();
+			else event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, 
+				"You are not scheduled for a match on this server.");
+		}	
 		
 		// if this player needs to be in a specific world, put them there
 		AutoRefTeam team = plugin.getExpectedTeam(player);
@@ -85,8 +86,14 @@ public class TeamListener implements Listener
 	@EventHandler
 	public void playerQuit(PlayerQuitEvent event)
 	{
+		Player player = event.getPlayer();
+		
+		// leave the team, if necessary
+		AutoRefTeam team = plugin.getTeam(player);
+		if (team != null) team.leave(player);
+		
 		// re-check world ready
-		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
+		AutoRefMatch match = plugin.getMatch(player.getWorld());
 		if (match != null) match.checkTeamsReady();
 	}
 }

@@ -181,7 +181,7 @@ public class AutoRefMatch
 
 		// log errors, report which world did not save
 		catch (java.io.IOException e)
-		{ plugin.log.info("Could not save world config: " + world.getName()); }
+		{ plugin.getLogger().info("Could not save world config: " + world.getName()); }
 	}
 
 	public Set<AutoRefPlayer> getPlayers()
@@ -349,7 +349,7 @@ public class AutoRefMatch
 	{
 		StartMechanism sm = new StartMechanism(block, state);
 		startMechanisms.add(sm);
-		plugin.log.info(sm.toString() + " is a start mechanism.");
+		plugin.getLogger().info(sm.toString() + " is a start mechanism.");
 	}
 
 	public void start()
@@ -481,7 +481,7 @@ public class AutoRefMatch
 		}
 		
 		int readyDelay = plugin.getConfig().getInt(
-			"server-mode.delay-seconds.ready", AutoRefMatch.READY_SECONDS);
+			"delay-seconds.ready", AutoRefMatch.READY_SECONDS);
 		
 		// announce the match starting in X seconds
 		this.broadcast("Match will begin in "
@@ -511,7 +511,7 @@ public class AutoRefMatch
 		if (currentState != eMatchStatus.WAITING) return;
 		
 		// if we aren't in online mode, assume we are always ready
-		if (!plugin.onlineMode) { setCurrentState(eMatchStatus.READY); return; }
+		if (!plugin.isAutoMode()) { setCurrentState(eMatchStatus.READY); return; }
 		
 		// check if all the players are here
 		boolean ready = true;
@@ -577,7 +577,7 @@ public class AutoRefMatch
 				logPlayerStats(null);
 				
 				int termDelay = plugin.getConfig().getInt(
-					"server-mode.delay-seconds.completed", COMPLETED_SECONDS);
+					"delay-seconds.completed", COMPLETED_SECONDS);
 				
 				plugin.getServer().getScheduler().scheduleSyncDelayedTask(
 					plugin, new MatchEndTask(), termDelay * 20L);
@@ -587,13 +587,15 @@ public class AutoRefMatch
 
 	public AutoRefTeam teamNameLookup(String name)
 	{
+		AutoRefTeam mteam = null;
+		
 		// if there is no match on that world, forget it
 		// is this team name a word?
-		for (AutoRefTeam t : teams)
-			if (t.matches(name)) return t;
+		for (AutoRefTeam t : teams) if (t.matches(name))
+		{ if (mteam == null) mteam = t; else return null; }
 	
-		// no team matches the name provided
-		return null;
+		// return the matched team (or null if no match)
+		return mteam;
 	}
 	
 	// get all expected players
@@ -664,7 +666,7 @@ public class AutoRefMatch
 			fw.close();
 		}
 		catch (IOException e)
-		{ plugin.log.severe("Could not write player stat logfile."); }
+		{ plugin.getLogger().severe("Could not write player stat logfile."); }
 	}
 
 	// distance from the closest owned region
