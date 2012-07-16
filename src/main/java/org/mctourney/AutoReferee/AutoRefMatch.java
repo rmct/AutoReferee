@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -32,7 +35,6 @@ import org.bukkit.material.*;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
-
 import org.mctourney.AutoReferee.util.BlockData;
 import org.mctourney.AutoReferee.util.CuboidRegion;
 import org.mctourney.AutoReferee.util.Vector3;
@@ -40,7 +42,6 @@ import org.mctourney.AutoReferee.util.Vector3;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Maps;
-import org.apache.commons.io.FileUtils;
 
 public class AutoRefMatch
 {
@@ -73,6 +74,14 @@ public class AutoRefMatch
 
 	public Set<AutoRefTeam> getTeams()
 	{ return teams; }
+
+	public String getTeamList()
+	{
+		Set<String> tlist = Sets.newHashSet();
+		for (AutoRefTeam team : teams)
+			tlist.add("\"" + team.getName() + "\"");
+		return StringUtils.join(tlist, ", ");
+	}
 	
 	// region defined as the "start" region (safe zone)
 	private CuboidRegion startRegion = null;
@@ -92,6 +101,7 @@ public class AutoRefMatch
 	
 	// basic variables loaded from file
 	private String mapName = null;
+	
 	public boolean allowFriendlyFire = false;
 	public boolean allowCraft = false;
 
@@ -199,6 +209,13 @@ public class AutoRefMatch
 			if (p.hasPermission("autoreferee.referee")) refs.add(p);
 		refs.removeAll(getPlayers());
 		return refs;
+	}
+
+	public void messageReferees(Player p, String type, String data)
+	{
+		byte[] msg = String.format("%s:%s:%s", p.getName(), type, data).getBytes();
+		for (Player ref : getReferees())
+			ref.sendPluginMessage(plugin, AutoReferee.REFEREE_PLUGIN_CHANNEL, msg);
 	}
 
 	public void broadcast(String msg)
@@ -700,20 +717,28 @@ public class AutoRefMatch
 
 	public void updateCarrying(AutoRefPlayer apl, Set<BlockData> carrying, Set<BlockData> newCarrying)
 	{
-		// this will be the set of all plugin channel messages
-		String pname = apl.getPlayer().getName();
-		Set<byte[]> pmsg = Sets.newHashSet();
-		
 		Set<BlockData> add = Sets.newHashSet(newCarrying);
 		add.removeAll(carrying);
 
 		Set<BlockData> rem = Sets.newHashSet(carrying);
 		rem.removeAll(newCarrying);
 		
-		for (BlockData bd : add) pmsg.add((pname + ":+" + bd.toString()).getBytes());
-		for (BlockData bd : rem) pmsg.add((pname + ":-" + bd.toString()).getBytes());
+		Player player = apl.getPlayer();
+		for (BlockData bd : add) messageReferees(player, "obj", "+" + bd.toString());
+		for (BlockData bd : rem) messageReferees(player, "obj", "-" + bd.toString());
+	}
+
+	public void updateHealthArmor(AutoRefPlayer apl, int currentHealth,
+			int currentArmor, int newHealth, int newArmor)
+	{
+		Player player = apl.getPlayer();
 		
-		for (Player ref : getReferees()) for (byte[] msg : pmsg)
-			ref.sendPluginMessage(plugin, AutoReferee.REFEREE_PLUGIN_CHANNEL, msg);
+		if (currentHealth != newHealth)
+			messageReferees(player, "hp", Integer.toString(newHealth));
+		
+		if (currentArmor != newArmor)
+			messageReferees(player, "armor", Integer.toString(newArmor));
+		
+		broadcast(String.format("%s -- %d hp, %d armor", player.getName(), newHealth, newArmor));
 	}
 }

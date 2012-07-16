@@ -1,5 +1,6 @@
 package org.mctourney.AutoReferee;
 
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -8,6 +9,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -28,6 +31,8 @@ public class ObjectiveTracker implements Listener
 	{
 		plugin = (AutoReferee) p;
 	}
+	
+	/* TRACKING WOOL PLACEMENT */
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void blockPlace(BlockPlaceEvent event)
@@ -60,6 +65,24 @@ public class ObjectiveTracker implements Listener
 		if (match != null) match.checkWinConditions(null);
 	}
 	
+	/* TRACKING WOOL CARRYING */
+	
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void inventoryClick(InventoryClickEvent event)
+	{ inventoryChange(event.getWhoClicked()); }
+	
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void itemDrop(PlayerDropItemEvent event)
+	{ inventoryChange(event.getPlayer()); }
+	
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void itemPickup(PlayerPickupItemEvent event)
+	{ inventoryChange(event.getPlayer()); }
+	
+	@EventHandler(priority=EventPriority.MONITOR)
+	public void blockPlaceInventory(BlockPlaceEvent event)
+	{ inventoryChange(event.getPlayer()); }
+	
 	class InventoryChangeTask implements Runnable
 	{
 		AutoRefPlayer apl = null;
@@ -85,25 +108,54 @@ public class ObjectiveTracker implements Listener
 		}
 	}
 	
-	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
-	public void inventoryClick(InventoryClickEvent event)
-	{ inventoryChange(event.getWhoClicked()); }
+	/* TRACKING PLAYER HEALTH AND ARMOR */
 	
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
-	public void itemDrop(PlayerDropItemEvent event)
-	{ inventoryChange(event.getPlayer()); }
+	public void playerHealthDown(EntityDamageEvent event)
+	{ healthArmorChange(event.getEntity()); }
 	
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
-	public void itemPickup(PlayerPickupItemEvent event)
-	{ inventoryChange(event.getPlayer()); }
+	public void playerHealthUp(EntityRegainHealthEvent event)
+	{ healthArmorChange(event.getEntity()); }
+	
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void playerArmorChange(InventoryClickEvent event)
+	{ healthArmorChange(event.getWhoClicked()); }
+	
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void playerArmorDrop(PlayerDropItemEvent event)
+	{ healthArmorChange(event.getPlayer()); }
+	
+	class HealthArmorChangeTask implements Runnable
+	{
+		AutoRefPlayer apl = null;
+		
+		public HealthArmorChangeTask(AutoRefPlayer apl)
+		{ this.apl = apl; }
+		
+		public void run()
+		{ if (apl != null) apl.updateHealthArmor(); }
+	}
+	
+	public void healthArmorChange(Entity entity)
+	{
+		AutoRefMatch match = plugin.getMatch(entity.getWorld());
+		if (match != null && entity.getType() == EntityType.PLAYER)
+		{
+			AutoRefPlayer apl = match.getPlayer((Player) entity);
+			if (apl != null) plugin.getServer().getScheduler()
+				.scheduleSyncDelayedTask(plugin, new HealthArmorChangeTask(apl));
+		}
+	}
+	
+	/* MISC */
 	
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void playerRespawn(PlayerRespawnEvent event)
-	{ inventoryChange(event.getPlayer()); }
-	
-	@EventHandler(priority=EventPriority.MONITOR)
-	public void blockPlaceInventory(BlockPlaceEvent event)
-	{ inventoryChange(event.getPlayer()); }
+	{
+		inventoryChange(event.getPlayer());
+		healthArmorChange(event.getPlayer());
+	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void itemCraft(CraftItemEvent event)

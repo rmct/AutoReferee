@@ -232,7 +232,7 @@ public class AutoRefTeam
 	public AutoRefPlayer getPlayer(String name)
 	{
 		if (name != null) for (AutoRefPlayer apl : players)
-			if (name.equalsIgnoreCase(apl.getPlayer().getName()))
+			if (name.equalsIgnoreCase(apl.getPlayerName()))
 				return apl;
 		return null;
 	}
@@ -357,5 +357,12 @@ public class AutoRefTeam
 	{
 		// TODO: perhaps store team-level carrying information?
 		match.updateCarrying(apl, carrying, newCarrying);
+	}
+
+	public void updateHealthArmor(AutoRefPlayer apl,
+			int currentHealth, int currentArmor, int newHealth, int newArmor)
+	{
+		match.updateHealthArmor(apl, 
+			currentHealth, currentArmor, newHealth, newArmor);
 	}
 }

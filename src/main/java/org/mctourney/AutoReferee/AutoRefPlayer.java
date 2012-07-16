@@ -14,6 +14,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.mctourney.AutoReferee.util.ArmorPoints;
 import org.mctourney.AutoReferee.util.BlockData;
 
 import org.apache.commons.collections.map.DefaultedMap;
@@ -74,15 +75,17 @@ class AutoRefPlayer
 					//c = EntityDamageEvent.DamageCause.ENTITY_ATTACK;
 					break;
 			}
-			
+
 			if ((p instanceof Monster))
 				p = ((Monster) p).getType();
+			if ((p instanceof Player))
+				p = ((Player) p).getName();
 			return new DamageCause(c, p);
 		}
 		
 		@Override public String toString()
 		{
-			String damager = null;
+			String damager = payload.toString();
 			
 			// generate a 'damager' string for more information
 			if ((payload instanceof Player))
@@ -91,14 +94,29 @@ class AutoRefPlayer
 				damager = ((EntityType) payload).name();
 			
 			// return a string representing this damage cause
-			return (damager == null ? "" : (damager + "'s "))
-				+ damageCause.name();
+			String owner = damager == null ? "" : (damager + "'s ");
+			return owner + damageCause.name();
 		}
 	}
 
 	// stored references
-	private Player player;
+	private String pname = null;
 	private AutoRefTeam team;
+	
+	public Player getPlayer()
+	{ return plugin.getServer().getPlayer(pname); }
+	
+	public String getPlayerName()
+	{ return pname; }
+
+	private void setPlayer(Player p)
+	{ pname = p.getName(); }
+
+	public AutoRefTeam getTeam()
+	{ return team; }
+
+	private void setTeam(AutoRefTeam t)
+	{ team = t; }
 	
 	// number of times this player has killed other players
 	public Map<String, Integer> kills;
@@ -112,7 +130,13 @@ class AutoRefPlayer
 	
 	// tracking objective items
 	private Set<BlockData> carrying;
+
+	private int currentHealth = 20;
+	private int currentArmor = 0;
 	
+	public Set<BlockData> getCarrying()
+	{ return carrying; }
+
 	// constructor for simply setting up the variables
 	@SuppressWarnings("unchecked")
 	public AutoRefPlayer(Player p, AutoRefTeam t)
@@ -129,8 +153,12 @@ class AutoRefPlayer
 		this.setPlayer(p);
 		this.setTeam(t);
 		
-		// setup the carrying array
+		// setup the carrying list
 		this.carrying = Sets.newHashSet();
+		
+		// setup base health and armor level
+		this.currentHealth = p.getHealth();
+		this.currentArmor = ArmorPoints.fromPlayerInventory(p.getInventory());
 	}
 	
 	public AutoRefPlayer(Player p)
@@ -242,19 +270,19 @@ class AutoRefPlayer
 		}
 		carrying = newCarrying;
 	}
-	
-	public Set<BlockData> getCarrying()
-	{ return carrying; }
 
-	public Player getPlayer()
-	{ return player; }
-
-	private void setPlayer(Player player)
-	{ this.player = player; }
-
-	public AutoRefTeam getTeam()
-	{ return team; }
-
-	private void setTeam(AutoRefTeam team)
-	{ this.team = team; }
+	public void updateHealthArmor()
+	{
+		Player player = this.getPlayer();
+		if (player == null) return;
+		
+		int newHealth = player.getHealth();
+		int newArmor = ArmorPoints.fromPlayerInventory(player.getInventory());
+		
+		getTeam().updateHealthArmor(this, 
+			currentHealth, currentArmor, newHealth, newArmor);
+		
+		currentHealth = newHealth;
+		currentArmor = newArmor;
+	}
 }

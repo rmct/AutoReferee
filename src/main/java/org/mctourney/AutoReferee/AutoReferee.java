@@ -7,7 +7,6 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,7 +41,6 @@ import com.sk89q.worldedit.bukkit.selections.Selection;
 import org.mctourney.AutoReferee.util.CuboidRegion;
 import org.mctourney.AutoReferee.util.Vector3;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
@@ -76,13 +74,13 @@ public class AutoReferee extends JavaPlugin
 	{ this.lobby = w; }
 
 	// is this plugin in online mode?
-	private boolean autoMode = false;
+	private boolean autoMode = true;
 	
 	public boolean isAutoMode()
 	{ return autoMode; }
 
-	public void setAutoMode(boolean m)
-	{ this.autoMode = m; }
+	public boolean setAutoMode(boolean m)
+	{ return this.autoMode = m; }
 
 	// get the match associated with the world
 	private Map<UUID, AutoRefMatch> matches = null;
@@ -216,8 +214,11 @@ public class AutoReferee extends JavaPlugin
 		
 		setupPluginChannels();
 	}
-
+	
 	public boolean makeServerConnection(String qserver)
+	{ boolean b = _makeServerConnection(qserver); return setAutoMode(b); }
+
+	public boolean _makeServerConnection(String qserver)
 	{
 		// if we are not in online mode, stop right here
 		if (!isAutoMode()) return false;
@@ -573,6 +574,7 @@ public class AutoReferee extends JavaPlugin
 			{
 				// team name is invalid. let the player know
 				player.sendMessage("Not a valid team: " + tname);
+				player.sendMessage("Teams are " + match.getTeamList());
 				return true;
 			}
 			
@@ -613,7 +615,10 @@ public class AutoReferee extends JavaPlugin
 			{
 				// team name is invalid. let the player know
 				if (args.length > 0)
+				{
 					sender.sendMessage("Not a valid team: " + args[0]);
+					sender.sendMessage("Teams are " + match.getTeamList());
+				}
 				return true;
 			}
 

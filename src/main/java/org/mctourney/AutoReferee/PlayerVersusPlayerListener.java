@@ -10,7 +10,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -29,17 +28,16 @@ public class PlayerVersusPlayerListener implements Listener
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
-	public void playerDeath(EntityDeathEvent event)
+	public void playerDeath(PlayerDeathEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
-		if (match != null && (event instanceof PlayerDeathEvent))
+		if (match != null)
 		{
-			PlayerDeathEvent pdeath = (PlayerDeathEvent) event;
-			Player victim = (Player) pdeath.getEntity();
+			Player victim = (Player) event.getEntity();
 
 			// get the player who killed this player (might be null)
 			Player killer = victim.getKiller();
-			String dmsg = pdeath.getDeathMessage();
+			String dmsg = event.getDeathMessage();
 
 			// if the death was due to intervention by the plugin
 			// let's change the death message to reflect this fact
@@ -59,15 +57,15 @@ public class PlayerVersusPlayerListener implements Listener
 			}
 
 			// update the death message with the changes
-			pdeath.setDeathMessage(dmsg);
+			event.setDeathMessage(dmsg);
 			
 			// register the death of the victim
 			AutoRefPlayer vdata = match.getPlayer(victim);
-			if (vdata != null) vdata.registerDeath(pdeath);
+			if (vdata != null) vdata.registerDeath(event);
 			
 			// register the kill for the killer
 			AutoRefPlayer kdata = match.getPlayer(killer); 
-			if (kdata != null) kdata.registerKill(pdeath);
+			if (kdata != null) kdata.registerKill(event);
 		}
 	}
 
