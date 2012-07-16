@@ -738,7 +738,5 @@ public class AutoRefMatch
 		
 		if (currentArmor != newArmor)
 			messageReferees(player, "armor", Integer.toString(newArmor));
-		
-		broadcast(String.format("%s -- %d hp, %d armor", player.getName(), newHealth, newArmor));
 	}
 }
