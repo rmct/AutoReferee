@@ -110,6 +110,11 @@
           <include>config.yml</include>
         </includes>
       </resource>
+      <resource>
+        <targetPath>webstats/</targetPath>
+        <filtering>false</filtering>
+        <directory>${basedir}/src/main/resources/webstats</directory>
+      </resource>
     </resources>
     
     <plugins>

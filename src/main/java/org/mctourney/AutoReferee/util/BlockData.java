@@ -56,9 +56,12 @@ public class BlockData
 
 	@Override public String toString()
 	{
-		String s = Integer.toString(getMaterial().ordinal());
+		String s = Integer.toString(getMaterial().getId());
 		return getData() == -1 ? s : (s + "," + Integer.toString(getData()));
 	}
+	
+	public String getRawName()
+	{ return ChatColor.stripColor(getName()); }
 	
 	public String getName()
 	{
@@ -66,7 +69,7 @@ public class BlockData
 		if ((getMaterial().getNewData((byte) 0) instanceof Colorable))
 		{
 			DyeColor color = DyeColor.getByData(getData());
-			ChatColor nameColor = ChatColorConverter.fromDyeColor(color);
+			ChatColor nameColor = ColorConverter.dyeToChat(color);
 			return nameColor + color.name() + " " + bname + ChatColor.RESET;
 			
 		}
@@ -103,7 +106,7 @@ public class BlockData
 	public static BlockData fromInventory(Inventory inv)
 	{
 		Map<BlockData, Integer> count = new DefaultedMap(0);
-		for (ItemStack item : inv)
+		for (ItemStack item : inv) if (item != null)
 		{
 			BlockData bd = BlockData.fromItemStack(item);
 			count.put(bd, item.getAmount() + count.get(bd));

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -15,16 +16,15 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
+import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.util.*;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Maps;
 
-public class AutoRefTeam
+public class AutoRefTeam implements Comparable<AutoRefTeam>
 {
-	public static AutoReferee plugin = null;
-
 	// reference to the match
 	private AutoRefMatch match = null;
 	
@@ -46,7 +46,7 @@ public class AutoRefTeam
 	{ expectedPlayers.add(op); }
 	
 	public void addExpectedPlayer(String name)
-	{ addExpectedPlayer(plugin.getServer().getOfflinePlayer(name)); }
+	{ addExpectedPlayer(AutoReferee.getInstance().getServer().getOfflinePlayer(name)); }
 	
 	public Set<OfflinePlayer> getExpectedPlayers()
 	{ return expectedPlayers; }
@@ -62,6 +62,9 @@ public class AutoRefTeam
 			return customName;
 		return name;
 	}
+
+	public String getTag()
+	{ return getRawName().toLowerCase().replaceAll("[^a-z0-9]+", ""); }
 	
 	public void setName(String name)
 	{ customName = name; }
@@ -105,16 +108,16 @@ public class AutoRefTeam
 	// win-conditions, locations mapped to expected block data
 	public Map<Location, BlockData> winConditions;
 	public Map<BlockData, SourceInventory> targetChests;
-
+	
 	// does a provided search string match this team?
 	public boolean matches(String needle)
 	{
 		if (needle == null) return false;
 		needle = needle.toLowerCase();
 
-		String a = name.toLowerCase(), b = customName.toLowerCase();
-		if (a != null && -1 != needle.indexOf(a)) return true;
-		if (b != null && -1 != needle.indexOf(b)) return true;
+		String a = name, b = customName;
+		if (a != null && -1 != needle.indexOf(a.toLowerCase())) return true;
+		if (b != null && -1 != needle.indexOf(b.toLowerCase())) return true;
 		return false;
 	}
 
@@ -260,7 +263,7 @@ public class AutoRefTeam
 		match.broadcast(colorName + " has joined " + getName());
 		
 		if (pl.isOnline() && (pl instanceof Player))
-			((Player) pl).setPlayerListName(colorName);
+			((Player) pl).setPlayerListName(StringUtils.substring(colorName, 0, 16));
 
 		match.checkTeamsReady();
 	}
@@ -308,9 +311,27 @@ public class AutoRefTeam
 		public Location location;
 		public Inventory inventory;
 		public BlockData blockdata;
+		
+		// has this team seen this chest yet?
+		public boolean seen = false;
 
 		@Override public String toString()
 		{ return BlockVector3.fromLocation(location).toCoords(); }
+
+		public void hasSeen(AutoRefPlayer apl)
+		{
+			// if this team has seen this box before, nevermind
+			if (seen) return;
+			
+			// generate a transcript event for seeing the box
+			String message = String.format("%s is carrying %s", 
+				apl.getPlayerName(), blockdata.getRawName());
+			getMatch().addEvent(new TranscriptEvent(apl.getTeam().getMatch(),
+				TranscriptEvent.EventType.OBJECTIVE_FOUND, message, location, apl, blockdata));
+			
+			// mark this box as seen
+			seen = true;
+		}
 	}
 
 	public void addSourceInventory(Block block)
@@ -365,4 +386,7 @@ public class AutoRefTeam
 		match.updateHealthArmor(apl, 
 			currentHealth, currentArmor, newHealth, newArmor);
 	}
+
+	public int compareTo(AutoRefTeam team)
+	{ return this.getRawName().compareTo(team.getRawName()); }
 }

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -20,6 +19,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrMatcher;
 import org.apache.commons.lang.text.StrTokenizer;
 
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -48,6 +48,15 @@ import com.google.gson.reflect.TypeToken;
 
 public class AutoReferee extends JavaPlugin
 {
+	// singleton instance
+	private static AutoReferee instance = null;
+	
+	public static AutoReferee getInstance()
+	{ return instance; }
+	
+	// expected configuration version number
+	private static final int PLUGIN_CFG_VERSION = 2;
+	
 	// plugin channel prefix - identifies all channels as belonging to AutoReferee
 	private static final String PLUGIN_CHANNEL_PREFIX = "autoref:";
 	
@@ -57,9 +66,15 @@ public class AutoReferee extends JavaPlugin
 	// name of the stored map configuration file
 	public static final String CFG_FILENAME = "autoreferee.yml";
 
-	// default port for a "master" server
-	public static final int DEFAULT_SERVER_PORT = 43760;
-	private static final int PLUGIN_CFG_VERSION = 2;
+	// prefix for temporary worlds
+	public static final String WORLD_PREFIX = "world-autoref-";
+
+	// messages
+	public static final String COMPLETED_KICK_MESSAGE = "Thank you for playing!";
+	public static final String NO_LOGIN_MESSAGE = "You are not scheduled for a match on this server.";
+
+	// query server object
+	public QueryServer qserv = null;
 
 	public enum eMatchStatus {
 		NONE, WAITING, READY, PLAYING, COMPLETED,
@@ -150,10 +165,8 @@ public class AutoReferee extends JavaPlugin
 
 	public void onEnable()
 	{
-		// store a reference to the plugin in the classes
-		AutoRefMatch.plugin = this;
-		AutoRefTeam.plugin = this;
-		AutoRefPlayer.plugin = this;
+		// store the singleton instance
+		instance = this;
 		
 		PluginManager pm = getServer().getPluginManager();
 
@@ -182,13 +195,13 @@ public class AutoReferee extends JavaPlugin
 		
 		// ensure we are dealing with the right type of config file
 		int configVersion = getConfig().getInt("config-version", -1);
-		if (configVersion != PLUGIN_CFG_VERSION)
+		if (configVersion != PLUGIN_CFG_VERSION && configVersion != -1)
 			getLogger().severe(String.format("!!! Incorrect config-version (expected %d, got %d)",
 				PLUGIN_CFG_VERSION, configVersion));
 
 		// get server list, and attempt to determine whether we are in online mode
-		String qserver = getConfig().getString("server-mode.query-server", null);
-		setAutoMode(getServer().getOnlineMode() && qserver != null && 
+		String qurl = getConfig().getString("server-mode.query-server", null);
+		setAutoMode(getServer().getOnlineMode() && qurl != null && 
 			this.getConfig().getBoolean("server-mode.online", true));
 
 		// wrap up, debug to follow this message
@@ -200,7 +213,7 @@ public class AutoReferee extends JavaPlugin
 		setLobbyWorld(lobbyworld == null ? getServer().getWorlds().get(0) : lobbyworld);
 
 		// connect to server, or let the server operator know to set up the match manually
-		if (!makeServerConnection(qserver))
+		if (!makeServerConnection(qurl))
 			getLogger().info("AutoReferee is running in OFFLINE mode. All setup must be done manually.");
 
 		// update online mode to represent whether or not we have a connection
@@ -210,15 +223,13 @@ public class AutoReferee extends JavaPlugin
 		AutoRefMatch.getMapLibrary();
 		
 		// process initial world(s), just in case
-		for ( World w : getServer().getWorlds() ) AutoRefMatch.setupWorld(w);
+		for ( World w : getServer().getWorlds() )
+			AutoRefMatch.setupWorld(w, false);
 		
 		setupPluginChannels();
 	}
-	
-	public boolean makeServerConnection(String qserver)
-	{ boolean b = _makeServerConnection(qserver); return setAutoMode(b); }
 
-	public boolean _makeServerConnection(String qserver)
+	public boolean makeServerConnection(String qurl)
 	{
 		// if we are not in online mode, stop right here
 		if (!isAutoMode()) return false;
@@ -233,13 +244,12 @@ public class AutoReferee extends JavaPlugin
 			// reference the keyserver to remind operator to get a server key
 			getLogger().severe("Please get a server key from " + 
 				getConfig().getString("server-mode.keyserver"));
-			return false;
+			return setAutoMode(false);
 		}
-		
-		// TODO - qserver
-		
-		// none worked, return failure
-		return false;
+
+		// setup query server and return response from ACK
+		qserv = new QueryServer(qurl, key);
+		return setAutoMode(qserv.ack());
 	}
 
 	public void onDisable()
@@ -258,8 +268,11 @@ public class AutoReferee extends JavaPlugin
 	
 	public void playerDone(Player p)
 	{
+		// set gametype back to something sane
+		p.setGameMode(GameMode.SURVIVAL);
+		
 		// if the server is in online mode, remove them
-		if (isAutoMode()) p.kickPlayer("Thank you for playing!");
+		if (isAutoMode()) p.kickPlayer(AutoReferee.COMPLETED_KICK_MESSAGE);
 		
 		// otherwise, take them back to the lobby
 		else p.teleport(getLobbyWorld().getSpawnLocation());
@@ -277,7 +290,7 @@ public class AutoReferee extends JavaPlugin
 		if (mapFolder == null) return null;
 		
 		// create the temporary directory where this map will be
-		File destWorld = new File("world-" + Long.toHexString(new Date().getTime()));
+		File destWorld = new File(WORLD_PREFIX + Long.toHexString(new Date().getTime()));
 		if (!destWorld.mkdir()) throw new IOException("Could not make temporary directory.");
 		
 		// copy the files over and fire up the world
@@ -288,11 +301,13 @@ public class AutoReferee extends JavaPlugin
 	public World createMatchWorld(String worldName) throws IOException
 	{ return createMatchWorld(worldName, null); }
 	
-	public AutoRefMatch createMatch(MatchParams params) throws IOException
+	public AutoRefMatch createMatch(QueryServer.MatchParams params) throws IOException
 	{
-		AutoRefMatch m = new AutoRefMatch(createMatchWorld(params.getMap(), params.getChecksum()));
+		World world = createMatchWorld(params.getMap(), params.getChecksum());
+		AutoRefMatch m = new AutoRefMatch(world, true);
+		
 		Iterator<AutoRefTeam> teamiter = m.getTeams().iterator();
-		for (MatchParams.TeamInfo teaminfo : params.getTeams())
+		for (QueryServer.MatchParams.TeamInfo teaminfo : params.getTeams())
 		{
 			if (!teamiter.hasNext()) break;
 			AutoRefTeam team = teamiter.next();
@@ -306,12 +321,12 @@ public class AutoReferee extends JavaPlugin
 	
 	public boolean parseMatchInitialization(String json) // TODO
 	{
-		Type type = new TypeToken<List<MatchParams>>() {}.getType();
-		List<MatchParams> paramList = new Gson().fromJson(json, type);
+		Type type = new TypeToken<List<QueryServer.MatchParams>>() {}.getType();
+		List<QueryServer.MatchParams> paramList = new Gson().fromJson(json, type);
 		
 		try
 		{
-			for (MatchParams params : paramList)
+			for (QueryServer.MatchParams params : paramList)
 				this.addMatch(createMatch(params));
 		}
 		catch (IOException e) { return false; }
@@ -358,7 +373,7 @@ public class AutoReferee extends JavaPlugin
 				// if there is not yet a match object for this map
 				if (match == null)
 				{
-					addMatch(match = new AutoRefMatch(world));
+					addMatch(match = new AutoRefMatch(world, false));
 					match.saveWorldConfiguration();
 					match.setCurrentState(eMatchStatus.NONE);
 				}
@@ -629,7 +644,7 @@ public class AutoReferee extends JavaPlugin
 			if (target == null)
 			{ sender.sendMessage("Must specify a valid user."); return true; }
 				
-			if (target != player && !player.hasPermission("autoreferee.configure"))
+			if (target != player && !player.hasPermission("autoreferee.referee"))
 			{ sender.sendMessage("You do not have permission."); return true; }
 
 			// get previous team, if this is the same team, do nothing
@@ -652,7 +667,7 @@ public class AutoReferee extends JavaPlugin
 			if (target == null)
 			{ sender.sendMessage("Must specify a valid user."); return true; }
 			
-			if (target != player && !player.hasPermission("autoreferee.configure"))
+			if (target != player && !player.hasPermission("autoreferee.referee"))
 			{ sender.sendMessage("You do not have permission."); return true; }
 
 			match.leaveTeam(target);
@@ -730,44 +745,4 @@ public class AutoReferee extends JavaPlugin
 		// default time: 6am
 		return 0L;
 	}
-}
-
-
-// unserialized match initialization parameters
-class MatchParams
-{
-	public static class TeamInfo
-	{
-		private String name;
-		
-		public String getName()
-		{ return name; }
-		
-		private List<String> players;
-
-		public List<String> getPlayers()
-		{ return Collections.unmodifiableList(players); }
-	}
-	
-	// info about all the teams
-	private List<TeamInfo> teams;
-	
-	public List<TeamInfo> getTeams()
-	{ return Collections.unmodifiableList(teams); }
-
-	// match tag for reporting
-	private String tag;
-	
-	public String getTag()
-	{ return tag; }
-	
-	// map name and checksum
-	private String map;
-	private Long checksum;
-	
-	public String getMap()
-	{ return map; }
-	
-	public Long getChecksum()
-	{ return checksum; }
 }

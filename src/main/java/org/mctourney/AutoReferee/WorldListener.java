@@ -19,7 +19,10 @@ public class WorldListener implements Listener
 	
 	@EventHandler
 	public void worldLoad(WorldLoadEvent event)
-	{ AutoRefMatch.setupWorld(event.getWorld()); }
+	{
+		boolean tmp = event.getWorld().getName().startsWith(AutoReferee.WORLD_PREFIX);
+		AutoRefMatch.setupWorld(event.getWorld(), tmp);
+	}
 	
 	@EventHandler
 	public void playerJoin(PlayerJoinEvent event)

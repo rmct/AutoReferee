@@ -5,8 +5,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -14,43 +16,42 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.util.ArmorPoints;
 import org.mctourney.AutoReferee.util.BlockData;
 
 import org.apache.commons.collections.map.DefaultedMap;
-
 import com.google.common.collect.Sets;
 
 class AutoRefPlayer
 {
-	public static AutoReferee plugin = null;
-	
 	public static final EntityDamageEvent VOID_DEATH = 
 		new EntityDamageEvent(null, EntityDamageEvent.DamageCause.VOID, 0);
-	
+
 	static class DamageCause
 	{
 		// cause of damage, primary value for damage cause
 		public EntityDamageEvent.DamageCause damageCause;
 		
 		// extra information to accompany damage cause
-		public Object payload = null;
+		public Object p = null, x = null;
 		
 		// generate a hashcode
 		@Override public int hashCode()
-		{ return (payload == null ? 0 : payload.hashCode()) ^ 
-			damageCause.hashCode(); }
+		{ return damageCause.hashCode()
+			^ (p == null ? 0 : p.hashCode())
+			^ (x == null ? 0 : x.hashCode()); }
 	
 		@Override public boolean equals(Object o)
 		{ return hashCode() == o.hashCode(); }
 		
-		public DamageCause(EntityDamageEvent.DamageCause c, Object p)
-		{ damageCause = c; payload = p; }
+		protected DamageCause(EntityDamageEvent.DamageCause c, Object p, Object x)
+		{ damageCause = c; this.p = p; this.x = x; }
 		
 		public static DamageCause fromDamageEvent(EntityDamageEvent e)
 		{
 			EntityDamageEvent.DamageCause c = e.getCause();
-			Object p = null;
+			Object p = null, x = null;
 			
 			EntityDamageByEntityEvent edEvent = null;
 			if ((e instanceof EntityDamageByEntityEvent))
@@ -62,40 +63,78 @@ class AutoRefPlayer
 				case ENTITY_EXPLOSION:
 					// get the entity that did the killing
 					if (edEvent != null)
+					{
 						p = edEvent.getDamager();
+						if (p instanceof Player)
+							x = ((Player) p).getItemInHand().getType();
+					}
 					break;
 	
 				case PROJECTILE:
 				case MAGIC:
 					// get the shooter from the projectile
 					if (edEvent != null && edEvent.getDamager() != null)
+					{
 						p = ((Projectile) edEvent.getDamager()).getShooter();
+						x = edEvent.getDamager().getType();
+					}
 					
 					// change damage cause to ENTITY_ATTACK
 					//c = EntityDamageEvent.DamageCause.ENTITY_ATTACK;
 					break;
 			}
-
-			if ((p instanceof Monster))
-				p = ((Monster) p).getType();
+			
 			if ((p instanceof Player))
-				p = ((Player) p).getName();
-			return new DamageCause(c, p);
+				p = AutoReferee.getInstance().getMatch(e.getEntity().getWorld()).getPlayer((Player) p);
+			else if ((p instanceof Entity))
+				p = ((Entity) p).getType();
+			return new DamageCause(c, p, x);
+		}
+		
+		private String cleanEnum(String e)
+		{ return e.toLowerCase().replace("_+", " "); }
+		
+		public String materialToWeapon(Material mat)
+		{
+			if (mat == null) return null;
+			if (mat == Material.AIR) return "fists";
+			return cleanEnum(mat.name());
 		}
 		
 		@Override public String toString()
 		{
-			String damager = payload.toString();
+			String weapon = null, damager = "";
 			
-			// generate a 'damager' string for more information
-			if ((payload instanceof Player))
-				damager = ((Player) payload).getName();
-			if ((payload instanceof EntityType))
-				damager = ((EntityType) payload).name();
+			// if there is a payload, convert it to a string
+			if (p != null)
+			{
+				// generate a 'damager' string for more information
+				damager = p.toString();
+				if ((p instanceof EntityType))
+					damager = "a " + ((EntityType) p).name();
+				else if ((p instanceof AutoRefPlayer))
+					damager = ((AutoRefPlayer) p).getPlayerName();
+				
+				// cleanup string if not a player's name
+				if (!(p instanceof AutoRefPlayer))
+					damager = cleanEnum(damager);
+			}
+			else return cleanEnum(damageCause.name());
 			
-			// return a string representing this damage cause
-			String owner = damager == null ? "" : (damager + "'s ");
-			return owner + damageCause.name();
+			// if this was an entity attack, figure out the weapon
+			switch (damageCause)
+			{
+				case ENTITY_ATTACK:
+					weapon = materialToWeapon((Material) x);
+					return damager + (weapon == null ? "" : ("'s " + weapon));
+					
+				case PROJECTILE:
+				case MAGIC:
+					weapon = cleanEnum(((EntityType) x).name());
+					return damager + (weapon == null ? "" : ("'s " + weapon));
+			}
+					
+			return damager;
 		}
 	}
 
@@ -104,8 +143,8 @@ class AutoRefPlayer
 	private AutoRefTeam team;
 	
 	public Player getPlayer()
-	{ return plugin.getServer().getPlayer(pname); }
-	
+	{ return AutoReferee.getInstance().getServer().getPlayer(pname); }
+
 	public String getPlayerName()
 	{ return pname; }
 
@@ -162,7 +201,7 @@ class AutoRefPlayer
 	}
 	
 	public AutoRefPlayer(Player p)
-	{ this(p, plugin.getTeam(p)); }
+	{ this(p, AutoReferee.getInstance().getTeam(p)); }
 
 	@Override
 	public int hashCode()
@@ -177,9 +216,12 @@ class AutoRefPlayer
 	
 	public String getName()
 	{
-		if (getTeam() == null) return getPlayer().getName();
-		return getTeam().getColor() + getPlayer().getName() + ChatColor.RESET;
+		if (getTeam() == null) return getPlayerName();
+		return getTeam().getColor() + getPlayerName() + ChatColor.RESET;
 	}
+
+	public String getTag()
+	{ return getPlayer().getName().toLowerCase().replaceAll("[^a-z0-9]+", ""); }
 	
 	public void heal()
 	{
@@ -208,8 +250,11 @@ class AutoRefPlayer
 		
 		// get the last damage cause, and mark that as the cause of one death
 		AutoRefPlayer.DamageCause dc = AutoRefPlayer.DamageCause.fromDamageEvent(e.getEntity().getLastDamageCause());
-		deaths.put(dc, 1 + deaths.get(dc));
-		++totalDeaths;
+		deaths.put(dc, 1 + deaths.get(dc)); ++totalDeaths;
+		
+		AutoRefMatch match = getTeam().getMatch(); Location loc = e.getEntity().getLocation();
+		match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DEATH,
+			String.format("%s killed by %s", getPlayer().getName(), dc), loc, this, dc.p));
 	}
 	
 	// register that we killed the Player who fired this event
@@ -220,8 +265,7 @@ class AutoRefPlayer
 		
 		// get the name of the player who died, record one kill against them
 		String pname = e.getEntity().getName();
-		kills.put(pname, 1 + kills.get(pname));
-		++totalKills;
+		kills.put(pname, 1 + kills.get(pname)); ++totalKills;
 	}
 
 	public boolean isReady()
@@ -284,5 +328,11 @@ class AutoRefPlayer
 		
 		currentHealth = newHealth;
 		currentArmor = newArmor;
+	}
+
+	public String toHTML()
+	{
+		return String.format("<span class='player player-%s team-%s'>%s</span>",
+			this.getTag(), this.getTeam().getTag(), this.getPlayerName());
 	}
 }

@@ -27,7 +27,7 @@ public class PlayerVersusPlayerListener implements Listener
 		plugin = (AutoReferee) p;
 	}
 
-	@EventHandler(priority=EventPriority.MONITOR)
+	@EventHandler(priority=EventPriority.HIGHEST)
 	public void playerDeath(PlayerDeathEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
@@ -35,20 +35,33 @@ public class PlayerVersusPlayerListener implements Listener
 		{
 			Player victim = (Player) event.getEntity();
 
-			// get the player who killed this player (might be null)
+			// get killer of this player (might be null)
 			Player killer = victim.getKiller();
-			String dmsg = event.getDeathMessage();
+			
+			// register the death of the victim
+			AutoRefPlayer vdata = match.getPlayer(victim);
+			if (vdata != null && match.getCurrentState() == eMatchStatus.PLAYING)
+				vdata.registerDeath(event);
+			
+			// register the kill for the killer
+			AutoRefPlayer kdata = match.getPlayer(killer); 
+			if (kdata != null && match.getCurrentState() == eMatchStatus.PLAYING)
+				kdata.registerKill(event);
 
 			// if the death was due to intervention by the plugin
 			// let's change the death message to reflect this fact
+			String dmsg = event.getDeathMessage();
 			if (victim.getLastDamageCause() == AutoRefPlayer.VOID_DEATH)
+			{
 				dmsg = victim.getName() + " entered the void lane.";
+				event.getDrops().clear();
+			}
 
 			// color the player's name with his team color
 			dmsg = dmsg.replace(victim.getName(), match.getPlayerName(victim));
 
 			// if the killer was a player, color their name as well
-			if (killer != null) 
+			if (killer != null)
 			{
 				if (plugin.getConfig().getBoolean("console-log", false))
 					plugin.getLogger().info("[DEATH] " + killer.getDisplayName() 
@@ -58,14 +71,6 @@ public class PlayerVersusPlayerListener implements Listener
 
 			// update the death message with the changes
 			event.setDeathMessage(dmsg);
-			
-			// register the death of the victim
-			AutoRefPlayer vdata = match.getPlayer(victim);
-			if (vdata != null) vdata.registerDeath(event);
-			
-			// register the kill for the killer
-			AutoRefPlayer kdata = match.getPlayer(killer); 
-			if (kdata != null) kdata.registerKill(event);
 		}
 	}
 
@@ -121,7 +126,8 @@ public class PlayerVersusPlayerListener implements Listener
 		}
 
 		// save player data if the damaged entity was a player	
-		if (event.getEntityType() == EntityType.PLAYER)
+		if (event.getEntityType() == EntityType.PLAYER && 
+			match.getCurrentState() == eMatchStatus.PLAYING)
 		{
 			AutoRefPlayer pdata = match.getPlayer((Player) event.getEntity());	
 			if (pdata != null) pdata.registerDamage(event);

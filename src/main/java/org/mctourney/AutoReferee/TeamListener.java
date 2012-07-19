@@ -75,7 +75,7 @@ public class TeamListener implements Listener
 			// if they should be whitelisted, let them in, otherwise, block them
 			if (plugin.playerWhitelisted(player)) event.allow();
 			else event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, 
-				"You are not scheduled for a match on this server.");
+				AutoReferee.NO_LOGIN_MESSAGE);
 		}	
 		
 		// if this player needs to be in a specific world, put them there

@@ -3,8 +3,14 @@ package org.mctourney.AutoReferee;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +19,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 import org.bukkit.ChatColor;
@@ -36,6 +43,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 import org.mctourney.AutoReferee.util.BlockData;
+import org.mctourney.AutoReferee.util.BlockVector3;
 import org.mctourney.AutoReferee.util.CuboidRegion;
 import org.mctourney.AutoReferee.util.Vector3;
 
@@ -47,9 +55,13 @@ public class AutoRefMatch
 {
 	// world this match is taking place on
 	private World world;
+	private boolean tmp;
 
 	public World getWorld()
 	{ return world; }
+
+	private boolean isTemporaryWorld()
+	{ return tmp; }
 
 	// time to set the world to at the start of the match
 	private long startTime = 8000L;
@@ -66,8 +78,8 @@ public class AutoRefMatch
 	public eMatchStatus getCurrentState()
 	{ return currentState; }
 
-	public void setCurrentState(eMatchStatus currentState)
-	{ this.currentState = currentState; }
+	public void setCurrentState(eMatchStatus s)
+	{ this.currentState = s; }
 	
 	// teams participating in the match
 	private Set<AutoRefTeam> teams = null;
@@ -83,6 +95,14 @@ public class AutoRefMatch
 		return StringUtils.join(tlist, ", ");
 	}
 	
+	private AutoRefTeam winningTeam = null;
+	
+	public AutoRefTeam getWinningTeam()
+	{ return winningTeam; }
+	
+	public void setWinningTeam(AutoRefTeam t)
+	{ winningTeam = t; }
+	
 	// region defined as the "start" region (safe zone)
 	private CuboidRegion startRegion = null;
 
@@ -93,7 +113,25 @@ public class AutoRefMatch
 	{ this.startRegion = startRegion; }
 	
 	// name of the match
-	public String matchName = "Scheduled Match";
+	private String matchName = null;
+	
+	public void setMatchName(String nm)
+	{ matchName = nm; }
+
+	public String getMatchName()
+	{
+		// if we have a specific match name...
+		if (matchName != null) return matchName;
+		
+		// generate a date string
+		String date = new SimpleDateFormat("dd MMM yyyy").format(new Date());
+		
+		// if the map is named, return map name as a placeholder
+		if (mapName != null) return mapName + ": " + date;
+		
+		// otherwise, just return the date
+		return date;
+	}
 	
 	// configuration information for the world
 	public File worldConfigFile;
@@ -108,24 +146,45 @@ public class AutoRefMatch
 	public String getMapName() 
 	{ return mapName; }
 	
+	private long startTicks = 0;
+	
+	public long getStartTicks()
+	{ return startTicks; }
+
+	public void setStartTicks(long startTicks)
+	{ this.startTicks = startTicks; }
+
 	// task that starts the match
 	public AutoRefMatch.MatchStartTask matchStarter = null;
 	public Set<StartMechanism> startMechanisms = null;
+
+	// transcript of every event in the match
+	private List<TranscriptEvent> transcript;
+
+	public List<TranscriptEvent> getTranscript()
+	{ return Collections.unmodifiableList(transcript); }
 
 	// number of seconds for each phase
 	public static final int READY_SECONDS = 15;
 	public static final int COMPLETED_SECONDS = 180;
 
-	public AutoRefMatch(World world)
+	public AutoRefMatch(World world, boolean tmp, eMatchStatus state)
+	{ this(world, tmp); setCurrentState(state); }
+
+	public AutoRefMatch(World world, boolean tmp)
 	{
 		this.world = world;
 		loadWorldConfiguration();
+		
+		// is this world a temporary world?
+		this.tmp = tmp;
+		
+		// brand new match transcript
+		transcript = Lists.newLinkedList();
 	}
 	
 	public static boolean isCompatible(World w)
 	{ return new File(w.getWorldFolder(), "autoreferee.yml").exists(); }
-
-	public static AutoReferee plugin;
 	
 	@SuppressWarnings("unchecked")
 	private void loadWorldConfiguration()
@@ -135,13 +194,13 @@ public class AutoRefMatch
 		worldConfig = YamlConfiguration.loadConfiguration(worldConfigFile);
 
 		// load up our default values file, so that we can have a base to work with
-		InputStream defConfigStream = plugin.getResource("defaults/map.yml");
+		InputStream defConfigStream = AutoReferee.getInstance().getResource("defaults/map.yml");
 		if (defConfigStream != null) worldConfig.setDefaults(
 			YamlConfiguration.loadConfiguration(defConfigStream));
 
 		// make sure any defaults get copied into the map file
 		worldConfig.options().copyDefaults(true);
-		worldConfig.options().header(plugin.getDescription().getFullName());
+		worldConfig.options().header(AutoReferee.getInstance().getDescription().getFullName());
 		worldConfig.options().copyHeader(false);
 
 		teams = new HashSet<AutoRefTeam>();
@@ -191,7 +250,7 @@ public class AutoRefMatch
 
 		// log errors, report which world did not save
 		catch (java.io.IOException e)
-		{ plugin.getLogger().info("Could not save world config: " + world.getName()); }
+		{ AutoReferee.getInstance().getLogger().info("Could not save world config: " + world.getName()); }
 	}
 
 	public Set<AutoRefPlayer> getPlayers()
@@ -215,7 +274,7 @@ public class AutoRefMatch
 	{
 		byte[] msg = String.format("%s:%s:%s", p.getName(), type, data).getBytes();
 		for (Player ref : getReferees())
-			ref.sendPluginMessage(plugin, AutoReferee.REFEREE_PLUGIN_CHANNEL, msg);
+			ref.sendPluginMessage(AutoReferee.getInstance(), AutoReferee.REFEREE_PLUGIN_CHANNEL, msg);
 	}
 
 	public void broadcast(String msg)
@@ -287,13 +346,20 @@ public class AutoRefMatch
 
 	public void destroy() throws IOException
 	{
-		plugin.clearMatch(this);
+		this.setCurrentState(eMatchStatus.NONE);
+		AutoReferee.getInstance().clearMatch(this);
 		
-		File worldFolder = world.getWorldFolder();
-		plugin.getServer().unloadWorld(world, false);
-		
-		if (!plugin.getConfig().getBoolean("save-worlds", false))
-			FileUtils.deleteDirectory(worldFolder);
+		// if everyone has been moved out of this world, clean it up
+		if (world.getPlayers().size() == 0)
+		{
+			// unload the world, get world folder to be deleted
+			File worldFolder = world.getWorldFolder();
+			AutoReferee.getInstance().getServer().unloadWorld(world, false);
+				
+			if (AutoReferee.getInstance().isAutoMode() && this.isTemporaryWorld() && 
+				!AutoReferee.getInstance().getConfig().getBoolean("save-worlds", false))
+					FileUtils.deleteDirectory(worldFolder);
+		}
 	}
 
 	public AutoRefTeam getArbitraryTeam()
@@ -366,13 +432,17 @@ public class AutoRefMatch
 	{
 		StartMechanism sm = new StartMechanism(block, state);
 		startMechanisms.add(sm);
-		plugin.getLogger().info(sm.toString() + " is a start mechanism.");
+		AutoReferee.getInstance().getLogger().info(sm.toString() + " is a start mechanism.");
 	}
 
 	public void start()
 	{
 		// set up the world time one last time
 		world.setTime(startTime);
+		startTicks = world.getFullTime();
+		
+		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_START,
+			String.format("Match began: %s", getMatchName()), null, null, null));
 		
 		for (AutoRefPlayer apl : getPlayers())
 		{
@@ -421,7 +491,7 @@ public class AutoRefMatch
 		}
 		
 		// set the current state to playing
-		currentState = eMatchStatus.PLAYING;
+		setCurrentState(eMatchStatus.PLAYING);
 	}
 
 	// helper class for starting match, synchronous task
@@ -446,7 +516,7 @@ public class AutoRefMatch
 				match.broadcast(">>> " + ChatColor.GREEN + "GO!");
 				
 				// cancel the task
-				plugin.getServer().getScheduler().cancelTask(task);
+				AutoReferee.getInstance().getServer().getScheduler().cancelTask(task);
 			}
 			
 			// report number of seconds remaining
@@ -473,7 +543,7 @@ public class AutoRefMatch
 	// prepare this world to start
 	public void prepareMatch()
 	{
-		BukkitScheduler scheduler = plugin.getServer().getScheduler();
+		BukkitScheduler scheduler = AutoReferee.getInstance().getServer().getScheduler();
 		
 		// set the current time to the start time
 		world.setTime(this.startTime);
@@ -497,7 +567,7 @@ public class AutoRefMatch
 				view.showPlayer(subj); else view.hidePlayer(subj);
 		}
 		
-		int readyDelay = plugin.getConfig().getInt(
+		int readyDelay = AutoReferee.getInstance().getConfig().getInt(
 			"delay-seconds.ready", AutoRefMatch.READY_SECONDS);
 		
 		// announce the match starting in X seconds
@@ -511,7 +581,7 @@ public class AutoRefMatch
 		// schedule the task to announce and prepare the match
 		this.matchStarter = new MatchStartTask(this);
 		this.matchStarter.task = scheduler.scheduleSyncRepeatingTask(
-				plugin, this.matchStarter, readyDelay * 20L, 20L);
+				AutoReferee.getInstance(), this.matchStarter, readyDelay * 20L, 20L);
 	}
 
 	public void checkTeamsReady() 
@@ -525,10 +595,10 @@ public class AutoRefMatch
 		}
 		
 		// this function is only useful if we are waiting
-		if (currentState != eMatchStatus.WAITING) return;
+		if (getCurrentState() != eMatchStatus.WAITING) return;
 		
 		// if we aren't in online mode, assume we are always ready
-		if (!plugin.isAutoMode()) { setCurrentState(eMatchStatus.READY); return; }
+		if (!AutoReferee.getInstance().isAutoMode()) { setCurrentState(eMatchStatus.READY); return; }
 		
 		// check if all the players are here
 		boolean ready = true;
@@ -537,14 +607,14 @@ public class AutoRefMatch
 				getPlayer(opl.getPlayer()).isReady();
 		
 		// set status based on whether the players are online
-		currentState = ready ? eMatchStatus.READY : eMatchStatus.WAITING;
+		setCurrentState(ready ? eMatchStatus.READY : eMatchStatus.WAITING);
 	}
 
-	public static void setupWorld(World w)
+	public static void setupWorld(World w, boolean b)
 	{
 		// if this map isn't compatible with AutoReferee, quit...
-		if (plugin.getMatch(w) != null || !isCompatible(w)) return;
-		plugin.addMatch(new AutoRefMatch(w));
+		if (AutoReferee.getInstance().getMatch(w) != null || !isCompatible(w)) return;
+		AutoReferee.getInstance().addMatch(new AutoRefMatch(w, b, eMatchStatus.WAITING));
 	}
 
 	// helper class for terminating world, synchronous task
@@ -553,7 +623,7 @@ public class AutoRefMatch
 		public void run()
 		{
 			// first, handle all the players
-			for (Player p : world.getPlayers()) plugin.playerDone(p);
+			for (Player p : world.getPlayers()) AutoReferee.getInstance().playerDone(p);
 			
 			// then, cleanup the match object (swallow exceptions)
 			try { destroy(); } catch (Exception e) {  };
@@ -566,7 +636,7 @@ public class AutoRefMatch
 		// we have confirmed that the state is PLAYING, so we know we are definitely
 		// in a match if this function is being called
 		
-		if (currentState == eMatchStatus.PLAYING) for (AutoRefTeam t : this.teams)
+		if (getCurrentState() == eMatchStatus.PLAYING) for (AutoRefTeam t : this.teams)
 		{
 			// if there are no win conditions set, skip this team
 			if (t.winConditions.size() == 0) continue;
@@ -580,26 +650,34 @@ public class AutoRefMatch
 					bd.matches(world.getBlockAt(pair.getKey()));
 			}
 			
-			if (win)
-			{
-				// announce the victory and set the match to completed
-				this.broadcast(t.getName() + " Wins!");
-				for (AutoRefPlayer apl : getPlayers())
-				{
-					apl.getPlayer().teleport(world.getSpawnLocation());
-					apl.getPlayer().setGameMode(GameMode.CREATIVE);
-				}
-				
-				this.currentState = AutoReferee.eMatchStatus.COMPLETED;
-				logPlayerStats(null);
-				
-				int termDelay = plugin.getConfig().getInt(
-					"delay-seconds.completed", COMPLETED_SECONDS);
-				
-				plugin.getServer().getScheduler().scheduleSyncDelayedTask(
-					plugin, new MatchEndTask(), termDelay * 20L);
-			}
+			if (win) matchComplete(t);
 		}
+	}
+
+	public void matchComplete(AutoRefTeam t)
+	{
+		// announce the victory and set the match to completed
+		this.broadcast(t.getName() + " Wins!");
+		setCurrentState(eMatchStatus.COMPLETED);
+		
+		for (AutoRefPlayer apl : getPlayers())
+		{
+		//	apl.getPlayer().teleport(world.getSpawnLocation());
+			apl.getPlayer().setGameMode(GameMode.CREATIVE);
+			apl.getPlayer().getInventory().clear();
+		}
+		
+		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_END,
+			String.format("Match ended: %s", getMatchName()), null, null, null));
+		
+		setWinningTeam(t);
+		logPlayerStats(null);
+		
+		int termDelay = AutoReferee.getInstance().getConfig().getInt(
+			"delay-seconds.completed", COMPLETED_SECONDS);
+		
+		AutoReferee.getInstance().getServer().getScheduler().scheduleSyncDelayedTask(
+			AutoReferee.getInstance(), new MatchEndTask(), termDelay * 20L);
 	}
 
 	public AutoRefTeam teamNameLookup(String name)
@@ -669,21 +747,63 @@ public class AutoRefMatch
 		return world.getSpawnLocation();
 	}
 
-	void logPlayerStats(String h)
+	public void logPlayerStats(String h)
 	{
 		String hdl = h != null ? h : 
 			new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
 		
 		try
 		{
-			File sfile = new File(plugin.getLogDirectory(), hdl + ".log");
+			File sfile = new File(AutoReferee.getInstance().getLogDirectory(), hdl + ".log");
 			PrintWriter fw = new PrintWriter(sfile);
 			
 			for (AutoRefPlayer apl : getPlayers()) apl.writeStats(fw);
+			for (TranscriptEvent e : transcript) fw.println(e);
+			
 			fw.close();
 		}
 		catch (IOException e)
-		{ plugin.getLogger().severe("Could not write player stat logfile."); }
+		{ AutoReferee.getInstance().getLogger().severe("Could not write player stat logfile."); }
+		
+		// WEBSTATS
+		String webstats = uploadReport(ReportGenerator.generate(this));
+		if (webstats != null) this.broadcast(ChatColor.RED + "Match Info: " + ChatColor.RESET + webstats);
+	}
+	
+	private String uploadReport(String report)
+	{
+		OutputStreamWriter wr = null;
+		InputStream rd = null;
+		
+		try
+		{
+			URL url = new URL("http://pastehtml.com/upload/create?input_type=html&result=address");
+			URLConnection conn = url.openConnection();
+		    conn.setDoOutput(true);
+		    
+		    wr = new OutputStreamWriter(conn.getOutputStream());
+		    wr.write("txt=" + URLEncoder.encode(report, "UTF-8")); wr.flush();
+			StringWriter writer = new StringWriter();
+			
+			IOUtils.copy(rd = conn.getInputStream(), writer);
+			return writer.toString();
+		}
+		
+		// just drop out
+		catch (Exception e)
+		{ return null; }
+		
+		finally
+		{
+			try
+			{
+				// close the stream pointers
+				if (wr != null) wr.close();
+				if (rd != null) rd.close();
+			}
+			// meh. don't bother, if something goes wrong here.
+			catch (Exception e) {  }
+		}
 	}
 
 	// distance from the closest owned region
@@ -739,4 +859,91 @@ public class AutoRefMatch
 		if (currentArmor != newArmor)
 			messageReferees(player, "armor", Integer.toString(newArmor));
 	}
+	
+	public static class TranscriptEvent
+	{
+		public enum EventType
+		{
+			MATCH_START("match-start"),
+			MATCH_END("match-end"),
+			PLAYER_DEATH("player-death"),
+			OBJECTIVE_FOUND("objective-found"),
+			OBJECTIVE_PLACED("objective-place");
+			
+			private String scls;
+			
+			private EventType(String scls)
+			{ this.scls = scls; }
+			
+			public String getCssClass()
+			{ return scls; }
+		}
+		
+		public Object icon1;
+		public Object icon2;
+		
+		public EventType type;
+		public String message;
+		
+		public Location location;
+		public long timestamp;
+		
+		public TranscriptEvent(AutoRefMatch match, EventType type, String message, 
+			Location loc, Object icon1, Object icon2)
+		{
+			this.type = type;
+			this.message = message;
+			
+			// if no location is given, use the spawn location
+			this.location = (loc != null) ? loc :
+				match.getWorld().getSpawnLocation();
+			
+			// these represent left- and right-side icons for a transcript
+			this.icon1 = icon1;
+			this.icon2 = icon2;
+			
+			this.timestamp = (match.getWorld().getFullTime() - match.getStartTicks()) / 20;
+		}
+
+		public String getTimestamp()
+		{
+			return String.format("%02d:%02d:%02d",
+				timestamp/3600L, (timestamp/60L)%60L, timestamp%60L);
+		}
+		
+		@Override
+		public String toString()
+		{ return String.format("[%s] %s", this.getTimestamp(), this.message); }
+		
+		public String toHTML()
+		{
+			String m = message;
+			
+			Set<AutoRefPlayer> players = Sets.newHashSet();
+			if (icon1 instanceof AutoRefPlayer) players.add((AutoRefPlayer) icon1);
+			if (icon2 instanceof AutoRefPlayer) players.add((AutoRefPlayer) icon2);
+			
+			for (AutoRefPlayer p : players)
+				m = m.replaceAll(p.getPlayerName(), p.toHTML());
+			
+			if (icon2 instanceof BlockData)
+			{
+				BlockData bd = (BlockData) icon2;
+				int mat = bd.getMaterial().getId();
+				int data = bd.getData();
+				
+				m = m.replaceAll(bd.getRawName(), String.format(
+					"<span class='block mat-%d data-%d'>%s</span>", 
+						mat, data, bd.getRawName()));
+			}
+			
+			String coords = BlockVector3.fromLocation(location).toCoords();
+			String fmt = "<div class='trans-line %s' data-location='%s'>" +
+				"<div class='message'>%s</div><div class='timestamp'>%s</div></div>";
+			return String.format(fmt, this.type.getCssClass(), coords, m, this.getTimestamp());
+		}
+	}
+	
+	public void addEvent(TranscriptEvent event)
+	{ transcript.add(event); AutoReferee.getInstance().getLogger().info(event.toHTML()); }
 }

@@ -1,5 +1,9 @@
 package org.mctourney.AutoReferee;
 
+import java.util.Map;
+
+import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.EntityType;
@@ -20,6 +24,7 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
 
+import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 import org.mctourney.AutoReferee.util.BlockData;
 
@@ -32,13 +37,28 @@ public class ObjectiveTracker implements Listener
 		plugin = (AutoReferee) p;
 	}
 	
-	/* TRACKING WOOL PLACEMENT */
+	/* TRACKING OBJECTIVES/WOOL */
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void blockPlace(BlockPlaceEvent event)
 	{
-		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
-		if (match != null) match.checkWinConditions(null);
+		Player pl = event.getPlayer();
+		Block block = event.getBlock();
+		
+		AutoRefMatch match = plugin.getMatch(block.getWorld());
+		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
+		
+		if (match != null && apl != null)
+		{
+			for (Map.Entry<Location, BlockData> e : apl.getTeam().winConditions.entrySet())
+			{
+				Location loc = e.getKey(); BlockData bd = e.getValue();
+				if (block.getLocation().equals(loc) && bd.matches(block))
+					match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.OBJECTIVE_PLACED,
+						String.format("%s has placed %s", apl.getPlayerName(), bd.getRawName()), loc, apl, bd));
+			}
+			match.checkWinConditions(null);
+		}
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
@@ -51,10 +71,19 @@ public class ObjectiveTracker implements Listener
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void blockInteract(PlayerInteractEvent event)
 	{
+		Player pl = event.getPlayer();
 		if (event.hasBlock())
 		{
 			AutoRefMatch match = plugin.getMatch(event.getClickedBlock().getWorld());
-			if (match != null) match.checkWinConditions(null);
+			AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
+			
+			if (match != null && apl != null)
+			{
+				Location loc = event.getClickedBlock().getLocation();
+				for (AutoRefTeam.SourceInventory sinv : apl.getTeam().targetChests.values())
+					if (loc.equals(sinv.location)) sinv.hasSeen(apl);
+				match.checkWinConditions(null);
+			}
 		}
 	}
 	

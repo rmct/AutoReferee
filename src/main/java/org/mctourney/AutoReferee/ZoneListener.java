@@ -130,6 +130,9 @@ public class ZoneListener implements Listener
 		// no match for this world, not our business
 		if (match == null) return true;
 		
+		// if the player is a referee, nothing is off-limits
+		if (player.hasPermission("autoreferee.referee")) return true;
+		
 		// if the player or the match are not under our control, allowed
 		if (match.getCurrentState() == eMatchStatus.NONE) return true;
 		

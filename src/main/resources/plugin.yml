@@ -25,11 +25,11 @@ commands:
     usage: /<command> <teamname>|start
   jointeam:
     description: Set player's team
-    permission: autoreferee.referee
+    permission: autoreferee.player
     usage: /<command> [teamname] [playername]
   leaveteam:
     description: Remove player's team
-    permission: autoreferee.referee
+    permission: autoreferee.player
     usage: /<command> [playername]
   ready:
     description: Prepare world for match
@@ -39,11 +39,12 @@ commands:
 permissions:
   autoreferee.*:
     description: Access to all AutoReferee features
+    default: op
     children:
       autoreferee.admin: true
   autoreferee.admin:
     description: AutoReferee administrators
-    default: op
+    default: false
     children:
       autoreferee.configure: true
       autoreferee.referee: true

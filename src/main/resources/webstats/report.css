@@ -1,0 +1,121 @@
+body
+{
+  margin: 0;
+  padding: 0;
+  background-color: #ddd;
+}
+
+*
+{
+  font: 10pt Georgia serif;
+  line-height: 150%;
+}
+
+#header
+{
+  width: 100%;        
+  padding: 10px 0;
+  margin: 0;
+  margin-bottom: 20px;
+  background: black;
+  color: white;
+}
+
+#header span
+{
+  padding-left: 100px;
+  display: block;
+}
+
+#header .system-name
+{
+  font-size: 24pt;
+  font-weight: bold;
+}
+
+#header .match-name
+{
+  font-size: 16pt;
+}
+
+div.table
+{
+  width: 100%;
+}
+
+div.table div.row
+{
+  clear: both;
+  margin: 0 20px;
+}
+
+div.table div.row div
+{
+  display: inline-block;
+  padding: 5px;
+}
+
+div.table div.row div.label
+{
+  float: left;
+  width: 200px;
+  font-weight: bold;
+}
+
+ul
+{
+  margin: 0;
+  padding-left: 20px;
+}
+
+#match-transcript
+{
+  padding: 20px;
+}
+
+#match-transcript .trans-line
+{
+  margin: 5px 0;
+}
+
+#match-transcript .trans-line div
+{
+  display: inline-block;
+}
+
+#match-transcript .trans-line div.timestamp
+{
+  width: 20%;
+}
+
+#match-transcript .trans-line div.message
+{
+  width: 60%;
+}
+
+.player
+{
+  padding-left: 20px;
+  background-repeat: no-repeat;
+  background-position: 0 50%;
+}
+
+.teamlist .player
+{
+  color: black !important;
+}
+
+.team, .block { font-weight: bold; }
+
+.block:before
+{
+  display: inline-block;
+  content: "";
+  vertical-align: middle;
+  width: 16px;
+  height: 16px;
+  margin-right: 2px;
+  
+  background-image: url(http://i.imgur.com/DOtdx.png);
+  background-repeat: no-repeat;
+}
