@@ -1,6 +1,8 @@
 package org.mctourney.AutoReferee;
 
 import java.util.Iterator;
+
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -8,6 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -95,5 +98,20 @@ public class TeamListener implements Listener
 		// re-check world ready
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
 		if (match != null) match.checkTeamsReady();
+	}
+	
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void changeGamemode(PlayerGameModeChangeEvent event)
+	{
+		Player player = event.getPlayer();
+		AutoRefMatch match = plugin.getMatch(player.getWorld());
+		
+		// if there is a match currently in progress on this world...
+		if (match != null && match.getCurrentState() == eMatchStatus.PLAYING)
+		{
+			// cancel the gamemode change if the player is a participant
+			if (event.getNewGameMode() == GameMode.CREATIVE && 
+				match.getPlayer(player) != null) event.setCancelled(true);
+		}
 	}
 }
