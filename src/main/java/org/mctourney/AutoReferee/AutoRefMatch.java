@@ -945,5 +945,5 @@ public class AutoRefMatch
 	}
 	
 	public void addEvent(TranscriptEvent event)
-	{ transcript.add(event); AutoReferee.getInstance().getLogger().info(event.toHTML()); }
+	{ transcript.add(event); AutoReferee.getInstance().getLogger().info(event.toString()); }
 }
