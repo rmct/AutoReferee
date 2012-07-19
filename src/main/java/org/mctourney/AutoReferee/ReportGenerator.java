@@ -66,7 +66,7 @@ public class ReportGenerator
 		}
 		
 		String winningTeam = (win == null) ? "??" : 
-			String.format("<span class='teamlist'><span class='team team-%s'>%s</span>: %s",
+			String.format("<span class='team team-%s'>%s</span>: %s",
 				win.getTag(), ChatColor.stripColor(win.getName()), winmembers);
 		
 		return (htm
