@@ -23,6 +23,10 @@ commands:
     description: Show a list of all zones
     permission: autoreferee.player
     usage: /<command> <teamname>|start
+  teaminfo:
+    description: Show team information
+    permission: autoreferee.player
+    usage: /<command>
   jointeam:
     description: Set player's team
     permission: autoreferee.player

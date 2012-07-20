@@ -33,20 +33,19 @@ public class PlayerVersusPlayerListener implements Listener
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
 		if (match != null)
 		{
+			// get victim, and killer (maybe null) of this player
 			Player victim = (Player) event.getEntity();
-
-			// get killer of this player (might be null)
 			Player killer = victim.getKiller();
 			
 			// register the death of the victim
 			AutoRefPlayer vdata = match.getPlayer(victim);
-			if (vdata != null && match.getCurrentState() == eMatchStatus.PLAYING)
-				vdata.registerDeath(event);
+			if (match.getCurrentState() == eMatchStatus.PLAYING &&
+				vdata != null) vdata.registerDeath(event);
 			
 			// register the kill for the killer
 			AutoRefPlayer kdata = match.getPlayer(killer); 
-			if (kdata != null && match.getCurrentState() == eMatchStatus.PLAYING)
-				kdata.registerKill(event);
+			if (match.getCurrentState() == eMatchStatus.PLAYING &&
+				kdata != null) kdata.registerKill(event);
 
 			// if the death was due to intervention by the plugin
 			// let's change the death message to reflect this fact
@@ -62,12 +61,7 @@ public class PlayerVersusPlayerListener implements Listener
 
 			// if the killer was a player, color their name as well
 			if (killer != null)
-			{
-				if (plugin.getConfig().getBoolean("console-log", false))
-					plugin.getLogger().info("[DEATH] " + killer.getDisplayName() 
-						+ " killed " + victim.getDisplayName());
 				dmsg = dmsg.replace(killer.getName(), match.getPlayerName(killer));
-			}
 
 			// update the death message with the changes
 			event.setDeathMessage(dmsg);

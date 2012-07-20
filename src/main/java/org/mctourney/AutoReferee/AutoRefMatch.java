@@ -20,6 +20,7 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang.StringUtils;
 
 import org.bukkit.ChatColor;
@@ -43,13 +44,11 @@ import org.bukkit.scheduler.BukkitScheduler;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 import org.mctourney.AutoReferee.util.BlockData;
-import org.mctourney.AutoReferee.util.BlockVector3;
 import org.mctourney.AutoReferee.util.CuboidRegion;
 import org.mctourney.AutoReferee.util.Vector3;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Maps;
 
 public class AutoRefMatch
 {
@@ -87,11 +86,18 @@ public class AutoRefMatch
 	public Set<AutoRefTeam> getTeams()
 	{ return teams; }
 
+	public List<AutoRefTeam> getSortedTeams()
+	{
+		List<AutoRefTeam> sortedTeams = Lists.newArrayList(getTeams());
+		Collections.sort(sortedTeams);
+		return sortedTeams;
+	}
+
 	public String getTeamList()
 	{
 		Set<String> tlist = Sets.newHashSet();
-		for (AutoRefTeam team : teams)
-			tlist.add("\"" + team.getName() + "\"");
+		for (AutoRefTeam team : getSortedTeams())
+			tlist.add(team.getName());
 		return StringUtils.join(tlist, ", ");
 	}
 	
@@ -368,20 +374,14 @@ public class AutoRefMatch
 		int minsize = Integer.MAX_VALUE;
 		List<AutoRefTeam> vteams = Lists.newArrayList();
 		
-		// get the number of players on each team: Map<TeamNumber -> NumPlayers>
-		Map<AutoRefTeam,Integer> count = Maps.newHashMap();
-		for (AutoRefTeam t : teams) count.put(t, 0);
-		
-		for (AutoRefTeam t : teams)
-			if (count.containsKey(t)) count.put(t, count.get(t)+1);
-		
 		// determine the size of the smallest team
-		for (Integer c : count.values())
-			if (c < minsize) minsize = c.intValue();
+		for (AutoRefTeam team : getTeams())
+			if (team.getPlayers().size() < minsize)
+				minsize = team.getPlayers().size();
 	
 		// make a list of all teams with this size
-		for (Map.Entry<AutoRefTeam,Integer> e : count.entrySet())
-			if (e.getValue().intValue() == minsize) vteams.add(e.getKey());
+		for (AutoRefTeam team : getTeams())
+			if (team.getPlayers().size() == minsize) vteams.add(team);
 	
 		// return a random element from this list
 		return vteams.get(new Random().nextInt(vteams.size()));
@@ -407,8 +407,7 @@ public class AutoRefMatch
 		{ return loc.hashCode() ^ blockState.hashCode(); }
 		
 		@Override public boolean equals(Object o)
-		{ return (o instanceof StartMechanism) && 
-			hashCode() == o.hashCode(); }
+		{ return (o instanceof StartMechanism) && hashCode() == o.hashCode(); }
 		
 		public String serialize()
 		{ return Vector3.fromLocation(loc).toCoords() + ":" + Boolean.toString(state); }
@@ -442,15 +441,12 @@ public class AutoRefMatch
 		startTicks = world.getFullTime();
 		
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_START,
-			String.format("Match began: %s", getMatchName()), null, null, null));
+			"Match began.", null, null, null));
 		
 		for (AutoRefPlayer apl : getPlayers())
 		{
 			// heal the players one last time
 			apl.heal();
-			
-			// clear their inventories
-			apl.getPlayer().getInventory().clear();
 			
 			// update the status of their objectives
 			apl.updateCarrying();
@@ -617,6 +613,25 @@ public class AutoRefMatch
 		AutoReferee.getInstance().addMatch(new AutoRefMatch(w, b, eMatchStatus.WAITING));
 	}
 
+	public void archiveMapData(File archiveFolder) throws IOException
+	{
+		// (1) copy the configuration file:
+		FileUtils.copyFileToDirectory(
+			new File(getWorld().getWorldFolder(), AutoReferee.CFG_FILENAME), archiveFolder);
+		
+		// (2) copy the level.dat:
+		FileUtils.copyFileToDirectory(
+			new File(getWorld().getWorldFolder(), "level.dat"), archiveFolder);
+		
+		// (3) copy the region folder (only the .mca files):
+		FileUtils.copyDirectory(new File(getWorld().getWorldFolder(), "region"), 
+			new File(archiveFolder, "region"), 
+			FileFilterUtils.suffixFileFilter(".mca"));
+		
+		// (4) make an empty data folder:
+		new File(archiveFolder, "data").mkdir();
+	}
+
 	// helper class for terminating world, synchronous task
 	class MatchEndTask implements Runnable
 	{
@@ -668,7 +683,7 @@ public class AutoRefMatch
 		}
 		
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_END,
-			String.format("Match ended: %s", getMatchName()), null, null, null));
+			"Match ended.", null, null, null));
 		
 		setWinningTeam(t);
 		logPlayerStats(null);
@@ -914,36 +929,17 @@ public class AutoRefMatch
 		@Override
 		public String toString()
 		{ return String.format("[%s] %s", this.getTimestamp(), this.message); }
-		
-		public String toHTML()
-		{
-			String m = message;
-			
-			Set<AutoRefPlayer> players = Sets.newHashSet();
-			if (icon1 instanceof AutoRefPlayer) players.add((AutoRefPlayer) icon1);
-			if (icon2 instanceof AutoRefPlayer) players.add((AutoRefPlayer) icon2);
-			
-			for (AutoRefPlayer p : players)
-				m = m.replaceAll(p.getPlayerName(), p.toHTML());
-			
-			if (icon2 instanceof BlockData)
-			{
-				BlockData bd = (BlockData) icon2;
-				int mat = bd.getMaterial().getId();
-				int data = bd.getData();
-				
-				m = m.replaceAll(bd.getRawName(), String.format(
-					"<span class='block mat-%d data-%d'>%s</span>", 
-						mat, data, bd.getRawName()));
-			}
-			
-			String coords = BlockVector3.fromLocation(location).toCoords();
-			String fmt = "<div class='trans-line %s' data-location='%s'>" +
-				"<div class='message'>%s</div><div class='timestamp'>%s</div></div>";
-			return String.format(fmt, this.type.getCssClass(), coords, m, this.getTimestamp());
-		}
 	}
 	
 	public void addEvent(TranscriptEvent event)
-	{ transcript.add(event); AutoReferee.getInstance().getLogger().info(event.toString()); }
+	{
+		AutoReferee plugin = AutoReferee.getInstance();
+		transcript.add(event);
+		
+		for (Player player : getReferees())
+			player.sendMessage(event.toString());
+		
+		if (plugin.getConfig().getBoolean("console-log", false))
+			plugin.getLogger().info(event.toString());
+	}
 }

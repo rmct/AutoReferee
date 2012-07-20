@@ -14,11 +14,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrMatcher;
 import org.apache.commons.lang.text.StrTokenizer;
 
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -267,15 +267,20 @@ public class AutoReferee extends JavaPlugin
 	}
 	
 	public void playerDone(Player p)
-	{
-		// set gametype back to something sane
-		p.setGameMode(GameMode.SURVIVAL);
-		
+	{		
 		// if the server is in online mode, remove them
-		if (isAutoMode()) p.kickPlayer(AutoReferee.COMPLETED_KICK_MESSAGE);
+		if (isAutoMode())
+		{
+			p.setGameMode(GameMode.SURVIVAL);
+			p.kickPlayer(AutoReferee.COMPLETED_KICK_MESSAGE);
+		}
 		
 		// otherwise, take them back to the lobby
-		else p.teleport(getLobbyWorld().getSpawnLocation());
+		else if (p.getWorld() != getLobbyWorld())
+		{
+			p.setGameMode(GameMode.SURVIVAL);
+			p.teleport(getLobbyWorld().getSpawnLocation());
+		}
 	}
 
 	public World createMatchWorld(String worldName, Long checksum) throws IOException
@@ -377,7 +382,7 @@ public class AutoReferee extends JavaPlugin
 					match.saveWorldConfiguration();
 					match.setCurrentState(eMatchStatus.NONE);
 				}
-				else player.sendMessage("AutoReferee already initialized for " + 
+				else sender.sendMessage("AutoReferee already initialized for " + 
 					match.worldConfig.getString("map.name", "this map") + ".");
 				
 				return true;
@@ -450,7 +455,8 @@ public class AutoReferee extends JavaPlugin
 				File archiveFolder = new File(mapLibrary, folderName);
 				if (!archiveFolder.exists()) archiveFolder.mkdir();
 				
-				archiveMapData(world.getWorldFolder(), archiveFolder);
+				match.archiveMapData(archiveFolder);
+				
 				long checksum = AutoRefMatch.recursiveCRC32(archiveFolder);
 				getLogger().info(match.getMapName() + ": [" + Long.toHexString(checksum) + "]");
 				return true;
@@ -493,9 +499,9 @@ public class AutoReferee extends JavaPlugin
 					inv.addItem(toolitem);
 					
 					// let the player know what the tool is and how to use it
-					player.sendMessage("Given win condition tool: " + toolitem.getType().name());
-					player.sendMessage("Right-click on a block to set it as a win-condition.");
-					player.sendMessage("Right-click on a chest/container to set it as an objective source.");
+					sender.sendMessage("Given win condition tool: " + toolitem.getType().name());
+					sender.sendMessage("Right-click on a block to set it as a win-condition.");
+					sender.sendMessage("Right-click on a chest/container to set it as an objective source.");
 					return true;
 				}
 				// get the tool for setting starting mechanisms
@@ -512,8 +518,8 @@ public class AutoReferee extends JavaPlugin
 					inv.addItem(toolitem);
 					
 					// let the player know what the tool is and how to use it
-					player.sendMessage("Given start mechanism tool: " + toolitem.getType().name());
-					player.sendMessage("Right-click on a device to set it as a starting mechanism.");
+					sender.sendMessage("Given start mechanism tool: " + toolitem.getType().name());
+					sender.sendMessage("Right-click on a device to set it as a starting mechanism.");
 					return true;
 				}
 			}
@@ -570,14 +576,14 @@ public class AutoReferee extends JavaPlugin
 			if (worldEdit == null)
 			{
 				// world edit not installed
-				player.sendMessage("This method requires WorldEdit installed and running.");
+				sender.sendMessage("This method requires WorldEdit installed and running.");
 				return true;
 			}
 			
 			if (args.length == 0)
 			{
 				// command is invalid. let the player know
-				player.sendMessage("Must specify a team as this zone's owner.");
+				sender.sendMessage("Must specify a team as this zone's owner.");
 				return true;
 			}
 			
@@ -588,8 +594,8 @@ public class AutoReferee extends JavaPlugin
 			if (t == null)
 			{
 				// team name is invalid. let the player know
-				player.sendMessage("Not a valid team: " + tname);
-				player.sendMessage("Teams are " + match.getTeamList());
+				sender.sendMessage("Not a valid team: " + tname);
+				sender.sendMessage("Teams are " + match.getTeamList());
 				return true;
 			}
 			
@@ -607,17 +613,29 @@ public class AutoReferee extends JavaPlugin
 				{
 					// set the start region to the selection
 					match.setStartRegion(reg);
-					player.sendMessage("Region now marked as " +
+					sender.sendMessage("Region now marked as " +
 						"the start region!");
 				}
 				else
 				{
 					// add the region to the team, announce
 					t.getRegions().add(reg);
-					player.sendMessage("Region now marked as " + 
+					sender.sendMessage("Region now marked as " + 
 						t.getName() + "'s zone!");
 				}
 			}
+			return true;
+		}
+		if ("teaminfo".equalsIgnoreCase(cmd.getName()) && match != null)
+		{
+			AutoRefPlayer apl = match.getPlayer(player);
+			if (apl == null) sender.sendMessage("You are not on a team! Type " + ChatColor.GRAY + "/jointeam");
+			else sender.sendMessage("You are on team: " + apl.getTeam().getName());
+			
+			for (AutoRefTeam team : match.getSortedTeams())
+				sender.sendMessage(String.format("%s (%d) - %s", 
+					team.getName(), team.getPlayers().size(), team.getPlayerList()));
+			
 			return true;
 		}
 		if ("jointeam".equalsIgnoreCase(cmd.getName()) && match != null && !isAutoMode())
@@ -661,8 +679,8 @@ public class AutoReferee extends JavaPlugin
 		if ("leaveteam".equalsIgnoreCase(cmd.getName()) && match != null && !isAutoMode())
 		{
 			// get the target player to affect (no arg = command sender)
-			Player target = args.length > 1 ? 
-				getServer().getPlayer(args[1]) : player;
+			Player target = args.length > 0 ? 
+				getServer().getPlayer(args[0]) : player;
 
 			if (target == null)
 			{ sender.sendMessage("Must specify a valid user."); return true; }
@@ -673,6 +691,7 @@ public class AutoReferee extends JavaPlugin
 			match.leaveTeam(target);
 			return true;
 		}
+		
 		// WARNING: using ordinals on enums is typically frowned upon,
 		// but we will consider the enums "partially-ordered"
 		if ("ready".equalsIgnoreCase(cmd.getName()) && match != null &&
@@ -683,25 +702,6 @@ public class AutoReferee extends JavaPlugin
 		}
 
 		return false;
-	}
-
-	private void archiveMapData(File worldFolder, File archiveFolder) throws IOException
-	{
-		// (1) copy the configuration file:
-		FileUtils.copyFileToDirectory(
-			new File(worldFolder, CFG_FILENAME), archiveFolder);
-		
-		// (2) copy the level.dat:
-		FileUtils.copyFileToDirectory(
-			new File(worldFolder, "level.dat"), archiveFolder);
-		
-		// (3) copy the region folder (only the .mca files):
-		FileUtils.copyDirectory(new File(worldFolder, "region"), 
-			new File(archiveFolder, "region"), 
-			FileFilterUtils.suffixFileFilter(".mca"));
-		
-		// (4) make an empty data folder:
-		new File(archiveFolder, "data").mkdir();
 	}
 
 	File getLogDirectory()

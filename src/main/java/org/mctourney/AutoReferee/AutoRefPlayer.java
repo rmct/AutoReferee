@@ -109,11 +109,13 @@ class AutoRefPlayer
 			if (p != null)
 			{
 				// generate a 'damager' string for more information
-				damager = p.toString();
 				if ((p instanceof EntityType))
 					damager = "a " + ((EntityType) p).name();
 				else if ((p instanceof AutoRefPlayer))
 					damager = ((AutoRefPlayer) p).getPlayerName();
+				
+				// default: .toString()
+				else damager = p.toString();
 				
 				// cleanup string if not a player's name
 				if (!(p instanceof AutoRefPlayer))
@@ -205,13 +207,13 @@ class AutoRefPlayer
 
 	@Override
 	public int hashCode()
-	{ return getPlayer().hashCode(); }
+	{ return getPlayerName().hashCode(); }
 
 	@Override
 	public boolean equals(Object o)
 	{
 		if (!(o instanceof AutoRefPlayer)) return false;
-		return getPlayer().equals(((AutoRefPlayer) o).getPlayer());
+		return getPlayerName().equals(((AutoRefPlayer) o).getPlayerName());
 	}
 	
 	public String getName()
@@ -221,7 +223,7 @@ class AutoRefPlayer
 	}
 
 	public String getTag()
-	{ return getPlayer().getName().toLowerCase().replaceAll("[^a-z0-9]+", ""); }
+	{ return getPlayerName().toLowerCase().replaceAll("[^a-z0-9]+", ""); }
 	
 	public void heal()
 	{
@@ -254,7 +256,7 @@ class AutoRefPlayer
 		
 		AutoRefMatch match = getTeam().getMatch(); Location loc = e.getEntity().getLocation();
 		match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DEATH,
-			String.format("%s killed by %s", getPlayer().getName(), dc), loc, this, dc.p));
+			String.format("%s killed by %s", getPlayerName(), dc), loc, this, dc.p));
 	}
 	
 	// register that we killed the Player who fired this event
@@ -275,7 +277,7 @@ class AutoRefPlayer
 	
 	public void writeStats(PrintWriter fw)
 	{
-		String pname = this.getPlayer().getName();
+		String pname = this.getPlayerName();
 		String accuracyInfo = "";
 		
 		if (shotsFired > 0) accuracyInfo = " (" + 
@@ -328,11 +330,5 @@ class AutoRefPlayer
 		
 		currentHealth = newHealth;
 		currentArmor = newArmor;
-	}
-
-	public String toHTML()
-	{
-		return String.format("<span class='player player-%s team-%s'>%s</span>",
-			this.getTag(), this.getTeam().getTag(), this.getPlayerName());
 	}
 }

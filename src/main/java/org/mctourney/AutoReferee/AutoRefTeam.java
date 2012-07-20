@@ -39,6 +39,15 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		if (players != null) return players;
 		return Sets.newHashSet();
 	}
+
+	public String getPlayerList()
+	{
+		Set<String> plist = Sets.newHashSet();
+		for (AutoRefPlayer apl : getPlayers())
+			plist.add(apl.getPlayerName());
+		if (plist.size() == 0) return "{empty}";
+		return StringUtils.join(plist, ", ");
+	}
 	
 	private Set<OfflinePlayer> expectedPlayers = Sets.newHashSet();
 	
@@ -262,8 +271,8 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		String colorName = getPlayerName(pl);
 		match.broadcast(colorName + " has joined " + getName());
 		
-		if (pl.isOnline() && (pl instanceof Player))
-			((Player) pl).setPlayerListName(StringUtils.substring(colorName, 0, 16));
+		//FIXME if (pl.isOnline() && (pl instanceof Player))
+		//	((Player) pl).setPlayerListName(StringUtils.substring(colorName, 0, 16));
 
 		match.checkTeamsReady();
 	}

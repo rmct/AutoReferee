@@ -18,6 +18,7 @@ import org.bukkit.Material;
 import org.bukkit.material.Colorable;
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.util.BlockData;
+import org.mctourney.AutoReferee.util.BlockVector3;
 import org.mctourney.AutoReferee.util.ColorConverter;
 
 import com.google.common.collect.Lists;
@@ -41,33 +42,14 @@ public class ReportGenerator
 		TranscriptEvent endEvent = null;
 		for (TranscriptEvent e : match.getTranscript())
 		{
-			transcript.write(String.format("      %s\n", e.toHTML()));
+			transcript.write(transcriptEventHTML(e));
 			if (e.type != TranscriptEvent.EventType.MATCH_END) endEvent = e;
 		}
 		
-		List<AutoRefTeam> sortedTeams = Lists.newArrayList(match.getTeams());
-		Collections.sort(sortedTeams);
-		
 		AutoRefTeam win = match.getWinningTeam();
-		String winmembers = "{none}";
-		
-		StringWriter teamlist = new StringWriter();
-		for (AutoRefTeam team : sortedTeams)
-		{
-			Set<String> members = Sets.newHashSet();
-			for (AutoRefPlayer apl : team.getPlayers())
-				members.add(apl.getPlayerName());
-			
-			String memberlist = members.size() == 0 ? "{none}" : StringUtils.join(members, ", ");
-			if (team == win) winmembers = memberlist;
-			
-			teamlist.write(String.format("<li><span class='team team-%s'>%s</span>: %s</li>", 
-				team.getTag(), ChatColor.stripColor(team.getName()), memberlist));
-		}
-		
 		String winningTeam = (win == null) ? "??" : 
-			String.format("<span class='team team-%s'>%s</span>: %s",
-				win.getTag(), ChatColor.stripColor(win.getName()), winmembers);
+			String.format("<span class='team team-%s'>%s</span>",
+				win.getTag(), ChatColor.stripColor(win.getName()));
 		
 		return (htm
 			// base files get replaced first
@@ -88,7 +70,7 @@ public class ReportGenerator
 			.replaceAll("#length#", endEvent == null ? "??" : endEvent.getTimestamp())
 			
 			// team information (all teams, and winning team)
-			.replaceAll("#teams#", "<ul>" + teamlist.toString() + "</ul>")
+			.replaceAll("#teams#", getTeamList(match))
 			.replaceAll("#winners#", winningTeam)
 			
 			// and last, throw in the transcript
@@ -101,6 +83,26 @@ public class ReportGenerator
 		StringWriter buffer = new StringWriter();
 		IOUtils.copy(AutoReferee.getInstance().getResource(path), buffer);
 		return buffer.toString();
+	}
+	
+	// generate player.css
+	private static String getPlayerStyles(AutoRefMatch match)
+	{
+		StringWriter css = new StringWriter();
+		for (AutoRefPlayer apl : match.getPlayers())
+			css.write(String.format(".player-%s:before { background-image: url(http://minotar.net/avatar/%s/16.png); }\n", 
+				apl.getTag(), apl.getPlayerName()));
+		return css.toString();
+	}
+	
+	// generate team.css
+	private static String getTeamStyles(AutoRefMatch match)
+	{
+		StringWriter css = new StringWriter();
+		for (AutoRefTeam team : match.getTeams())
+			css.write(String.format(".team-%s { color: %s; }\n", 
+				team.getTag(), ColorConverter.chatToHex(team.getColor())));
+		return css.toString();
 	}
 	
 	private static Map<BlockData, Integer> terrain_png = Maps.newHashMap();
@@ -124,26 +126,6 @@ public class ReportGenerator
 		terrain_png.put(new BlockData(Material.WOOL, DyeColor.CYAN.getData()), 13 * 16 + 1);
 		terrain_png.put(new BlockData(Material.WOOL, DyeColor.ORANGE.getData()), 13 * 16 + 2);
 		terrain_png.put(new BlockData(Material.WOOL, DyeColor.SILVER.getData()), 14 * 16 + 1);
-	}
-	
-	// generate player.css
-	private static String getPlayerStyles(AutoRefMatch match)
-	{
-		StringWriter css = new StringWriter();
-		for (AutoRefPlayer apl : match.getPlayers())
-			css.write(String.format(".player-%s { background-image: url(http://minotar.net/avatar/%s/16.png); }\n", 
-				apl.getTag(), apl.getPlayerName()));
-		return css.toString();
-	}
-	
-	// generate team.css
-	private static String getTeamStyles(AutoRefMatch match)
-	{
-		StringWriter css = new StringWriter();
-		for (AutoRefTeam team : match.getTeams())
-			css.write(String.format(".team-%s { color: %s; }\n", 
-				team.getTag(), ColorConverter.chatToHex(team.getColor())));
-		return css.toString();
 	}
 	
 	// generate block.css
@@ -175,5 +157,60 @@ public class ReportGenerator
 		}
 			
 		return css.toString();
+	}
+	
+	private static String getTeamList(AutoRefMatch match)
+	{
+		StringWriter teamlist = new StringWriter();
+		for (AutoRefTeam team : match.getSortedTeams())
+		{
+			Set<String> members = Sets.newHashSet();
+			for (AutoRefPlayer apl : team.getPlayers())
+				members.add("<li>" + playerHTML(apl) + "</li>\n");
+			
+			String memberlist = members.size() == 0 
+				? "<li>{none}</li>" : StringUtils.join(members, "");
+			
+			teamlist.write("<div class='span3'>");
+			teamlist.write(String.format("<h4 class='team team-%s'>%s</h4>",
+				team.getTag(), ChatColor.stripColor(team.getName())));
+			teamlist.write(String.format("<ul class='unstyled'>%s</ul></div>\n", memberlist));
+		}
+		
+		return teamlist.toString();
+	}
+	
+	private static String playerHTML(AutoRefPlayer apl)
+	{
+		return String.format("<span class='player player-%s team-%s'>%s</span>",
+			apl.getTag(), apl.getTeam().getTag(), apl.getPlayerName());
+	}
+	
+	private static String transcriptEventHTML(TranscriptEvent e)
+	{
+		String m = e.message;
+		
+		Set<AutoRefPlayer> players = Sets.newHashSet();
+		if (e.icon1 instanceof AutoRefPlayer) players.add((AutoRefPlayer) e.icon1);
+		if (e.icon2 instanceof AutoRefPlayer) players.add((AutoRefPlayer) e.icon2);
+		
+		for (AutoRefPlayer apl : players)
+			m = m.replaceAll(apl.getPlayerName(), playerHTML(apl));
+		
+		if (e.icon2 instanceof BlockData)
+		{
+			BlockData bd = (BlockData) e.icon2;
+			int mat = bd.getMaterial().getId();
+			int data = bd.getData();
+			
+			m = m.replaceAll(bd.getRawName(), String.format(
+				"<span class='block mat-%d data-%d'>%s</span>", 
+					mat, data, bd.getRawName()));
+		}
+		
+		String coords = BlockVector3.fromLocation(e.location).toCoords();
+		String fmt = "<tr class='transcript-event %s' data-location='%s'>" + 
+			"<td class='message'>%s</td><td class='timestamp'>%s</td></tr>";
+		return String.format(fmt, e.type.getCssClass(), coords, m, e.getTimestamp());
 	}
 }

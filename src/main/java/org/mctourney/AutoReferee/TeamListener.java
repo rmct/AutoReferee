@@ -90,13 +90,15 @@ public class TeamListener implements Listener
 	public void playerQuit(PlayerQuitEvent event)
 	{
 		Player player = event.getPlayer();
+		AutoRefMatch match = plugin.getMatch(player.getWorld());
 		
 		// leave the team, if necessary
 		AutoRefTeam team = plugin.getTeam(player);
-		if (team != null) team.leave(player);
+		if (team != null && match != null && 
+			match.getCurrentState() != eMatchStatus.PLAYING)
+				team.leave(player);
 		
 		// re-check world ready
-		AutoRefMatch match = plugin.getMatch(player.getWorld());
 		if (match != null) match.checkTeamsReady();
 	}
 	
@@ -107,7 +109,8 @@ public class TeamListener implements Listener
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
 		
 		// if there is a match currently in progress on this world...
-		if (match != null && match.getCurrentState() == eMatchStatus.PLAYING)
+		if (match != null && plugin.isAutoMode() &&
+			match.getCurrentState() == eMatchStatus.PLAYING)
 		{
 			// cancel the gamemode change if the player is a participant
 			if (event.getNewGameMode() == GameMode.CREATIVE && 
