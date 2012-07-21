@@ -262,7 +262,8 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		players.add(apl);
 		
 		// prepare the player
-		pl.teleport(getSpawnLocation());
+		if (match != null && match.getCurrentState() != eMatchStatus.PLAYING)
+			pl.teleport(getSpawnLocation());
 		pl.setGameMode(GameMode.SURVIVAL);
 		
 		// if the match is in progress, no one may join
@@ -315,14 +316,15 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		return distance;
 	}
 
+	private static final long SEEN_COOLDOWN = 20 * 20;
 	public class SourceInventory
 	{
 		public Location location;
 		public Inventory inventory;
 		public BlockData blockdata;
 		
-		// has this team seen this chest yet?
-		public boolean seen = false;
+		// has this team seen this chest recently?
+		public long lastSeen = 0;
 
 		@Override public String toString()
 		{ return BlockVector3.fromLocation(location).toCoords(); }
@@ -330,7 +332,8 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		public void hasSeen(AutoRefPlayer apl)
 		{
 			// if this team has seen this box before, nevermind
-			if (seen) return;
+			long ctime = location.getWorld().getFullTime();
+			if (lastSeen > 0 && ctime - lastSeen < SEEN_COOLDOWN) return;
 			
 			// generate a transcript event for seeing the box
 			String message = String.format("%s is carrying %s", 
@@ -339,7 +342,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 				TranscriptEvent.EventType.OBJECTIVE_FOUND, message, location, apl, blockdata));
 			
 			// mark this box as seen
-			seen = true;
+			lastSeen = ctime;
 		}
 	}
 

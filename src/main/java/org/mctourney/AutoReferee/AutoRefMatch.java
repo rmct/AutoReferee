@@ -677,9 +677,12 @@ public class AutoRefMatch
 		
 		for (AutoRefPlayer apl : getPlayers())
 		{
-		//	apl.getPlayer().teleport(world.getSpawnLocation());
-			apl.getPlayer().setGameMode(GameMode.CREATIVE);
-			apl.getPlayer().getInventory().clear();
+			Player pl = apl.getPlayer();
+			if (pl == null) continue;
+			
+		//	pl.teleport(world.getSpawnLocation());
+			pl.setGameMode(GameMode.CREATIVE);
+			pl.getInventory().clear();
 		}
 		
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_END,
@@ -688,11 +691,12 @@ public class AutoRefMatch
 		setWinningTeam(t);
 		logPlayerStats(null);
 		
-		int termDelay = AutoReferee.getInstance().getConfig().getInt(
+		AutoReferee plugin = AutoReferee.getInstance();
+		int termDelay = plugin.getConfig().getInt(
 			"delay-seconds.completed", COMPLETED_SECONDS);
 		
-		AutoReferee.getInstance().getServer().getScheduler().scheduleSyncDelayedTask(
-			AutoReferee.getInstance(), new MatchEndTask(), termDelay * 20L);
+		plugin.getServer().getScheduler().scheduleSyncDelayedTask(
+			plugin, new MatchEndTask(), termDelay * 20L);
 	}
 
 	public AutoRefTeam teamNameLookup(String name)

@@ -174,7 +174,7 @@ public class ReportGenerator
 			teamlist.write("<div class='span3'>");
 			teamlist.write(String.format("<h4 class='team team-%s'>%s</h4>",
 				team.getTag(), ChatColor.stripColor(team.getName())));
-			teamlist.write(String.format("<ul class='unstyled'>%s</ul></div>\n", memberlist));
+			teamlist.write(String.format("<ul class='teammembers unstyled'>%s</ul></div>\n", memberlist));
 		}
 		
 		return teamlist.toString();
