@@ -21,6 +21,7 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.material.Redstone;
@@ -34,7 +35,10 @@ public class ZoneListener implements Listener
 {
 	AutoReferee plugin = null;
 	
-	public static final double SNEAK_DISTANCE = 0.30001;
+	// distance a player may travel outside of their lane without penalty
+	private static final double VOID_SAFE_TRAVEL_DISTANCE = 1.5;
+
+	public static final double SNEAK_DISTANCE = 0.301;
 	public static final double FREEFALL_THRESHOLD = 0.350;
 
 	// convenience for changing defaults
@@ -84,21 +88,28 @@ public class ZoneListener implements Listener
 		Player player = event.getPlayer();
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
 		if (match == null) return;
+
+		AutoRefPlayer apl = match.getPlayer(player);
+		if (apl == null) return;
 		
-		AutoRefTeam team = plugin.getTeam(player);
+		AutoRefTeam team = apl.getTeam();
 		if (team == null) return;
 		
 		double d = team.distanceToClosestRegion(event.getTo());
 		double fallspeed = event.getFrom().getY() - event.getTo().getY();
 		
+		// don't bother if the player isn't in survival mode
+		if (player.getGameMode() != GameMode.SURVIVAL 
+			|| match.inStartRegion(event.getTo())) return;
+		
 		// if a player leaves the start region... 
-		if (player.getGameMode() == GameMode.SURVIVAL && match.getPlayer(player) != null && 
-			match.inStartRegion(event.getFrom()) && !match.inStartRegion(event.getTo()))
+		if (apl != null && match.inStartRegion(event.getFrom()) && 
+			!match.inStartRegion(event.getTo()))
 		{
 			// if game isn't going, teleport them back
 			if (match.getCurrentState() != eMatchStatus.PLAYING)
 			{
-				player.teleport(match.getPlayerSpawn(player));
+				player.teleport(team.getSpawnLocation());
 				player.setVelocity(new org.bukkit.util.Vector());
 				player.setFallDistance(0.0f);
 			}
@@ -107,19 +118,48 @@ public class ZoneListener implements Listener
 			else player.getInventory().clear();
 		}
 		
-		// only kill if they are in survival mode. otherwise, what's the point?
-		else if (player.getGameMode() == GameMode.SURVIVAL && d > 0.3)
+		// if they have left their region, mark their exit location
+		else if (d > 0.3)
 		{
 			// player is sneaking off the edge and not in freefall
 			if (player.isSneaking() && d < SNEAK_DISTANCE && fallspeed < FREEFALL_THRESHOLD);
 			
 			// if any of the above clauses fail, they are not in a defensible position
-			else if (!player.isDead())
+			else if (apl.getExitLocation() == null)
+			{
+				apl.setExitLocation(player.getLocation());
+				for (Player ref : match.getReferees())
+					ref.sendMessage(String.format("%s exited their lane!", apl.getName()));
+			}
+		}
+		
+		// only kill if they are in survival mode. otherwise, what's the point?
+		else if (apl.getExitLocation() != null)
+		{
+			// if we have traveled more than 1.5 blocks from our exit location, kill
+			if (apl.getExitLocation().distance(player.getLocation()) > VOID_SAFE_TRAVEL_DISTANCE)
 			{
 				player.setLastDamageCause(AutoRefPlayer.VOID_DEATH);
 				player.setHealth(0);
 			}
+			
+			// set the exit location to null since we are back in
+			apl.setExitLocation(null);
 		}
+	}
+	
+	@EventHandler
+	public void playerRespawn(PlayerRespawnEvent event)
+	{
+		Player player = event.getPlayer();
+		AutoRefMatch match = plugin.getMatch(player.getWorld());
+		if (match == null) return;
+
+		AutoRefPlayer apl = match.getPlayer(player);
+		if (apl == null) return;
+		
+		// when a player respawns, clear their exit location
+		apl.setExitLocation(null);
 	}
 	
 	public boolean validInteract(Player player, Location loc)

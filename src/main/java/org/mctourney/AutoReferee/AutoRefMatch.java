@@ -10,6 +10,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -145,12 +146,20 @@ public class AutoRefMatch
 	
 	// basic variables loaded from file
 	private String mapName = null;
+	private Collection<String> mapAuthors = null;
 	
 	public boolean allowFriendlyFire = false;
 	public boolean allowCraft = false;
 
 	public String getMapName() 
 	{ return mapName; }
+
+	public String getMapAuthors()
+	{
+		if (mapAuthors != null && mapAuthors.size() != 0)
+			return StringUtils.join(mapAuthors, ", ");
+		return "??";
+	}
 	
 	private long startTicks = 0;
 	
@@ -228,6 +237,8 @@ public class AutoRefMatch
 		
 		// get the extra settings cached
 		mapName = worldConfig.getString("map.name", "<Untitled>");
+		mapAuthors = worldConfig.getStringList("map.creators");
+		
 		allowFriendlyFire = worldConfig.getBoolean("match.allow-ff", false);
 		allowCraft = worldConfig.getBoolean("match.allow-craft", false);
 	}
@@ -272,7 +283,8 @@ public class AutoRefMatch
 		Set<Player> refs = Sets.newHashSet();
 		for (Player p : world.getPlayers())
 			if (p.hasPermission("autoreferee.referee")) refs.add(p);
-		refs.removeAll(getPlayers());
+		for (AutoRefPlayer apl : getPlayers())
+			if (apl.getPlayer() != null) refs.remove(apl.getPlayer());
 		return refs;
 	}
 
@@ -746,6 +758,23 @@ public class AutoRefMatch
 		return null;
 	}
 	
+	public AutoRefPlayer getNearestPlayer(Location loc)
+	{
+		AutoRefPlayer apl = null;
+		double distance = Double.POSITIVE_INFINITY;
+		
+		for (AutoRefPlayer a : getPlayers())
+		{
+			Player pl = a.getPlayer();
+			if (pl == null) continue;
+			
+			double d = loc.distanceSquared(pl.getLocation());
+			if (d < distance) { apl = a; distance = d; }
+		}
+		
+		return apl;
+	}
+	
 	public AutoRefTeam getPlayerTeam(Player pl)
 	{
 		for (AutoRefTeam team : teams)
@@ -881,28 +910,53 @@ public class AutoRefMatch
 	
 	public static class TranscriptEvent
 	{
+		public enum EventVisibility
+		{ NONE, REFEREES, ALL }
+		
 		public enum EventType
 		{
-			MATCH_START("match-start"),
-			MATCH_END("match-end"),
-			PLAYER_DEATH("player-death"),
-			OBJECTIVE_FOUND("objective-found"),
-			OBJECTIVE_PLACED("objective-place");
+			// generic match start and end events
+			MATCH_START("match-start", EventVisibility.NONE),
+			MATCH_END("match-end", EventVisibility.NONE),
 			
-			private String scls;
+			// player messages should be broadcast to players
+			PLAYER_DEATH("player-death", EventVisibility.ALL),
+			PLAYER_STREAK("player-killstreak", EventVisibility.ALL),
+			PLAYER_DOMINATE("player-dominate", EventVisibility.ALL),
+			PLAYER_REVENGE("player-revenge", EventVisibility.ALL),
 			
-			private EventType(String scls)
-			{ this.scls = scls; }
+			// objective events should not be broadcast to players
+			OBJECTIVE_FOUND("objective-found", EventVisibility.REFEREES),
+			OBJECTIVE_PLACED("objective-place", EventVisibility.REFEREES);
 			
-			public String getCssClass()
-			{ return scls; }
+			private String eventClass;
+			private EventVisibility visibility;
+			
+			private EventType(String eventClass, EventVisibility visibility)
+			{
+				this.eventClass = eventClass;
+				this.visibility = visibility;
+			}
+			
+			public String getEventClass()
+			{ return eventClass; }
+			
+			public EventVisibility getVisibility()
+			{ return visibility; }
 		}
 		
 		public Object icon1;
 		public Object icon2;
 		
-		public EventType type;
-		public String message;
+		private EventType type;
+
+		public EventType getType()
+		{ return type; }
+		
+		private String message;
+		
+		public String getMessage()
+		{ return message; }
 		
 		public Location location;
 		public long timestamp;
@@ -932,7 +986,7 @@ public class AutoRefMatch
 		
 		@Override
 		public String toString()
-		{ return String.format("[%s] %s", this.getTimestamp(), this.message); }
+		{ return String.format("[%s] %s", this.getTimestamp(), this.getMessage()); }
 	}
 	
 	public void addEvent(TranscriptEvent event)
@@ -940,10 +994,24 @@ public class AutoRefMatch
 		AutoReferee plugin = AutoReferee.getInstance();
 		transcript.add(event);
 		
-		for (Player player : getReferees())
-			player.sendMessage(event.toString());
+		Collection<Player> recipients = null;
+		switch (event.getType().getVisibility())
+		{
+			case REFEREES: recipients = getReferees(); break;
+			case ALL: recipients = getWorld().getPlayers(); break;
+		}
+		
+		if (recipients != null) for (Player player : recipients)
+			player.sendMessage(colorMessage(event.getMessage()));
 		
 		if (plugin.getConfig().getBoolean("console-log", false))
 			plugin.getLogger().info(event.toString());
+	}
+
+	private String colorMessage(String message)
+	{
+		for (AutoRefPlayer apl : getPlayers())
+			message = message.replaceAll(apl.getPlayerName(), apl.getName());
+		return message;
 	}
 }

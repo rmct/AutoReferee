@@ -3,6 +3,7 @@ package org.mctourney.AutoReferee;
 import java.util.Map;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
@@ -12,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
@@ -25,6 +27,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
+import org.mctourney.AutoReferee.AutoRefTeam.SourceInventory;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 import org.mctourney.AutoReferee.util.BlockData;
 
@@ -80,10 +83,26 @@ public class ObjectiveTracker implements Listener
 			if (match != null && apl != null)
 			{
 				Location loc = event.getClickedBlock().getLocation();
-				for (AutoRefTeam.SourceInventory sinv : apl.getTeam().targetChests.values())
+				for (SourceInventory sinv : apl.getTeam().targetChests.values())
 					if (loc.equals(sinv.location)) sinv.hasSeen(apl);
 				match.checkWinConditions(null);
 			}
+		}
+	}
+	
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void blockDispense(BlockDispenseEvent event)
+	{
+		World world = event.getBlock().getWorld();
+		AutoRefMatch match = plugin.getMatch(world);
+		
+		if (match != null)
+		{
+			Location loc = event.getBlock().getLocation();
+			for (AutoRefTeam team : match.locationOwnership(loc))
+				for (SourceInventory sinv : team.targetChests.values())
+					if (loc.equals(sinv.location))
+						sinv.hasSeen(match.getNearestPlayer(loc));
 		}
 	}
 	

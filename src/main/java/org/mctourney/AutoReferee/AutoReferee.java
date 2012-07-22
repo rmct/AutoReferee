@@ -626,8 +626,10 @@ public class AutoReferee extends JavaPlugin
 			}
 			return true;
 		}
-		if ("teaminfo".equalsIgnoreCase(cmd.getName()) && match != null)
+		if ("matchinfo".equalsIgnoreCase(cmd.getName()) && match != null)
 		{
+			sender.sendMessage("Map: " + ChatColor.GRAY + match.getMapName() + ChatColor.ITALIC + " by " + match.getMapAuthors());
+			
 			AutoRefPlayer apl = match.getPlayer(player);
 			if (apl == null) sender.sendMessage("You are not on a team! Type " + ChatColor.GRAY + "/jointeam");
 			else sender.sendMessage("You are on team: " + apl.getTeam().getName());
@@ -635,6 +637,12 @@ public class AutoReferee extends JavaPlugin
 			for (AutoRefTeam team : match.getSortedTeams())
 				sender.sendMessage(String.format("%s (%d) - %s", 
 					team.getName(), team.getPlayers().size(), team.getPlayerList()));
+			
+			long timestamp = (match.getWorld().getFullTime() - match.getStartTicks()) / 20L;
+				sender.sendMessage("Match status is currently " + ChatColor.GRAY + match.getCurrentState().name());
+			if (match.getCurrentState() == eMatchStatus.PLAYING)
+				sender.sendMessage(String.format(ChatColor.GRAY + "The current match time is: %02d:%02d:%02d", 
+					timestamp/3600L, (timestamp/60L)%60L, timestamp%60L));
 			
 			return true;
 		}

@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.text.DateFormat;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.map.DefaultedMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -43,7 +45,7 @@ public class ReportGenerator
 		for (TranscriptEvent e : match.getTranscript())
 		{
 			transcript.write(transcriptEventHTML(e));
-			if (e.type != TranscriptEvent.EventType.MATCH_END) endEvent = e;
+			if (e.getType() != TranscriptEvent.EventType.MATCH_END) endEvent = e;
 		}
 		
 		AutoRefTeam win = match.getWinningTeam();
@@ -73,8 +75,9 @@ public class ReportGenerator
 			.replaceAll("#teams#", getTeamList(match))
 			.replaceAll("#winners#", winningTeam)
 			
-			// and last, throw in the transcript
-			.replaceAll("#transcript#", transcript.toString()));
+			// and last, throw in the transcript and stats
+			.replaceAll("#transcript#", transcript.toString())
+			.replaceAll("#plyr-stats#", getPlayerStats(match)));
 	}
 
 	// helper method
@@ -126,6 +129,62 @@ public class ReportGenerator
 		terrain_png.put(new BlockData(Material.WOOL, DyeColor.CYAN.getData()), 13 * 16 + 1);
 		terrain_png.put(new BlockData(Material.WOOL, DyeColor.ORANGE.getData()), 13 * 16 + 2);
 		terrain_png.put(new BlockData(Material.WOOL, DyeColor.SILVER.getData()), 14 * 16 + 1);
+	}
+	
+	private static Map<Material, Integer> items_png = Maps.newHashMap();
+	private static int items_png_size = 16;
+	
+	static
+	{
+		items_png.put(Material.LEATHER_HELMET, 0 * 16 + 0);
+		items_png.put(Material.LEATHER_CHESTPLATE, 1 * 16 + 0);
+		items_png.put(Material.LEATHER_LEGGINGS, 2 * 16 + 0);
+		items_png.put(Material.LEATHER_BOOTS, 3 * 16 + 0);
+		items_png.put(Material.CHAINMAIL_HELMET, 0 * 16 + 1);
+		items_png.put(Material.CHAINMAIL_CHESTPLATE, 1 * 16 + 1);
+		items_png.put(Material.CHAINMAIL_LEGGINGS, 2 * 16 + 1);
+		items_png.put(Material.CHAINMAIL_BOOTS, 3 * 16 + 1);
+		items_png.put(Material.IRON_HELMET, 0 * 16 + 2);
+		items_png.put(Material.IRON_CHESTPLATE, 1 * 16 + 2);
+		items_png.put(Material.IRON_LEGGINGS, 2 * 16 + 2);
+		items_png.put(Material.IRON_BOOTS, 3 * 16 + 2);
+		items_png.put(Material.DIAMOND_HELMET, 0 * 16 + 3);
+		items_png.put(Material.DIAMOND_CHESTPLATE, 1 * 16 + 3);
+		items_png.put(Material.DIAMOND_LEGGINGS, 2 * 16 + 3);
+		items_png.put(Material.DIAMOND_BOOTS, 3 * 16 + 3);
+		items_png.put(Material.GOLD_HELMET, 0 * 16 + 4);
+		items_png.put(Material.GOLD_CHESTPLATE, 1 * 16 + 4);
+		items_png.put(Material.GOLD_LEGGINGS, 2 * 16 + 4);
+		items_png.put(Material.GOLD_BOOTS, 3 * 16 + 4);
+
+		items_png.put(Material.WOOD_SWORD, 4 * 16 + 0);
+		items_png.put(Material.WOOD_SPADE, 5 * 16 + 0);
+		items_png.put(Material.WOOD_PICKAXE, 6 * 16 + 0);
+		items_png.put(Material.WOOD_AXE, 7 * 16 + 0);
+		items_png.put(Material.WOOD_HOE, 8 * 16 + 0);
+		items_png.put(Material.STONE_SWORD, 4 * 16 + 1);
+		items_png.put(Material.STONE_SPADE, 5 * 16 + 1);
+		items_png.put(Material.STONE_PICKAXE, 6 * 16 + 1);
+		items_png.put(Material.STONE_AXE, 7 * 16 + 1);
+		items_png.put(Material.STONE_HOE, 8 * 16 + 1);
+		items_png.put(Material.IRON_SWORD, 4 * 16 + 2);
+		items_png.put(Material.IRON_SPADE, 5 * 16 + 2);
+		items_png.put(Material.IRON_PICKAXE, 6 * 16 + 2);
+		items_png.put(Material.IRON_AXE, 7 * 16 + 2);
+		items_png.put(Material.IRON_HOE, 8 * 16 + 2);
+		items_png.put(Material.DIAMOND_SWORD, 4 * 16 + 3);
+		items_png.put(Material.DIAMOND_SPADE, 5 * 16 + 3);
+		items_png.put(Material.DIAMOND_PICKAXE, 6 * 16 + 3);
+		items_png.put(Material.DIAMOND_AXE, 7 * 16 + 3);
+		items_png.put(Material.DIAMOND_HOE, 8 * 16 + 3);
+		items_png.put(Material.GOLD_SWORD, 4 * 16 + 4);
+		items_png.put(Material.GOLD_SPADE, 5 * 16 + 4);
+		items_png.put(Material.GOLD_PICKAXE, 6 * 16 + 4);
+		items_png.put(Material.GOLD_AXE, 7 * 16 + 4);
+		items_png.put(Material.GOLD_HOE, 8 * 16 + 4);
+
+		items_png.put(Material.BOW, 6 * 16 + 5);
+		items_png.put(Material.POTION, 9 * 16 + 10);
 	}
 	
 	// generate block.css
@@ -180,6 +239,60 @@ public class ReportGenerator
 		return teamlist.toString();
 	}
 	
+	private static class NemesisComparator implements Comparator<AutoRefPlayer>
+	{
+		private AutoRefPlayer target = null;
+		
+		public NemesisComparator(AutoRefPlayer target)
+		{ this.target = target; }
+
+		public int compare(AutoRefPlayer apl1, AutoRefPlayer apl2)
+		{
+			// get the number of kills on this player total
+			int k = apl2.kills.get(target) - apl1.kills.get(target);
+			if (k != 0) return k;
+			
+			// get the relative difference in "focus"
+			return apl2.kills.get(target)*apl1.totalKills - 
+				apl1.kills.get(target)*apl2.totalKills;
+		}
+	};
+
+	@SuppressWarnings("unchecked")
+	private static String getPlayerStats(AutoRefMatch match)
+	{
+		List<AutoRefPlayer> players = Lists.newArrayList(match.getPlayers());
+		Collections.sort(players, new Comparator<AutoRefPlayer>()
+		{
+			public int compare(AutoRefPlayer apl1, AutoRefPlayer apl2)
+			{ return apl2.getScore() - apl1.getScore(); }
+		});
+		
+		Map<AutoRefPlayer, Integer> dd = new DefaultedMap(0);
+		for (AutoRefPlayer apl : players)
+			for (Map.Entry<AutoRefPlayer.DamageCause, Integer> dc : apl.damage.entrySet())
+				if (dc.getKey().p instanceof AutoRefPlayer)
+					dd.put((AutoRefPlayer) dc.getKey().p, dd.get(dc.getKey().p) + dc.getValue());
+		
+		int rank = 0;
+		StringWriter playerstats = new StringWriter();
+		for (AutoRefPlayer apl : players)
+		{
+			// get nemesis of this player
+			AutoRefPlayer nms = Collections.max(players, new NemesisComparator(apl));
+			if (nms == apl) nms = null;
+			
+			playerstats.write(String.format("<tr><td>%d</td><td>%s</td>", 
+					++rank, playerHTML(apl)));
+			playerstats.write(String.format("<td>%d</td><td>%d</td><td>%s</td>", 
+					apl.totalKills, apl.totalDeaths, apl.getAccuracy()));
+			playerstats.write(String.format("<td>%d</td><td>%d</td><td>%s</td></tr>\n", 
+					999, dd.get(apl), nms == null ? "??" : playerHTML(nms)));
+		}
+		
+		return playerstats.toString();
+	}
+	
 	private static String playerHTML(AutoRefPlayer apl)
 	{
 		return String.format("<span class='player player-%s team-%s'>%s</span>",
@@ -188,7 +301,7 @@ public class ReportGenerator
 	
 	private static String transcriptEventHTML(TranscriptEvent e)
 	{
-		String m = e.message;
+		String m = e.getMessage();
 		
 		Set<AutoRefPlayer> players = Sets.newHashSet();
 		if (e.icon1 instanceof AutoRefPlayer) players.add((AutoRefPlayer) e.icon1);
@@ -211,6 +324,6 @@ public class ReportGenerator
 		String coords = BlockVector3.fromLocation(e.location).toCoords();
 		String fmt = "<tr class='transcript-event %s' data-location='%s'>" + 
 			"<td class='message'>%s</td><td class='timestamp'>%s</td></tr>";
-		return String.format(fmt, e.type.getCssClass(), coords, m, e.getTimestamp());
+		return String.format(fmt, e.getType().getEventClass(), coords, m, e.getTimestamp());
 	}
 }

@@ -316,7 +316,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		return distance;
 	}
 
-	private static final long SEEN_COOLDOWN = 20 * 20;
+	private static final long SEEN_COOLDOWN = 40 * 20;
 	public class SourceInventory
 	{
 		public Location location;
@@ -335,11 +335,14 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			long ctime = location.getWorld().getFullTime();
 			if (lastSeen > 0 && ctime - lastSeen < SEEN_COOLDOWN) return;
 			
-			// generate a transcript event for seeing the box
-			String message = String.format("%s is carrying %s", 
-				apl.getPlayerName(), blockdata.getRawName());
-			getMatch().addEvent(new TranscriptEvent(apl.getTeam().getMatch(),
-				TranscriptEvent.EventType.OBJECTIVE_FOUND, message, location, apl, blockdata));
+			if (apl != null)
+			{
+				// generate a transcript event for seeing the box
+				String message = String.format("%s is carrying %s", 
+					apl.getPlayerName(), blockdata.getRawName());
+				getMatch().addEvent(new TranscriptEvent(apl.getTeam().getMatch(),
+					TranscriptEvent.EventType.OBJECTIVE_FOUND, message, location, apl, blockdata));
+			}
 			
 			// mark this box as seen
 			lastSeen = ctime;

@@ -14,6 +14,7 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
@@ -35,36 +36,36 @@ public class PlayerVersusPlayerListener implements Listener
 		{
 			// get victim, and killer (maybe null) of this player
 			Player victim = (Player) event.getEntity();
-			Player killer = victim.getKiller();
-			
-			// register the death of the victim
 			AutoRefPlayer vdata = match.getPlayer(victim);
-			if (match.getCurrentState() == eMatchStatus.PLAYING &&
-				vdata != null) vdata.registerDeath(event);
 			
-			// register the kill for the killer
-			AutoRefPlayer kdata = match.getPlayer(killer); 
-			if (match.getCurrentState() == eMatchStatus.PLAYING &&
-				kdata != null) kdata.registerKill(event);
+			Player killer = victim.getKiller();
+			AutoRefPlayer kdata = match.getPlayer(killer);
+			
+			String dmsg = event.getDeathMessage();
+			EntityDamageEvent lastDmg = victim.getLastDamageCause();
 
 			// if the death was due to intervention by the plugin
 			// let's change the death message to reflect this fact
-			String dmsg = event.getDeathMessage();
-			if (victim.getLastDamageCause() == AutoRefPlayer.VOID_DEATH)
+			if (lastDmg == AutoRefPlayer.VOID_DEATH || (lastDmg.getCause() == DamageCause.VOID
+				&& !match.locationOwnership(victim.getLocation()).contains(vdata.getTeam())))
 			{
 				dmsg = victim.getName() + " entered the void lane.";
 				event.getDrops().clear();
 			}
 
-			// color the player's name with his team color
-			dmsg = dmsg.replace(victim.getName(), match.getPlayerName(victim));
-
-			// if the killer was a player, color their name as well
-			if (killer != null)
-				dmsg = dmsg.replace(killer.getName(), match.getPlayerName(killer));
-
 			// update the death message with the changes
 			event.setDeathMessage(dmsg);
+			
+			// register the death of the victim
+			if (match.getCurrentState() == eMatchStatus.PLAYING &&
+				vdata != null) vdata.registerDeath(event);
+			
+			// register the kill for the killer
+			if (match.getCurrentState() == eMatchStatus.PLAYING &&
+				kdata != null) kdata.registerKill(event);
+			
+			// now remove the death message (so we can control who receives it)
+			event.setDeathMessage(null);
 		}
 	}
 

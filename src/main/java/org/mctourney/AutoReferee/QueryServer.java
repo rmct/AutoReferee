@@ -58,10 +58,10 @@ public class QueryServer
 		{
 			URL url = new URL(String.format("%s/%s?%s", qurl, path, getParams));
 			URLConnection conn = url.openConnection();
-		    conn.setDoOutput(true);
+			conn.setDoOutput(true);
 		    
-		    wr = new OutputStreamWriter(conn.getOutputStream());
-		    wr.write(postParams); wr.flush();
+			wr = new OutputStreamWriter(conn.getOutputStream());
+			wr.write(postParams); wr.flush();
 			StringWriter writer = new StringWriter();
 			
 			IOUtils.copy(rd = conn.getInputStream(), writer);

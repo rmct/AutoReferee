@@ -21,6 +21,7 @@ import org.mctourney.AutoReferee.util.ArmorPoints;
 import org.mctourney.AutoReferee.util.BlockData;
 
 import org.apache.commons.collections.map.DefaultedMap;
+
 import com.google.common.collect.Sets;
 
 class AutoRefPlayer
@@ -160,7 +161,7 @@ class AutoRefPlayer
 	{ team = t; }
 	
 	// number of times this player has killed other players
-	public Map<String, Integer> kills;
+	public Map<AutoRefPlayer, Integer> kills;
 	public int totalKills = 0;
 	public int shotsFired, shotsHit;
 
@@ -256,7 +257,7 @@ class AutoRefPlayer
 		
 		AutoRefMatch match = getTeam().getMatch(); Location loc = e.getEntity().getLocation();
 		match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DEATH,
-			String.format("%s killed by %s", getPlayerName(), dc), loc, this, dc.p));
+			e.getDeathMessage(), loc, this, dc.p));
 	}
 	
 	// register that we killed the Player who fired this event
@@ -266,38 +267,45 @@ class AutoRefPlayer
 		if (e.getEntity().getKiller() != getPlayer()) return;
 		
 		// get the name of the player who died, record one kill against them
-		String pname = e.getEntity().getName();
-		kills.put(pname, 1 + kills.get(pname)); ++totalKills;
+		AutoRefPlayer apl = getTeam().getMatch().getPlayer(e.getEntity());
+		kills.put(apl, 1 + kills.get(apl)); ++totalKills;
 	}
 
 	public boolean isReady()
-	{
-		return getPlayer().getWorld() == getTeam().getMatch().getWorld();
-	}
+	{ return getPlayer().getWorld() == getTeam().getMatch().getWorld(); }
+
+	public int getScore()
+	{ return totalKills - totalDeaths; }
+
+	public String getAccuracy()
+	{ return shotsFired == 0 ? "N/A" : (Integer.toString(100 * shotsHit / shotsFired) + "%"); }
 	
 	public void writeStats(PrintWriter fw)
 	{
 		String pname = this.getPlayerName();
-		String accuracyInfo = "";
+		fw.println(String.format("Stats for %s: (%d:%d KDR) (%s accuracy)",
+			pname, totalKills, totalDeaths, getAccuracy()));
 		
-		if (shotsFired > 0) accuracyInfo = " (" + 
-			Integer.toString(100 * shotsHit / shotsFired) + "% accuracy)";
-		
-		fw.println("Stats for " + pname + ": (" + Integer.toString(this.totalKills)
-			+ ":" + Integer.toString(this.totalDeaths) + " KDR)" + accuracyInfo);
-		
-		for (Map.Entry<String, Integer> kill : this.kills.entrySet())
-			fw.println("\t" + pname + " killed " + kill.getKey() + " " 
-				+ kill.getValue().toString() + " time(s).");
+		for (Map.Entry<AutoRefPlayer, Integer> kill : this.kills.entrySet())
+			fw.println(String.format("\t%s killed %s %d time(s).",
+				pname, kill.getKey().getPlayerName(), kill.getValue()));
 		
 		for (Map.Entry<DamageCause, Integer> death : this.deaths.entrySet())
-			fw.println("\t" + death.getKey().toString() + " killed " + pname 
-				+ " " + death.getValue().toString() + " time(s).");
+			fw.println(String.format("\t%s killed %s %d time(s).",
+				death.getKey().toString(), pname, death.getValue()));
 		
 		for (Map.Entry<DamageCause, Integer> damage : this.damage.entrySet())
-			fw.println("\t" + damage.getKey().toString() + " caused " + pname 
-				+ " " + damage.getValue().toString() + " damage.");
+			fw.println(String.format("\t%s caused %s %d damage.",
+				damage.getKey().toString(), pname, damage.getValue()));
 	}
+	
+	private Location exitLocation = null;
+	
+	public Location getExitLocation()
+	{ return exitLocation; }
+	
+	public void setExitLocation(Location loc)
+	{ this.exitLocation = loc; }
 
 	public void updateCarrying()
 	{ updateCarrying(getPlayer().getInventory()); }
