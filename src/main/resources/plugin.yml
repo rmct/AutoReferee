@@ -23,8 +23,8 @@ commands:
     description: Show a list of all zones
     permission: autoreferee.player
     usage: /<command> <teamname>|start
-  teaminfo:
-    description: Show team information
+  matchinfo:
+    description: Show info about current match
     permission: autoreferee.player
     usage: /<command>
   jointeam:
@@ -63,3 +63,5 @@ permissions:
   autoreferee.player:
     description: AutoReferee players
     default: true
+    children:
+      bukkit.command.kill: false
