@@ -2,7 +2,7 @@ config-version: 2
 console-log: true
 
 server-mode:
-  online: true
+  online: false
   keyserver: server.mlm.net
   key: YOUR-KEY-GOES-HERE
   query-server: localhost
@@ -13,5 +13,5 @@ delay-seconds:
 
 config-mode:
   tools:
-    win-condition: 284
-    start-mechanism: 286
+    win-condition: GOLD_SPADE
+    start-mechanism: GOLD_AXE

@@ -35,12 +35,14 @@ import org.bukkit.block.BlockState;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Animals;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.material.*;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
@@ -200,6 +202,9 @@ public class AutoRefMatch
 	
 	public static boolean isCompatible(World w)
 	{ return new File(w.getWorldFolder(), "autoreferee.yml").exists(); }
+	
+	public void reload()
+	{ this.loadWorldConfiguration(); }
 	
 	@SuppressWarnings("unchecked")
 	private void loadWorldConfiguration()
@@ -439,11 +444,23 @@ public class AutoRefMatch
 			"):" + Boolean.toString(state); }
 	}
 
-	public void addStartMech(Block block, boolean state)
+	public StartMechanism addStartMech(Block block, boolean state)
 	{
+		if (block.getType() != Material.LEVER) state = true;
 		StartMechanism sm = new StartMechanism(block, state);
 		startMechanisms.add(sm);
-		AutoReferee.getInstance().getLogger().info(sm.toString() + " is a start mechanism.");
+		
+		AutoReferee.getInstance().getLogger().info(
+			sm.toString() + " is a start mechanism.");
+		return sm;
+	}
+
+	public boolean isStartMechanism(Location loc)
+	{
+		if (loc == null) return false;
+		for (StartMechanism sm : startMechanisms)
+			if (loc.equals(sm.loc)) return true;
+		return false;
 	}
 
 	public void start()
@@ -468,36 +485,34 @@ public class AutoRefMatch
 		for (Entity e : world.getEntitiesByClasses(Monster.class, 
 			Animals.class, Item.class, ExperienceOrb.class)) e.remove();
 
-		// loop through all the redstone mechanisms required to start
-		for (StartMechanism sm : startMechanisms)
+		// loop through all the redstone mechanisms required to start / FIXME BUKKIT-1858
+/*		for (StartMechanism sm : startMechanisms)
 		{
 			MaterialData mdata = sm.blockState.getData();
-		
-			// switch on the type of block
 			switch (sm.blockState.getType())
 			{
-			case LEVER:
-				// flip the lever to the correct state
-				((Lever) mdata).setPowered(sm.state);
-				break;
-				
-			case STONE_BUTTON:
-				// press (or depress) the button
-				((Button) mdata).setPowered(sm.state);
-				break;
-				
-			case WOOD_PLATE:
-			case STONE_PLATE:
-				// press (or depress) the pressure plate
-				((PressurePlate) mdata).setData((byte)(sm.state ? 0x1 : 0x0));
-				break;
+				case LEVER:
+					// flip the lever to the correct state
+					((Lever) mdata).setPowered(sm.state);
+					break;
+					
+				case STONE_BUTTON:
+					// press (or depress) the button
+					((Button) mdata).setPowered(sm.state);
+					break;
+					
+				case WOOD_PLATE:
+				case STONE_PLATE:
+					// press (or depress) the pressure plate
+					((PressurePlate) mdata).setData((byte)(sm.state ? 0x1 : 0x0));
+					break;
 			}
 			
 			// save the block state and fire an update
 			sm.blockState.setData(mdata);
 			sm.blockState.update(true);
 		}
-		
+*/		
 		// set the current state to playing
 		setCurrentState(eMatchStatus.PLAYING);
 	}
@@ -547,6 +562,12 @@ public class AutoRefMatch
 		// players have the lowest level vanish
 		return 0;
 	}
+	
+	public void clearEntities()
+	{
+		for (Entity e : world.getEntitiesByClasses(Monster.class, 
+			Animals.class, Item.class, ExperienceOrb.class, Arrow.class)) e.remove();
+	}
 
 	// prepare this world to start
 	public void prepareMatch()
@@ -557,8 +578,7 @@ public class AutoRefMatch
 		world.setTime(this.startTime);
 		
 		// remove all mobs, animals, and items
-		for (Entity e : world.getEntitiesByClasses(Monster.class, 
-			Animals.class, Item.class, ExperienceOrb.class)) e.remove();
+		this.clearEntities();
 		
 		// turn off weather forever (or for a long time)
 		world.setStorm(false);
@@ -687,6 +707,9 @@ public class AutoRefMatch
 		this.broadcast(t.getName() + " Wins!");
 		setCurrentState(eMatchStatus.COMPLETED);
 		
+		// remove all mobs, animals, and items
+		this.clearEntities();
+		
 		for (AutoRefPlayer apl : getPlayers())
 		{
 			Player pl = apl.getPlayer();
@@ -813,9 +836,19 @@ public class AutoRefMatch
 		catch (IOException e)
 		{ AutoReferee.getInstance().getLogger().severe("Could not write player stat logfile."); }
 		
-		// WEBSTATS
-		String webstats = uploadReport(ReportGenerator.generate(this));
-		if (webstats != null) this.broadcast(ChatColor.RED + "Match Info: " + ChatColor.RESET + webstats);
+		// upload WEBSTATS (do via an async query in case uploading the stats lags the main thread)
+		Plugin plugin = AutoReferee.getInstance();
+		plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, new Runnable()
+		{
+			public void run()
+			{
+				broadcast(ChatColor.RED + "Generating Match Info...");
+				String webstats = uploadReport(ReportGenerator.generate(AutoRefMatch.this));
+				
+				if (webstats == null) broadcast(ChatColor.RED + AutoReferee.NO_WEBSTATS_MESSAGE);
+				else broadcast(ChatColor.RED + "Match Info: " + ChatColor.RESET + webstats);
+			}
+		});
 	}
 	
 	private String uploadReport(String report)
@@ -1012,6 +1045,9 @@ public class AutoRefMatch
 	{
 		for (AutoRefPlayer apl : getPlayers())
 			message = message.replaceAll(apl.getPlayerName(), apl.getName());
+		for (AutoRefTeam team : getTeams())
+			for (BlockData bd : team.winConditions.values())
+				message = message.replaceAll(bd.getRawName(), bd.getName());
 		return message;
 	}
 }

@@ -364,8 +364,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		if (bd == null) return;
 		
 		targetChests.put(src.blockdata = bd, src);
-		match.broadcast(BlockVector3.fromLocation(block.getLocation()).toCoords() + 
-			" is a source chest for " + bd.getName());
+		String nm = String.format("%s @ %s", block.getType().name(),
+			BlockVector3.fromLocation(block.getLocation()).toCoords());
+		match.broadcast(nm + " is a source for " + bd.getName());
 	}
 	
 	public void addWinCondition(Block block)

@@ -1,8 +1,10 @@
 package org.mctourney.AutoReferee;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -27,7 +29,10 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 
+import org.mctourney.AutoReferee.AutoRefMatch.StartMechanism;
+import org.mctourney.AutoReferee.AutoRefTeam.SourceInventory;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
+import org.mctourney.AutoReferee.util.BlockVector3;
 
 import com.google.common.collect.Maps;
 
@@ -50,10 +55,10 @@ public class ZoneListener implements Listener
 
 	private Map<Integer, ToolAction> toolMap;
 	
-	public static int parseTool(String s, int def)
+	public static int parseTool(String s, Material def)
 	{
 		// if no string was passed, return default
-		if (s == null) return def;
+		if (s == null) return def.getId();
 		
 		// check to see if this is a material name
 		Material mat = Material.getMaterial(s);
@@ -61,7 +66,7 @@ public class ZoneListener implements Listener
 		
 		// try to parse as an integer
 		try { return Integer.parseInt(s); }
-		catch (Exception e) { return def; }
+		catch (Exception e) { return def.getId(); }
 	}
 
 	public ZoneListener(Plugin p)
@@ -71,14 +76,12 @@ public class ZoneListener implements Listener
 
 		// tools.win-condition: golden shovel
 		toolMap.put(parseTool(plugin.getConfig().getString(
-			"config-mode.tools.win-condition", null),
-				Material.GOLD_SPADE.getId()), 
+			"config-mode.tools.win-condition", null), Material.GOLD_SPADE), 
 			ToolAction.TOOL_WINCOND);
 
 		// tools.start-mechanism: golden axe
 		toolMap.put(parseTool(plugin.getConfig().getString(
-			"config-mode.tools.start-mechanism", null),
-				Material.GOLD_AXE.getId()), 
+			"config-mode.tools.start-mechanism", null), Material.GOLD_AXE), 
 			ToolAction.TOOL_STARTMECH);
 	}
 
@@ -180,6 +183,9 @@ public class ZoneListener implements Listener
 		// not be allowed to place or destroy blocks anywhere
 		if (match.getCurrentState() != eMatchStatus.PLAYING)
 			return false;
+		
+		// if the block is a start mechanism, allow this in manual mode / FIXME BUKKIT-1858
+		if (!plugin.isAutoMode() && match.isStartMechanism(loc)) return true;
 
 		// if this block is inside the start region, not allowed
 		if (match.inStartRegion(loc)) return false;
@@ -247,21 +253,36 @@ public class ZoneListener implements Listener
 				
 				// if there is no block involved in this event, nothing
 				if (!event.hasBlock()) return;
+				block = event.getClickedBlock();
 				
 				// if the player doesn't have configure permissions, nothing
 				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
 				
 				// determine who owns the region that the clicked block is in
-				block = event.getClickedBlock();
 				Set<AutoRefTeam> owns = match.locationOwnership(block.getLocation());
 				
 				// if the region is owned by only one team, make it one of their
 				// win conditions (otherwise, we may need to configure by hand)
 				if (owns.size() == 1) for (AutoRefTeam team : owns)
 				{
-					if (block.getState() instanceof InventoryHolder)
-						team.addSourceInventory(block);
-					else team.addWinCondition(block);
+					Iterator<SourceInventory> iter; boolean found = false;
+					for (iter = team.targetChests.values().iterator(); iter.hasNext(); )
+					{
+						SourceInventory sinv = iter.next();
+						if (block.getLocation().equals(sinv.location))
+						{
+							iter.remove(); found = true;
+							String nm = String.format("%s @ %s", block.getType().name(),
+								BlockVector3.fromLocation(block.getLocation()).toCoords()); 
+							match.broadcast(nm + " is a no longer a source for " + sinv.blockdata.getName());
+						}
+					}
+					if (!found)
+					{
+						if (block.getState() instanceof InventoryHolder)
+							team.addSourceInventory(block);
+						else team.addWinCondition(block);
+					}
 				}
 				
 				break;
@@ -280,7 +301,19 @@ public class ZoneListener implements Listener
 				blockState = block.getState();
 				
 				if (blockState.getData() instanceof Redstone)
-					match.addStartMech(block, true);
+				{
+					// get the start mechanism
+					StartMechanism sm = match.addStartMech(block, 
+						((Redstone) blockState.getData()).isPowered());
+					
+					if (sm != null)
+					{
+						// announce it...
+						String m = ChatColor.RED + sm.toString() + 
+							ChatColor.RESET + " is a start mechanism.";
+						event.getPlayer().sendMessage(m);
+					}
+				}
 				
 				break;
 				

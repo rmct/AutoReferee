@@ -93,15 +93,16 @@ public class ObjectiveTracker implements Listener
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void blockDispense(BlockDispenseEvent event)
 	{
-		World world = event.getBlock().getWorld();
-		AutoRefMatch match = plugin.getMatch(world);
+		Block block = event.getBlock();
+		World world = block.getWorld();
 		
+		AutoRefMatch match = plugin.getMatch(world);
 		if (match != null)
 		{
-			Location loc = event.getBlock().getLocation();
+			Location loc = block.getLocation();
 			for (AutoRefTeam team : match.locationOwnership(loc))
 				for (SourceInventory sinv : team.targetChests.values())
-					if (loc.equals(sinv.location))
+					if (loc.equals(sinv.location) && sinv.blockdata.matches(block))
 						sinv.hasSeen(match.getNearestPlayer(loc));
 		}
 	}
@@ -111,6 +112,13 @@ public class ObjectiveTracker implements Listener
 	{
 		AutoRefMatch match = plugin.getMatch(event.getRightClicked().getWorld());
 		if (match != null) match.checkWinConditions(null);
+
+		if (event.getPlayer().hasPermission("autoreferee.referee") &&
+			(event.getRightClicked().getType() == EntityType.PLAYER))
+		{
+			Player other = (Player) event.getRightClicked();
+			event.getPlayer().openInventory(other.getInventory());
+		}
 	}
 	
 	/* TRACKING WOOL CARRYING */

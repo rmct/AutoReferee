@@ -70,8 +70,9 @@ public class AutoReferee extends JavaPlugin
 	public static final String WORLD_PREFIX = "world-autoref-";
 
 	// messages
-	public static final String COMPLETED_KICK_MESSAGE = "Thank you for playing!";
 	public static final String NO_LOGIN_MESSAGE = "You are not scheduled for a match on this server.";
+	public static final String COMPLETED_KICK_MESSAGE = "Thank you for playing!";
+	public static final String NO_WEBSTATS_MESSAGE = "An error has occured; no webstats will be generated.";
 
 	// query server object
 	public QueryServer qserv = null;
@@ -381,6 +382,8 @@ public class AutoReferee extends JavaPlugin
 					addMatch(match = new AutoRefMatch(world, false));
 					match.saveWorldConfiguration();
 					match.setCurrentState(eMatchStatus.NONE);
+					
+					sender.sendMessage(ChatColor.GREEN + CFG_FILENAME + " generated.");
 				}
 				else sender.sendMessage("AutoReferee already initialized for " + 
 					match.worldConfig.getString("map.name", "this map") + ".");
@@ -415,6 +418,14 @@ public class AutoReferee extends JavaPlugin
 				return true;
 			}
 			catch (Exception e) { return false; }
+			
+			// reloads the autoreferee.yml for this match only
+			if (args.length == 1 && "reload".equalsIgnoreCase(args[0]) && match != null)
+			{
+				match.reload();
+				sender.sendMessage(ChatColor.GREEN + CFG_FILENAME + " reload complete!");
+				return true;
+			}
 
 			if (args.length >= 2 && args[0].toLowerCase().startsWith("crc")) try
 			{
@@ -441,6 +452,10 @@ public class AutoReferee extends JavaPlugin
 
 			if (args.length >= 1 && "archive".equalsIgnoreCase(args[0]) && match != null) try
 			{
+				// LAST MINUTE CLEANUP!!!
+				match.clearEntities();
+				world.setTime(match.getStartTime());
+				
 				// save the world and configuration first
 				world.save();
 				match.saveWorldConfiguration();
@@ -458,7 +473,8 @@ public class AutoReferee extends JavaPlugin
 				match.archiveMapData(archiveFolder);
 				
 				long checksum = AutoRefMatch.recursiveCRC32(archiveFolder);
-				getLogger().info(match.getMapName() + ": [" + Long.toHexString(checksum) + "]");
+				String resp = match.getMapName() + ": [" + Long.toHexString(checksum) + "]";
+				sender.sendMessage(ChatColor.GREEN + resp); getLogger().info(resp);
 				return true;
 			}
 			catch (Exception e) { return false; }
@@ -489,9 +505,8 @@ public class AutoReferee extends JavaPlugin
 				if (args.length >= 2 && "wincond".equalsIgnoreCase(args[1]))
 				{
 					// get the tool used to set the win conditions
-					int wincondtool = ZoneListener.parseTool(
-						getConfig().getString("config-mode.tools.win-condition", null), 
-							Material.GOLD_SPADE.getId());
+					int wincondtool = ZoneListener.parseTool(getConfig().getString(
+						"config-mode.tools.win-condition", null), Material.GOLD_SPADE);
 					ItemStack toolitem = new ItemStack(wincondtool);
 					
 					// add to the inventory and switch to holding it
@@ -508,9 +523,8 @@ public class AutoReferee extends JavaPlugin
 				if (args.length >= 2 && "startmech".equalsIgnoreCase(args[1]))
 				{
 					// get the tool used to set the starting mechanisms
-					int mechtool = ZoneListener.parseTool(
-						getConfig().getString("config-mode.tools.start-mechanism", null), 
-							Material.GOLD_AXE.getId());
+					int mechtool = ZoneListener.parseTool(getConfig().getString(
+						"config-mode.tools.start-mechanism", null), Material.GOLD_AXE);
 					ItemStack toolitem = new ItemStack(mechtool);
 					
 					// add to the inventory and switch to holding it

@@ -279,6 +279,12 @@ class AutoRefPlayer
 
 	public String getAccuracy()
 	{ return shotsFired == 0 ? "N/A" : (Integer.toString(100 * shotsHit / shotsFired) + "%"); }
+
+	public String getExtendedAccuracyInfo()
+	{
+		return String.format("%s (%d/%d)", (shotsFired == 0 ? "N/A" : 
+			(Integer.toString(100 * shotsHit / shotsFired) + "%")), shotsHit, shotsFired);
+	}
 	
 	public void writeStats(PrintWriter fw)
 	{

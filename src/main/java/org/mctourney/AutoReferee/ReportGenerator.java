@@ -31,12 +31,15 @@ public class ReportGenerator
 {
 	public static String generate(AutoRefMatch match)
 	{
-		String htm, css, js;
+		String htm, css, js, images = "";
 		try
 		{
 			htm = getResourceString("webstats/report.htm");
 			css = getResourceString("webstats/report.css");
 			js  = getResourceString("webstats/report.js" );
+			
+			images += getResourceString("webstats/image-block.css");
+		//	images += getResourceString("webstats/image-items.css");
 		}
 		catch (IOException e) { return null; }
 		
@@ -55,7 +58,7 @@ public class ReportGenerator
 		
 		return (htm
 			// base files get replaced first
-			.replaceAll("#base-css#", css.replaceAll("\\s+", " "))
+			.replaceAll("#base-css#", css.replaceAll("\\s+", " ") + images)
 			.replaceAll("#base-js#", js)
 			
 			// followed by the team, player, and block styles
@@ -77,7 +80,8 @@ public class ReportGenerator
 			
 			// and last, throw in the transcript and stats
 			.replaceAll("#transcript#", transcript.toString())
-			.replaceAll("#plyr-stats#", getPlayerStats(match)));
+			.replaceAll("#plyr-stats#", getPlayerStats(match))
+		);
 	}
 
 	// helper method
@@ -248,13 +252,16 @@ public class ReportGenerator
 
 		public int compare(AutoRefPlayer apl1, AutoRefPlayer apl2)
 		{
+			if (apl1 == target) return -1;
+			if (apl2 == target) return +1;
+			
 			// get the number of kills on this player total
-			int k = apl2.kills.get(target) - apl1.kills.get(target);
+			int k = apl1.kills.get(target) - apl2.kills.get(target);
 			if (k != 0) return k;
 			
 			// get the relative difference in "focus"
-			return apl2.kills.get(target)*apl1.totalKills - 
-				apl1.kills.get(target)*apl2.totalKills;
+			return apl1.kills.get(target)*apl2.totalKills - 
+				apl2.kills.get(target)*apl1.totalKills;
 		}
 	};
 
@@ -285,7 +292,7 @@ public class ReportGenerator
 			playerstats.write(String.format("<tr><td>%d</td><td>%s</td>", 
 					++rank, playerHTML(apl)));
 			playerstats.write(String.format("<td>%d</td><td>%d</td><td>%s</td>", 
-					apl.totalKills, apl.totalDeaths, apl.getAccuracy()));
+					apl.totalKills, apl.totalDeaths, apl.getExtendedAccuracyInfo()));
 			playerstats.write(String.format("<td>%d</td><td>%d</td><td>%s</td></tr>\n", 
 					999, dd.get(apl), nms == null ? "??" : playerHTML(nms)));
 		}
