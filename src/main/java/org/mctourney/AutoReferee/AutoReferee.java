@@ -372,7 +372,11 @@ public class AutoReferee extends JavaPlugin
 		if ("autoref".equalsIgnoreCase(cmd.getName()))
 		{
 			if (args.length >= 1 && "save".equalsIgnoreCase(args[0]) && match != null)
-			{ match.saveWorldConfiguration(); return true; }
+			{
+				match.saveWorldConfiguration(); 
+				sender.sendMessage(ChatColor.GREEN + CFG_FILENAME + " saved.");
+				return true;
+			}
 
 			if (args.length >= 1 && "init".equalsIgnoreCase(args[0]))
 			{
