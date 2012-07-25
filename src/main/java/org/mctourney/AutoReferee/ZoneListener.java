@@ -128,26 +128,11 @@ public class ZoneListener implements Listener
 			if (player.isSneaking() && d < SNEAK_DISTANCE && fallspeed < FREEFALL_THRESHOLD);
 			
 			// if any of the above clauses fail, they are not in a defensible position
-			else if (apl.getExitLocation() == null)
-			{
-				apl.setExitLocation(player.getLocation());
-				for (Player ref : match.getReferees())
-					ref.sendMessage(String.format("%s exited their lane!", apl.getName()));
-			}
-		}
-		
-		// only kill if they are in survival mode. otherwise, what's the point?
-		else if (apl.getExitLocation() != null)
-		{
-			// if we have traveled more than 1.5 blocks from our exit location, kill
-			if (apl.getExitLocation().distance(player.getLocation()) > VOID_SAFE_TRAVEL_DISTANCE)
+			else if (fallspeed == 0.0 && d > 0.5 && !player.isDead())
 			{
 				player.setLastDamageCause(AutoRefPlayer.VOID_DEATH);
 				player.setHealth(0);
 			}
-			
-			// set the exit location to null since we are back in
-			apl.setExitLocation(null);
 		}
 	}
 	

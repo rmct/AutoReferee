@@ -51,6 +51,9 @@ public class CuboidRegion
 	// appropriate for measurements on cuboid regions)
 	public double distanceToRegion(Location v)
 	{
+		// garbage-in, garbage-out
+		if (v == null) return Double.POSITIVE_INFINITY;
+		
 		double x = v.getX(), y = v.getY(), z = v.getZ();
 		Vector3 mx = getMaximumPoint(), mn = getMinimumPoint();
 		
