@@ -60,7 +60,7 @@ public class ObjectiveTracker implements Listener
 					match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.OBJECTIVE_PLACED,
 						String.format("%s has placed %s", apl.getPlayerName(), bd.getRawName()), loc, apl, bd));
 			}
-			match.checkWinConditions(null);
+			match.checkWinConditions();
 		}
 	}
 
@@ -68,7 +68,7 @@ public class ObjectiveTracker implements Listener
 	public void blockBreak(BlockBreakEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
-		if (match != null) match.checkWinConditions(event.getBlock().getLocation());
+		if (match != null) match.checkWinConditions();
 	}
 	
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
@@ -85,7 +85,7 @@ public class ObjectiveTracker implements Listener
 				Location loc = event.getClickedBlock().getLocation();
 				for (SourceInventory sinv : apl.getTeam().targetChests.values())
 					if (loc.equals(sinv.location)) sinv.hasSeen(apl);
-				match.checkWinConditions(null);
+				match.checkWinConditions();
 			}
 		}
 	}
@@ -111,7 +111,7 @@ public class ObjectiveTracker implements Listener
 	public void entityInteract(PlayerInteractEntityEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getRightClicked().getWorld());
-		if (match != null) match.checkWinConditions(null);
+		if (match != null) match.checkWinConditions();
 
 		if (event.getPlayer().hasPermission("autoreferee.referee") &&
 			(event.getRightClicked().getType() == EntityType.PLAYER))

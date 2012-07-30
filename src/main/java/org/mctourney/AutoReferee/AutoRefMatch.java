@@ -677,7 +677,15 @@ public class AutoRefMatch
 		}
 	}
 	
-	public void checkWinConditions(Location aloc)
+	
+	public void checkWinConditions()
+	{
+		Plugin plugin = AutoReferee.getInstance();
+		plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+			new Runnable(){ public void run(){ delayedCheckWinConditions(); } });
+	}
+	
+	public void delayedCheckWinConditions()
 	{
 		// this code is only called in BlockPlaceEvent and BlockBreakEvent when
 		// we have confirmed that the state is PLAYING, so we know we are definitely
@@ -691,12 +699,7 @@ public class AutoRefMatch
 			// check all win condition blocks (AND together)
 			boolean win = true;
 			for (Map.Entry<Location, BlockData> pair : t.winConditions.entrySet())
-			{
-				BlockData bd = pair.getValue();
-				win &= pair.getKey().equals(aloc) ? bd.getMaterial() == Material.AIR : 
-					bd.matches(world.getBlockAt(pair.getKey()));
-			}
-			
+				win &= pair.getValue().matches(world.getBlockAt(pair.getKey()));
 			if (win) matchComplete(t);
 		}
 	}
