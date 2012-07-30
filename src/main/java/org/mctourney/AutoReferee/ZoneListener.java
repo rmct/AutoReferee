@@ -41,7 +41,7 @@ public class ZoneListener implements Listener
 	AutoReferee plugin = null;
 	
 	// distance a player may travel outside of their lane without penalty
-	private static final double VOID_SAFE_TRAVEL_DISTANCE = 1.5;
+	private static final double VOID_SAFE_TRAVEL_DISTANCE = 1.595;
 
 	public static final double SNEAK_DISTANCE = 0.301;
 	public static final double FREEFALL_THRESHOLD = 0.350;
@@ -100,13 +100,14 @@ public class ZoneListener implements Listener
 		
 		double d = team.distanceToClosestRegion(event.getTo());
 		double fallspeed = event.getFrom().getY() - event.getTo().getY();
+		Location exit = apl.getExitLocation();
 		
 		// don't bother if the player isn't in survival mode
 		if (player.getGameMode() != GameMode.SURVIVAL 
 			|| match.inStartRegion(event.getTo())) return;
 		
 		// if a player leaves the start region... 
-		if (apl != null && match.inStartRegion(event.getFrom()) && 
+		if (match.inStartRegion(event.getFrom()) && 
 			!match.inStartRegion(event.getTo()))
 		{
 			// if game isn't going, teleport them back
@@ -127,11 +128,26 @@ public class ZoneListener implements Listener
 			// player is sneaking off the edge and not in freefall
 			if (player.isSneaking() && d < SNEAK_DISTANCE && fallspeed < FREEFALL_THRESHOLD);
 			
-			// if any of the above clauses fail, they are not in a defensible position
-			else if (fallspeed == 0.0 && d > 0.5 && !player.isDead())
+			// if there is no exit position, set the exit position
+			else if (exit == null) apl.setExitLocation(player.getLocation());
+			
+			// if there is an exit position and they aren't falling, kill them
+			else if (exit != null && fallspeed == 0.0)
+				apl.die(AutoRefPlayer.VOID_DEATH, true);
+		}
+		
+		// player inside region
+		else
+		{
+			// if there is an exit location
+			if (exit != null)
 			{
-				player.setLastDamageCause(AutoRefPlayer.VOID_DEATH);
-				player.setHealth(0);
+				// if the player traveled too far through the void, kill them
+				if (player.getLocation().distance(exit) > VOID_SAFE_TRAVEL_DISTANCE)
+					apl.die(AutoRefPlayer.VOID_DEATH, true);
+				
+				// reset exit location since player in region
+				apl.setExitLocation(null);
 			}
 		}
 	}
@@ -144,10 +160,7 @@ public class ZoneListener implements Listener
 		if (match == null) return;
 
 		AutoRefPlayer apl = match.getPlayer(player);
-		if (apl == null) return;
-		
-		// when a player respawns, clear their exit location
-		apl.setExitLocation(null);
+		if (apl != null) apl.respawn();
 	}
 	
 	public boolean validInteract(Player player, Location loc)

@@ -225,6 +225,26 @@ class AutoRefPlayer
 
 	public String getTag()
 	{ return getPlayerName().toLowerCase().replaceAll("[^a-z0-9]+", ""); }
+
+	public void die(EntityDamageEvent deathCause, boolean clearDrops)
+	{
+		Player player = getPlayer();
+		if (player == null || player.isDead()) return;
+		
+		// if a cause of death is specified, set it
+		if (deathCause != null) player.setLastDamageCause(deathCause);
+		
+		// if the inventory needs to be cleared, clear it
+		if (clearDrops) player.getInventory().clear();
+		
+		// kill the player
+		player.setHealth(0);
+	}
+
+	public void respawn()
+	{
+		this.setExitLocation(null);
+	}
 	
 	public void heal()
 	{
