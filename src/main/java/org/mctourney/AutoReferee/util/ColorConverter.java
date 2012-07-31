@@ -49,15 +49,15 @@ public abstract class ColorConverter
 		chatHexMap.put(ChatColor.DARK_RED, "#a00");
 		chatHexMap.put(ChatColor.DARK_PURPLE, "#a0a");
 		chatHexMap.put(ChatColor.GOLD, "#fa0");
-		chatHexMap.put(ChatColor.GRAY, "#aaa");
+		chatHexMap.put(ChatColor.GRAY, "#999");
 		chatHexMap.put(ChatColor.DARK_GRAY, "#555");
 		chatHexMap.put(ChatColor.BLUE, "#55f");
-		chatHexMap.put(ChatColor.GREEN, "#5f5");
-		chatHexMap.put(ChatColor.AQUA, "#5ff");
+		chatHexMap.put(ChatColor.GREEN, "#5c5");
+		chatHexMap.put(ChatColor.AQUA, "#5cc");
 		chatHexMap.put(ChatColor.RED, "#f55");
 		chatHexMap.put(ChatColor.LIGHT_PURPLE, "#f5f");
-		chatHexMap.put(ChatColor.YELLOW, "#ff5");
-		chatHexMap.put(ChatColor.WHITE, "#fff");
+		chatHexMap.put(ChatColor.YELLOW, "#cc5");
+		chatHexMap.put(ChatColor.WHITE, "#aaa");
 	}
 	
 	public static String chatToHex(ChatColor clr)
@@ -85,7 +85,7 @@ public abstract class ColorConverter
 		dyeHexMap.put(DyeColor.PURPLE, "#7e34bf");
 		dyeHexMap.put(DyeColor.RED, "#9e2b27");
 		dyeHexMap.put(DyeColor.SILVER, "#a0a7a7");
-		dyeHexMap.put(DyeColor.WHITE, "#e4e4e4");
+		dyeHexMap.put(DyeColor.WHITE, "#a4a4a4");
 		dyeHexMap.put(DyeColor.YELLOW, "#c2b51c");
 	}
 
@@ -94,5 +94,24 @@ public abstract class ColorConverter
 		if (dyeHexMap.containsKey(clr))
 			return dyeHexMap.get(clr);
 		return "#000";
+	}
+
+	public static String generateColorTable()
+	{
+		StringBuilder str = new StringBuilder();
+
+		str.append("<table><tr><td>Chat Color</td><td>Color</td></tr>");
+		for (Map.Entry<ChatColor, String> e : chatHexMap.entrySet())
+			str.append(String.format("<tr><td style='color: %2$s;'>%1$s</td>" + 
+				"<td style='color: %2$s;'>Test String</td></tr>", e.getKey().name(), e.getValue()));
+		str.append("</table>");
+
+		str.append("<table><tr><td>Dye Color</td><td>Color</td></tr>");
+		for (Map.Entry<DyeColor, String> e : dyeHexMap.entrySet())
+			str.append(String.format("<tr><td style='color: %2$s;'>%1$s</td>" + 
+				"<td style='color: %2$s;'>Test String</td></tr>", e.getKey().name(), e.getValue()));
+		str.append("</table>");
+
+		return str.toString();
 	}
 }
