@@ -1,5 +1,7 @@
 [![Travis Build Status for AutoReferee](https://secure.travis-ci.org/rmct/AutoReferee.png?branch=master)](http://travis-ci.org/#!/rmct/AutoReferee)
 
+[Follow us on dev.bukkit.org](http://dev.bukkit.org/server-mods/autoreferee/)!
+
 **AutoReferee**, in cooperation with [_RMCT_](http://www.reddit.com/r/mctourney) and _Major League Mining_: A plugin to automatically referee Race for Wool (and other competitive Minecraft) matches. Automatically handles whitelists, teams, regions, end conditions, and optionally interfaces with a central server to report match statistics and results.
 
 **Mapmakers:** Once you have built your map and [configured it for use with Autoreferee](http://github.com/rmct/AutoReferee/wiki/How-to-Configure-a-Map), the plugin will place a special configuration file directly into your world folder for you to package and distribute with your map. The configuration file configures AutoReferee automatically when your map is loaded. Please refer to the documentation regarding this configuration file.
