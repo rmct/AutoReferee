@@ -1,5 +1,8 @@
 package org.mctourney.AutoReferee;
 
+import java.util.Map;
+import java.util.UUID;
+
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -14,18 +17,21 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 
+import com.google.common.collect.Maps;
+
 public class PlayerVersusPlayerListener implements Listener
 {
 	AutoReferee plugin = null;
+	public Map<UUID, AutoRefPlayer> tntOwner;
 
 	public PlayerVersusPlayerListener(Plugin p)
 	{
 		plugin = (AutoReferee) p;
+		tntOwner = Maps.newHashMap();
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST)
@@ -46,8 +52,7 @@ public class PlayerVersusPlayerListener implements Listener
 
 			// if the death was due to intervention by the plugin
 			// let's change the death message to reflect this fact
-			if (lastDmg == AutoRefPlayer.VOID_DEATH || (lastDmg.getCause() == DamageCause.VOID
-				&& !match.locationOwnership(victim.getLocation()).contains(vdata.getTeam())))
+			if (lastDmg == AutoRefPlayer.VOID_DEATH)
 			{
 				dmsg = victim.getName() + " entered the void lane.";
 				event.getDrops().clear();
@@ -162,5 +167,10 @@ public class PlayerVersusPlayerListener implements Listener
 	public void explosionPrime(ExplosionPrimeEvent event)
 	{
 		// TODO: Waiting on BUKKIT-770
+		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
+		if (match == null) return;
+		
+		AutoRefPlayer apl = match.getNearestPlayer(event.getEntity().getLocation());
+		if (apl == null) return;
 	}
 }
