@@ -252,8 +252,8 @@ public class ReportGenerator
 
 		public int compare(AutoRefPlayer apl1, AutoRefPlayer apl2)
 		{
-			if (apl1 == target) return -1;
-			if (apl2 == target) return +1;
+			if (apl1.getTeam() == target.getTeam()) return -1;
+			if (apl2.getTeam() == target.getTeam()) return +1;
 			
 			// get the number of kills on this player total
 			int k = apl1.kills.get(target) - apl2.kills.get(target);
@@ -287,14 +287,14 @@ public class ReportGenerator
 		{
 			// get nemesis of this player
 			AutoRefPlayer nms = Collections.max(players, new NemesisComparator(apl));
-			if (nms == apl) nms = null;
+			if (nms != null && nms.getTeam() == apl.getTeam()) nms = null;
 			
 			playerstats.write(String.format("<tr><td>%d</td><td>%s</td>", 
 					++rank, playerHTML(apl)));
 			playerstats.write(String.format("<td>%d</td><td>%d</td><td>%s</td>", 
 					apl.totalKills, apl.totalDeaths, apl.getExtendedAccuracyInfo()));
 			playerstats.write(String.format("<td>%d</td><td>%d</td><td>%s</td></tr>\n", 
-					999, dd.get(apl), nms == null ? "??" : playerHTML(nms)));
+					999, dd.get(apl), nms == null ? "none" : playerHTML(nms)));
 		}
 		
 		return playerstats.toString();
