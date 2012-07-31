@@ -517,6 +517,27 @@ public class AutoRefMatch
 		setCurrentState(eMatchStatus.PLAYING);
 	}
 
+	public int getVanishLevel(Player p)
+	{
+		// referees have the highest vanish level
+		if (p.hasPermission("autoreferee.referee")) return 200;
+		
+		// if you aren't on a team, you get a vanish level
+		if (getPlayerTeam(p) == null) return 100;
+		
+		// streamers are ONLY able to see streamers and players
+		if (p.hasPermission("autoreferee.streamer")) return 1;
+		
+		// players have the lowest level vanish
+		return 0;
+	}
+	
+	public void clearEntities()
+	{
+		for (Entity e : world.getEntitiesByClasses(Monster.class, 
+			Animals.class, Item.class, ExperienceOrb.class, Arrow.class)) e.remove();
+	}
+
 	// helper class for starting match, synchronous task
 	static class MatchStartTask implements Runnable
 	{
@@ -546,27 +567,6 @@ public class AutoRefMatch
 			else match.broadcast(">>> " + ChatColor.GREEN + 
 				Integer.toString(secs--) + "...");
 		}
-	}
-
-	public int getVanishLevel(Player p)
-	{
-		// referees have the highest vanish level
-		if (p.hasPermission("autoreferee.referee")) return 200;
-		
-		// if you aren't on a team, you get a vanish level
-		if (getPlayerTeam(p) == null) return 100;
-		
-		// streamers are ONLY able to see streamers and players
-		if (p.hasPermission("autoreferee.streamer")) return 1;
-		
-		// players have the lowest level vanish
-		return 0;
-	}
-	
-	public void clearEntities()
-	{
-		for (Entity e : world.getEntitiesByClasses(Monster.class, 
-			Animals.class, Item.class, ExperienceOrb.class, Arrow.class)) e.remove();
 	}
 
 	// prepare this world to start
@@ -663,19 +663,6 @@ public class AutoRefMatch
 		// (4) make an empty data folder:
 		new File(archiveFolder, "data").mkdir();
 	}
-
-	// helper class for terminating world, synchronous task
-	class MatchEndTask implements Runnable
-	{
-		public void run()
-		{
-			// first, handle all the players
-			for (Player p : world.getPlayers()) AutoReferee.getInstance().playerDone(p);
-			
-			// then, cleanup the match object (swallow exceptions)
-			try { destroy(); } catch (Exception e) {  };
-		}
-	}
 	
 	
 	public void checkWinConditions()
@@ -701,6 +688,19 @@ public class AutoRefMatch
 			for (Map.Entry<Location, BlockData> pair : t.winConditions.entrySet())
 				win &= pair.getValue().matches(world.getBlockAt(pair.getKey()));
 			if (win) matchComplete(t);
+		}
+	}
+
+	// helper class for terminating world, synchronous task
+	class MatchEndTask implements Runnable
+	{
+		public void run()
+		{
+			// first, handle all the players
+			for (Player p : world.getPlayers()) AutoReferee.getInstance().playerDone(p);
+			
+			// then, cleanup the match object (swallow exceptions)
+			try { destroy(); } catch (Exception e) {  };
 		}
 	}
 
