@@ -30,9 +30,9 @@ import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMatch.StartMechanism;
-import org.mctourney.AutoReferee.AutoRefTeam.SourceInventory;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 import org.mctourney.AutoReferee.util.BlockVector3;
+import org.mctourney.AutoReferee.util.SourceInventory;
 
 import com.google.common.collect.Maps;
 
@@ -267,7 +267,7 @@ public class ZoneListener implements Listener
 					for (iter = team.targetChests.values().iterator(); iter.hasNext(); )
 					{
 						SourceInventory sinv = iter.next();
-						if (block.getLocation().equals(sinv.location))
+						if (block.getLocation().equals(sinv.target))
 						{
 							iter.remove(); found = true;
 							String nm = String.format("%s @ %s", block.getType().name(),
@@ -310,6 +310,66 @@ public class ZoneListener implements Listener
 						String m = ChatColor.RED + sm.toString() + 
 							ChatColor.RESET + " is a start mechanism.";
 						event.getPlayer().sendMessage(m);
+					}
+				}
+				
+				break;
+				
+			// this isn't one of our tools...
+			default: return;
+		}
+		
+		// cancel the event, since it was one of our tools being used properly
+		event.setCancelled(true);
+	}
+
+	@EventHandler
+	public void toolUsage(PlayerInteractEntityEvent event)
+	{
+		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
+		if (match == null) return;
+		
+		// this event is not an "item" event
+		if (event.getPlayer().getItemInHand() == null) return;
+
+		// get type id of the event and check if its one of our tools
+		int typeID = event.getPlayer().getItemInHand().getTypeId();
+		if (!toolMap.containsKey(typeID)) return;
+
+		// get which action to perform
+		switch (toolMap.get(typeID))
+		{
+			// this is the tool built for setting win conditions
+			case TOOL_WINCOND:
+				
+				// if there is no block involved in this event, nothing
+				if (event.getRightClicked() == null) return;
+				
+				// if the player doesn't have configure permissions, nothing
+				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
+				
+				// determine who owns the region that the clicked block is in
+				Set<AutoRefTeam> owns = match.locationOwnership(event.getRightClicked().getLocation());
+				
+				// if the region is owned by only one team, make it one of their
+				// win conditions (otherwise, we may need to configure by hand)
+				if (owns.size() == 1) for (AutoRefTeam team : owns)
+				{
+					Iterator<SourceInventory> iter; boolean found = false;
+					for (iter = team.targetChests.values().iterator(); iter.hasNext(); )
+					{
+						SourceInventory sinv = iter.next();
+						if (event.getRightClicked().equals(sinv.target))
+						{
+							iter.remove(); found = true;
+							match.broadcast(String.format("%s is no longer a source for %s", 
+								sinv.toString(), sinv.blockdata.getName()));
+						}
+					}
+					if (!found)
+					{
+						if (event.getRightClicked() instanceof InventoryHolder)
+							team.addSourceInventory((InventoryHolder) event.getRightClicked());
 					}
 				}
 				

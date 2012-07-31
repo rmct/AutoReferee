@@ -3,6 +3,7 @@ package org.mctourney.AutoReferee;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
@@ -11,12 +12,12 @@ import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
-import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.util.*;
 
 import com.google.common.collect.Lists;
@@ -191,8 +192,11 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			List<String> slist = (List<String>) conf.get("target-container");
 			if (slist != null) for (String s : slist)
 			{
-				newTeam.addSourceInventory(
-					w.getBlockAt(BlockVector3.fromCoords(s).toLocation(w)));
+				BlockVector3 bvec = BlockVector3.fromCoords(s);
+				if (bvec != null) newTeam.addSourceInventory(w.getBlockAt(bvec.toLocation(w)));
+				
+				else try { newTeam.addSourceInventory(UUID.fromString(s)); }
+				catch (IllegalArgumentException e) {  }
 			}
 		}
 
@@ -225,7 +229,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		// convert the target containers to strings
 		List<String> tcon = Lists.newArrayList();
 		for (Map.Entry<BlockData, SourceInventory> e : targetChests.entrySet())
-			tcon.add(BlockVector3.fromLocation(e.getValue().location).toCoords());
+			tcon.add(e.getValue().toString());
 
 		// add the target container list
 		map.put("target-container", tcon);
@@ -315,59 +319,36 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			distance = Math.min(distance, reg.distanceToRegion(loc));
 		return distance;
 	}
-
-	private static final long SEEN_COOLDOWN = 40 * 20;
-	public class SourceInventory
+	
+	public void addSourceInventory(Object tgt, Inventory inv)
 	{
-		public Location location;
-		public Inventory inventory;
-		public BlockData blockdata;
+		SourceInventory src = new SourceInventory(inv);
+		if (src.blockdata == null) return;
 		
-		// has this team seen this chest recently?
-		public long lastSeen = 0;
-
-		@Override public String toString()
-		{ return BlockVector3.fromLocation(location).toCoords(); }
-
-		public void hasSeen(AutoRefPlayer apl)
-		{
-			// if this team has seen this box before, nevermind
-			long ctime = location.getWorld().getFullTime();
-			if (lastSeen > 0 && ctime - lastSeen < SEEN_COOLDOWN) return;
-			
-			if (apl != null)
-			{
-				// generate a transcript event for seeing the box
-				String message = String.format("%s is carrying %s", 
-					apl.getPlayerName(), blockdata.getRawName());
-				getMatch().addEvent(new TranscriptEvent(apl.getTeam().getMatch(),
-					TranscriptEvent.EventType.OBJECTIVE_FOUND, message, location, apl, blockdata));
-			}
-			
-			// mark this box as seen
-			lastSeen = ctime;
-		}
+		// save the target (this is messy!)
+		src.target = tgt;
+		
+		targetChests.put(src.blockdata, src);
+		match.broadcast(String.format("%s is a source for %s", 
+			src.toString(), src.blockdata.getName()));
 	}
 
 	public void addSourceInventory(Block block)
 	{
-		if (block == null) return;
-
-		if (!(block.getState() instanceof InventoryHolder)) return;
-		InventoryHolder cblock = (InventoryHolder) block.getState();
-
-		SourceInventory src = new SourceInventory();
-		src.location = block.getLocation();
-		src.inventory = cblock.getInventory();
-		
-		BlockData bd = BlockData.fromInventory(src.inventory);
-		if (bd == null) return;
-		
-		targetChests.put(src.blockdata = bd, src);
-		String nm = String.format("%s @ %s", block.getType().name(),
-			BlockVector3.fromLocation(block.getLocation()).toCoords());
-		match.broadcast(nm + " is a source for " + bd.getName());
+		if (block == null || !(block.getState() instanceof InventoryHolder)) return;
+		addSourceInventory(block.getLocation(), 
+			((InventoryHolder) block.getState()).getInventory());
 	}
+
+	public void addSourceInventory(UUID uid)
+	{
+		if (uid == null) return;
+		for (Entity e : getMatch().getWorld().getEntitiesByClasses(InventoryHolder.class))
+			if (uid.equals(e.getUniqueId())) addSourceInventory((InventoryHolder) e);
+	}
+
+	public void addSourceInventory(InventoryHolder invh)
+	{ if (invh != null) addSourceInventory(invh, invh.getInventory()); }
 	
 	public void addWinCondition(Block block)
 	{

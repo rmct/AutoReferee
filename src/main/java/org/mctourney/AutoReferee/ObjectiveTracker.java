@@ -24,12 +24,14 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
-import org.mctourney.AutoReferee.AutoRefTeam.SourceInventory;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 import org.mctourney.AutoReferee.util.BlockData;
+import org.mctourney.AutoReferee.util.SourceInventory;
 
 public class ObjectiveTracker implements Listener 
 {
@@ -77,14 +79,15 @@ public class ObjectiveTracker implements Listener
 		Player pl = event.getPlayer();
 		if (event.hasBlock())
 		{
-			AutoRefMatch match = plugin.getMatch(event.getClickedBlock().getWorld());
+			Block block = event.getClickedBlock();
+			AutoRefMatch match = plugin.getMatch(block.getWorld());
 			AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
 			
-			if (match != null && apl != null)
+			if (match != null && apl != null && block != null)
 			{
-				Location loc = event.getClickedBlock().getLocation();
+				Location loc = block.getLocation();
 				for (SourceInventory sinv : apl.getTeam().targetChests.values())
-					if (loc.equals(sinv.location)) sinv.hasSeen(apl);
+					if (loc.equals(sinv.target)) sinv.hasSeen(apl);
 				match.checkWinConditions();
 			}
 		}
@@ -102,21 +105,32 @@ public class ObjectiveTracker implements Listener
 			Location loc = block.getLocation();
 			for (AutoRefTeam team : match.locationOwnership(loc))
 				for (SourceInventory sinv : team.targetChests.values())
-					if (loc.equals(sinv.location) && sinv.blockdata.matches(block))
-						sinv.hasSeen(match.getNearestPlayer(loc));
+					if (loc.equals(sinv.target)) sinv.hasSeen(match.getNearestPlayer(loc));
 		}
 	}
 	
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void entityInteract(PlayerInteractEntityEvent event)
 	{
-		AutoRefMatch match = plugin.getMatch(event.getRightClicked().getWorld());
-		if (match != null) match.checkWinConditions();
+		Player pl = event.getPlayer();
+		Entity entity = event.getRightClicked();
+		
+		AutoRefMatch match = plugin.getMatch(pl.getWorld());
+		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
+		
+		if (match != null && apl != null && entity != null)
+		{
+			Location loc = entity.getLocation();
+			for (AutoRefTeam team : match.locationOwnership(loc))
+				for (SourceInventory sinv : team.targetChests.values())
+					if (entity.equals(sinv.target)) sinv.hasSeen(apl);
+			match.checkWinConditions();
+		}
 
 		if (event.getPlayer().hasPermission("autoreferee.referee") &&
-			(event.getRightClicked().getType() == EntityType.PLAYER))
+			(entity.getType() == EntityType.PLAYER))
 		{
-			Player other = (Player) event.getRightClicked();
+			Player other = (Player) entity;
 			event.getPlayer().openInventory(other.getInventory());
 		}
 	}

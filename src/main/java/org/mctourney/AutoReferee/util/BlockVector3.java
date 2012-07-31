@@ -18,7 +18,10 @@ public class BlockVector3 extends Vector3
 	{ return bx + "," + by + "," + bz; }
 
 	public static BlockVector3 fromCoords(String coords)
-	{ return new BlockVector3(Vector3.fromCoords(coords)); }
+	{
+		Vector3 v3 = Vector3.fromCoords(coords);
+		return v3 == null ? null : new BlockVector3(v3);
+	}
 
 	public static BlockVector3 fromLocation(Location loc)
 	{ return new BlockVector3(Vector3.fromLocation(loc)); }

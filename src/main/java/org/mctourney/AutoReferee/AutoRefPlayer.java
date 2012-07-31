@@ -24,7 +24,7 @@ import org.apache.commons.collections.map.DefaultedMap;
 
 import com.google.common.collect.Sets;
 
-class AutoRefPlayer
+public class AutoRefPlayer
 {
 	public static final EntityDamageEvent VOID_DEATH = 
 		new EntityDamageEvent(null, EntityDamageEvent.DamageCause.VOID, 0);
