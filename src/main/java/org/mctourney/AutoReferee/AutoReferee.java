@@ -679,15 +679,7 @@ public class AutoReferee extends JavaPlugin
 			if (target != player && !player.hasPermission("autoreferee.referee"))
 			{ sender.sendMessage("You do not have permission."); return true; }
 
-			// get previous team, if this is the same team, do nothing
-			AutoRefTeam pteam = match.getPlayerTeam(target);
-			if (team != pteam)
-			{
-				// if this is a different team, leave previous team
-				if (pteam != null) pteam.leave(player);
-				team.join(target);
-			}
-			
+			match.joinTeam(target, team);
 			return true;
 		}
 		if ("leaveteam".equalsIgnoreCase(cmd.getName()) && match != null && !isAutoMode())

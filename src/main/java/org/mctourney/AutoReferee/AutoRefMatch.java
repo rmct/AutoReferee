@@ -771,6 +771,15 @@ public class AutoRefMatch
 	public boolean isPlayerExpected(OfflinePlayer opl)
 	{ return expectedTeam(opl) != null; }
 	
+	public boolean joinTeam(Player pl, AutoRefTeam t)
+	{
+		AutoRefTeam pteam = getPlayerTeam(pl);
+		if (t == pteam) return true;
+		
+		if (pteam != null) pteam.leave(pl);
+		t.join(pl); return true;
+	}
+	
 	public void leaveTeam(Player pl)
 	{ for (AutoRefTeam team : teams) team.leave(pl); }
 	
