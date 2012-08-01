@@ -1,6 +1,5 @@
 package org.mctourney.AutoReferee;
 
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -27,13 +26,12 @@ public class WorldListener implements Listener
 	@EventHandler
 	public void playerJoin(PlayerJoinEvent event)
 	{
-		Player player = event.getPlayer();
-		AutoRefMatch match = plugin.getMatch(player.getWorld());
-		if (match == null) return;
-		
-		AutoRefTeam team = match.getPlayerTeam(player);
-		if (team != null) event.setJoinMessage(event.getJoinMessage()
-			.replace(player.getName(), match.getPlayerName(player)));
+		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
+		if (match != null)
+		{
+			event.setJoinMessage(match.colorMessage(event.getJoinMessage()));
+			match.sendMatchInfo(event.getPlayer());
+		}
 	}
 	
 	@EventHandler
@@ -44,6 +42,10 @@ public class WorldListener implements Listener
 		if (matchFm != null) matchFm.checkTeamsReady();
 		
 		AutoRefMatch matchTo = plugin.getMatch(event.getPlayer().getWorld());
-		if (matchTo != null) matchTo.checkTeamsReady();
+		if (matchTo != null)
+		{
+			matchTo.checkTeamsReady();
+			matchTo.sendMatchInfo(event.getPlayer());
+		}
 	}
 }

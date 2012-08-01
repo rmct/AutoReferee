@@ -1044,7 +1044,7 @@ public class AutoRefMatch
 			plugin.getLogger().info(event.toString());
 	}
 
-	private String colorMessage(String message)
+	public String colorMessage(String message)
 	{
 		for (AutoRefPlayer apl : getPlayers())
 			message = message.replaceAll(apl.getPlayerName(), apl.getName());
