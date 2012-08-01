@@ -16,6 +16,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.plugin.Plugin;
 
@@ -153,6 +154,14 @@ public class PlayerVersusPlayerListener implements Listener
 		
 		AutoRefPlayer apl = match.getPlayer(player);
 		if (apl != null) ++apl.shotsFired;
+	}
+	
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void hungerChange(FoodLevelChangeEvent event)
+	{
+		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
+		if (match != null && match.getCurrentState() != eMatchStatus.PLAYING)
+			event.setFoodLevel(20);
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
