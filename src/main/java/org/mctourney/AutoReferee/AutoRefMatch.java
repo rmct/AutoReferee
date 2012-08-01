@@ -1053,4 +1053,24 @@ public class AutoRefMatch
 				message = message.replaceAll(bd.getRawName(), bd.getName());
 		return message;
 	}
+
+	public void sendMatchInfo(Player player)
+	{
+		player.sendMessage("Map: " + ChatColor.GRAY + getMapName() + 
+			ChatColor.ITALIC + " by " + getMapAuthors());
+		
+		AutoRefPlayer apl = getPlayer(player);
+		if (apl == null) player.sendMessage("You are not on a team! Type " + ChatColor.GRAY + "/jointeam");
+		else player.sendMessage("You are on team: " + apl.getTeam().getName());
+		
+		for (AutoRefTeam team : getSortedTeams())
+			player.sendMessage(String.format("%s (%d) - %s", 
+				team.getName(), team.getPlayers().size(), team.getPlayerList()));
+		
+		long timestamp = (getWorld().getFullTime() - getStartTicks()) / 20L;
+		player.sendMessage("Match status is currently " + ChatColor.GRAY + getCurrentState().name());
+		if (getCurrentState() == eMatchStatus.PLAYING)
+			player.sendMessage(String.format(ChatColor.GRAY + "The current match time is: %02d:%02d:%02d", 
+				timestamp/3600L, (timestamp/60L)%60L, timestamp%60L));
+	}
 }
