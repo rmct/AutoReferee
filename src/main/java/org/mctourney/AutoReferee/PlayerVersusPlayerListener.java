@@ -3,6 +3,7 @@ package org.mctourney.AutoReferee;
 import java.util.Map;
 import java.util.UUID;
 
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -16,7 +17,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
@@ -99,6 +99,13 @@ public class PlayerVersusPlayerListener implements Listener
 			EntityDamageByEntityEvent ed = (EntityDamageByEntityEvent) event;
 			Player damager = entityToPlayer(ed.getDamager());
 			Player damaged = entityToPlayer(ed.getEntity());
+			
+			if (null != damager && match.getCurrentState() == eMatchStatus.PLAYING
+				&& ed.getDamager() instanceof Arrow)
+			{
+				AutoRefPlayer apl = match.getPlayer(damager);
+				if (apl != null) ++apl.shotsHit;
+			}
 
 			// if either of these aren't players, nothing to do here
 			if (null == damager || null == damaged) return;
@@ -146,21 +153,6 @@ public class PlayerVersusPlayerListener implements Listener
 		
 		AutoRefPlayer apl = match.getPlayer(player);
 		if (apl != null) ++apl.shotsFired;
-	}
-
-	@EventHandler
-	public void playerArrowHit(ProjectileHitEvent event)
-	{
-		if ((event.getEntityType() == EntityType.ARROW) && 
-			(event.getEntity().getShooter() instanceof Player))
-		{
-			Player player = (Player) event.getEntity().getShooter();
-			AutoRefMatch match = plugin.getMatch(player.getWorld());
-			if (match == null) return;
-			
-			AutoRefPlayer apl = match.getPlayer(player);
-			if (apl != null) ++apl.shotsHit;
-		}
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
