@@ -206,7 +206,7 @@ public class AutoReferee extends JavaPlugin
 			this.getConfig().getBoolean("server-mode.online", true));
 
 		// wrap up, debug to follow this message
-		getLogger().info("AutoReferee loaded successfully.");
+		getLogger().info(this.getName() + " loaded successfully.");
 		
 		// save the "lobby" world as a sort of drop-zone for discharged players
 		String lobbyname = getConfig().getString("lobby-world", null);
@@ -215,7 +215,7 @@ public class AutoReferee extends JavaPlugin
 
 		// connect to server, or let the server operator know to set up the match manually
 		if (!makeServerConnection(qurl))
-			getLogger().info("AutoReferee is running in OFFLINE mode. All setup must be done manually.");
+			getLogger().info(this.getName() + " is running in OFFLINE mode. All setup must be done manually.");
 
 		// update online mode to represent whether or not we have a connection
 		if (isAutoMode()) setAutoMode(checkPlugins(pm));
@@ -255,7 +255,7 @@ public class AutoReferee extends JavaPlugin
 
 	public void onDisable()
 	{
-		getLogger().info("AutoReferee disabled.");
+		getLogger().info(this.getName() + " disabled.");
 	}
 
 	private void setupPluginChannels() 
@@ -389,7 +389,7 @@ public class AutoReferee extends JavaPlugin
 					
 					sender.sendMessage(ChatColor.GREEN + CFG_FILENAME + " generated.");
 				}
-				else sender.sendMessage("AutoReferee already initialized for " + 
+				else sender.sendMessage(this.getName() + " already initialized for " + 
 					match.worldConfig.getString("map.name", "this map") + ".");
 				
 				return true;
@@ -644,8 +644,14 @@ public class AutoReferee extends JavaPlugin
 			}
 			return true;
 		}
-		if ("matchinfo".equalsIgnoreCase(cmd.getName()) && match != null)
+		if ("matchinfo".equalsIgnoreCase(cmd.getName()))
 		{
+			if (match == null)
+			{
+				sender.sendMessage(ChatColor.GRAY + this.getName() + " is not running for this world!");
+				return true;
+			}
+			
 			sender.sendMessage("Map: " + ChatColor.GRAY + match.getMapName() + ChatColor.ITALIC + " by " + match.getMapAuthors());
 			
 			AutoRefPlayer apl = match.getPlayer(player);
