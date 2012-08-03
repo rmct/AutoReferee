@@ -330,7 +330,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		
 		targetChests.put(src.blockdata, src);
 		match.broadcast(String.format("%s is a source for %s", 
-			src.toString(), src.blockdata.getName()));
+			src.getName(), src.blockdata.getName()));
 	}
 
 	public void addSourceInventory(Block block)

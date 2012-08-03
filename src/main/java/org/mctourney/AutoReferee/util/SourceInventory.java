@@ -31,11 +31,33 @@ public class SourceInventory
 			return BlockVector3.fromLocation((Location) target).toCoords();
 		
 		// if the source is an entity, print UUID
-		if (target instanceof Entity)
+		else if (target instanceof Entity)
 			return ((Entity) target).getUniqueId().toString();
 		
 		// profit ??
 		return null;
+	}
+
+	public String getName()
+	{
+		Location loc = null;
+		String type = "??";
+		
+		if (target instanceof Location)
+		{
+			loc = (Location) target;
+			type = loc.getWorld().getBlockAt(loc).getType().name();
+		}
+		
+		else if (target instanceof Entity)
+		{
+			Entity entity = (Entity) target;
+			loc = entity.getLocation();
+			type = entity.getType().name();
+		}
+		
+		return String.format("%s(%s)", type, 
+			BlockVector3.fromLocation(loc).toCoords());
 	}
 
 	public void hasSeen(AutoRefPlayer apl)

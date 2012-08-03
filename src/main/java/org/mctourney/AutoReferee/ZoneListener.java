@@ -31,7 +31,6 @@ import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMatch.StartMechanism;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
-import org.mctourney.AutoReferee.util.BlockVector3;
 import org.mctourney.AutoReferee.util.SourceInventory;
 
 import com.google.common.collect.Maps;
@@ -270,9 +269,8 @@ public class ZoneListener implements Listener
 						if (block.getLocation().equals(sinv.target))
 						{
 							iter.remove(); found = true;
-							String nm = String.format("%s @ %s", block.getType().name(),
-								BlockVector3.fromLocation(block.getLocation()).toCoords()); 
-							match.broadcast(nm + " is a no longer a source for " + sinv.blockdata.getName());
+							match.broadcast(String.format("%s is no longer a source for %s", 
+								sinv.getName(), sinv.blockdata.getName()));
 						}
 					}
 					if (!found)
@@ -363,7 +361,7 @@ public class ZoneListener implements Listener
 						{
 							iter.remove(); found = true;
 							match.broadcast(String.format("%s is no longer a source for %s", 
-								sinv.toString(), sinv.blockdata.getName()));
+								sinv.getName(), sinv.blockdata.getName()));
 						}
 					}
 					if (!found)
