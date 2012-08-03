@@ -16,7 +16,7 @@
   
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <bukkit.version>1.2.5-R1.2</bukkit.version>
+    <bukkit.version>1.2.5-R5.0</bukkit.version>
   </properties>
   
   <scm>
