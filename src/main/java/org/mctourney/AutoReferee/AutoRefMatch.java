@@ -519,17 +519,28 @@ public class AutoRefMatch
 
 	public int getVanishLevel(Player p)
 	{
-		// referees have the highest vanish level
+		// if this person is a player, lowest vanish level
+		if (getPlayer(p) != null) return 0;
+
+		// referees have the highest vanish level (see everything)
 		if (p.hasPermission("autoreferee.referee")) return 200;
-		
-		// if you aren't on a team, you get a vanish level
-		if (getPlayerTeam(p) == null) return 100;
 		
 		// streamers are ONLY able to see streamers and players
 		if (p.hasPermission("autoreferee.streamer")) return 1;
 		
-		// players have the lowest level vanish
-		return 0;
+		// spectators can only be seen by referees
+		return 100;
+	}
+
+	public void setupVanish()
+	{
+		for ( Player view : world.getPlayers() ) // <--- viewer
+		for ( Player subj : world.getPlayers() ) // <--- subject
+		{
+			if (getVanishLevel(view) >= getVanishLevel(subj))
+				view.showPlayer(subj);
+			else view.hidePlayer(subj);
+		}
 	}
 	
 	public void clearEntities()
@@ -588,13 +599,8 @@ public class AutoRefMatch
 		for (AutoRefPlayer apl : getPlayers()) apl.heal();
 		
 		// vanish players appropriately
-		for ( Player view : world.getPlayers() ) // <--- viewer
-		for ( Player subj : world.getPlayers() ) // <--- subject
-		{
-			if (getVanishLevel(view) >= getVanishLevel(subj))
-				view.showPlayer(subj); else view.hidePlayer(subj);
-		}
-		
+		setupVanish();
+
 		int readyDelay = AutoReferee.getInstance().getConfig().getInt(
 			"delay-seconds.ready", AutoRefMatch.READY_SECONDS);
 		

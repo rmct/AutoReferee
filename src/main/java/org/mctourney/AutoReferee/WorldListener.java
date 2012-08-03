@@ -31,6 +31,7 @@ public class WorldListener implements Listener
 		{
 			event.setJoinMessage(match.colorMessage(event.getJoinMessage()));
 			match.sendMatchInfo(event.getPlayer());
+			match.setupVanish();
 		}
 	}
 	
@@ -46,6 +47,7 @@ public class WorldListener implements Listener
 		{
 			matchTo.checkTeamsReady();
 			matchTo.sendMatchInfo(event.getPlayer());
+			matchTo.setupVanish();
 		}
 	}
 }
