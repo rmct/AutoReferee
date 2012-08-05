@@ -36,9 +36,13 @@ commands:
     permission: autoreferee.player
     usage: /<command> [playername]
   ready:
-    description: Prepare world for match
+    description: Mark team as ready to play
     permission: autoreferee.player
-    usage: /<command>
+    usage: /<command> [true|false|yes|no]
+  viewinventory:
+    description: View the inventory of the player
+    permission: autoreferee.referee
+    usage: /<command> <playername>
 
 permissions:
   autoreferee.*:

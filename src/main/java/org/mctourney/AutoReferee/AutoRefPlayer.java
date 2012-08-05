@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Set;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -368,5 +369,28 @@ public class AutoRefPlayer
 		
 		currentHealth = newHealth;
 		currentArmor = newArmor;
+	}
+
+	public Inventory getInventoryView()
+	{
+		Player player = this.getPlayer();
+		if (player == null) return null;
+		
+		Inventory pInventory = player.getInventory();
+		Inventory inventoryView = Bukkit.getServer().createInventory(null,
+			pInventory.getSize(), this.getName() + "'s Inventory");
+		
+		ItemStack[] contents = pInventory.getContents();
+		for (int i = 0; i < contents.length; ++i)
+			if (contents[i] != null) contents[i] = contents[i].clone();
+		inventoryView.setContents(contents);
+		
+		return inventoryView;
+	}
+
+	public void showInventory(Player pl)
+	{
+		Inventory v = this.getInventoryView();
+		if (v != null) pl.openInventory(v);
 	}
 }

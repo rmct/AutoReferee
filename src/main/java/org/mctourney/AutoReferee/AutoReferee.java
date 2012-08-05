@@ -697,6 +697,15 @@ public class AutoReferee extends JavaPlugin
 			match.leaveTeam(target);
 			return true;
 		}
+		if ("viewinventory".equalsIgnoreCase(cmd.getName()) && args.length == 1 
+			&& match != null && player != null)
+		{
+			if (!match.getReferees().contains(player))
+			{ sender.sendMessage("You do not have permission."); return true; }
+			
+			AutoRefPlayer target = match.getPlayer(getServer().getPlayer(args[0]));
+			if (target != null) target.showInventory(player);
+		}
 		
 		// WARNING: using ordinals on enums is typically frowned upon,
 		// but we will consider the enums "partially-ordered"

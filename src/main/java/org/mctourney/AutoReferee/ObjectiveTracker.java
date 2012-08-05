@@ -132,20 +132,8 @@ public class ObjectiveTracker implements Listener
 		if (event.getPlayer().hasPermission("autoreferee.referee") &&
 			(entity.getType() == EntityType.PLAYER) && match != null)
 		{
-			Player other = (Player) entity;
-			AutoRefPlayer aplo = match.getPlayer(other);
-			Inventory pinv = null;
-			
-			Inventory inventory = other.getInventory();
-			pinv = Bukkit.getServer().createInventory(pl, inventory.getSize(),
-				(aplo == null ? other.getName() : aplo.getName()) + "'s Inventory");
-			
-			ItemStack[] contents = inventory.getContents();
-			for (int i = 0; i < contents.length; ++i)
-				if (contents[i] != null) contents[i] = contents[i].clone();
-			pinv.setContents(contents);
-			
-			event.getPlayer().openInventory(pinv);
+			AutoRefPlayer a = match.getPlayer((Player) entity);
+			a.showInventory(pl);
 		}
 	}
 	
