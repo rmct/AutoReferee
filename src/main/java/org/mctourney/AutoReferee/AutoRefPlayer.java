@@ -334,7 +334,11 @@ public class AutoRefPlayer
 	{ this.exitLocation = loc; }
 
 	public void updateCarrying()
-	{ updateCarrying(getPlayer().getInventory()); }
+	{
+		Player player = getPlayer();
+		if (player != null)
+			updateCarrying(player.getInventory());
+	}
 
 	public void updateCarrying(Inventory inv)
 	{
