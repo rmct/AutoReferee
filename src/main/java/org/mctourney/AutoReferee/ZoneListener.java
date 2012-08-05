@@ -23,6 +23,7 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.inventory.InventoryHolder;
@@ -224,6 +225,15 @@ public class ZoneListener implements Listener
 		// if this block interaction is invalid, cancel the event
 		if (!validInteract(event.getPlayer(), event.getRightClicked().getLocation()))
 		{ event.setCancelled(true); return; }
+	}
+	
+	// restrict block pickup by referees
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void refereePickup(PlayerPickupItemEvent event)
+	{
+		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
+		if (match != null && match.getCurrentState() == eMatchStatus.PLAYING 
+			&& match.getPlayer(event.getPlayer()) == null) event.setCancelled(true);
 	}
 
 	@EventHandler
