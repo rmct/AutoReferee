@@ -81,7 +81,7 @@ public class AutoRefMatch
 	{ return currentState; }
 
 	public void setCurrentState(eMatchStatus s)
-	{ this.currentState = s; }
+	{ this.currentState = s; this.setupVanish(); }
 	
 	// teams participating in the match
 	private Set<AutoRefTeam> teams = null;
@@ -180,6 +180,14 @@ public class AutoRefMatch
 
 	public List<TranscriptEvent> getTranscript()
 	{ return Collections.unmodifiableList(transcript); }
+	
+	private boolean refereeReady = false;
+	
+	public boolean isRefereeReady()
+	{ return getReferees().size() == 0 || refereeReady; }
+
+	public void setRefereeReady(boolean r)
+	{ refereeReady = r; }
 
 	// number of seconds for each phase
 	public static final int READY_SECONDS = 15;
@@ -198,6 +206,9 @@ public class AutoRefMatch
 		
 		// brand new match transcript
 		transcript = Lists.newLinkedList();
+		
+		// fix vanish
+		this.setupVanish();
 	}
 	
 	public static boolean isCompatible(World w)
@@ -537,8 +548,8 @@ public class AutoRefMatch
 		for ( Player view : world.getPlayers() ) // <--- viewer
 		for ( Player subj : world.getPlayers() ) // <--- subject
 		{
-			if (getVanishLevel(view) >= getVanishLevel(subj))
-				view.showPlayer(subj);
+			if (getVanishLevel(view) >= getVanishLevel(subj) || 
+				this.getCurrentState() != eMatchStatus.PLAYING) view.showPlayer(subj);
 			else view.hidePlayer(subj);
 		}
 	}
@@ -597,9 +608,6 @@ public class AutoRefMatch
 		
 		// prepare all players for the match
 		for (AutoRefPlayer apl : getPlayers()) apl.heal();
-		
-		// vanish players appropriately
-		setupVanish();
 
 		int readyDelay = AutoReferee.getInstance().getConfig().getInt(
 			"delay-seconds.ready", AutoRefMatch.READY_SECONDS);
@@ -642,6 +650,20 @@ public class AutoRefMatch
 		
 		// set status based on whether the players are online
 		setCurrentState(ready ? eMatchStatus.READY : eMatchStatus.WAITING);
+	}
+	
+	public void checkTeamsStart()
+	{
+		boolean teamsReady = true;
+		for ( AutoRefTeam t : teams )
+			teamsReady &= t.isReady();
+		
+		boolean refReady = isRefereeReady();
+		if (teamsReady && !refReady) for (Player p : getReferees())
+			p.sendMessage(ChatColor.GRAY + "Teams are ready. Type /ready to begin the match.");
+		
+		// everyone is ready, let's go!
+		if (refReady) this.prepareMatch();
 	}
 
 	public static void setupWorld(World w, boolean b)

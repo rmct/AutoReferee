@@ -37,7 +37,7 @@ commands:
     usage: /<command> [playername]
   ready:
     description: Prepare world for match
-    permission: autoreferee.referee
+    permission: autoreferee.player
     usage: /<command>
 
 permissions:

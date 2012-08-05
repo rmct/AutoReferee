@@ -703,7 +703,22 @@ public class AutoReferee extends JavaPlugin
 		if ("ready".equalsIgnoreCase(cmd.getName()) && match != null &&
 			match.getCurrentState().ordinal() < eMatchStatus.PLAYING.ordinal())
 		{
-			match.prepareMatch();
+			boolean rstate = true;
+			if (args.length > 0)
+			{
+				String rstr = args[0].toLowerCase();
+				rstate = !rstr.startsWith("f") && !rstr.startsWith("n");
+			}
+			
+			if (match.getReferees().contains(player))
+				match.setRefereeReady(rstate);
+			else
+			{
+				AutoRefTeam team = match.getPlayerTeam(player);
+				if (team != null) team.setReady(rstate);
+			}
+			
+			match.checkTeamsStart();
 			return true;
 		}
 
