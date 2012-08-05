@@ -177,9 +177,6 @@ public class AutoRefMatch
 
 	// transcript of every event in the match
 	private List<TranscriptEvent> transcript;
-
-	public List<TranscriptEvent> getTranscript()
-	{ return Collections.unmodifiableList(transcript); }
 	
 	private boolean refereeReady = false;
 	
@@ -746,13 +743,12 @@ public class AutoRefMatch
 			Player pl = apl.getPlayer();
 			if (pl == null) continue;
 			
-		//	pl.teleport(world.getSpawnLocation());
 			pl.setGameMode(GameMode.CREATIVE);
 			pl.getInventory().clear();
 		}
 		
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_END,
-			"Match ended.", null, null, null));
+			"Match ended. " + t.getName() + " wins!", null, null, null));
 		
 		setWinningTeam(t);
 		logPlayerStats(null);
@@ -1079,6 +1075,17 @@ public class AutoRefMatch
 		
 		if (plugin.getConfig().getBoolean("console-log", false))
 			plugin.getLogger().info(event.toString());
+	}
+
+	public List<TranscriptEvent> getTranscript()
+	{
+		List<TranscriptEvent> trans = Lists.newLinkedList();
+		for (TranscriptEvent event : transcript)
+		{
+			trans.add(event);
+			// TODO - auxiliary events
+		}
+		return trans;
 	}
 
 	public String colorMessage(String message)
