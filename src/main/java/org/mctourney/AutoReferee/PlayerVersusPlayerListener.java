@@ -14,6 +14,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
@@ -53,7 +54,7 @@ public class PlayerVersusPlayerListener implements Listener
 
 			// if the death was due to intervention by the plugin
 			// let's change the death message to reflect this fact
-			if (lastDmg == AutoRefPlayer.VOID_DEATH)
+			if (lastDmg.getCause() == DamageCause.VOID)
 			{
 				dmsg = victim.getName() + " entered the void lane.";
 				event.getDrops().clear();
