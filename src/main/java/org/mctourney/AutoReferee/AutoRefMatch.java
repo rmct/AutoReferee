@@ -1083,10 +1083,10 @@ public class AutoRefMatch
 
 	public String colorMessage(String message)
 	{
-		for (AutoRefPlayer apl : getPlayers())
+		for (AutoRefPlayer apl : getPlayers()) if (apl != null)
 			message = message.replaceAll(apl.getPlayerName(), apl.getName());
-		for (AutoRefTeam team : getTeams())
-			for (BlockData bd : team.winConditions.values())
+		for (AutoRefTeam team : getTeams()) if (team.winConditions != null)
+			for (BlockData bd : team.winConditions.values()) if (bd != null)
 				message = message.replaceAll(bd.getRawName(), bd.getName());
 		return message;
 	}
