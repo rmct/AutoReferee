@@ -13,7 +13,7 @@ commands:
   autoref:
     description: AutoReferee configuration
     permission: autoreferee.admin
-    usage: /<command> [action] [args...]
+    usage: /<command> [<action>] [args...]
     permission-message: Only admins have access to AutoReferee configuration.
   zone:
     description: Set a region's ownership
@@ -30,11 +30,11 @@ commands:
   jointeam:
     description: Set player's team
     permission: autoreferee.player
-    usage: /<command> [teamname] [playername]
+    usage: /<command> [<teamname>] [<playername>]
   leaveteam:
     description: Remove player's team
     permission: autoreferee.player
-    usage: /<command> [playername]
+    usage: /<command> [<playername>]
   ready:
     description: Mark team as ready to play
     permission: autoreferee.player
