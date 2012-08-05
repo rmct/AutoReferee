@@ -101,7 +101,14 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	{ return ready; }
 
 	public void setReady(boolean ready)
-	{ this.ready = ready; }
+	{
+		if (ready == this.ready) return;
+		this.ready = ready;
+		
+		for (AutoRefPlayer apl : getPlayers())
+			apl.getPlayer().sendMessage("Your team is now marked as " + 
+				ChatColor.RED + (this.ready ? "READY" : "NOT READY"));
+	}
 
 	// list of regions
 	private Set<CuboidRegion> regions = null;

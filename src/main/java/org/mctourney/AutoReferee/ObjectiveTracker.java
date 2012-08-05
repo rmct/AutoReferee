@@ -2,6 +2,7 @@ package org.mctourney.AutoReferee;
 
 import java.util.Map;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -24,6 +25,9 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
@@ -126,10 +130,22 @@ public class ObjectiveTracker implements Listener
 		}
 
 		if (event.getPlayer().hasPermission("autoreferee.referee") &&
-			(entity.getType() == EntityType.PLAYER))
+			(entity.getType() == EntityType.PLAYER) && match != null)
 		{
 			Player other = (Player) entity;
-			event.getPlayer().openInventory(other.getInventory());
+			AutoRefPlayer aplo = match.getPlayer(other);
+			Inventory pinv = null;
+			
+			Inventory inventory = other.getInventory();
+			pinv = Bukkit.getServer().createInventory(pl, inventory.getSize(),
+				(aplo == null ? other.getName() : aplo.getName()) + "'s Inventory");
+			
+			ItemStack[] contents = inventory.getContents();
+			for (int i = 0; i < contents.length; ++i)
+				if (contents[i] != null) contents[i] = contents[i].clone();
+			pinv.setContents(contents);
+			
+			event.getPlayer().openInventory(pinv);
 		}
 	}
 	
