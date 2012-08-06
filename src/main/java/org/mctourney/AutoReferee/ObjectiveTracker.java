@@ -2,7 +2,6 @@ package org.mctourney.AutoReferee;
 
 import java.util.Map;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -13,9 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockDispenseEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
@@ -25,9 +22,6 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
@@ -67,13 +61,60 @@ public class ObjectiveTracker implements Listener
 			match.checkWinConditions();
 		}
 	}
-
-	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
-	public void blockBreak(BlockBreakEvent event)
+	
+	// ----------------- START WINCONDITION -----------------------
+	
+	private void delayCheckWinConditions(BlockEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
 		if (match != null) match.checkWinConditions();
 	}
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void checkWinConditions(BlockBreakEvent event)
+	{ delayCheckWinConditions(event); }
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void checkWinConditions(BlockBurnEvent event)
+	{ delayCheckWinConditions(event); }
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void checkWinConditions(BlockFadeEvent event)
+	{ delayCheckWinConditions(event); }
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void checkWinConditions(BlockFromToEvent event)
+	{ delayCheckWinConditions(event); }
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void checkWinConditions(BlockGrowEvent event)
+	{ delayCheckWinConditions(event); }
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void checkWinConditions(BlockIgniteEvent event)
+	{ delayCheckWinConditions(event); }
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void checkWinConditions(BlockPhysicsEvent event)
+	{ delayCheckWinConditions(event); }
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void checkWinConditions(BlockPistonExtendEvent event)
+	{ delayCheckWinConditions(event); }
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void checkWinConditions(BlockPistonRetractEvent event)
+	{ delayCheckWinConditions(event); }
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void checkWinConditions(BlockRedstoneEvent event)
+	{ delayCheckWinConditions(event); }
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void checkWinConditions(LeavesDecayEvent event)
+	{ delayCheckWinConditions(event); }
+	
+	// ------------------ END WINCONDITION ------------------------
 	
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void blockInteract(PlayerInteractEvent event)
