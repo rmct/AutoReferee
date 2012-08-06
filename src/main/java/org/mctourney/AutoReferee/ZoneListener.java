@@ -166,7 +166,7 @@ public class ZoneListener implements Listener
 	public boolean validInteract(Player player, Location loc)
 	{
 		AutoRefMatch match = plugin.getMatch(loc.getWorld());
-		AutoRefTeam team = plugin.getTeam(player);
+		AutoRefPlayer apl = match.getPlayer(player);
 		
 		// no match for this world, not our business
 		if (match == null) return true;
@@ -184,12 +184,15 @@ public class ZoneListener implements Listener
 		
 		// if the block is a start mechanism, allow this in manual mode / FIXME BUKKIT-1858
 		if (!plugin.isAutoMode() && match.isStartMechanism(loc)) return true;
+		
+		// if the player is not in their lane, they shouldn't be allowed to interact
+		if (apl.getExitLocation() != null) return false;
 
 		// if this block is inside the start region, not allowed
 		if (match.inStartRegion(loc)) return false;
 
 		// if this block is outside the player's zone, not allowed
-		if (team == null || !team.checkPosition(loc)) return false;
+		if (apl.getTeam() == null || !apl.getTeam().checkPosition(loc)) return false;
 		
 		// seems okay!
 		return true;
