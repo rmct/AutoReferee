@@ -17,6 +17,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.util.ArmorPoints;
 import org.mctourney.AutoReferee.util.BlockData;
@@ -376,14 +377,25 @@ public class AutoRefPlayer
 		Player player = this.getPlayer();
 		if (player == null) return null;
 		
-		Inventory pInventory = player.getInventory();
+		PlayerInventory pInventory = player.getInventory();
 		Inventory inventoryView = Bukkit.getServer().createInventory(null,
-			pInventory.getSize(), this.getName() + "'s Inventory");
+			pInventory.getSize() + 9, this.getName() + "'s Inventory");
+
+		ItemStack[] oldContents = pInventory.getContents();
+		ItemStack[] newContents = inventoryView.getContents();
 		
-		ItemStack[] contents = pInventory.getContents();
-		for (int i = 0; i < contents.length; ++i)
-			if (contents[i] != null) contents[i] = contents[i].clone();
-		inventoryView.setContents(contents);
+		for (int i = 0; i < oldContents.length; ++i) 
+			if (oldContents[i] != null) newContents[i] = oldContents[i];
+
+		newContents[oldContents.length + 0] = pInventory.getHelmet();
+		newContents[oldContents.length + 1] = pInventory.getChestplate();
+		newContents[oldContents.length + 2] = pInventory.getLeggings();
+		newContents[oldContents.length + 3] = pInventory.getBoots();
+
+		newContents[oldContents.length + 7] = new ItemStack(Material.APPLE, player.getHealth());
+		newContents[oldContents.length + 8] = new ItemStack(Material.COOKED_BEEF, player.getFoodLevel());
+		
+		inventoryView.setContents(newContents);
 		
 		return inventoryView;
 	}

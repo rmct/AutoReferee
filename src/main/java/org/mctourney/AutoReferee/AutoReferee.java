@@ -703,6 +703,8 @@ public class AutoReferee extends JavaPlugin
 			
 			AutoRefPlayer target = match.getPlayer(getServer().getPlayer(args[0]));
 			if (target != null) target.showInventory(player);
+			
+			return true;
 		}
 		
 		// WARNING: using ordinals on enums is typically frowned upon,
