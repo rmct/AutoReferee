@@ -99,10 +99,10 @@ public class AutoReferee extends JavaPlugin
 	{ return this.autoMode = m; }
 
 	// get the match associated with the world
-	private Map<UUID, AutoRefMatch> matches = null;
+	private Map<UUID, AutoRefMatch> matches = Maps.newHashMap();
 
 	public AutoRefMatch getMatch(World w)
-	{ return matches.get(w.getUID()); }
+	{ return w != null ? matches.get(w.getUID()) : null; }
 
 	public void addMatch(AutoRefMatch match)
 	{ matches.put(match.getWorld().getUID(), match); }
@@ -185,8 +185,6 @@ public class AutoReferee extends JavaPlugin
 
 		// events related to tracking objectives during a match
 		pm.registerEvents(new ObjectiveTracker(this), this);
-
-		matches = Maps.newHashMap();
 
 		// global configuration object (can't be changed, so don't save onDisable)
 		InputStream configInputStream = getResource("defaults/config.yml");
