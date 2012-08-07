@@ -881,8 +881,12 @@ public class AutoRefMatch
 				broadcast(ChatColor.RED + "Generating Match Summary...");
 				String webstats = uploadReport(ReportGenerator.generate(AutoRefMatch.this));
 				
-				if (webstats == null) broadcast(ChatColor.RED + AutoReferee.NO_WEBSTATS_MESSAGE);
-				else broadcast(ChatColor.RED + "Match Summary: " + ChatColor.RESET + webstats);
+				if (webstats != null)
+				{
+					AutoReferee.getInstance().getLogger().info("Match Summary - " + webstats);
+					broadcast(ChatColor.RED + "Match Summary: " + ChatColor.RESET + webstats);
+				}
+				else broadcast(ChatColor.RED + AutoReferee.NO_WEBSTATS_MESSAGE);
 			}
 		});
 	}
