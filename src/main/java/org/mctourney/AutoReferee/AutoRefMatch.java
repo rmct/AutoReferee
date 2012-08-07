@@ -748,7 +748,7 @@ public class AutoRefMatch
 		}
 		
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_END,
-			"Match ended. " + t.getName() + " wins!", null, null, null));
+			"Match ended. " + ChatColor.stripColor(t.getName()) + " wins!", null, null, null));
 		
 		setWinningTeam(t);
 		logPlayerStats(null);
