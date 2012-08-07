@@ -655,12 +655,12 @@ public class AutoRefMatch
 		for ( AutoRefTeam t : teams )
 			teamsReady &= t.isReady();
 		
-		boolean refReady = isRefereeReady();
-		if (teamsReady && !refReady) for (Player p : getReferees())
+		boolean ready = getReferees().size() == 0 ? teamsReady : isRefereeReady();
+		if (teamsReady && !ready) for (Player p : getReferees())
 			p.sendMessage(ChatColor.GRAY + "Teams are ready. Type /ready to begin the match.");
 		
 		// everyone is ready, let's go!
-		if (refReady) this.prepareMatch();
+		if (ready) this.prepareMatch();
 	}
 
 	public static void setupWorld(World w, boolean b)

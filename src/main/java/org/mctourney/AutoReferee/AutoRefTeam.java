@@ -105,9 +105,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		if (ready == this.ready) return;
 		this.ready = ready;
 		
-		for (AutoRefPlayer apl : getPlayers())
-			apl.getPlayer().sendMessage(getName() + " is now marked as " + 
-				ChatColor.RED + (this.ready ? "READY" : "NOT READY"));
+		for (Player pl : getMatch().getWorld().getPlayers())
+			pl.sendMessage(getName() + " is now marked as " + 
+				ChatColor.DARK_GRAY + (this.ready ? "READY" : "NOT READY"));
 	}
 
 	// list of regions
@@ -286,6 +286,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		//FIXME if (pl.isOnline() && (pl instanceof Player))
 		//	((Player) pl).setPlayerListName(StringUtils.substring(colorName, 0, 16));
 
+		match.setupSpectators();
 		match.checkTeamsReady();
 	}
 
