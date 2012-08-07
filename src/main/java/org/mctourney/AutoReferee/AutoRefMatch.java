@@ -1078,15 +1078,7 @@ public class AutoRefMatch
 	}
 
 	public List<TranscriptEvent> getTranscript()
-	{
-		List<TranscriptEvent> trans = Lists.newLinkedList();
-		for (TranscriptEvent event : transcript)
-		{
-			trans.add(event);
-			// TODO - auxiliary events
-		}
-		return trans;
-	}
+	{ return Collections.unmodifiableList(transcript); }
 
 	public String colorMessage(String message)
 	{
