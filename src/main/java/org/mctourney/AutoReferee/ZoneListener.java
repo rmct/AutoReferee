@@ -168,25 +168,21 @@ public class ZoneListener implements Listener
 		AutoRefMatch match = plugin.getMatch(loc.getWorld());
 		AutoRefPlayer apl = match.getPlayer(player);
 		
-		// no match for this world, not our business
-		if (match == null) return true;
+		// if the match is not under our control, allowed
+		if (match == null || match.getCurrentState() == eMatchStatus.NONE) return true;
 		
 		// if the player is a referee, nothing is off-limits
-		if (player.hasPermission("autoreferee.referee")) return true;
-		
-		// if the player or the match are not under our control, allowed
-		if (match.getCurrentState() == eMatchStatus.NONE) return true;
+		if (match.getReferees().contains(player)) return true;
 		
 		// if the match isn't currently in progress, a player should
 		// not be allowed to place or destroy blocks anywhere
-		if (match.getCurrentState() != eMatchStatus.PLAYING)
-			return false;
+		if (match.getCurrentState() != eMatchStatus.PLAYING) return false;
 		
 		// if the block is a start mechanism, allow this in manual mode / FIXME BUKKIT-1858
 		if (!plugin.isAutoMode() && match.isStartMechanism(loc)) return true;
 		
 		// if the player is not in their lane, they shouldn't be allowed to interact
-		if (apl.getExitLocation() != null) return false;
+		if (apl == null || apl.getExitLocation() != null) return false;
 
 		// if this block is inside the start region, not allowed
 		if (match.inStartRegion(loc)) return false;
