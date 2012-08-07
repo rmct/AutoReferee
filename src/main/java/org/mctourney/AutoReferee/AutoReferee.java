@@ -491,7 +491,8 @@ public class AutoReferee extends JavaPlugin
 			}
 			catch (Exception e) { return false; }
 			
-			if (args.length >= 1 && "debug".equalsIgnoreCase(args[0]) && match != null)
+			if (args.length >= 1 && "debug".equalsIgnoreCase(args[0]) && match != null
+				&& player.hasPermission("autoreferee.configure"))
 			{
 				match.setDebugMode(args.length >= 2 ? 
 					Boolean.parseBoolean(args[1]) : !match.isDebugMode());
