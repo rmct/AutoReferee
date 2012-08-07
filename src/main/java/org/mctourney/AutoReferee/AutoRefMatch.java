@@ -1130,4 +1130,15 @@ public class AutoRefMatch
 			player.sendMessage(String.format(ChatColor.GRAY + "The current match time is: %02d:%02d:%02d", 
 				timestamp/3600L, (timestamp/60L)%60L, timestamp%60L));
 	}
+
+	private boolean debugMode = false;
+
+	public boolean isDebugMode()
+	{ return debugMode; }
+	
+	public void setDebugMode(boolean d)
+	{
+		debugMode = d;
+		broadcast(ChatColor.GREEN + "Debug mode is now " + (debugMode ? "on" : "off"));
+	}
 }

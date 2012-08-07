@@ -491,6 +491,13 @@ public class AutoReferee extends JavaPlugin
 			}
 			catch (Exception e) { return false; }
 			
+			if (args.length >= 1 && "debug".equalsIgnoreCase(args[0]) && match != null)
+			{
+				match.setDebugMode(args.length >= 2 ? 
+					Boolean.parseBoolean(args[1]) : !match.isDebugMode());
+				return true;
+			}
+			
 			if (args.length >= 1 && "state".equalsIgnoreCase(args[0]) && match != null) try
 			{
 				if (args.length >= 2)

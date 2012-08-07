@@ -273,9 +273,12 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		players.add(apl);
 		
 		// prepare the player
-		if (match != null && match.getCurrentState() != eMatchStatus.PLAYING)
-			pl.teleport(getSpawnLocation());
-		pl.setGameMode(GameMode.SURVIVAL);
+		if (!match.isDebugMode())
+		{
+			if (match != null && match.getCurrentState() != eMatchStatus.PLAYING)
+				pl.teleport(getSpawnLocation());
+			pl.setGameMode(GameMode.SURVIVAL);
+		}
 		
 		// if the match is in progress, no one may join
 		if (match.getCurrentState().ordinal() >= eMatchStatus.PLAYING.ordinal()) return;
