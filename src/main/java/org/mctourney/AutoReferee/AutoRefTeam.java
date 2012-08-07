@@ -106,7 +106,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		this.ready = ready;
 		
 		for (AutoRefPlayer apl : getPlayers())
-			apl.getPlayer().sendMessage("Your team is now marked as " + 
+			apl.getPlayer().sendMessage(getName() + " is now marked as " + 
 				ChatColor.RED + (this.ready ? "READY" : "NOT READY"));
 	}
 
