@@ -81,7 +81,7 @@ public class AutoRefMatch
 	{ return currentState; }
 
 	public void setCurrentState(eMatchStatus s)
-	{ this.currentState = s; this.setupVanish(); }
+	{ this.currentState = s; this.setupSpectators(); }
 	
 	// teams participating in the match
 	private Set<AutoRefTeam> teams = null;
@@ -205,7 +205,7 @@ public class AutoRefMatch
 		transcript = Lists.newLinkedList();
 		
 		// fix vanish
-		this.setupVanish();
+		this.setupSpectators();
 	}
 	
 	public static boolean isCompatible(World w)
@@ -540,7 +540,7 @@ public class AutoRefMatch
 		return 100;
 	}
 
-	public void setupVanish()
+	public void setupSpectators()
 	{
 		for ( Player view : world.getPlayers() ) // <--- viewer
 		for ( Player subj : world.getPlayers() ) // <--- subject
