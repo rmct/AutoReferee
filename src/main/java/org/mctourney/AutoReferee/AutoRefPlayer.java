@@ -30,7 +30,10 @@ public class AutoRefPlayer
 {
 	public static final EntityDamageEvent VOID_DEATH = 
 		new EntityDamageEvent(null, EntityDamageEvent.DamageCause.VOID, 0);
-
+	
+	private static final int MIN_KILLSTREAK = 5;
+	private static final int MIN_DOMINATE = 3;
+	
 	static class DamageCause
 	{
 		// cause of damage, primary value for damage cause
@@ -180,6 +183,10 @@ public class AutoRefPlayer
 	
 	public Set<BlockData> getCarrying()
 	{ return carrying; }
+	
+	// streak information - kill streak, domination, revenge
+	protected int totalStreak = 0;
+	protected Map<AutoRefPlayer, Integer> playerStreak;
 
 	// constructor for simply setting up the variables
 	@SuppressWarnings("unchecked")
@@ -203,6 +210,10 @@ public class AutoRefPlayer
 		// setup base health and armor level
 		this.currentHealth = p.getHealth();
 		this.currentArmor = ArmorPoints.fromPlayerInventory(p.getInventory());
+		
+		// streak information
+		totalStreak = 0;
+		playerStreak = new DefaultedMap(0);
 	}
 	
 	public AutoRefPlayer(Player p)
@@ -277,9 +288,17 @@ public class AutoRefPlayer
 		AutoRefPlayer.DamageCause dc = AutoRefPlayer.DamageCause.fromDamageEvent(e.getEntity().getLastDamageCause());
 		deaths.put(dc, 1 + deaths.get(dc)); ++totalDeaths;
 		
-		AutoRefMatch match = getTeam().getMatch(); Location loc = e.getEntity().getLocation();
+		AutoRefMatch match = getTeam().getMatch();
+		Location loc = e.getEntity().getLocation();
+		
 		match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DEATH,
 			e.getDeathMessage(), loc, this, dc.p));
+		
+		// reset the streak after reporting (if it was good)
+		if (totalStreak >= MIN_KILLSTREAK)
+			match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_STREAK, 
+				String.format("%s had a %d-kill streak!", this.getPlayerName(), totalStreak), loc, this, null));
+		totalStreak = 0;
 	}
 	
 	// register that we killed the Player who fired this event
@@ -291,6 +310,24 @@ public class AutoRefPlayer
 		// get the name of the player who died, record one kill against them
 		AutoRefPlayer apl = getTeam().getMatch().getPlayer(e.getEntity());
 		kills.put(apl, 1 + kills.get(apl)); ++totalKills;
+		
+		AutoRefMatch match = getTeam().getMatch();
+		Location loc = e.getEntity().getLocation();
+		
+		// one more kill for kill streak
+		++totalStreak;
+
+		if (playerStreak.get(apl) + 1 == MIN_DOMINATE)
+			match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DOMINATE, 
+				String.format("%s is dominating %s", this.getPlayerName(), apl.getPlayerName()), loc, this, apl));
+
+		if (apl.playerStreak.get(this) >= MIN_DOMINATE)
+			match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_REVENGE, 
+				String.format("%s got revenge on %s", this.getPlayerName(), apl.getPlayerName()), loc, this, apl));
+		
+		// reset player streaks
+		playerStreak.put(apl, playerStreak.get(apl) + 1);
+		apl.playerStreak.put(this, 0);
 	}
 
 	public boolean isReady()

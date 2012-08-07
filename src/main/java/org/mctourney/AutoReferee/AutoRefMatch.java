@@ -992,11 +992,11 @@ public class AutoRefMatch
 			MATCH_START("match-start", EventVisibility.NONE),
 			MATCH_END("match-end", EventVisibility.NONE),
 			
-			// player messages should be broadcast to players
+			// player messages (except kill streak) should be broadcast to players
 			PLAYER_DEATH("player-death", EventVisibility.ALL),
-			PLAYER_STREAK("player-killstreak", EventVisibility.ALL),
-			PLAYER_DOMINATE("player-dominate", EventVisibility.ALL),
-			PLAYER_REVENGE("player-revenge", EventVisibility.ALL),
+			PLAYER_STREAK("player-killstreak", EventVisibility.NONE, ChatColor.DARK_GRAY),
+			PLAYER_DOMINATE("player-dominate", EventVisibility.ALL, ChatColor.DARK_GRAY),
+			PLAYER_REVENGE("player-revenge", EventVisibility.ALL, ChatColor.DARK_GRAY),
 			
 			// objective events should not be broadcast to players
 			OBJECTIVE_FOUND("objective-found", EventVisibility.REFEREES),
@@ -1004,11 +1004,16 @@ public class AutoRefMatch
 			
 			private String eventClass;
 			private EventVisibility visibility;
+			private ChatColor color;
 			
 			private EventType(String eventClass, EventVisibility visibility)
+			{ this(eventClass, visibility, null); }
+			
+			private EventType(String eventClass, EventVisibility visibility, ChatColor color)
 			{
 				this.eventClass = eventClass;
 				this.visibility = visibility;
+				this.color = color;
 			}
 			
 			public String getEventClass()
@@ -1016,6 +1021,9 @@ public class AutoRefMatch
 			
 			public EventVisibility getVisibility()
 			{ return visibility; }
+			
+			public ChatColor getColor()
+			{ return color; }
 		}
 		
 		public Object icon1;
@@ -1074,8 +1082,14 @@ public class AutoRefMatch
 			case ALL: recipients = getWorld().getPlayers(); break;
 		}
 		
+		ChatColor clr = event.getType().getColor();
+		String message = event.getMessage();
+		
+		if (clr == null) message = colorMessage(message);
+		else message = (clr + message + ChatColor.RESET);
+		
 		if (recipients != null) for (Player player : recipients)
-			player.sendMessage(colorMessage(event.getMessage()));
+			player.sendMessage(message);
 		
 		if (plugin.getConfig().getBoolean("console-log", false))
 			plugin.getLogger().info(event.toString());
