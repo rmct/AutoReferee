@@ -1104,8 +1104,11 @@ public class AutoRefMatch
 			ChatColor.ITALIC + " by " + getMapAuthors());
 		
 		AutoRefPlayer apl = getPlayer(player);
-		if (apl == null) player.sendMessage("You are not on a team! Type " + ChatColor.GRAY + "/jointeam");
-		else player.sendMessage("You are on team: " + apl.getTeam().getName());
+		boolean isReferee = getReferees().contains(player);
+		
+		if (apl != null) player.sendMessage("You are on team: " + apl.getTeam().getName());
+		else if (isReferee) player.sendMessage(ChatColor.GRAY + "You are a referee!");
+		else player.sendMessage("You are not on a team! Type " + ChatColor.GRAY + "/jointeam");
 		
 		for (AutoRefTeam team : getSortedTeams())
 			player.sendMessage(String.format("%s (%d) - %s", 
