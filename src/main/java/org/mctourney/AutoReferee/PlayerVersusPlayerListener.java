@@ -56,7 +56,7 @@ public class PlayerVersusPlayerListener implements Listener
 			// let's change the death message to reflect this fact
 			if (lastDmg.getCause() == DamageCause.VOID)
 			{
-				dmsg = victim.getName() + " entered the void lane.";
+				dmsg = victim.getName() + " entered the void lane";
 				event.getDrops().clear();
 			}
 
