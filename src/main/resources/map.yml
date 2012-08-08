@@ -15,11 +15,11 @@ match:
   # a list of all teams. each team has several basic features:
   # name, unique color, size of a team, and owned regions
   teams:
-    - name: Red Team
+    - name: Red
       color: RED
       maxsize: 4
     
-    - name: Blue Team
+    - name: Blue
       color: BLUE
       maxsize: 4
   
