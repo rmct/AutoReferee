@@ -98,7 +98,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	private boolean ready = false;
 
 	public boolean isReady()
-	{ return ready; }
+	{ return ready || (getPlayers().isEmpty() && getMatch().isDebugMode()); }
 
 	public void setReady(boolean ready)
 	{
