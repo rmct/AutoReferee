@@ -939,23 +939,6 @@ public class AutoRefMatch
 	public boolean inStartRegion(Location loc)
 	{ return startRegion.distanceToRegion(loc) < ZoneListener.SNEAK_DISTANCE; }
 
-	public Set<AutoRefTeam> locationOwnership(Location loc)
-	{
-		// teams who own this location
-		Set<AutoRefTeam> owners = new HashSet<AutoRefTeam>();
-	
-		// check all safe regions for that team
-		for (AutoRefTeam team : teams)
-			for (CuboidRegion reg : team.getRegions())
-		{
-			// if the location is inside the region, add it
-			if (reg.distanceToRegion(loc) < ZoneListener.SNEAK_DISTANCE) 
-				owners.add(team);
-		}
-		
-		return owners;
-	}
-
 	public void updateCarrying(AutoRefPlayer apl, Set<BlockData> carrying, Set<BlockData> newCarrying)
 	{
 		Set<BlockData> add = Sets.newHashSet(newCarrying);

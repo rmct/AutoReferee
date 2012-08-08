@@ -111,9 +111,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	}
 
 	// list of regions
-	private Set<CuboidRegion> regions = null;
+	private Set<AutoRefRegion> regions = null;
 	
-	public Set<CuboidRegion> getRegions()
+	public Set<AutoRefRegion> getRegions()
 	{ return regions; }
 
 	// location of custom spawn
@@ -174,7 +174,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			List<String> coordstrings = (List<String>) conf.get("regions");
 			if (coordstrings != null) for (String coords : coordstrings)
 			{
-				CuboidRegion creg = CuboidRegion.fromCoords(coords);
+				AutoRefRegion creg = AutoRefRegion.fromCoords(coords);
 				if (creg != null) newTeam.regions.add(creg);
 			}
 		}
@@ -243,7 +243,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		// convert regions to strings
 		List<String> regstr = Lists.newArrayList();
-		for (CuboidRegion reg : regions) regstr.add(reg.toCoords());
+		for (AutoRefRegion reg : regions) regstr.add(reg.toCoords());
 
 		// add the region list
 		map.put("regions", regstr);
@@ -329,6 +329,32 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		for ( CuboidRegion reg : regions ) if (distance > 0)
 			distance = Math.min(distance, reg.distanceToRegion(loc));
 		return distance;
+	}
+	
+	public boolean canEnter(Location loc)
+	{ return canEnter(loc, ZoneListener.SNEAK_DISTANCE); }
+	
+	public boolean canEnter(Location loc, Double dist)
+	{
+		double distance = match.getStartRegion().distanceToRegion(loc);
+		for ( AutoRefRegion reg : regions ) if (distance > 0)
+		{
+			distance = Math.min(distance, reg.distanceToRegion(loc));
+			if (!reg.canEnter() && reg.distanceToRegion(loc) <= dist) return false; 
+		}
+		return distance <= dist;
+	}
+	
+	public boolean canBuild(Location loc)
+	{
+		// start region is a permanent no-build zone
+		if (getMatch().inStartRegion(loc)) return false;
+		
+		boolean build = false;
+		for ( AutoRefRegion reg : regions )
+			if (reg.contains(BlockVector3.fromLocation(loc)))
+			{ build = true; if (!reg.canBuild()) return false; }
+		return build;
 	}
 	
 	public void addSourceInventory(Object tgt, Inventory inv)

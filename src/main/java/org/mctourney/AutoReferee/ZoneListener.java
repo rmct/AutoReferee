@@ -98,7 +98,6 @@ public class ZoneListener implements Listener
 		AutoRefTeam team = apl.getTeam();
 		if (team == null) return;
 		
-		double d = team.distanceToClosestRegion(event.getTo());
 		double fallspeed = event.getFrom().getY() - event.getTo().getY();
 		Location exit = apl.getExitLocation();
 		
@@ -123,10 +122,10 @@ public class ZoneListener implements Listener
 		}
 		
 		// if they have left their region, mark their exit location
-		else if (d > 0.3)
+		if (!team.canEnter(event.getTo(), 0.3))
 		{
 			// player is sneaking off the edge and not in freefall
-			if (player.isSneaking() && d < SNEAK_DISTANCE && fallspeed < FREEFALL_THRESHOLD);
+			if (player.isSneaking() && team.canEnter(event.getTo()) && fallspeed < FREEFALL_THRESHOLD);
 			
 			// if there is no exit position, set the exit position
 			else if (exit == null) apl.setExitLocation(player.getLocation());
@@ -163,12 +162,10 @@ public class ZoneListener implements Listener
 		if (apl != null) apl.respawn();
 	}
 	
-	public boolean validInteract(Player player, Location loc)
+	public boolean validPlayer(Player player)
 	{
-		AutoRefMatch match = plugin.getMatch(loc.getWorld());
-		AutoRefPlayer apl = match.getPlayer(player);
-		
 		// if the match is not under our control, allowed
+		AutoRefMatch match = plugin.getMatch(player.getWorld());
 		if (match == null || match.getCurrentState() == eMatchStatus.NONE) return true;
 		
 		// if the player is a referee, nothing is off-limits
@@ -178,17 +175,9 @@ public class ZoneListener implements Listener
 		// not be allowed to place or destroy blocks anywhere
 		if (match.getCurrentState() != eMatchStatus.PLAYING) return false;
 		
-		// if the block is a start mechanism, allow this in manual mode / FIXME BUKKIT-1858
-		if (!plugin.isAutoMode() && match.isStartMechanism(loc)) return true;
-		
 		// if the player is not in their lane, they shouldn't be allowed to interact
+		AutoRefPlayer apl = match.getPlayer(player);
 		if (apl == null || apl.getExitLocation() != null) return false;
-
-		// if this block is inside the start region, not allowed
-		if (match.inStartRegion(loc)) return false;
-
-		// if this block is outside the player's zone, not allowed
-		if (apl.getTeam() == null || !apl.getTeam().checkPosition(loc)) return false;
 		
 		// seems okay!
 		return true;
@@ -197,32 +186,66 @@ public class ZoneListener implements Listener
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void blockPlace(BlockPlaceEvent event)
 	{
-		// if this block interaction is invalid, cancel the event
-		if (!validInteract(event.getPlayer(), event.getBlock().getLocation()))
+		Player player = event.getPlayer();
+		Location loc = event.getBlock().getLocation();
+		
+		if (!validPlayer(player))
+		{ event.setCancelled(true); return; }
+		
+		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+		AutoRefPlayer apl = match.getPlayer(player);
+		
+		if (!apl.getTeam().canBuild(loc))
 		{ event.setCancelled(true); return; }
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void blockBreak(BlockBreakEvent event)
 	{
-		// if this block interaction is invalid, cancel the event
-		if (!validInteract(event.getPlayer(), event.getBlock().getLocation()))
+		Player player = event.getPlayer();
+		Location loc = event.getBlock().getLocation();
+
+		if (!validPlayer(player))
+		{ event.setCancelled(true); return; }
+		
+		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+		AutoRefPlayer apl = match.getPlayer(player);
+		
+		if (!apl.getTeam().canBuild(loc))
 		{ event.setCancelled(true); return; }
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void blockInteract(PlayerInteractEvent event)
 	{
-		// if this block interaction is invalid, cancel the event
-		if (!validInteract(event.getPlayer(), event.getClickedBlock().getLocation()))
+		Player player = event.getPlayer();
+		Location loc = event.getClickedBlock().getLocation();
+		
+		if (!validPlayer(player))
+		{ event.setCancelled(true); return; }
+		
+		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+		AutoRefPlayer apl = match.getPlayer(player);
+		
+		if (!plugin.isAutoMode() && match.isStartMechanism(loc)) return;
+		
+		if (!apl.getTeam().canEnter(loc, 0.0))
 		{ event.setCancelled(true); return; }
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void entityInteract(PlayerInteractEntityEvent event)
 	{
-		// if this block interaction is invalid, cancel the event
-		if (!validInteract(event.getPlayer(), event.getRightClicked().getLocation()))
+		Player player = event.getPlayer();
+		Location loc = event.getRightClicked().getLocation();
+		
+		if (!validPlayer(player))
+		{ event.setCancelled(true); return; }
+		
+		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+		AutoRefPlayer apl = match.getPlayer(player);
+		
+		if (!apl.getTeam().canEnter(loc, 0.0))
 		{ event.setCancelled(true); return; }
 	}
 	
@@ -264,12 +287,10 @@ public class ZoneListener implements Listener
 				// if the player doesn't have configure permissions, nothing
 				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
 				
-				// determine who owns the region that the clicked block is in
-				Set<AutoRefTeam> owns = match.locationOwnership(block.getLocation());
-				
 				// if the region is owned by only one team, make it one of their
 				// win conditions (otherwise, we may need to configure by hand)
-				if (owns.size() == 1) for (AutoRefTeam team : owns)
+				for (AutoRefTeam team : match.getTeams())
+					if (team.checkPosition(block.getLocation()))
 				{
 					Iterator<SourceInventory> iter; boolean found = false;
 					for (iter = team.targetChests.values().iterator(); iter.hasNext(); )
@@ -355,12 +376,10 @@ public class ZoneListener implements Listener
 				// if the player doesn't have configure permissions, nothing
 				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
 				
-				// determine who owns the region that the clicked block is in
-				Set<AutoRefTeam> owns = match.locationOwnership(event.getRightClicked().getLocation());
-				
 				// if the region is owned by only one team, make it one of their
 				// win conditions (otherwise, we may need to configure by hand)
-				if (owns.size() == 1) for (AutoRefTeam team : owns)
+				for (AutoRefTeam team : match.getTeams())
+					if (team.checkPosition(event.getRightClicked().getLocation()))
 				{
 					Iterator<SourceInventory> iter; boolean found = false;
 					for (iter = team.targetChests.values().iterator(); iter.hasNext(); )

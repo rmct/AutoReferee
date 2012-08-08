@@ -642,8 +642,11 @@ public class AutoReferee extends JavaPlugin
 				}
 				else
 				{
+					AutoRefRegion areg = new AutoRefRegion(reg);
+					if (args.length >= 2) for (String f : args[1].split(",")) areg.toggle(f);
+					
 					// add the region to the team, announce
-					t.getRegions().add(reg);
+					t.getRegions().add(areg);
 					sender.sendMessage("Region now marked as " + 
 						t.getName() + "'s zone!");
 				}

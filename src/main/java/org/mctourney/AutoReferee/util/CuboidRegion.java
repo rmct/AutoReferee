@@ -22,8 +22,8 @@ public class CuboidRegion
 	
 	public boolean contains(Vector3 v)
 	{
-		return v.x >= x1 && v.x <= x2 && v.y >= y1 
-		    && v.y <= y2 && v.z >= z1 && v.z <= z2;
+		return v.x >= x1 && v.y >= y1 && v.z >= z1
+		    && v.x <= x2 && v.y <= y2 && v.z <= z2;
 	}
 
 	public static CuboidRegion fromCoords(String coords)
