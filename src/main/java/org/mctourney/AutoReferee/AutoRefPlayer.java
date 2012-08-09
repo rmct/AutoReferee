@@ -244,6 +244,14 @@ public class AutoRefPlayer
 		Player player = getPlayer();
 		if (player == null || player.isDead()) return;
 		
+		// "die" when the match isn't in progress just means a teleport
+		if (getTeam().getMatch().getCurrentState() != AutoReferee.eMatchStatus.PLAYING)
+		{
+			player.teleport(getTeam().getSpawnLocation());
+			player.setVelocity(new org.bukkit.util.Vector());
+			player.setFallDistance(0.0f);
+		}
+		
 		// if a cause of death is specified, set it
 		if (deathCause != null) player.setLastDamageCause(deathCause);
 		

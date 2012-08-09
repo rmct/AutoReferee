@@ -109,16 +109,9 @@ public class ZoneListener implements Listener
 		if (match.inStartRegion(event.getFrom()) && 
 			!match.inStartRegion(event.getTo()))
 		{
-			// if game isn't going, teleport them back
-			if (match.getCurrentState() != eMatchStatus.PLAYING)
-			{
-				player.teleport(team.getSpawnLocation());
-				player.setVelocity(new org.bukkit.util.Vector());
-				player.setFallDistance(0.0f);
-			}
-			
-			// if game is being played, empty their inventory
-			else player.getInventory().clear();
+			// if game isn't going yet, they are leaving the start region
+			if (match.getCurrentState() == eMatchStatus.PLAYING)
+				player.getInventory().clear();
 		}
 		
 		// if they have left their region, mark their exit location
