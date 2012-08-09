@@ -1,6 +1,9 @@
 package org.mctourney.AutoReferee;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -18,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -155,6 +160,11 @@ public class AutoRefMatch
 
 	public String getMapName() 
 	{ return mapName; }
+	
+	private String versionString = "1.0";
+	
+	public String getVersion()
+	{ return versionString; }
 
 	public String getMapAuthors()
 	{
@@ -250,6 +260,7 @@ public class AutoRefMatch
 		
 		// get the extra settings cached
 		mapName = worldConfig.getString("map.name", "<Untitled>");
+		versionString = worldConfig.getString("map.version", "1.0");
 		mapAuthors = worldConfig.getStringList("map.creators");
 		
 		allowFriendlyFire = worldConfig.getBoolean("match.allow-ff", false);
@@ -314,6 +325,9 @@ public class AutoRefMatch
 	public static String normalizeMapName(String m)
 	{ return m == null ? null : m.toLowerCase().replaceAll("[^0-9a-z]+", ""); }
 
+	public String getVersionString()
+	{ return String.format("%s-v%s", this.getMapName().replaceAll("[^0-9a-zA-Z]+", ""), this.getVersion()); }
+
 	public static File getMapFolder(String worldName, Long checksum) throws IOException
 	{
 		// assume worldName exists
@@ -373,6 +387,56 @@ public class AutoRefMatch
 		
 		// return the maps library
 		return m;
+	}
+
+	public static void setupWorld(World w, boolean b)
+	{
+		// if this map isn't compatible with AutoReferee, quit...
+		if (AutoReferee.getInstance().getMatch(w) != null || !isCompatible(w)) return;
+		AutoReferee.getInstance().addMatch(new AutoRefMatch(w, b, eMatchStatus.WAITING));
+	}
+
+	public File archiveMapData() throws IOException
+	{
+		// make sure the folder exists first
+		File archiveFolder = new File(getMapLibrary(), this.getVersionString());
+		if (!archiveFolder.exists()) archiveFolder.mkdir();
+		
+		// (1) copy the configuration file:
+		FileUtils.copyFileToDirectory(
+			new File(getWorld().getWorldFolder(), AutoReferee.CFG_FILENAME), archiveFolder);
+		
+		// (2) copy the level.dat:
+		FileUtils.copyFileToDirectory(
+			new File(getWorld().getWorldFolder(), "level.dat"), archiveFolder);
+		
+		// (3) copy the region folder (only the .mca files):
+		FileUtils.copyDirectory(new File(getWorld().getWorldFolder(), "region"), 
+			new File(archiveFolder, "region"), FileFilterUtils.suffixFileFilter(".mca"));
+		
+		// (4) make an empty data folder:
+		new File(archiveFolder, "data").mkdir();
+		return archiveFolder;
+	}
+	
+	private static void addToZip(ZipOutputStream zip, File f, File base) throws IOException
+	{
+		zip.putNextEntry(new ZipEntry(base.toURI().relativize(f.toURI()).getPath()));
+		if (f.isDirectory()) for (File c : f.listFiles()) addToZip(zip, c, base);
+		else IOUtils.copy(new FileInputStream(f), zip);
+	}
+	
+	public File distributeMap() throws IOException
+	{
+		File archiveFolder = this.archiveMapData();
+		File outZipfile = new File(getMapLibrary(), this.getVersionString() + ".zip");
+		
+		ZipOutputStream zip = new ZipOutputStream(new 
+			BufferedOutputStream(new FileOutputStream(outZipfile)));
+		addToZip(zip, archiveFolder, getMapLibrary());
+		
+		zip.close();
+		return archiveFolder;
 	}
 
 	public void destroy() throws IOException
@@ -662,33 +726,6 @@ public class AutoRefMatch
 		// everyone is ready, let's go!
 		if (ready) this.prepareMatch();
 	}
-
-	public static void setupWorld(World w, boolean b)
-	{
-		// if this map isn't compatible with AutoReferee, quit...
-		if (AutoReferee.getInstance().getMatch(w) != null || !isCompatible(w)) return;
-		AutoReferee.getInstance().addMatch(new AutoRefMatch(w, b, eMatchStatus.WAITING));
-	}
-
-	public void archiveMapData(File archiveFolder) throws IOException
-	{
-		// (1) copy the configuration file:
-		FileUtils.copyFileToDirectory(
-			new File(getWorld().getWorldFolder(), AutoReferee.CFG_FILENAME), archiveFolder);
-		
-		// (2) copy the level.dat:
-		FileUtils.copyFileToDirectory(
-			new File(getWorld().getWorldFolder(), "level.dat"), archiveFolder);
-		
-		// (3) copy the region folder (only the .mca files):
-		FileUtils.copyDirectory(new File(getWorld().getWorldFolder(), "region"), 
-			new File(archiveFolder, "region"), 
-			FileFilterUtils.suffixFileFilter(".mca"));
-		
-		// (4) make an empty data folder:
-		new File(archiveFolder, "data").mkdir();
-	}
-	
 	
 	public void checkWinConditions()
 	{

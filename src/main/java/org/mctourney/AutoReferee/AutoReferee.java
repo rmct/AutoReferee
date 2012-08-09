@@ -462,17 +462,10 @@ public class AutoReferee extends JavaPlugin
 				world.save();
 				match.saveWorldConfiguration();
 				
-				File mapLibrary = AutoRefMatch.getMapLibrary();
-				if (!mapLibrary.exists()) return true;
-				
-				// archive folder is "<username>-<timestamp>/"
-				String folderName = player.getName() + "-" + 
-					Long.toHexString(new Date().getTime());
-				
-				File archiveFolder = new File(mapLibrary, folderName);
-				if (!archiveFolder.exists()) archiveFolder.mkdir();
-				
-				match.archiveMapData(archiveFolder);
+				File archiveFolder = null;
+				if (args.length >= 2 && "zip".equalsIgnoreCase(args[1]))
+					archiveFolder = match.distributeMap();
+				else archiveFolder = match.archiveMapData();
 				
 				long checksum = AutoRefMatch.recursiveCRC32(archiveFolder);
 				String resp = match.getMapName() + ": [" + Long.toHexString(checksum) + "]";

@@ -4,6 +4,9 @@ map:
   # name of the map
   name: My Competitive Map
   
+  # version for this map
+  version: 1.0
+  
   # names of any creators
   creators:
   - creator1
