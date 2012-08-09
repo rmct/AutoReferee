@@ -441,6 +441,7 @@ public class AutoRefMatch
 		
 		ZipOutputStream zip = new ZipOutputStream(new 
 			BufferedOutputStream(new FileOutputStream(outZipfile)));
+		zip.setMethod(ZipOutputStream.DEFLATED);
 		addToZip(zip, archiveFolder, getMapLibrary());
 		
 		zip.close();
