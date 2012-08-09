@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -26,7 +26,7 @@ public class TeamListener implements Listener
 	{ plugin = (AutoReferee) p; }
 
 	@EventHandler(priority=EventPriority.HIGHEST)
-	public void chatMessage(PlayerChatEvent event)
+	public void chatMessage(AsyncPlayerChatEvent event)
 	{
 		// typical chat message format, swap out with colored version
 		Player player = event.getPlayer();
