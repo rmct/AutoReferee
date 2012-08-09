@@ -456,13 +456,13 @@ public class AutoRefMatch
 		// if everyone has been moved out of this world, clean it up
 		if (world.getPlayers().size() == 0)
 		{
-			// unload the world, get world folder to be deleted
-			File worldFolder = world.getWorldFolder();
-			AutoReferee.getInstance().getServer().unloadWorld(world, false);
-				
-			if (AutoReferee.getInstance().isAutoMode() && this.isTemporaryWorld() && 
-				!AutoReferee.getInstance().getConfig().getBoolean("save-worlds", false))
-					FileUtils.deleteDirectory(worldFolder);
+			// if we are running in auto-mode and this is OUR world
+			if (AutoReferee.getInstance().isAutoMode() && this.isTemporaryWorld())
+			{
+				AutoReferee.getInstance().getServer().unloadWorld(world, false);
+				if (!AutoReferee.getInstance().getConfig().getBoolean("save-worlds", false))
+					FileUtils.deleteDirectory(world.getWorldFolder());
+			}
 		}
 	}
 
