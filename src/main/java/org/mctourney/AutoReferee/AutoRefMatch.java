@@ -598,7 +598,7 @@ public class AutoRefMatch
 		setCurrentState(eMatchStatus.PLAYING);
 	}
 
-	public int getVanishLevel(Player p)
+	private int getVanishLevel(Player p)
 	{
 		// if this person is a player, lowest vanish level
 		if (getPlayer(p) != null) return 0;
@@ -612,17 +612,27 @@ public class AutoRefMatch
 		// spectators can only be seen by referees
 		return 100;
 	}
-
-	public void setupSpectators()
+	
+	// either vanish or show the player `subj` from perspective of `view`
+	private void setupVanish(Player view, Player subj)
 	{
-		for ( Player view : world.getPlayers() ) // <--- viewer
-		for ( Player subj : world.getPlayers() ) // <--- subject
+		if (getVanishLevel(view) >= getVanishLevel(subj) || 
+			this.getCurrentState() != eMatchStatus.PLAYING) view.showPlayer(subj);
+		else view.hidePlayer(subj);
+	}
+
+	public void setupSpectators(Player focus)
+	{
+		for ( Player pl : getWorld().getPlayers() )
 		{
-			if (getVanishLevel(view) >= getVanishLevel(subj) || 
-				this.getCurrentState() != eMatchStatus.PLAYING) view.showPlayer(subj);
-			else view.hidePlayer(subj);
+			// setup vanish in both directions
+			setupVanish(focus, pl);
+			setupVanish(pl, focus);
 		}
 	}
+
+	public void setupSpectators()
+	{ for ( Player pl : getWorld().getPlayers() ) setupSpectators(pl); }
 	
 	public void clearEntities()
 	{
@@ -662,7 +672,7 @@ public class AutoRefMatch
 	}
 
 	// prepare this world to start
-	public void prepareMatch()
+	private void prepareMatch()
 	{
 		BukkitScheduler scheduler = AutoReferee.getInstance().getServer().getScheduler();
 		
