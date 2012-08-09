@@ -196,6 +196,14 @@ public class AutoRefMatch
 	public void setRefereeReady(boolean r)
 	{ refereeReady = r; }
 
+	private boolean debugMode = false;
+
+	public boolean isDebugMode()
+	{ return debugMode; }
+	
+	public void setDebugMode(boolean d)
+	{ broadcast(ChatColor.GREEN + "Debug mode is now " + ((debugMode = d) ? "on" : "off")); }
+	
 	// number of seconds for each phase
 	public static final int READY_SECONDS = 15;
 	public static final int COMPLETED_SECONDS = 180;
@@ -216,6 +224,24 @@ public class AutoRefMatch
 		
 		// fix vanish
 		this.setupSpectators();
+	}
+
+	public Set<AutoRefPlayer> getPlayers()
+	{
+		Set<AutoRefPlayer> players = Sets.newHashSet();
+		for (AutoRefTeam team : teams)
+			players.addAll(team.getPlayers());
+		return players;
+	}
+
+	public Set<Player> getReferees()
+	{
+		Set<Player> refs = Sets.newHashSet();
+		for (Player p : world.getPlayers())
+			if (p.hasPermission("autoreferee.referee")) refs.add(p);
+		for (AutoRefPlayer apl : getPlayers())
+			if (apl.getPlayer() != null) refs.remove(apl.getPlayer());
+		return refs;
 	}
 	
 	public static boolean isCompatible(World w)
@@ -292,24 +318,6 @@ public class AutoRefMatch
 		// log errors, report which world did not save
 		catch (java.io.IOException e)
 		{ AutoReferee.getInstance().getLogger().info("Could not save world config: " + world.getName()); }
-	}
-
-	public Set<AutoRefPlayer> getPlayers()
-	{
-		Set<AutoRefPlayer> players = Sets.newHashSet();
-		for (AutoRefTeam team : teams)
-			players.addAll(team.getPlayers());
-		return players;
-	}
-
-	public Set<Player> getReferees()
-	{
-		Set<Player> refs = Sets.newHashSet();
-		for (Player p : world.getPlayers())
-			if (p.hasPermission("autoreferee.referee")) refs.add(p);
-		for (AutoRefPlayer apl : getPlayers())
-			if (apl.getPlayer() != null) refs.remove(apl.getPlayer());
-		return refs;
 	}
 
 	public void messageReferees(Player p, String type, String data)
@@ -1149,16 +1157,5 @@ public class AutoRefMatch
 		if (getCurrentState() == eMatchStatus.PLAYING)
 			player.sendMessage(String.format(ChatColor.GRAY + "The current match time is: %02d:%02d:%02d", 
 				timestamp/3600L, (timestamp/60L)%60L, timestamp%60L));
-	}
-
-	private boolean debugMode = false;
-
-	public boolean isDebugMode()
-	{ return debugMode; }
-	
-	public void setDebugMode(boolean d)
-	{
-		debugMode = d;
-		broadcast(ChatColor.GREEN + "Debug mode is now " + (debugMode ? "on" : "off"));
 	}
 }
