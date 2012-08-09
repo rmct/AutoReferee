@@ -86,10 +86,7 @@ public class AutoRefRegion extends CuboidRegion
 	}
 
 	public AutoRefRegion toggle(RegionFlag flag)
-	{
-		AutoReferee.getInstance().getLogger().info("Toggle " + flag.name());
-		flags ^= flag.getValue(); return this;
-	}
+	{ flags ^= flag.getValue(); return this; }
 
 	public AutoRefRegion toggle(String nm)
 	{
