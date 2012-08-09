@@ -1140,7 +1140,7 @@ public class AutoRefMatch
 	public void sendMatchInfo(Player player)
 	{
 		player.sendMessage("Map: " + ChatColor.GRAY + getMapName() + 
-			ChatColor.ITALIC + " by " + getMapAuthors());
+			" v" + getVersion() + ChatColor.ITALIC + " by " + getMapAuthors());
 		
 		AutoRefPlayer apl = getPlayer(player);
 		boolean isReferee = getReferees().contains(player);
