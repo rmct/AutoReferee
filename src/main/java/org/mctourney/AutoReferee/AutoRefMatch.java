@@ -1139,12 +1139,13 @@ public class AutoRefMatch
 
 	public String colorMessage(String message)
 	{
+		message = ChatColor.stripColor(message);
 		for (AutoRefPlayer apl : getPlayers()) if (apl != null)
 			message = message.replaceAll(apl.getPlayerName(), apl.getName());
 		for (AutoRefTeam team : getTeams()) if (team.winConditions != null)
 			for (BlockData bd : team.winConditions.values()) if (bd != null)
 				message = message.replaceAll(bd.getRawName(), bd.getName());
-		return message;
+		return ChatColor.RESET + message;
 	}
 
 	public void sendMatchInfo(Player player)
