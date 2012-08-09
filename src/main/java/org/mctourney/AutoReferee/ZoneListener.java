@@ -2,7 +2,6 @@ package org.mctourney.AutoReferee;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -182,13 +181,14 @@ public class ZoneListener implements Listener
 		Player player = event.getPlayer();
 		Location loc = event.getBlock().getLocation();
 		
+		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+		if (match == null) return;
+		
 		if (!validPlayer(player))
 		{ event.setCancelled(true); return; }
 		
-		AutoRefMatch match = plugin.getMatch(loc.getWorld());
 		AutoRefPlayer apl = match.getPlayer(player);
-		
-		if (!apl.getTeam().canBuild(loc))
+		if (apl != null && !apl.getTeam().canBuild(loc))
 		{ event.setCancelled(true); return; }
 	}
 
@@ -197,14 +197,15 @@ public class ZoneListener implements Listener
 	{
 		Player player = event.getPlayer();
 		Location loc = event.getBlock().getLocation();
+		
+		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+		if (match == null) return;
 
 		if (!validPlayer(player))
 		{ event.setCancelled(true); return; }
 		
-		AutoRefMatch match = plugin.getMatch(loc.getWorld());
 		AutoRefPlayer apl = match.getPlayer(player);
-		
-		if (!apl.getTeam().canBuild(loc))
+		if (apl != null && !apl.getTeam().canBuild(loc))
 		{ event.setCancelled(true); return; }
 	}
 	
@@ -214,15 +215,16 @@ public class ZoneListener implements Listener
 		Player player = event.getPlayer();
 		Location loc = event.getClickedBlock().getLocation();
 		
+		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+		if (match == null) return;
+		
 		if (!validPlayer(player))
 		{ event.setCancelled(true); return; }
 		
-		AutoRefMatch match = plugin.getMatch(loc.getWorld());
 		AutoRefPlayer apl = match.getPlayer(player);
-		
 		if (!plugin.isAutoMode() && match.isStartMechanism(loc)) return;
 		
-		if (!apl.getTeam().canEnter(loc, 0.0))
+		if (apl != null && !apl.getTeam().canEnter(loc, 0.0))
 		{ event.setCancelled(true); return; }
 	}
 	
@@ -232,13 +234,14 @@ public class ZoneListener implements Listener
 		Player player = event.getPlayer();
 		Location loc = event.getRightClicked().getLocation();
 		
+		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+		if (match == null) return;
+		
 		if (!validPlayer(player))
 		{ event.setCancelled(true); return; }
 		
-		AutoRefMatch match = plugin.getMatch(loc.getWorld());
 		AutoRefPlayer apl = match.getPlayer(player);
-		
-		if (!apl.getTeam().canEnter(loc, 0.0))
+		if (apl != null && !apl.getTeam().canEnter(loc, 0.0))
 		{ event.setCancelled(true); return; }
 	}
 	
