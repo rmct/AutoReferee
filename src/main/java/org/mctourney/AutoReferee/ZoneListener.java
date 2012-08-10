@@ -20,6 +20,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -478,9 +479,20 @@ public class ZoneListener implements Listener
 		if (match.getCurrentState() != eMatchStatus.PLAYING)
 		{ event.setCancelled(true); return; }
 
-		// if this is in the start region, cancel
-		if (match.inStartRegion(event.getLocation()))
+		// if this is a safe zone, cancel
+		if (match.isSafeZone(event.getLocation()))
 		{ event.setCancelled(true); return; }
+	}
+	
+	@EventHandler
+	public void creatureTarget(EntityTargetEvent event)
+	{
+		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
+		if (match == null || event.getTarget() == null) return;
+		
+		if (match.getCurrentState() != eMatchStatus.PLAYING || 
+			match.isSafeZone(event.getTarget().getLocation()))
+		{ event.setTarget(null); return; }
 	}
 
 	@EventHandler

@@ -13,7 +13,7 @@ public class AutoRefRegion extends CuboidRegion
 	{
 		NO_BUILD(1 << 0, "nobuild", 'b'),
 		NO_ENTRY(1 << 1, "noentry", 'n'),
-		NO_SPAWN(1 << 2, "nospawn", 'm');
+		SAFE_ZONE(1 << 2, "safe", 's');
 		
 		// value for the flag set
 		private int value;
@@ -66,8 +66,8 @@ public class AutoRefRegion extends CuboidRegion
 	public boolean canEnter()
 	{ return !is(RegionFlag.NO_ENTRY); }
 	
-	public boolean canMobsSpawn()
-	{ return !is(RegionFlag.NO_SPAWN); }
+	public boolean isSafeZone()
+	{ return is(RegionFlag.SAFE_ZONE); }
 	
 	public Set<RegionFlag> getFlags()
 	{

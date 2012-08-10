@@ -969,6 +969,14 @@ public class AutoRefMatch
 		if (team != null) return team.getSpawnLocation();
 		return world.getSpawnLocation();
 	}
+	
+	public boolean isSafeZone(Location loc)
+	{
+		if (this.inStartRegion(loc)) return true;
+		for (AutoRefTeam team : getTeams()) for (AutoRefRegion reg : team.getRegions())
+			if (reg.contains(Vector3.fromLocation(loc)) && reg.isSafeZone()) return true;
+		return false;
+	}
 
 	public void logPlayerStats(String h)
 	{
