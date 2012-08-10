@@ -15,3 +15,4 @@ config-mode:
   tools:
     win-condition: GOLD_SPADE
     start-mechanism: GOLD_AXE
+    protect-entities: GOLD_SWORD

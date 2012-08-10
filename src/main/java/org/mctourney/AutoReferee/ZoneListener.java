@@ -2,6 +2,7 @@ package org.mctourney.AutoReferee;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -31,6 +32,7 @@ import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMatch.StartMechanism;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
+import org.mctourney.AutoReferee.util.BlockVector3;
 import org.mctourney.AutoReferee.util.SourceInventory;
 
 import com.google.common.collect.Maps;
@@ -50,6 +52,7 @@ public class ZoneListener implements Listener
 	{
 		TOOL_WINCOND,
 		TOOL_STARTMECH,
+		TOOL_PROTECT,
 	}
 
 	private Map<Integer, ToolAction> toolMap;
@@ -82,6 +85,11 @@ public class ZoneListener implements Listener
 		toolMap.put(parseTool(plugin.getConfig().getString(
 			"config-mode.tools.start-mechanism", null), Material.GOLD_AXE), 
 			ToolAction.TOOL_STARTMECH);
+
+		// tools.protect-entities: golden axe
+		toolMap.put(parseTool(plugin.getConfig().getString(
+			"config-mode.tools.protect-entities", null), Material.GOLD_SWORD), 
+			ToolAction.TOOL_PROTECT);
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
@@ -366,7 +374,7 @@ public class ZoneListener implements Listener
 			// this is the tool built for setting win conditions
 			case TOOL_WINCOND:
 				
-				// if there is no block involved in this event, nothing
+				// if there is no entity involved in this event, nothing
 				if (event.getRightClicked() == null) return;
 				
 				// if the player doesn't have configure permissions, nothing
@@ -397,6 +405,37 @@ public class ZoneListener implements Listener
 				
 				break;
 				
+			// this is the tool built for protecting entities
+			case TOOL_PROTECT:
+				
+				// if there is no entity involved in this event, nothing
+				if (event.getRightClicked() == null) return;
+				
+				// if the player doesn't have configure permissions, nothing
+				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
+
+				// entity name
+				String ename = String.format("%s @ %s", event.getRightClicked().getType().getName(),
+					BlockVector3.fromLocation(event.getRightClicked().getLocation()).toCoords());
+				
+				// save the entity's unique id
+				UUID uid = event.getRightClicked().getUniqueId();
+				if (match.protectedEntities.contains(uid))
+				{
+					match.protectedEntities.remove(uid);
+					match.broadcast(ChatColor.RED + ename + ChatColor.RESET + 
+						" is no longer a protected entity");
+				}
+				else
+				{
+					match.protectedEntities.add(uid);
+					match.broadcast(ChatColor.RED + ename + ChatColor.RESET + 
+						" is a protected entity");
+				}
+				
+				
+				break;
+				
 			// this isn't one of our tools...
 			default: return;
 		}
@@ -409,7 +448,27 @@ public class ZoneListener implements Listener
 	public void creatureSpawn(CreatureSpawnEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
-		if (match == null) return;
+		if (match == null || match.getCurrentState() == eMatchStatus.NONE) return;
+		
+		if (event.getSpawnReason() == SpawnReason.SPAWNER_EGG)
+		{
+			Player spawner = null;
+			double distance = Double.POSITIVE_INFINITY;
+			
+			// get the player who spawned this entity
+			Location loc = event.getEntity().getLocation();
+			for (Player pl : event.getEntity().getWorld().getPlayers())
+			{
+				double d = loc.distanceSquared(pl.getLocation());
+				if (d < distance && pl.getItemInHand() != null && 
+					pl.getItemInHand().getType() == Material.MONSTER_EGG)
+				{ spawner = pl; distance = d; }
+			}
+			
+			// if the player who spawned this creature can configure...
+			if (spawner != null && spawner.hasPermission("autoreferee.configure")
+				&& spawner.getGameMode() == GameMode.CREATIVE) return;
+		}
 		
 		if (event.getEntityType() == EntityType.SLIME && 
 			event.getSpawnReason() == SpawnReason.NATURAL)

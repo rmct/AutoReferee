@@ -539,6 +539,23 @@ public class AutoReferee extends JavaPlugin
 					sender.sendMessage("Right-click on a device to set it as a starting mechanism.");
 					return true;
 				}
+				// get the tool for setting protected entities
+				if (args.length >= 2 && "protect".equalsIgnoreCase(args[1]))
+				{
+					// get the tool used to set the starting mechanisms
+					int mechtool = ZoneListener.parseTool(getConfig().getString(
+						"config-mode.tools.protect-entities", null), Material.GOLD_SWORD);
+					ItemStack toolitem = new ItemStack(mechtool);
+					
+					// add to the inventory and switch to holding it
+					PlayerInventory inv = player.getInventory();
+					inv.addItem(toolitem);
+					
+					// let the player know what the tool is and how to use it
+					sender.sendMessage("Given entity protection tool: " + toolitem.getType().name());
+					sender.sendMessage("Right-click on an entity to protect it from butchering.");
+					return true;
+				}
 			}
 		}
 

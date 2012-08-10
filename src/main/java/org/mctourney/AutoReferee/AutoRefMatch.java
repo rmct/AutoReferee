@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -186,6 +187,9 @@ public class AutoRefMatch
 	
 	// mechanisms to open the starting gates
 	public Set<StartMechanism> startMechanisms = null;
+	
+	// protected entities - only protected from "butchering"
+	public Set<UUID> protectedEntities = null;
 
 	// transcript of every event in the match
 	private List<TranscriptEvent> transcript;
@@ -269,14 +273,23 @@ public class AutoRefMatch
 		worldConfig.options().header(AutoReferee.getInstance().getDescription().getFullName());
 		worldConfig.options().copyHeader(false);
 
-		teams = new HashSet<AutoRefTeam>();
-		startMechanisms = new HashSet<StartMechanism>();
-		
+		teams = Sets.newHashSet();
 		for (Map<?, ?> map : worldConfig.getMapList("match.teams"))
 			teams.add(AutoRefTeam.fromMap((Map<String, Object>) map, this));
 		
+		startMechanisms = Sets.newHashSet();
 		for (String sm : worldConfig.getStringList("match.start-mechanisms"))
 			startMechanisms.add(StartMechanism.unserialize(world, sm));
+		
+		protectedEntities = Sets.newHashSet();
+		for (String uid : worldConfig.getStringList("match.protected-entities"))
+			protectedEntities.add(UUID.fromString(uid));
+		
+		// HELPER: ensure all protected entities are still present in world
+		Set<UUID> uuidSearch = Sets.newHashSet(protectedEntities);
+		for (Entity e : getWorld().getEntities()) uuidSearch.remove(e.getUniqueId());
+		if (!uuidSearch.isEmpty()) this.broadcast(ChatColor.RED + "" + ChatColor.BOLD + "WARNING: " + 
+			ChatColor.RESET + "One or more protected entities are missing!");
 		
 		// get the start region (safe for both teams, no pvp allowed)
 		if (worldConfig.isString("match.start-region"))
@@ -309,6 +322,11 @@ public class AutoRefMatch
 		List<String> smList = Lists.newArrayList();
 		for ( StartMechanism sm : startMechanisms ) smList.add(sm.serialize());
 		worldConfig.set("match.start-mechanisms", smList);
+		
+		// save the protected entities
+		List<String> peList = Lists.newArrayList();
+		for ( UUID uid : protectedEntities ) peList.add(uid.toString());
+		worldConfig.set("match.protected-entities", peList);
 		
 		// save the start region
 		if (startRegion != null)
@@ -678,7 +696,8 @@ public class AutoRefMatch
 	public void clearEntities()
 	{
 		for (Entity e : world.getEntitiesByClasses(Monster.class, 
-			Animals.class, Item.class, ExperienceOrb.class, Arrow.class)) e.remove();
+			Animals.class, Item.class, ExperienceOrb.class, Arrow.class))
+			if (!protectedEntities.contains(e.getUniqueId())) e.remove();
 	}
 
 	// helper class for starting match, synchronous task
