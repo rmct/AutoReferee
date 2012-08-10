@@ -32,13 +32,13 @@ public class QueryServer
 		catch (Exception e) { return false; }
 	}
 	
-	public MatchParams getNextMatch()
+	public AutoRefMatch.MatchParams getNextMatch()
 	{
 		try
 		{
 			String params = String.format("key=%s", URLEncoder.encode(key, encoding));
 			String json = syncPostQuery("match.php", params);
-			return json == null ? null : new Gson().fromJson(json, MatchParams.class);
+			return json == null ? null : new Gson().fromJson(json, AutoRefMatch.MatchParams.class);
 		}
 		catch (Exception e) { return null; }
 	}
@@ -83,44 +83,5 @@ public class QueryServer
 			// meh. don't bother, if something goes wrong here.
 			catch (Exception e) {  }
 		}
-	}
-	
-	// unserialized match initialization parameters
-	static class MatchParams
-	{
-		public static class TeamInfo
-		{
-			private String name;
-			
-			public String getName()
-			{ return name; }
-			
-			private List<String> players;
-	
-			public List<String> getPlayers()
-			{ return Collections.unmodifiableList(players); }
-		}
-		
-		// info about all the teams
-		private List<TeamInfo> teams;
-		
-		public List<TeamInfo> getTeams()
-		{ return Collections.unmodifiableList(teams); }
-	
-		// match tag for reporting
-		private String tag;
-		
-		public String getTag()
-		{ return tag; }
-		
-		// map name and checksum
-		private String map;
-		private Long checksum;
-		
-		public String getMap()
-		{ return map; }
-		
-		public Long getChecksum()
-		{ return checksum; }
 	}
 }

@@ -545,6 +545,45 @@ public class AutoRefMatch
 			if (loc.equals(sm.loc)) return true;
 		return false;
 	}
+	
+	// unserialized match initialization parameters
+	static class MatchParams
+	{
+		public static class TeamInfo
+		{
+			private String name;
+			
+			public String getName()
+			{ return name; }
+			
+			private List<String> players;
+	
+			public List<String> getPlayers()
+			{ return Collections.unmodifiableList(players); }
+		}
+		
+		// info about all the teams
+		private List<TeamInfo> teams;
+		
+		public List<TeamInfo> getTeams()
+		{ return Collections.unmodifiableList(teams); }
+	
+		// match tag for reporting
+		private String tag;
+		
+		public String getTag()
+		{ return tag; }
+		
+		// map name and checksum
+		private String map;
+		private Long checksum;
+		
+		public String getMap()
+		{ return map; }
+		
+		public Long getChecksum()
+		{ return checksum; }
+	}
 
 	public void start()
 	{

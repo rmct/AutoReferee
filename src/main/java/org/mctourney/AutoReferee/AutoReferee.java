@@ -305,13 +305,13 @@ public class AutoReferee extends JavaPlugin
 	public World createMatchWorld(String worldName) throws IOException
 	{ return createMatchWorld(worldName, null); }
 	
-	public AutoRefMatch createMatch(QueryServer.MatchParams params) throws IOException
+	public AutoRefMatch createMatch(AutoRefMatch.MatchParams params) throws IOException
 	{
 		World world = createMatchWorld(params.getMap(), params.getChecksum());
 		AutoRefMatch m = new AutoRefMatch(world, true);
 		
 		Iterator<AutoRefTeam> teamiter = m.getTeams().iterator();
-		for (QueryServer.MatchParams.TeamInfo teaminfo : params.getTeams())
+		for (AutoRefMatch.MatchParams.TeamInfo teaminfo : params.getTeams())
 		{
 			if (!teamiter.hasNext()) break;
 			AutoRefTeam team = teamiter.next();
@@ -325,12 +325,12 @@ public class AutoReferee extends JavaPlugin
 	
 	public boolean parseMatchInitialization(String json) // TODO
 	{
-		Type type = new TypeToken<List<QueryServer.MatchParams>>() {}.getType();
-		List<QueryServer.MatchParams> paramList = new Gson().fromJson(json, type);
+		Type type = new TypeToken<List<AutoRefMatch.MatchParams>>() {}.getType();
+		List<AutoRefMatch.MatchParams> paramList = new Gson().fromJson(json, type);
 		
 		try
 		{
-			for (QueryServer.MatchParams params : paramList)
+			for (AutoRefMatch.MatchParams params : paramList)
 				this.addMatch(createMatch(params));
 		}
 		catch (IOException e) { return false; }
