@@ -508,9 +508,9 @@ public class AutoReferee extends JavaPlugin
 				if (args.length >= 2 && "wincond".equalsIgnoreCase(args[1]))
 				{
 					// get the tool used to set the win conditions
-					int wincondtool = ZoneListener.parseTool(getConfig().getString(
+					int toolID = ZoneListener.parseTool(getConfig().getString(
 						"config-mode.tools.win-condition", null), Material.GOLD_SPADE);
-					ItemStack toolitem = new ItemStack(wincondtool);
+					ItemStack toolitem = new ItemStack(toolID);
 					
 					// add to the inventory and switch to holding it
 					PlayerInventory inv = player.getInventory();
@@ -526,9 +526,9 @@ public class AutoReferee extends JavaPlugin
 				if (args.length >= 2 && "startmech".equalsIgnoreCase(args[1]))
 				{
 					// get the tool used to set the starting mechanisms
-					int mechtool = ZoneListener.parseTool(getConfig().getString(
+					int toolID = ZoneListener.parseTool(getConfig().getString(
 						"config-mode.tools.start-mechanism", null), Material.GOLD_AXE);
-					ItemStack toolitem = new ItemStack(mechtool);
+					ItemStack toolitem = new ItemStack(toolID);
 					
 					// add to the inventory and switch to holding it
 					PlayerInventory inv = player.getInventory();
@@ -543,9 +543,9 @@ public class AutoReferee extends JavaPlugin
 				if (args.length >= 2 && "protect".equalsIgnoreCase(args[1]))
 				{
 					// get the tool used to set the starting mechanisms
-					int mechtool = ZoneListener.parseTool(getConfig().getString(
+					int toolID = ZoneListener.parseTool(getConfig().getString(
 						"config-mode.tools.protect-entities", null), Material.GOLD_SWORD);
-					ItemStack toolitem = new ItemStack(mechtool);
+					ItemStack toolitem = new ItemStack(toolID);
 					
 					// add to the inventory and switch to holding it
 					PlayerInventory inv = player.getInventory();
