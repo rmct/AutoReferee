@@ -604,11 +604,11 @@ public class AutoRefMatch
 		}
 		
 		// remove all mobs, animals, and items (again)
-		for (Entity e : world.getEntitiesByClasses(Monster.class, 
-			Animals.class, Item.class, ExperienceOrb.class)) e.remove();
+		this.clearEntities();
 
 		// loop through all the redstone mechanisms required to start / FIXME BUKKIT-1858
-/*		for (StartMechanism sm : startMechanisms)
+		if (AutoReferee.getInstance().isAutoMode())
+			for (StartMechanism sm : startMechanisms)
 		{
 			MaterialData mdata = sm.blockState.getData();
 			switch (sm.blockState.getType())
@@ -634,7 +634,7 @@ public class AutoRefMatch
 			sm.blockState.setData(mdata);
 			sm.blockState.update(true);
 		}
-*/		
+			
 		// set the current state to playing
 		setCurrentState(eMatchStatus.PLAYING);
 	}
