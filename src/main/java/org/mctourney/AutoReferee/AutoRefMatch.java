@@ -183,6 +183,8 @@ public class AutoRefMatch
 
 	// task that starts the match
 	public AutoRefMatch.MatchStartTask matchStarter = null;
+	
+	// mechanisms to open the starting gates
 	public Set<StartMechanism> startMechanisms = null;
 
 	// transcript of every event in the match
