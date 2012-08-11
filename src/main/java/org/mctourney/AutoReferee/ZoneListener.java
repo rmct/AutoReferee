@@ -300,27 +300,33 @@ public class ZoneListener implements Listener
 				// if the player doesn't have configure permissions, nothing
 				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
 				
-				// setup source inventory
-				SourceInventory src = SourceInventoryBlock.fromBlock(block);
-				Set<AutoRefTeam> cfgTeams = Sets.newLinkedHashSet();
-				
-				boolean removed = false, r;
-				for (AutoRefTeam team : match.getTeams())
+				if (block.getState() instanceof InventoryHolder)
+				{
+					// setup source inventory
+					SourceInventory src = SourceInventoryBlock.fromBlock(block);
+					Set<AutoRefTeam> cfgTeams = Sets.newLinkedHashSet();
+					
+					boolean removed = false, r;
+					for (AutoRefTeam team : match.getTeams())
+						if (team.checkPosition(block.getLocation()))
+					{
+						removed |= (r = team.targetChests.values().remove(src));
+						if (r) match.broadcast(String.format("%s is no longer a source for %s for %s", 
+							src.getName(), src.blockdata.getName(), team.getName()));
+						else cfgTeams.add(team);
+					}
+					
+					if (!removed && !cfgTeams.isEmpty())
+					{
+						if (cfgTeams.size() == 1) for (AutoRefTeam team : cfgTeams)
+							team.addSourceInventory(src);
+						else new Conversation(plugin, event.getPlayer(), 
+							new SourceInventoryConfirmation(src, cfgTeams)).begin();
+					}
+				}
+				else for (AutoRefTeam team : match.getTeams())
 					if (team.checkPosition(block.getLocation()))
-				{
-					removed |= (r = team.targetChests.values().remove(src));
-					if (r) match.broadcast(String.format("%s is no longer a source for %s for %s", 
-						src.getName(), src.blockdata.getName(), team.getName()));
-					else cfgTeams.add(team);
-				}
-				
-				if (!removed && !cfgTeams.isEmpty())
-				{
-					if (cfgTeams.size() == 1) for (AutoRefTeam team : cfgTeams)
-						team.addSourceInventory(src);
-					else new Conversation(plugin, event.getPlayer(), 
-						new SourceInventoryConfirmation(src, cfgTeams)).begin();
-				}
+						team.addWinCondition(block);
 				
 				break;
 				
