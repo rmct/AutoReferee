@@ -95,7 +95,7 @@ public class ZoneListener implements Listener
 			"config-mode.tools.start-mechanism", null), Material.GOLD_AXE), 
 			ToolAction.TOOL_STARTMECH);
 
-		// tools.protect-entities: golden axe
+		// tools.protect-entities: golden sword
 		toolMap.put(parseTool(plugin.getConfig().getString(
 			"config-mode.tools.protect-entities", null), Material.GOLD_SWORD), 
 			ToolAction.TOOL_PROTECT);
