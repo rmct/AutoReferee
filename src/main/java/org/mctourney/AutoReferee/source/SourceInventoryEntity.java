@@ -17,6 +17,17 @@ public class SourceInventoryEntity extends SourceInventory
 		super(((InventoryHolder) e).getInventory());
 		this.entity = e;
 	}
+	
+	@Override
+	public int hashCode()
+	{ return entity.hashCode(); }
+	
+	@Override
+	public boolean equals(Object o)
+	{
+		return (o instanceof SourceInventoryEntity) && 
+			entity.equals(((SourceInventoryEntity) o).entity);
+	}
 
 	@Override
 	public String toString()

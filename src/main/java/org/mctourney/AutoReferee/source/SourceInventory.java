@@ -1,5 +1,6 @@
 package org.mctourney.AutoReferee.source;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -32,8 +33,8 @@ public class SourceInventory
 
 	public String getName()
 	{
-		return String.format("%s(%s)", this.getType(),
-			BlockVector3.fromLocation(this.getLocation()).toCoords());
+		return ChatColor.GRAY + String.format("%s(%s)", this.getType(),
+			BlockVector3.fromLocation(this.getLocation()).toCoords()) + ChatColor.RESET;
 	}
 	
 	public void hasSeen(AutoRefPlayer apl)

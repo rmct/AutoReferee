@@ -16,6 +16,17 @@ public class SourceInventoryBlock extends SourceInventory
 		super(((InventoryHolder) b.getState()).getInventory());
 		this.block = b;
 	}
+	
+	@Override
+	public int hashCode()
+	{ return block.hashCode(); }
+	
+	@Override
+	public boolean equals(Object o)
+	{
+		return (o instanceof SourceInventoryBlock) && 
+			block.equals(((SourceInventoryBlock) o).block);
+	}
 
 	@Override
 	public String toString()

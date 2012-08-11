@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.conversations.BooleanPrompt;
+import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.Prompt;
 import org.bukkit.entity.EntityType;
@@ -43,6 +44,7 @@ import org.mctourney.AutoReferee.source.SourceInventoryEntity;
 import org.mctourney.AutoReferee.util.BlockVector3;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class ZoneListener implements Listener 
 {
@@ -298,28 +300,26 @@ public class ZoneListener implements Listener
 				// if the player doesn't have configure permissions, nothing
 				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
 				
-				// if the region is owned by only one team, make it one of their
-				// win conditions (otherwise, we may need to configure by hand)
+				// setup source inventory
+				SourceInventory src = SourceInventoryBlock.fromBlock(block);
+				Set<AutoRefTeam> cfgTeams = Sets.newLinkedHashSet();
+				
+				boolean removed = false, r;
 				for (AutoRefTeam team : match.getTeams())
 					if (team.checkPosition(block.getLocation()))
 				{
-					Iterator<SourceInventory> iter; boolean found = false;
-					for (iter = team.targetChests.values().iterator(); iter.hasNext(); )
-					{
-						SourceInventory sinv = iter.next();
-						if (sinv.matchesBlock(block))
-						{
-							iter.remove(); found = true;
-							match.broadcast(String.format("%s is no longer a source for %s", 
-								sinv.getName(), sinv.blockdata.getName()));
-						}
-					}
-					if (!found)
-					{
-						if (block.getState() instanceof InventoryHolder)
-							team.addSourceInventory(SourceInventoryBlock.fromBlock(block));
-						else team.addWinCondition(block);
-					}
+					removed |= (r = team.targetChests.values().remove(src));
+					if (r) match.broadcast(String.format("%s is no longer a source for %s for %s", 
+						src.getName(), src.blockdata.getName(), team.getName()));
+					else cfgTeams.add(team);
+				}
+				
+				if (!removed && !cfgTeams.isEmpty())
+				{
+					if (cfgTeams.size() == 1) for (AutoRefTeam team : cfgTeams)
+						team.addSourceInventory(src);
+					else new Conversation(plugin, event.getPlayer(), 
+						new SourceInventoryConfirmation(src, cfgTeams)).begin();
 				}
 				
 				break;
@@ -387,27 +387,26 @@ public class ZoneListener implements Listener
 				// if the player doesn't have configure permissions, nothing
 				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
 				
-				// if the region is owned by only one team, make it one of their
-				// win conditions (otherwise, we may need to configure by hand)
+				// setup source inventory
+				SourceInventory src = SourceInventoryEntity.fromEntity(event.getRightClicked());
+				Set<AutoRefTeam> cfgTeams = Sets.newLinkedHashSet();
+				
+				boolean removed = false, r;
 				for (AutoRefTeam team : match.getTeams())
 					if (team.checkPosition(event.getRightClicked().getLocation()))
 				{
-					Iterator<SourceInventory> iter; boolean found = false;
-					for (iter = team.targetChests.values().iterator(); iter.hasNext(); )
-					{
-						SourceInventory sinv = iter.next();
-						if (sinv.matchesEntity(event.getRightClicked()))
-						{
-							iter.remove(); found = true;
-							match.broadcast(String.format("%s is no longer a source for %s", 
-								sinv.getName(), sinv.blockdata.getName()));
-						}
-					}
-					if (!found)
-					{
-						if (event.getRightClicked() instanceof InventoryHolder)
-							team.addSourceInventory(SourceInventoryEntity.fromEntity(event.getRightClicked()));
-					}
+					removed |= (r = team.targetChests.values().remove(src));
+					if (r) match.broadcast(String.format("%s is no longer a source for %s for %s", 
+						src.getName(), src.blockdata.getName(), team.getName()));
+					else cfgTeams.add(team);
+				}
+				
+				if (!removed && !cfgTeams.isEmpty())
+				{
+					if (cfgTeams.size() == 1) for (AutoRefTeam team : cfgTeams)
+						team.addSourceInventory(src);
+					else new Conversation(plugin, event.getPlayer(), 
+						new SourceInventoryConfirmation(src, cfgTeams)).begin();
 				}
 				
 				break;
@@ -449,6 +448,51 @@ public class ZoneListener implements Listener
 		
 		// cancel the event, since it was one of our tools being used properly
 		event.setCancelled(true);
+	}
+	
+	private class SourceInventoryConfirmation extends BooleanPrompt
+	{
+		// inventory that is being set up
+		private SourceInventory src = null;
+		
+		// teams to add this source inventory to
+		private Set<AutoRefTeam> teams = null;
+		private Iterator<AutoRefTeam> teamIterator = null;
+		
+		public SourceInventoryConfirmation(SourceInventory s, Set<AutoRefTeam> t)
+		{
+			this.teams = t;
+			this.teamIterator = this.teams.iterator();
+			this.src = s;
+		}
+
+		public String getPromptText(ConversationContext context)
+		{
+			if (!teamIterator.hasNext()) return null;
+			
+			// get the team for this specific prompt
+			AutoRefTeam team = teamIterator.next();
+			
+			return String.format("Set %s as source for %s for %s?", 
+				src.getName(), src.blockdata.getName(), team.getName());
+		}
+
+		@Override
+		protected Prompt acceptValidatedInput(ConversationContext context, boolean res)
+		{
+			// if the configuration was rejected, remove the team
+			if (!res) teamIterator.remove();
+			
+			// if there are more teams, return this prompt again
+			if (teamIterator.hasNext()) return this;
+			
+			// add the source inventory to the remaining teams
+			for (AutoRefTeam team : this.teams)
+				team.addSourceInventory(this.src);
+			
+			// done with conversation
+			return Prompt.END_OF_CONVERSATION;
+		}
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
