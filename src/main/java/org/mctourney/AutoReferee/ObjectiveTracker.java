@@ -26,8 +26,8 @@ import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
+import org.mctourney.AutoReferee.source.*;
 import org.mctourney.AutoReferee.util.BlockData;
-import org.mctourney.AutoReferee.util.SourceInventory;
 
 public class ObjectiveTracker implements Listener 
 {
@@ -128,9 +128,8 @@ public class ObjectiveTracker implements Listener
 			
 			if (match != null && apl != null && block != null)
 			{
-				Location loc = block.getLocation();
 				for (SourceInventory sinv : apl.getTeam().targetChests.values())
-					if (loc.equals(sinv.target)) sinv.hasSeen(apl);
+					if (sinv.matchesBlock(block)) sinv.hasSeen(apl);
 				match.checkWinConditions();
 			}
 		}
@@ -148,7 +147,7 @@ public class ObjectiveTracker implements Listener
 			Location loc = block.getLocation();
 			for (AutoRefTeam team : match.getTeams())
 				for (SourceInventory sinv : team.targetChests.values())
-					if (loc.equals(sinv.target)) sinv.hasSeen(match.getNearestPlayer(loc));
+					if (sinv.matchesBlock(block)) sinv.hasSeen(match.getNearestPlayer(loc));
 		}
 	}
 	
@@ -163,10 +162,9 @@ public class ObjectiveTracker implements Listener
 		
 		if (match != null && apl != null && entity != null)
 		{
-			Location loc = entity.getLocation();
 			for (AutoRefTeam team : match.getTeams())
 				for (SourceInventory sinv : team.targetChests.values())
-					if (entity.equals(sinv.target)) sinv.hasSeen(apl);
+					if (sinv.matchesEntity(entity)) sinv.hasSeen(apl);
 			match.checkWinConditions();
 		}
 

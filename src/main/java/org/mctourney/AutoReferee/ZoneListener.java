@@ -2,6 +2,7 @@ package org.mctourney.AutoReferee;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.ChatColor;
@@ -10,6 +11,9 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.conversations.BooleanPrompt;
+import org.bukkit.conversations.ConversationContext;
+import org.bukkit.conversations.Prompt;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -33,8 +37,10 @@ import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMatch.StartMechanism;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
+import org.mctourney.AutoReferee.source.SourceInventory;
+import org.mctourney.AutoReferee.source.SourceInventoryBlock;
+import org.mctourney.AutoReferee.source.SourceInventoryEntity;
 import org.mctourney.AutoReferee.util.BlockVector3;
-import org.mctourney.AutoReferee.util.SourceInventory;
 
 import com.google.common.collect.Maps;
 
@@ -301,7 +307,7 @@ public class ZoneListener implements Listener
 					for (iter = team.targetChests.values().iterator(); iter.hasNext(); )
 					{
 						SourceInventory sinv = iter.next();
-						if (block.getLocation().equals(sinv.target))
+						if (sinv.matchesBlock(block))
 						{
 							iter.remove(); found = true;
 							match.broadcast(String.format("%s is no longer a source for %s", 
@@ -311,7 +317,7 @@ public class ZoneListener implements Listener
 					if (!found)
 					{
 						if (block.getState() instanceof InventoryHolder)
-							team.addSourceInventory(block);
+							team.addSourceInventory(SourceInventoryBlock.fromBlock(block));
 						else team.addWinCondition(block);
 					}
 				}
@@ -390,7 +396,7 @@ public class ZoneListener implements Listener
 					for (iter = team.targetChests.values().iterator(); iter.hasNext(); )
 					{
 						SourceInventory sinv = iter.next();
-						if (event.getRightClicked().equals(sinv.target))
+						if (sinv.matchesEntity(event.getRightClicked()))
 						{
 							iter.remove(); found = true;
 							match.broadcast(String.format("%s is no longer a source for %s", 
@@ -400,7 +406,7 @@ public class ZoneListener implements Listener
 					if (!found)
 					{
 						if (event.getRightClicked() instanceof InventoryHolder)
-							team.addSourceInventory((InventoryHolder) event.getRightClicked());
+							team.addSourceInventory(SourceInventoryEntity.fromEntity(event.getRightClicked()));
 					}
 				}
 				

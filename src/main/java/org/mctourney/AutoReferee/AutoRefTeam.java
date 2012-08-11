@@ -18,6 +18,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
+import org.mctourney.AutoReferee.source.SourceInventory;
+import org.mctourney.AutoReferee.source.SourceInventoryBlock;
+import org.mctourney.AutoReferee.source.SourceInventoryEntity;
 import org.mctourney.AutoReferee.util.*;
 
 import com.google.common.collect.Lists;
@@ -200,9 +203,14 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			if (slist != null) for (String s : slist)
 			{
 				BlockVector3 bvec = BlockVector3.fromCoords(s);
-				if (bvec != null) newTeam.addSourceInventory(w.getBlockAt(bvec.toLocation(w)));
+				if (bvec != null) newTeam.addSourceInventory(
+					SourceInventoryBlock.fromBlock(w.getBlockAt(bvec.toLocation(w))));
 				
-				else try { newTeam.addSourceInventory(UUID.fromString(s)); }
+				else try
+				{
+					SourceInventory srce = SourceInventoryEntity.fromUUID(w, UUID.fromString(s));
+					newTeam.addSourceInventory(srce);
+				}
 				catch (IllegalArgumentException e) {  }
 			}
 		}
@@ -357,35 +365,15 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		return build;
 	}
 	
-	public void addSourceInventory(Object tgt, Inventory inv)
+	public void addSourceInventory(SourceInventory src)
 	{
-		SourceInventory src = new SourceInventory(inv);
-		if (src.blockdata == null) return;
-		
-		// save the target (this is messy!)
-		src.target = tgt;
+		// actually quite possible...
+		if (src == null) return;
 		
 		targetChests.put(src.blockdata, src);
 		match.broadcast(String.format("%s is a source for %s", 
 			src.getName(), src.blockdata.getName()));
 	}
-
-	public void addSourceInventory(Block block)
-	{
-		if (block == null || !(block.getState() instanceof InventoryHolder)) return;
-		addSourceInventory(block.getLocation(), 
-			((InventoryHolder) block.getState()).getInventory());
-	}
-
-	public void addSourceInventory(UUID uid)
-	{
-		if (uid == null) return;
-		for (Entity e : getMatch().getWorld().getEntitiesByClasses(InventoryHolder.class))
-			if (uid.equals(e.getUniqueId())) addSourceInventory((InventoryHolder) e);
-	}
-
-	public void addSourceInventory(InventoryHolder invh)
-	{ if (invh != null) addSourceInventory(invh, invh.getInventory()); }
 	
 	public void addWinCondition(Block block)
 	{
