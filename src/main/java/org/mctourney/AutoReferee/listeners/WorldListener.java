@@ -1,4 +1,4 @@
-package org.mctourney.AutoReferee;
+package org.mctourney.AutoReferee.listeners;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -6,6 +6,8 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.plugin.Plugin;
+import org.mctourney.AutoReferee.AutoRefMatch;
+import org.mctourney.AutoReferee.AutoReferee;
 
 public class WorldListener implements Listener
 {

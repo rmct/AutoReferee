@@ -1,4 +1,4 @@
-package org.mctourney.AutoReferee;
+package org.mctourney.AutoReferee.listeners;
 
 import java.util.Iterator;
 
@@ -16,6 +16,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
 
+import org.mctourney.AutoReferee.AutoRefMatch;
+import org.mctourney.AutoReferee.AutoRefTeam;
+import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 
 public class TeamListener implements Listener 

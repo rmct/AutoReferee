@@ -1,4 +1,4 @@
-package org.mctourney.AutoReferee;
+package org.mctourney.AutoReferee.listeners;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -36,6 +36,10 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 
+import org.mctourney.AutoReferee.AutoRefMatch;
+import org.mctourney.AutoReferee.AutoRefPlayer;
+import org.mctourney.AutoReferee.AutoRefTeam;
+import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.AutoRefMatch.StartMechanism;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 import org.mctourney.AutoReferee.source.SourceInventory;

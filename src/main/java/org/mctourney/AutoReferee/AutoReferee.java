@@ -38,6 +38,11 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 
+import org.mctourney.AutoReferee.listeners.ObjectiveTracker;
+import org.mctourney.AutoReferee.listeners.PlayerVersusPlayerListener;
+import org.mctourney.AutoReferee.listeners.TeamListener;
+import org.mctourney.AutoReferee.listeners.WorldListener;
+import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.util.CuboidRegion;
 import org.mctourney.AutoReferee.util.Vector3;
 

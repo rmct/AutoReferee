@@ -52,6 +52,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
+import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.util.BlockData;
 import org.mctourney.AutoReferee.util.CuboidRegion;
 import org.mctourney.AutoReferee.util.Vector3;
@@ -505,7 +506,7 @@ public class AutoRefMatch
 		return vteams.get(new Random().nextInt(vteams.size()));
 	}
 
-	static class StartMechanism
+	public static class StartMechanism
 	{
 		public Location loc = null;
 		public BlockState blockState = null;

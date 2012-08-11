@@ -1,4 +1,4 @@
-package org.mctourney.AutoReferee;
+package org.mctourney.AutoReferee.listeners;
 
 import java.util.Map;
 import java.util.UUID;
@@ -21,6 +21,10 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.plugin.Plugin;
 
+import org.mctourney.AutoReferee.AutoRefMatch;
+import org.mctourney.AutoReferee.AutoRefPlayer;
+import org.mctourney.AutoReferee.AutoRefTeam;
+import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 
 import com.google.common.collect.Maps;

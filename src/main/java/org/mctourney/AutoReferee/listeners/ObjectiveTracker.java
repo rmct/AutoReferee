@@ -1,4 +1,4 @@
-package org.mctourney.AutoReferee;
+package org.mctourney.AutoReferee.listeners;
 
 import java.util.Map;
 
@@ -24,7 +24,12 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
 
+import org.mctourney.AutoReferee.AutoRefMatch;
+import org.mctourney.AutoReferee.AutoRefPlayer;
+import org.mctourney.AutoReferee.AutoRefTeam;
+import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
+import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent.EventType;
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 import org.mctourney.AutoReferee.source.*;
 import org.mctourney.AutoReferee.util.BlockData;
