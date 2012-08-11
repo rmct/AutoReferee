@@ -23,6 +23,9 @@ public class SourceInventory
 
 	protected SourceInventory(Inventory inv)
 	{ this.blockdata = BlockData.fromInventory(this.inventory = inv); }
+	
+	protected SourceInventory(BlockData bd)
+	{ this.blockdata = bd; this.inventory = null; }
 
 	@Override
 	public String toString()
