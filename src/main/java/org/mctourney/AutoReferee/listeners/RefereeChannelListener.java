@@ -1,8 +1,9 @@
-package org.mctourney.AutoReferee;
+package org.mctourney.AutoReferee.listeners;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
+import org.mctourney.AutoReferee.AutoReferee;
 
 public class RefereeChannelListener implements PluginMessageListener
 {
