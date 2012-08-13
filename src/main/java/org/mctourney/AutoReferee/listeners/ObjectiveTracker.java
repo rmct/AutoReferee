@@ -273,7 +273,7 @@ public class ObjectiveTracker implements Listener
 		healthArmorChange(event.getPlayer());
 	}
 	
-	@EventHandler(priority=EventPriority.HIGHEST)
+	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void itemCraft(CraftItemEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getWhoClicked().getWorld());
@@ -283,7 +283,10 @@ public class ObjectiveTracker implements Listener
 		AutoRefTeam team = plugin.getTeam((Player) event.getWhoClicked());
 		
 		BlockData recipeTarget = BlockData.fromItemStack(event.getRecipe().getResult());
-		if (team != null && team.winConditions.containsValue(recipeTarget))
+		if (team != null && team.winConditions.containsValue(recipeTarget) && !match.allowCraft)
 			event.setCancelled(true);
+		
+		// if this is on the blacklist, cancel
+		if (!match.canCraft(recipeTarget)) event.setCancelled(true);
 	}
 }

@@ -43,6 +43,7 @@ import org.mctourney.AutoReferee.listeners.PlayerVersusPlayerListener;
 import org.mctourney.AutoReferee.listeners.TeamListener;
 import org.mctourney.AutoReferee.listeners.WorldListener;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
+import org.mctourney.AutoReferee.util.BlockData;
 import org.mctourney.AutoReferee.util.CuboidRegion;
 import org.mctourney.AutoReferee.util.Vector3;
 
@@ -561,6 +562,14 @@ public class AutoReferee extends JavaPlugin
 					sender.sendMessage("Right-click on an entity to protect it from butchering.");
 					return true;
 				}
+			}
+			
+			// CMD: /autoref nocraft
+			if (args.length >= 1 && "nocraft".equalsIgnoreCase(args[0]))
+			{
+				ItemStack item = player.getItemInHand();
+				if (item != null) match.addIllegalCraft(BlockData.fromItemStack(item));
+				return true;
 			}
 		}
 

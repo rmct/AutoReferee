@@ -156,9 +156,6 @@ public class AutoRefMatch
 	// basic variables loaded from file
 	private String mapName = null;
 	private Collection<String> mapAuthors = null;
-	
-	public boolean allowFriendlyFire = false;
-	public boolean allowCraft = false;
 
 	public String getMapName() 
 	{ return mapName; }
@@ -191,6 +188,12 @@ public class AutoRefMatch
 	
 	// protected entities - only protected from "butchering"
 	public Set<UUID> protectedEntities = null;
+	
+	public boolean allowFriendlyFire = false;
+	public boolean allowCraft = false;
+	
+	// list of items players may not craft
+	private Set<BlockData> prohibitCraft = Sets.newHashSet();
 
 	// transcript of every event in the match
 	private List<TranscriptEvent> transcript;
@@ -286,6 +289,10 @@ public class AutoRefMatch
 		for (String uid : worldConfig.getStringList("match.protected-entities"))
 			protectedEntities.add(UUID.fromString(uid));
 		
+		prohibitCraft = Sets.newHashSet();
+		for (String b : worldConfig.getStringList("match.no-craft"))
+			prohibitCraft.add(BlockData.fromString(b));
+		
 		// HELPER: ensure all protected entities are still present in world
 		Set<UUID> uuidSearch = Sets.newHashSet(protectedEntities);
 		for (Entity e : getWorld().getEntities()) uuidSearch.remove(e.getUniqueId());
@@ -328,6 +335,11 @@ public class AutoRefMatch
 		List<String> peList = Lists.newArrayList();
 		for ( UUID uid : protectedEntities ) peList.add(uid.toString());
 		worldConfig.set("match.protected-entities", peList);
+		
+		// save the craft blacklist
+		List<String> ncList = Lists.newArrayList();
+		for ( BlockData bd : prohibitCraft ) ncList.add(bd.toString());
+		worldConfig.set("match.no-craft", ncList);
 		
 		// save the start region
 		if (startRegion != null)
@@ -485,6 +497,19 @@ public class AutoRefMatch
 					FileUtils.deleteDirectory(world.getWorldFolder());
 			}
 		}
+	}
+	
+	public boolean canCraft(BlockData bd)
+	{
+		for (BlockData nc : prohibitCraft)
+			if (nc.equals(bd)) return false;
+		return true;
+	}
+
+	public void addIllegalCraft(BlockData bd)
+	{
+		this.prohibitCraft.add(bd);
+		this.broadcast("Crafting " + bd.getName() + " is now prohibited");
 	}
 
 	public AutoRefTeam getArbitraryTeam()

@@ -42,8 +42,8 @@ public class BlockData
 		if (o == null || !(o instanceof BlockData)) return false;
 		
 		// otherwise, check that the data is all equivalent
-		BlockData ob = (BlockData) o; 
-		return ob.getMaterial().equals(getMaterial()) && ob.getData() == getData();
+		BlockData ob = (BlockData) o;
+		return ob.getMaterial().equals(getMaterial()) && this.dataMatches(ob);
 	}
 
 	// does this block data match the given block?
@@ -53,6 +53,9 @@ public class BlockData
 		return (b != null && b.getType().equals(getMaterial())
 			&& (getData() == -1 || getData() == b.getData()));
 	}
+
+	private boolean dataMatches(BlockData ob)
+	{ return ob.getData() == getData() || ob.getData() == -1 || getData() == -1; }
 
 	@Override public String toString()
 	{
@@ -99,7 +102,10 @@ public class BlockData
 	
 	// generate block data object from an ItemStack
 	public static BlockData fromItemStack(ItemStack item)
-	{ return new BlockData(item.getType(), item.getData().getData()); }
+	{
+		byte b = item.getData().getData();
+		return new BlockData(item.getType(), b);
+	}
 	
 	// get primary BlockData type from Inventory
 	@SuppressWarnings("unchecked")
