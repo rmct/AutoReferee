@@ -379,6 +379,7 @@ public class AutoReferee extends JavaPlugin
 		
 		if ("autoref".equalsIgnoreCase(cmd.getName()) && player.hasPermission("autoreferee.configure"))
 		{
+			// CMD: /autoref save
 			if (args.length >= 1 && "save".equalsIgnoreCase(args[0]) && match != null)
 			{
 				match.saveWorldConfiguration(); 
@@ -386,6 +387,7 @@ public class AutoReferee extends JavaPlugin
 				return true;
 			}
 
+			// CMD: /autoref init
 			if (args.length >= 1 && "init".equalsIgnoreCase(args[0]))
 			{
 				// if there is not yet a match object for this map
@@ -403,6 +405,7 @@ public class AutoReferee extends JavaPlugin
 				return true;
 			}
 
+			// CMD: /autoref load <map> [<custom>]
 			if (args.length >= 2 && "load".equalsIgnoreCase(args[0])) try
 			{	
 				// get generate a map name from the args
@@ -432,6 +435,7 @@ public class AutoReferee extends JavaPlugin
 			catch (Exception e) { return false; }
 			
 			// reloads the autoreferee.yml for this match only
+			// CMD: /autoref reload
 			if (args.length == 1 && "reload".equalsIgnoreCase(args[0]) && match != null)
 			{
 				match.reload();
@@ -439,6 +443,7 @@ public class AutoReferee extends JavaPlugin
 				return true;
 			}
 
+			// CMD: /autoref crc
 			if (args.length >= 2 && args[0].toLowerCase().startsWith("crc")) try
 			{
 				// get map folder from the name provided
@@ -462,6 +467,7 @@ public class AutoReferee extends JavaPlugin
 			}
 			catch (Exception e) { return false; }
 
+			// CMD: /autoref archive [zip]
 			if (args.length >= 1 && "archive".equalsIgnoreCase(args[0]) && match != null) try
 			{
 				// LAST MINUTE CLEANUP!!!
@@ -484,6 +490,7 @@ public class AutoReferee extends JavaPlugin
 			}
 			catch (Exception e) { return false; }
 			
+			// CMD: /autoref stats [dump]
 			if (args.length >= 1 && "stats".equalsIgnoreCase(args[0]) && match != null) try
 			{
 				if (args.length >= 2 && "dump".equalsIgnoreCase(args[1]))
@@ -494,14 +501,15 @@ public class AutoReferee extends JavaPlugin
 			}
 			catch (Exception e) { return false; }
 			
-			if (args.length >= 1 && "debug".equalsIgnoreCase(args[0]) && match != null
-				&& player.hasPermission("autoreferee.configure"))
+			// CMD: /autoref debug [<bool>]
+			if (args.length >= 1 && "debug".equalsIgnoreCase(args[0]) && match != null)
 			{
 				match.setDebugMode(args.length >= 2 ? 
 					Boolean.parseBoolean(args[1]) : !match.isDebugMode());
 				return true;
 			}
 			
+			// CMD: /autoref state [<new state>]
 			if (args.length >= 1 && "state".equalsIgnoreCase(args[0]) && match != null) try
 			{
 				if (args.length >= 2)
@@ -512,6 +520,7 @@ public class AutoReferee extends JavaPlugin
 			}
 			catch (Exception e) { return false; }
 			
+			// CMD: /autoref tool <type>
 			if (args.length >= 1 && "tool".equalsIgnoreCase(args[0]))
 			{
 				// get the tool for setting win condition
