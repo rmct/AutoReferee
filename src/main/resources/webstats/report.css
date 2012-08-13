@@ -41,6 +41,10 @@ h4 {
 	text-align: center;
 }
 
+input[type=checkbox].player-toggle {
+	margin-right: 3px;
+}
+
 .player:before,
 .block:before,
 .item:before {
@@ -49,7 +53,7 @@ h4 {
 	vertical-align: text-bottom;
 	width: 16px;
 	height: 16px;
-	margin-right: 2px;
+	margin-right: 3px;
 	background-repeat: no-repeat;
 }
 

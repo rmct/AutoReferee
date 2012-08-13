@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 import org.apache.commons.collections.map.DefaultedMap;
 import org.apache.commons.io.IOUtils;
@@ -59,7 +60,7 @@ public class ReportGenerator
 		return (htm
 			// base files get replaced first
 			.replaceAll("#base-css#", css.replaceAll("\\s+", " ") + images)
-			.replaceAll("#base-js#", js)
+			.replaceAll("#base-js#", Matcher.quoteReplacement(js))
 			
 			// followed by the team, player, and block styles
 			.replaceAll("#team-css#", getTeamStyles(match).replaceAll("\\s+", " "))
@@ -229,7 +230,8 @@ public class ReportGenerator
 		{
 			Set<String> members = Sets.newHashSet();
 			for (AutoRefPlayer apl : team.getPlayers())
-				members.add("<li>" + playerHTML(apl) + "</li>\n");
+				members.add("<li><input type='checkbox' class='player-toggle' data-player='" + 
+					apl.getTag() + "'>" + playerHTML(apl) + "</li>\n");
 			
 			String memberlist = members.size() == 0 
 				? "<li>{none}</li>" : StringUtils.join(members, "");
@@ -309,13 +311,18 @@ public class ReportGenerator
 	private static String transcriptEventHTML(TranscriptEvent e)
 	{
 		String m = e.getMessage();
+		Set<String> rowClasses = Sets.newHashSet("type-" + e.getType().getEventClass());
 		
 		Set<AutoRefPlayer> players = Sets.newHashSet();
 		if (e.icon1 instanceof AutoRefPlayer) players.add((AutoRefPlayer) e.icon1);
 		if (e.icon2 instanceof AutoRefPlayer) players.add((AutoRefPlayer) e.icon2);
 		
 		for (AutoRefPlayer apl : players)
+		{
 			m = m.replaceAll(apl.getPlayerName(), playerHTML(apl));
+			rowClasses.add("type-player-event");
+			rowClasses.add("player-" + apl.getTag());
+		}
 		
 		if (e.icon2 instanceof BlockData)
 		{
@@ -330,7 +337,7 @@ public class ReportGenerator
 		
 		String coords = BlockVector3.fromLocation(e.location).toCoords();
 		String fmt = "<tr class='transcript-event %s' data-location='%s'>" + 
-			"<td class='message'>%s</td><td class='timestamp'>%s</td></tr>";
-		return String.format(fmt, e.getType().getEventClass(), coords, m, e.getTimestamp());
+			"<td class='message'>%s</td><td class='timestamp'>%s</td></tr>\n";
+		return String.format(fmt, StringUtils.join(rowClasses, " "), coords, m, e.getTimestamp());
 	}
 }
