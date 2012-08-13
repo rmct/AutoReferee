@@ -377,7 +377,7 @@ public class AutoReferee extends JavaPlugin
 		args = new StrTokenizer(StringUtils.join(args, ' '), StrMatcher.splitMatcher(), 
 			StrMatcher.quoteMatcher()).setTrimmerMatcher(StrMatcher.trimMatcher()).getTokenArray();
 		
-		if ("autoref".equalsIgnoreCase(cmd.getName()))
+		if ("autoref".equalsIgnoreCase(cmd.getName()) && player.hasPermission("autoreferee.configure"))
 		{
 			if (args.length >= 1 && "save".equalsIgnoreCase(args[0]) && match != null)
 			{
