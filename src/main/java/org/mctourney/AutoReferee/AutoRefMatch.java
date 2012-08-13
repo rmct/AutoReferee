@@ -729,6 +729,8 @@ public class AutoRefMatch
 	// helper class for starting match, synchronous task
 	static class MatchStartTask implements Runnable
 	{
+		public static final ChatColor COLOR = ChatColor.GREEN;
+		
 		public int task = -1;
 		private int secs = 3;
 		
@@ -745,14 +747,14 @@ public class AutoRefMatch
 			{
 				// setup world to go!
 				match.start();
-				match.broadcast(">>> " + ChatColor.GREEN + "GO!");
+				match.broadcast(">>> " + MatchStartTask.COLOR + "GO!");
 				
 				// cancel the task
 				AutoReferee.getInstance().getServer().getScheduler().cancelTask(task);
 			}
 			
 			// report number of seconds remaining
-			else match.broadcast(">>> " + ChatColor.GREEN + 
+			else match.broadcast(">>> " + MatchStartTask.COLOR + 
 				Integer.toString(secs--) + "...");
 		}
 	}
@@ -779,8 +781,8 @@ public class AutoRefMatch
 			"delay-seconds.ready", AutoRefMatch.READY_SECONDS);
 		
 		// announce the match starting in X seconds
-		this.broadcast("Match will begin in "
-			+ Integer.toString(readyDelay) + " seconds.");
+		this.broadcast(MatchStartTask.COLOR + "Match will begin in "
+			+ ChatColor.WHITE + Integer.toString(readyDelay) + MatchStartTask.COLOR + " seconds.");
 		
 		// cancel any previous match-start task
 		if (this.matchStarter != null && this.matchStarter.task != -1)
