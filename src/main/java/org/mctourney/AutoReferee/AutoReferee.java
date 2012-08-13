@@ -289,7 +289,7 @@ public class AutoReferee extends JavaPlugin
 		}
 	}
 
-	public World createMatchWorld(String worldName, Long checksum) throws IOException
+	public World createMatchWorld(String worldName, Long checksum, String loadedName) throws IOException
 	{
 		File existingWorld = new File(worldName);
 		if (existingWorld.exists() && existingWorld.isDirectory() &&
@@ -301,7 +301,7 @@ public class AutoReferee extends JavaPlugin
 		if (mapFolder == null) return null;
 		
 		// create the temporary directory where this map will be
-		File destWorld = new File(WORLD_PREFIX + Long.toHexString(new Date().getTime()));
+		File destWorld = new File(loadedName);
 		if (!destWorld.mkdir()) throw new IOException("Could not make temporary directory.");
 		
 		// copy the files over and fire up the world
@@ -309,12 +309,15 @@ public class AutoReferee extends JavaPlugin
 		return getServer().createWorld(WorldCreator.name(destWorld.getName()));
 	}
 	
-	public World createMatchWorld(String worldName) throws IOException
-	{ return createMatchWorld(worldName, null); }
+	public World createMatchWorld(String worldName, String loadedName) throws IOException
+	{
+		if (loadedName == null) loadedName = WORLD_PREFIX + Long.toHexString(new Date().getTime());
+		return createMatchWorld(worldName, null, loadedName);
+	}
 	
 	public AutoRefMatch createMatch(AutoRefMatch.MatchParams params) throws IOException
 	{
-		World world = createMatchWorld(params.getMap(), params.getChecksum());
+		World world = createMatchWorld(params.getMap(), params.getChecksum(), null);
 		AutoRefMatch m = new AutoRefMatch(world, true);
 		
 		Iterator<AutoRefTeam> teamiter = m.getTeams().iterator();
@@ -405,15 +408,15 @@ public class AutoReferee extends JavaPlugin
 				// get generate a map name from the args
 				String mapName = args[1];
 				World mw;
-
-				Long checksum = null;
-				if (args.length >= 3) checksum = Long.valueOf(args[2], 16);
+				
+				// may specify a custom world name as the 3rd argument
+				String customName = args.length >= 3 ? args[2] : null;
 
 				File existingWorld = new File(mapName);
 				if (existingWorld.exists() && existingWorld.isDirectory() &&
 					new File(existingWorld, AutoReferee.CFG_FILENAME).exists())
 						mw = getServer().createWorld(WorldCreator.name(mapName));
-				else mw = createMatchWorld(mapName, checksum);
+				else mw = createMatchWorld(mapName, customName);
 				
 				// if there is a map folder, print the CRC
 				if (mw == null) getLogger().info("No such map: [" + mapName + "]");
