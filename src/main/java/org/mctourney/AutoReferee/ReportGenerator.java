@@ -18,6 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.material.Colorable;
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.util.BlockData;
@@ -57,6 +58,10 @@ public class ReportGenerator
 			String.format("<span class='team team-%s'>%s</span>",
 				win.getTag(), ChatColor.stripColor(win.getName()));
 		
+		Set<String> refList = Sets.newHashSet();
+		for (Player pl : match.getReferees())
+			refList.add(String.format("<span class='referee'>%s</span>", pl.getName()));
+		
 		return (htm
 			// base files get replaced first
 			.replaceAll("#base-css#", css.replaceAll("\\s+", " ") + images)
@@ -78,6 +83,7 @@ public class ReportGenerator
 			// team information (all teams, and winning team)
 			.replaceAll("#teams#", getTeamList(match))
 			.replaceAll("#winners#", winningTeam)
+			.replaceAll("#referees#", StringUtils.join(refList, ", "))
 			
 			// and last, throw in the transcript and stats
 			.replaceAll("#transcript#", transcript.toString())
