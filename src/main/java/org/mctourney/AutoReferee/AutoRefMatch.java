@@ -353,11 +353,13 @@ public class AutoRefMatch
 		{ AutoReferee.getInstance().getLogger().info("Could not save world config: " + world.getName()); }
 	}
 
-	public void messageReferees(Player p, String type, String data)
+	public void messageReferees(String target, Player p, String type, String data)
 	{
-		byte[] msg = String.format("%s:%s:%s", p.getName(), type, data).getBytes();
-		for (Player ref : getReferees())
-			ref.sendPluginMessage(AutoReferee.getInstance(), AutoReferee.REFEREE_PLUGIN_CHANNEL, msg);
+		String msg = String.format("%s:%s:%s:%s", target, p.getName(), type, data);
+		if (this.isDebugMode()) broadcast(msg);
+		
+		for (Player ref : getReferees()) ref.sendPluginMessage(AutoReferee.getInstance(), 
+			AutoReferee.REFEREE_PLUGIN_CHANNEL, msg.getBytes());
 	}
 
 	public void broadcast(String msg)
@@ -1100,8 +1102,8 @@ public class AutoRefMatch
 		rem.removeAll(newCarrying);
 		
 		Player player = apl.getPlayer();
-		for (BlockData bd : add) messageReferees(player, "obj", "+" + bd.toString());
-		for (BlockData bd : rem) messageReferees(player, "obj", "-" + bd.toString());
+		for (BlockData bd : add) messageReferees("player", player, "obj", "+" + bd.toString());
+		for (BlockData bd : rem) messageReferees("player", player, "obj", "-" + bd.toString());
 	}
 
 	public void updateHealthArmor(AutoRefPlayer apl, int currentHealth,
@@ -1110,10 +1112,10 @@ public class AutoRefMatch
 		Player player = apl.getPlayer();
 		
 		if (currentHealth != newHealth)
-			messageReferees(player, "hp", Integer.toString(newHealth));
+			messageReferees("player", player, "hp", Integer.toString(newHealth));
 		
 		if (currentArmor != newArmor)
-			messageReferees(player, "armor", Integer.toString(newArmor));
+			messageReferees("player", player, "armor", Integer.toString(newArmor));
 	}
 	
 	public static class TranscriptEvent
