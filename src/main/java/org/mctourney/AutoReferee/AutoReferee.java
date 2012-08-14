@@ -306,7 +306,10 @@ public class AutoReferee extends JavaPlugin
 		
 		// copy the files over and fire up the world
 		FileUtils.copyDirectory(mapFolder, destWorld);
-		return getServer().createWorld(WorldCreator.name(destWorld.getName()));
+		World w = getServer().createWorld(WorldCreator.name(destWorld.getName()));
+		
+		// add a match object now marked as temporary, return the world
+		this.addMatch(new AutoRefMatch(w, true)); return w;
 	}
 	
 	public World createMatchWorld(String worldName, String loadedName) throws IOException
