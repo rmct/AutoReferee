@@ -21,8 +21,7 @@ public class WorldListener implements Listener
 	@EventHandler
 	public void worldLoad(WorldLoadEvent event)
 	{
-		boolean tmp = event.getWorld().getName().startsWith(AutoReferee.WORLD_PREFIX);
-		AutoRefMatch.setupWorld(event.getWorld(), tmp);
+		AutoRefMatch.setupWorld(event.getWorld(), false);
 	}
 	
 	@EventHandler

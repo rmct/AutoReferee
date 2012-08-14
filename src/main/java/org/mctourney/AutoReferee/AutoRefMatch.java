@@ -492,7 +492,7 @@ public class AutoRefMatch
 		if (world.getPlayers().size() == 0)
 		{
 			// if we are running in auto-mode and this is OUR world
-			if (AutoReferee.getInstance().isAutoMode() && this.isTemporaryWorld())
+			if (AutoReferee.getInstance().isAutoMode() || this.isTemporaryWorld())
 			{
 				AutoReferee.getInstance().getServer().unloadWorld(world, false);
 				if (!AutoReferee.getInstance().getConfig().getBoolean("save-worlds", false))
