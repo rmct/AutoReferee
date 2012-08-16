@@ -4,6 +4,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.plugin.Plugin;
 import org.mctourney.AutoReferee.AutoRefMatch;
@@ -34,6 +35,14 @@ public class WorldListener implements Listener
 			match.sendMatchInfo(event.getPlayer());
 			match.setupSpectators(event.getPlayer());
 		}
+	}
+	
+	@EventHandler
+	public void playerQuit(PlayerQuitEvent event)
+	{
+		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
+		if (match != null) 
+			event.setQuitMessage(match.colorMessage(event.getQuitMessage()));
 	}
 	
 	@EventHandler
