@@ -34,6 +34,9 @@ public class WorldListener implements Listener
 			event.setJoinMessage(match.colorMessage(event.getJoinMessage()));
 			match.sendMatchInfo(event.getPlayer());
 			match.setupSpectators(event.getPlayer());
+
+			if (match.getReferees().contains(event.getPlayer()))
+				match.updateReferee(event.getPlayer());
 		}
 	}
 	
