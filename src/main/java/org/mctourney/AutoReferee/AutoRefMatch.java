@@ -180,6 +180,22 @@ public class AutoRefMatch
 	public void setStartTicks(long startTicks)
 	{ this.startTicks = startTicks; }
 
+	public long getMatchTime()
+	{
+		if (getCurrentState() != eMatchStatus.PLAYING) return 0L;
+		return (getWorld().getFullTime() - getStartTicks()) / 20L;
+	}
+
+	public String getTimestamp()
+	{ return getTimestamp(":"); }
+
+	public String getTimestamp(String sep)
+	{
+		long timestamp = this.getMatchTime();
+		return String.format("%02d%s%02d%s%02d", timestamp/3600L,
+			sep, (timestamp/60L)%60L, sep, timestamp%60L);
+	}
+
 	// task that starts the match
 	public AutoRefMatch.MatchStartTask matchStarter = null;
 	
@@ -1193,7 +1209,7 @@ public class AutoRefMatch
 			this.icon1 = icon1;
 			this.icon2 = icon2;
 			
-			this.timestamp = (match.getWorld().getFullTime() - match.getStartTicks()) / 20;
+			this.timestamp = match.getMatchTime();
 		}
 
 		public String getTimestamp()
