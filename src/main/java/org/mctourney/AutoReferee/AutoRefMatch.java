@@ -1070,10 +1070,10 @@ public class AutoRefMatch
 		{
 			URL url = new URL("http://pastehtml.com/upload/create?input_type=html&result=address");
 			URLConnection conn = url.openConnection();
-		    conn.setDoOutput(true);
-		    
-		    wr = new OutputStreamWriter(conn.getOutputStream());
-		    wr.write("txt=" + URLEncoder.encode(report, "UTF-8")); wr.flush();
+			conn.setDoOutput(true);
+		
+			wr = new OutputStreamWriter(conn.getOutputStream());
+			wr.write("txt=" + URLEncoder.encode(report, "UTF-8")); wr.flush();
 			StringWriter writer = new StringWriter();
 			
 			IOUtils.copy(rd = conn.getInputStream(), writer);
