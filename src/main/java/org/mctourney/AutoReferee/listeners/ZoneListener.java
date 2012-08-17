@@ -46,6 +46,7 @@ import org.mctourney.AutoReferee.source.SourceInventory;
 import org.mctourney.AutoReferee.source.SourceInventoryBlock;
 import org.mctourney.AutoReferee.source.SourceInventoryEntity;
 import org.mctourney.AutoReferee.util.BlockVector3;
+import org.mctourney.AutoReferee.util.BlockData;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -314,9 +315,9 @@ public class ZoneListener implements Listener
 					for (AutoRefTeam team : match.getTeams())
 						if (team.checkPosition(block.getLocation()))
 					{
-						Set<BlockData> prevObj = getObjectives();
+						Set<BlockData> prevObj = team.getObjectives();
 						removed |= (r = team.targetChests.values().remove(src));
-						Set<BlockData> newObj = getObjectives();
+						Set<BlockData> newObj = team.getObjectives();
 
 						prevObj.removeAll(newObj);
 						for (BlockData bd : prevObj) match.messageReferees(
@@ -412,9 +413,9 @@ public class ZoneListener implements Listener
 				for (AutoRefTeam team : match.getTeams())
 					if (team.checkPosition(event.getRightClicked().getLocation()))
 				{
-					Set<BlockData> prevObj = getObjectives();
+					Set<BlockData> prevObj = team.getObjectives();
 					removed |= (r = team.targetChests.values().remove(src));
-					Set<BlockData> newObj = getObjectives();
+					Set<BlockData> newObj = team.getObjectives();
 
 					prevObj.removeAll(newObj);
 					for (BlockData bd : prevObj) match.messageReferees(
