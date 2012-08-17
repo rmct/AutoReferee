@@ -278,7 +278,6 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		
 		// null team not allowed, and quit if they are already on this team
 		if (players.contains(apl)) return;
-		players.add(apl);
 		
 		// prepare the player
 		if (!match.isDebugMode())
@@ -290,6 +289,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		
 		// if the match is in progress, no one may join
 		if (match.getCurrentState().ordinal() >= eMatchStatus.PLAYING.ordinal()) return;
+		
+		players.add(apl);
+		match.messageReferees("team", this.getName(), "player", "+" + apl.getPlayerName());
 	
 		String colorName = getPlayerName(pl);
 		match.broadcast(colorName + " has joined " + getName());
@@ -313,6 +315,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		if (pl.isOnline() && (pl instanceof Player))
 			((Player) pl).setPlayerListName(pl.getName());
 
+		match.messageReferees("team", this.getName(), "player", "-" + apl.getPlayerName());
 		match.checkTeamsReady();
 	}
 	
