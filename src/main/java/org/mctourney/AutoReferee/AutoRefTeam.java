@@ -373,7 +373,14 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		// actually quite possible...
 		if (src == null) return;
 		
+		Set<BlockData> prevObj = getObjectives();
 		targetChests.put(src.blockdata, src);
+		Set<BlockData> newObj = getObjectives();
+		
+		newObj.removeAll(prevObj);
+		for (BlockData bd : newObj) match.messageReferees(
+			"team", this.getRawName(), "obj", "+" + bd.toString());
+		
 		match.broadcast(String.format("%s is a source for %s", 
 			src.getName(), src.blockdata.getName()));
 	}
@@ -392,11 +399,26 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	{
 		// if the block is null, forget it
 		if (block == null || bd == null) return;
+		
+		Set<BlockData> prevObj = getObjectives();
 		winConditions.put(block.getLocation(), bd);
+		Set<BlockData> newObj = getObjectives();
+		
+		newObj.removeAll(prevObj);
+		for (BlockData bd : newObj) match.messageReferees(
+			"team", this.getRawName(), "obj", "+" + bd.toString());
 		
 		// broadcast the update
 		match.broadcast(bd.getName() + " is now a win condition for " + getName() + 
 			" @ " + BlockVector3.fromLocation(block.getLocation()).toCoords());
+	}
+
+	public Set<BlockData> getObjectives()
+	{
+		Set<BlockData> objectives = Sets.newHashSet();
+		objectives.addAll(winConditions.values());
+		objectives.addAll(targetChests.keySet());
+		return objectives;
 	}
 
 	public void updateCarrying(AutoRefPlayer apl, Set<BlockData> carrying, Set<BlockData> newCarrying)

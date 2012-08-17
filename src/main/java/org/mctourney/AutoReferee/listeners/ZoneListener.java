@@ -314,7 +314,14 @@ public class ZoneListener implements Listener
 					for (AutoRefTeam team : match.getTeams())
 						if (team.checkPosition(block.getLocation()))
 					{
+						Set<BlockData> prevObj = getObjectives();
 						removed |= (r = team.targetChests.values().remove(src));
+						Set<BlockData> newObj = getObjectives();
+
+						prevObj.removeAll(newObj);
+						for (BlockData bd : prevObj) match.messageReferees(
+							"team", team.getRawName(), "obj", "-" + bd.toString());
+
 						if (r) match.broadcast(String.format("%s is no longer a source for %s for %s", 
 							src.getName(), src.blockdata.getName(), team.getName()));
 						else cfgTeams.add(team);
@@ -405,7 +412,14 @@ public class ZoneListener implements Listener
 				for (AutoRefTeam team : match.getTeams())
 					if (team.checkPosition(event.getRightClicked().getLocation()))
 				{
+					Set<BlockData> prevObj = getObjectives();
 					removed |= (r = team.targetChests.values().remove(src));
+					Set<BlockData> newObj = getObjectives();
+
+					prevObj.removeAll(newObj);
+					for (BlockData bd : prevObj) match.messageReferees(
+						"team", team.getRawName(), "obj", "-" + bd.toString());
+					
 					if (r) match.broadcast(String.format("%s is no longer a source for %s for %s", 
 						src.getName(), src.blockdata.getName(), team.getName()));
 					else cfgTeams.add(team);
