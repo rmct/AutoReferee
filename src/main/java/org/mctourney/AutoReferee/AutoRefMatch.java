@@ -391,6 +391,10 @@ public class AutoRefMatch
 		{
 			messageReferee(ref, "team", team.getRawName(), "init");
 			messageReferee(ref, "team", team.getRawName(), "color", team.getColor().toString());
+
+			for (BlockData bd : team.getObjectives())
+				messageReferee(ref, "team", team.getRawName(), "obj", "+" + bd.toString());
+
 			for (AutoRefPlayer apl : team.getPlayers())
 			{
 				messageReferee(ref, "team", team.getRawName(), "player", "+" + apl.getPlayerName());
