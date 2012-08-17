@@ -925,7 +925,6 @@ public class AutoRefMatch
 	{
 		// announce the victory and set the match to completed
 		this.broadcast(t.getName() + " Wins!");
-		setCurrentState(eMatchStatus.COMPLETED);
 		
 		// remove all mobs, animals, and items
 		this.clearEntities();
@@ -941,6 +940,7 @@ public class AutoRefMatch
 		
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_END,
 			"Match ended. " + ChatColor.stripColor(t.getName()) + " wins!", null, null, null));
+		setCurrentState(eMatchStatus.COMPLETED);
 		
 		setWinningTeam(t);
 		logPlayerStats(null);
