@@ -369,13 +369,43 @@ public class AutoRefMatch
 		{ AutoReferee.getInstance().getLogger().info("Could not save world config: " + world.getName()); }
 	}
 
-	public void messageReferees(String target, Player p, String type, String data)
+	public void messageReferees(String ...parts)
 	{
-		String msg = String.format("%s:%s:%s:%s", target, p.getName(), type, data);
-		if (this.isDebugMode()) broadcast(msg);
+		if (this.isDebugMode()) broadcast(ChatColor.DARK_GRAY + StringUtils.join(parts, ":"));
+		for (Player ref : getReferees()) messageReferee(ref, parts);
+	}	
+	
+	public void messageReferee(Player ref, String ...parts)
+	{
+		ref.sendPluginMessage(AutoReferee.getInstance(), AutoReferee.REFEREE_PLUGIN_CHANNEL, 
+			StringUtils.join(parts, ":").getBytes());
+	}
+
+	public void updateReferee(Player ref)
+	{
+		messageReferee(ref, "match", getWorld().getName(), "map", getMapName());
+		messageReferee(ref, "match", getWorld().getName(), "time", getTimestamp(","));
 		
-		for (Player ref : getReferees()) ref.sendPluginMessage(AutoReferee.getInstance(), 
-			AutoReferee.REFEREE_PLUGIN_CHANNEL, msg.getBytes());
+		for (AutoRefTeam team : getTeams())
+		{
+			messageReferee(ref, "team", team.getRawName(), "init");
+			messageReferee(ref, "team", team.getRawName(), "color", team.getColor().toString());
+			for (AutoRefPlayer apl : team.getPlayers())
+			{
+				messageReferee(ref, "team", team.getRawName(), "player", "+" + apl.getPlayerName());
+				updateReferee(ref, apl);
+			}
+		}
+	}
+
+	public void updateReferee(Player ref, AutoRefPlayer apl)
+	{
+		messageReferee(ref, "player", apl.getPlayerName(), "kills", new Integer(apl.totalKills).toString());
+		messageReferee(ref, "player", apl.getPlayerName(), "deaths", new Integer(apl.totalDeaths).toString());
+		messageReferee(ref, "player", apl.getPlayerName(), "streak", new Integer(apl.totalStreak).toString());
+
+		for (AutoRefPlayer en : getPlayers()) if (apl.isDominating(en))
+			messageReferee(ref, "player", apl.getPlayerName(), "dominate", en.getPlayerName());
 	}
 
 	public void broadcast(String msg)
@@ -1118,8 +1148,8 @@ public class AutoRefMatch
 		rem.removeAll(newCarrying);
 		
 		Player player = apl.getPlayer();
-		for (BlockData bd : add) messageReferees("player", player, "obj", "+" + bd.toString());
-		for (BlockData bd : rem) messageReferees("player", player, "obj", "-" + bd.toString());
+		for (BlockData bd : add) messageReferees("player", player.getName(), "obj", "+" + bd.toString());
+		for (BlockData bd : rem) messageReferees("player", player.getName(), "obj", "-" + bd.toString());
 	}
 
 	public void updateHealthArmor(AutoRefPlayer apl, int currentHealth,
@@ -1127,11 +1157,11 @@ public class AutoRefMatch
 	{
 		Player player = apl.getPlayer();
 		
-		if (currentHealth != newHealth)
-			messageReferees("player", player, "hp", Integer.toString(newHealth));
+		if (currentHealth != newHealth) messageReferees("player", player.getName(), 
+			"hp", Integer.toString(newHealth));
 		
-		if (currentArmor != newArmor)
-			messageReferees("player", player, "armor", Integer.toString(newArmor));
+		if (currentArmor != newArmor) messageReferees("player", player.getName(), 
+			"armor", Integer.toString(newArmor));
 	}
 	
 	public static class TranscriptEvent

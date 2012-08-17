@@ -295,10 +295,11 @@ public class AutoRefPlayer
 		// get the last damage cause, and mark that as the cause of one death
 		AutoRefPlayer.DamageCause dc = AutoRefPlayer.DamageCause.fromDamageEvent(e.getEntity().getLastDamageCause());
 		deaths.put(dc, 1 + deaths.get(dc)); ++totalDeaths;
-		
+	
 		AutoRefMatch match = getTeam().getMatch();
 		Location loc = e.getEntity().getLocation();
 		
+		match.messageReferees("player", getPlayerName(), "deaths", new Integer(totalDeaths).toString());
 		match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DEATH,
 			e.getDeathMessage(), loc, this, dc.p));
 		
@@ -325,14 +326,23 @@ public class AutoRefPlayer
 		// one more kill for kill streak
 		++totalStreak;
 
+		match.messageReferees("player", getPlayerName(), "kills", new Integer(totalKills).toString());
+		match.messageReferees("player", getPlayerName(), "streak", new Integer(totalStreak).toString());
+		
 		if (playerStreak.get(apl) + 1 == MIN_DOMINATE)
+		{
+			match.messageReferees("player", getPlayerName(), "dominate", apl.getPlayerName());
 			match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DOMINATE, 
 				String.format("%s is dominating %s", this.getPlayerName(), apl.getPlayerName()), loc, this, apl));
+		}
 
 		if (apl.playerStreak.get(this) >= MIN_DOMINATE)
+		{
+			match.messageReferees("player", getPlayerName(), "revenge", apl.getPlayerName());
 			match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_REVENGE, 
 				String.format("%s got revenge on %s", this.getPlayerName(), apl.getPlayerName()), loc, this, apl));
-		
+		}		
+
 		// reset player streaks
 		playerStreak.put(apl, playerStreak.get(apl) + 1);
 		apl.playerStreak.put(this, 0);
@@ -340,6 +350,9 @@ public class AutoRefPlayer
 
 	public boolean isReady()
 	{ return getPlayer().getWorld() == getTeam().getMatch().getWorld(); }
+
+	public boolean isDominating(AutoRefPlayer apl)
+	{ return playerStreak.get(apl) >= MIN_DOMINATE; }
 
 	public int getScore()
 	{ return totalKills - totalDeaths; }
