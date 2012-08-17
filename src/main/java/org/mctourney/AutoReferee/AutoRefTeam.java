@@ -70,10 +70,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	private String customName = null;
 
 	// determine the name provided back from this team
-	private String getRawName()
+	public String getRawName()
 	{
-		if (customName != null)
-			return customName;
+		if (customName != null) return customName;
 		return name;
 	}
 

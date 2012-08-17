@@ -185,8 +185,8 @@ public class AutoRefPlayer
 	{ return carrying; }
 	
 	// streak information - kill streak, domination, revenge
-	protected int totalStreak = 0;
-	protected Map<AutoRefPlayer, Integer> playerStreak;
+	public int totalStreak = 0;
+	private Map<AutoRefPlayer, Integer> playerStreak;
 
 	// constructor for simply setting up the variables
 	@SuppressWarnings("unchecked")
