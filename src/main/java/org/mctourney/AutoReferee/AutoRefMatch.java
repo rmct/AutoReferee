@@ -383,6 +383,7 @@ public class AutoRefMatch
 
 	public void updateReferee(Player ref)
 	{
+		messageReferee(ref, "match", getWorld().getName(), "init");
 		messageReferee(ref, "match", getWorld().getName(), "map", getMapName());
 		messageReferee(ref, "match", getWorld().getName(), "time", getTimestamp(","));
 		
