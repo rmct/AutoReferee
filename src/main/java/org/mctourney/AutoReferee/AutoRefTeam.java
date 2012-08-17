@@ -405,8 +405,8 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		Set<BlockData> newObj = getObjectives();
 		
 		newObj.removeAll(prevObj);
-		for (BlockData bd : newObj) match.messageReferees(
-			"team", this.getRawName(), "obj", "+" + bd.toString());
+		for (BlockData nbd : newObj) match.messageReferees(
+			"team", this.getRawName(), "obj", "+" + nbd.toString());
 		
 		// broadcast the update
 		match.broadcast(bd.getName() + " is now a win condition for " + getName() + 
