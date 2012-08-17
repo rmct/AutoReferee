@@ -587,6 +587,16 @@ public class AutoReferee extends JavaPlugin
 				if (item != null) match.addIllegalCraft(BlockData.fromItemStack(item));
 				return true;
 			}
+
+			// CMD: /autoref send <msg> [<recipient>]
+			if (args.length >= 2 && "send".equalsIgnoreCase(args[0]) && match.isDebugMode())
+			{
+				Set<Player> targets = match.getReferees();
+				if (args.length >= 3) targets = Sets.newHashSet(getServer().getPlayer(args[2]));
+
+				for (Player ref : targets) if (ref != null) ref.sendPluginMessage(this, 
+					AutoReferee.REFEREE_PLUGIN_CHANNEL, args[1].getBytes());
+			}
 		}
 
 		if ("zones".equalsIgnoreCase(cmd.getName()) && match != null)
