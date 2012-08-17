@@ -291,7 +291,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		if (match.getCurrentState().ordinal() >= eMatchStatus.PLAYING.ordinal()) return;
 		
 		players.add(apl);
-		match.messageReferees("team", this.getName(), "player", "+" + apl.getPlayerName());
+		match.messageReferees("team", getRawName(), "player", "+" + apl.getPlayerName());
 	
 		String colorName = getPlayerName(pl);
 		match.broadcast(colorName + " has joined " + getName());
@@ -315,7 +315,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		if (pl.isOnline() && (pl instanceof Player))
 			((Player) pl).setPlayerListName(pl.getName());
 
-		match.messageReferees("team", this.getName(), "player", "-" + apl.getPlayerName());
+		match.messageReferees("team", getRawName(), "player", "-" + apl.getPlayerName());
 		match.checkTeamsReady();
 	}
 	
