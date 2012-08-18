@@ -40,7 +40,7 @@ public class SourceInventory
 			BlockVector3.fromLocation(this.getLocation()).toCoords()) + ChatColor.RESET;
 	}
 	
-	public void hasSeen(AutoRefPlayer apl)
+	public void seenBy(AutoRefPlayer apl)
 	{
 		// if this team has seen this box before, nevermind
 		long ctime = this.getLocation().getWorld().getFullTime();

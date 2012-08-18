@@ -134,7 +134,7 @@ public class ObjectiveTracker implements Listener
 			if (match != null && apl != null && block != null)
 			{
 				for (SourceInventory sinv : apl.getTeam().targetChests.values())
-					if (sinv.matchesBlock(block)) sinv.hasSeen(apl);
+					if (sinv.matchesBlock(block)) sinv.seenBy(apl);
 				match.checkWinConditions();
 			}
 		}
@@ -152,7 +152,7 @@ public class ObjectiveTracker implements Listener
 			Location loc = block.getLocation();
 			for (AutoRefTeam team : match.getTeams())
 				for (SourceInventory sinv : team.targetChests.values())
-					if (sinv.matchesBlock(block)) sinv.hasSeen(match.getNearestPlayer(loc));
+					if (sinv.matchesBlock(block)) sinv.seenBy(match.getNearestPlayer(loc));
 		}
 	}
 	
@@ -169,7 +169,7 @@ public class ObjectiveTracker implements Listener
 		{
 			for (AutoRefTeam team : match.getTeams())
 				for (SourceInventory sinv : team.targetChests.values())
-					if (sinv.matchesEntity(entity)) sinv.hasSeen(apl);
+					if (sinv.matchesEntity(entity)) sinv.seenBy(apl);
 			match.checkWinConditions();
 		}
 
