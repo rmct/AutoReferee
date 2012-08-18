@@ -19,6 +19,7 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMatch;
@@ -169,14 +170,23 @@ public class PlayerVersusPlayerListener implements Listener
 			event.setFoodLevel(20);
 	}
 	
-	@EventHandler(priority=EventPriority.HIGHEST)
+	@EventHandler(priority=EventPriority.MONITOR)
 	public void explosionPrime(ExplosionPrimeEvent event)
 	{
-		// TODO: Waiting on BUKKIT-770
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
 		if (match == null) return;
+
+		// TODO: Waiting on BUKKIT-770
+		if (event.getEntityType() == EntityType.PRIMED_TNT)
+		{
+			AutoRefPlayer apl = match.getNearestPlayer(event.getEntity().getLocation());
+			if (apl == null) return;
+		}
+	}
+	
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void entityExplode(EntityExplodeEvent event)
+	{
 		
-		AutoRefPlayer apl = match.getNearestPlayer(event.getEntity().getLocation());
-		if (apl == null) return;
 	}
 }
