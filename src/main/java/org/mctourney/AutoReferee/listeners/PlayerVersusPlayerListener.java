@@ -156,7 +156,7 @@ public class PlayerVersusPlayerListener implements Listener
 		
 		Player player = (Player) event.getEntity();
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
-		if (match == null) return;
+		if (match == null || match.getCurrentState() != eMatchStatus.PLAYING) return;
 		
 		AutoRefPlayer apl = match.getPlayer(player);
 		if (apl != null) ++apl.shotsFired;
