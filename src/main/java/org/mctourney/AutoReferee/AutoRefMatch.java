@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -384,8 +385,12 @@ public class AutoRefMatch
 	
 	public void messageReferee(Player ref, String ...parts)
 	{
-		ref.sendPluginMessage(AutoReferee.getInstance(), AutoReferee.REFEREE_PLUGIN_CHANNEL, 
-			StringUtils.join(parts, ":").getBytes());
+		try
+		{
+			ref.sendPluginMessage(AutoReferee.getInstance(), AutoReferee.REFEREE_PLUGIN_CHANNEL, 
+				StringUtils.join(parts, ":").getBytes("UTF-8"));
+		}
+		catch (UnsupportedEncodingException e) {  }
 	}
 
 	public void updateReferee(Player ref)
