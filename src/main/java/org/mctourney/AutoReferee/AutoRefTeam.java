@@ -182,7 +182,11 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			}
 		}
 
+		// setup both objective-based data-structures together
+		// -- avoids an NPE with getObjectives()
 		newTeam.winConditions = Maps.newHashMap();
+		newTeam.targetChests = Maps.newHashMap();
+		
 		if (conf.containsKey("win-condition"))
 		{
 			List<String> slist = (List<String>) conf.get("win-condition");
@@ -196,7 +200,6 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			}
 		}
 		
-		newTeam.targetChests = Maps.newHashMap();
 		if (conf.containsKey("target-container"))
 		{
 			List<String> slist = (List<String>) conf.get("target-container");

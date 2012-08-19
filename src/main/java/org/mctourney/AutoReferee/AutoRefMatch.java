@@ -1142,7 +1142,7 @@ public class AutoRefMatch
 
 	// is location in start region?
 	public boolean inStartRegion(Location loc)
-	{ return startRegion.distanceToRegion(loc) < ZoneListener.SNEAK_DISTANCE; }
+	{ return startRegion != null && startRegion.distanceToRegion(loc) < ZoneListener.SNEAK_DISTANCE; }
 
 	public void updateCarrying(AutoRefPlayer apl, Set<BlockData> carrying, Set<BlockData> newCarrying)
 	{
