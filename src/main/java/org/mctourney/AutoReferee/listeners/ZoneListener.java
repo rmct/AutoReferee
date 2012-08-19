@@ -183,7 +183,7 @@ public class ZoneListener implements Listener
 		if (match == null || match.getCurrentState() == eMatchStatus.NONE) return true;
 		
 		// if the player is a referee, nothing is off-limits
-		if (match.getReferees().contains(player)) return true;
+		if (match.isReferee(player)) return true;
 		
 		// if the match isn't currently in progress, a player should
 		// not be allowed to place or destroy blocks anywhere

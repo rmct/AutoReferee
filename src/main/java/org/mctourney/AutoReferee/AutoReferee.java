@@ -759,7 +759,7 @@ public class AutoReferee extends JavaPlugin
 		if ("viewinventory".equalsIgnoreCase(cmd.getName()) && args.length == 1 
 			&& match != null && player != null)
 		{
-			if (!match.getReferees().contains(player))
+			if (!match.isReferee(player))
 			{ sender.sendMessage("You do not have permission."); return true; }
 			
 			AutoRefPlayer target = match.getPlayer(getServer().getPlayer(args[0]));
@@ -780,7 +780,7 @@ public class AutoReferee extends JavaPlugin
 				rstate = !rstr.startsWith("f") && !rstr.startsWith("n");
 			}
 			
-			if (match.getReferees().contains(player))
+			if (match.isReferee(player))
 				match.setRefereeReady(rstate);
 			else
 			{

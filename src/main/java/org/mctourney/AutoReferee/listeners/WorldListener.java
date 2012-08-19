@@ -35,7 +35,7 @@ public class WorldListener implements Listener
 			match.sendMatchInfo(event.getPlayer());
 			match.setupSpectators(event.getPlayer());
 
-			if (match.getReferees().contains(event.getPlayer()))
+			if (match.isReferee(event.getPlayer()))
 				match.updateReferee(event.getPlayer());
 		}
 	}

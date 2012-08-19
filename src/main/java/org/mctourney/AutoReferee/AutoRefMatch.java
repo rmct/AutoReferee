@@ -269,6 +269,13 @@ public class AutoRefMatch
 			if (apl.getPlayer() != null) refs.remove(apl.getPlayer());
 		return refs;
 	}
+
+	public boolean isReferee(Player p)
+	{
+		for (AutoRefPlayer apl : getPlayers())
+			if (apl.getPlayerName() == p.getName()) return true;
+		return p.hasPermission("autoreferee.referee");
+	}
 	
 	public static boolean isCompatible(World w)
 	{ return new File(w.getWorldFolder(), "autoreferee.yml").exists(); }
@@ -1303,11 +1310,10 @@ public class AutoRefMatch
 			" v" + getVersion() + ChatColor.ITALIC + " by " + getMapAuthors());
 		
 		AutoRefPlayer apl = getPlayer(player);
-		boolean isReferee = getReferees().contains(player);
 		String tmpflag = tmp ? "*" : "";
 		
 		if (apl != null) player.sendMessage("You are on team: " + apl.getTeam().getName());
-		else if (isReferee) player.sendMessage(ChatColor.GRAY + "You are a referee! " + tmpflag);
+		else if (isReferee(player)) player.sendMessage(ChatColor.GRAY + "You are a referee! " + tmpflag);
 		else player.sendMessage("You are not on a team! Type " + ChatColor.GRAY + "/jointeam");
 		
 		for (AutoRefTeam team : getSortedTeams())

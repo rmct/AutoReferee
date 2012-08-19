@@ -279,7 +279,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		// create an APL object for this player.
 		AutoRefPlayer apl = new AutoRefPlayer(pl, this);
 		
-		// null team not allowed, and quit if they are already on this team
+		// quit if they are already on this team
 		if (players.contains(apl)) return;
 		
 		// prepare the player
