@@ -58,6 +58,9 @@ public class SourceInventory
 		lastSeen = ctime;
 	}
 
+	public boolean hasSeen()
+	{ return lastSeen > 0; }
+
 	public Location getLocation()
 	{ throw new UnsupportedOperationException("Abstract method."); }
 	
