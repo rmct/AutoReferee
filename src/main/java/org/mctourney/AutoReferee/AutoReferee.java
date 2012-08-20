@@ -69,6 +69,7 @@ public class AutoReferee extends JavaPlugin
 	
 	// plugin channels (referee)
 	public static final String REFEREE_PLUGIN_CHANNEL = PLUGIN_CHANNEL_PREFIX + "referee";
+	private RefereeChannelListener refChannelListener = null;
 	
 	// name of the stored map configuration file
 	public static final String CFG_FILENAME = "autoreferee.yml";
@@ -193,6 +194,9 @@ public class AutoReferee extends JavaPlugin
 		// events related to tracking objectives during a match
 		pm.registerEvents(new ObjectiveTracker(this), this);
 
+		// events related to referee channel
+		pm.registerEvents(refChannelListener = new RefereeChannelListener(this), this);
+
 		// global configuration object (can't be changed, so don't save onDisable)
 		InputStream configInputStream = getResource("defaults/config.yml");
 		if (configInputStream != null) getConfig().setDefaults(
@@ -269,7 +273,7 @@ public class AutoReferee extends JavaPlugin
 
 		msgr.registerOutgoingPluginChannel(this, REFEREE_PLUGIN_CHANNEL);
 		msgr.registerIncomingPluginChannel(this, REFEREE_PLUGIN_CHANNEL, 
-			new RefereeChannelListener(this));
+			refChannelListener == null ? new RefereeChannelListener(this) : refChannelListener);
 	}
 	
 	public void playerDone(Player p)
