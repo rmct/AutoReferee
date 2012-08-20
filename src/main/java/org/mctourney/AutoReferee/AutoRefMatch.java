@@ -705,6 +705,9 @@ public class AutoRefMatch
 		
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_START,
 			"Match began.", null, null, null));
+
+		// send referees the start event
+		messageReferees("match", getWorld().getName(), "start");
 		
 		for (AutoRefPlayer apl : getPlayers())
 		{
@@ -851,6 +854,9 @@ public class AutoRefMatch
 		// announce the match starting in X seconds
 		this.broadcast(MatchStartTask.COLOR + "Match will begin in "
 			+ ChatColor.WHITE + Integer.toString(readyDelay) + MatchStartTask.COLOR + " seconds.");
+
+		// send referees countdown notification
+		messageReferees("match", getWorld().getName(), "countdown", Integer.toString(readyDelay));
 		
 		// cancel any previous match-start task
 		if (this.matchStarter != null && this.matchStarter.task != -1)
