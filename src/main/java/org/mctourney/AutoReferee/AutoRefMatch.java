@@ -398,7 +398,9 @@ public class AutoRefMatch
 	{
 		messageReferee(ref, "match", getWorld().getName(), "init");
 		messageReferee(ref, "match", getWorld().getName(), "map", getMapName());
-		messageReferee(ref, "match", getWorld().getName(), "time", getTimestamp(","));
+
+		if (getCurrentState() == eMatchStatus.PLAYING)
+			messageReferee(ref, "match", getWorld().getName(), "time", getTimestamp(","));
 		
 		for (AutoRefTeam team : getTeams())
 		{
