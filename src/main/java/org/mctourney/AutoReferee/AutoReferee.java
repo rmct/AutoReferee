@@ -216,6 +216,9 @@ public class AutoReferee extends JavaPlugin
 		String qurl = getConfig().getString("server-mode.query-server", null);
 		setAutoMode(getServer().getOnlineMode() && qurl != null && 
 			this.getConfig().getBoolean("server-mode.online", true));
+		
+		// attempt to setup the plugin channels
+		setupPluginChannels();
 
 		// wrap up, debug to follow this message
 		getLogger().info(this.getName() + " loaded successfully.");
@@ -238,8 +241,6 @@ public class AutoReferee extends JavaPlugin
 		// process initial world(s), just in case
 		for ( World w : getServer().getWorlds() )
 			AutoRefMatch.setupWorld(w, false);
-		
-		setupPluginChannels();
 	}
 
 	public boolean makeServerConnection(String qurl)
