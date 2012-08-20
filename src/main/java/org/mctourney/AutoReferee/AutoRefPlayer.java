@@ -463,6 +463,9 @@ public class AutoRefPlayer
 
 	public void showInventory(Player pl)
 	{
+		AutoRefMatch match = AutoReferee.getInstance().getMatch(pl.getWorld());
+		if (match == null || !match.isReferee(pl)) return;
+
 		Inventory v = this.getInventoryView();
 		if (v != null) pl.openInventory(v);
 	}

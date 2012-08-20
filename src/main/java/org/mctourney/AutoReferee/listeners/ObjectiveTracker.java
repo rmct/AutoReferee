@@ -173,8 +173,8 @@ public class ObjectiveTracker implements Listener
 			match.checkWinConditions();
 		}
 
-		if (event.getPlayer().hasPermission("autoreferee.referee") &&
-			(entity.getType() == EntityType.PLAYER) && match != null)
+		if (entity.getType() == EntityType.PLAYER && match != null
+			&& match.isReferee(pl))
 		{
 			AutoRefPlayer a = match.getPlayer((Player) entity);
 			a.showInventory(pl);
