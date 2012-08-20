@@ -307,7 +307,10 @@ public class AutoRefPlayer
 		if (totalStreak >= MIN_KILLSTREAK)
 			match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_STREAK, 
 				String.format("%s had a %d-kill streak!", this.getPlayerName(), totalStreak), loc, this, null));
+		
+		// reset total killstreak
 		totalStreak = 0;
+		match.messageReferees("player", getPlayerName(), "streak", Integer.toString(totalStreak));
 	}
 	
 	// register that we killed the Player who fired this event
