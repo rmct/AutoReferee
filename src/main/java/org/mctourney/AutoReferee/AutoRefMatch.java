@@ -420,9 +420,9 @@ public class AutoRefMatch
 
 	public void updateReferee(Player ref, AutoRefPlayer apl)
 	{
-		messageReferee(ref, "player", apl.getPlayerName(), "kills", new Integer(apl.totalKills).toString());
-		messageReferee(ref, "player", apl.getPlayerName(), "deaths", new Integer(apl.totalDeaths).toString());
-		messageReferee(ref, "player", apl.getPlayerName(), "streak", new Integer(apl.totalStreak).toString());
+		messageReferee(ref, "player", apl.getPlayerName(), "kills", Integer.toString(apl.totalKills));
+		messageReferee(ref, "player", apl.getPlayerName(), "deaths", Integer.toString(apl.totalDeaths));
+		messageReferee(ref, "player", apl.getPlayerName(), "streak", Integer.toString(apl.totalStreak));
 
 		for (AutoRefPlayer en : getPlayers()) if (apl.isDominating(en))
 			messageReferee(ref, "player", apl.getPlayerName(), "dominate", en.getPlayerName());

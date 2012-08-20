@@ -299,7 +299,7 @@ public class AutoRefPlayer
 		AutoRefMatch match = getTeam().getMatch();
 		Location loc = e.getEntity().getLocation();
 		
-		match.messageReferees("player", getPlayerName(), "deaths", new Integer(totalDeaths).toString());
+		match.messageReferees("player", getPlayerName(), "deaths", Integer.toString(totalDeaths));
 		match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DEATH,
 			e.getDeathMessage(), loc, this, dc.p));
 		
@@ -326,8 +326,8 @@ public class AutoRefPlayer
 		// one more kill for kill streak
 		++totalStreak;
 
-		match.messageReferees("player", getPlayerName(), "kills", new Integer(totalKills).toString());
-		match.messageReferees("player", getPlayerName(), "streak", new Integer(totalStreak).toString());
+		match.messageReferees("player", getPlayerName(), "kills", Integer.toString(totalKills));
+		match.messageReferees("player", getPlayerName(), "streak", Integer.toString(totalStreak));
 		
 		if (playerStreak.get(apl) + 1 == MIN_DOMINATE)
 		{
