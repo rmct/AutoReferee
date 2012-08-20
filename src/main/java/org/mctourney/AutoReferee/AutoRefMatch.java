@@ -388,9 +388,10 @@ public class AutoRefMatch
 		try
 		{
 			ref.sendPluginMessage(AutoReferee.getInstance(), AutoReferee.REFEREE_PLUGIN_CHANNEL, 
-				StringUtils.join(parts, ":").getBytes("UTF-8"));
+				StringUtils.join(parts, ":").getBytes(AutoReferee.PLUGIN_CHANNEL_ENC));
 		}
-		catch (UnsupportedEncodingException e) {  }
+		catch (UnsupportedEncodingException e)
+		{ AutoReferee.getInstance().getLogger().info("Unsupported encoding: " + AutoReferee.PLUGIN_CHANNEL_ENC); }
 	}
 
 	public void updateReferee(Player ref)

@@ -26,10 +26,11 @@ public class RefereeChannelListener implements PluginMessageListener, Listener
 	{
 		try
 		{
-			String message = new String(mbytes, "UTF-8");
+			String message = new String(mbytes, AutoReferee.PLUGIN_CHANNEL_ENC);
 			AutoRefMatch match = plugin.getMatch(player.getWorld());
 		}
-		catch (UnsupportedEncodingException e) {  }
+		catch (UnsupportedEncodingException e)
+		{ plugin.getLogger().info("Unsupported encoding: " + AutoReferee.PLUGIN_CHANNEL_ENC); }
 	}
 
 	@EventHandler

@@ -63,6 +63,9 @@ public class AutoReferee extends JavaPlugin
 	
 	// expected configuration version number
 	private static final int PLUGIN_CFG_VERSION = 2;
+
+	// plugin channel encoding
+	public static final String PLUGIN_CHANNEL_ENC = "UTF-8";
 	
 	// plugin channel prefix - identifies all channels as belonging to AutoReferee
 	private static final String PLUGIN_CHANNEL_PREFIX = "autoref:";
@@ -269,11 +272,11 @@ public class AutoReferee extends JavaPlugin
 
 	private void setupPluginChannels() 
 	{
-		Messenger msgr = getServer().getMessenger();
+		Messenger m = getServer().getMessenger();
 
-		msgr.registerOutgoingPluginChannel(this, REFEREE_PLUGIN_CHANNEL);
-		msgr.registerIncomingPluginChannel(this, REFEREE_PLUGIN_CHANNEL, 
-			refChannelListener == null ? new RefereeChannelListener(this) : refChannelListener);
+		// setup referee plugin channels
+		m.registerOutgoingPluginChannel(this, REFEREE_PLUGIN_CHANNEL);
+		m.registerIncomingPluginChannel(this, REFEREE_PLUGIN_CHANNEL, refChannelListener);
 	}
 	
 	public void playerDone(Player p)
