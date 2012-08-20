@@ -274,7 +274,7 @@ public class AutoRefMatch
 	public boolean isReferee(Player p)
 	{
 		for (AutoRefPlayer apl : getPlayers())
-			if (apl.getPlayerName() == p.getName()) return true;
+			if (apl.getPlayerName() == p.getName()) return false;
 		return p.hasPermission("autoreferee.referee");
 	}
 	
