@@ -966,6 +966,9 @@ public class AutoRefMatch
 			pl.getInventory().clear();
 		}
 		
+		// send referees the end event
+		messageReferees("match", getWorld().getName(), "end", t.getRawName());
+		
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_END,
 			"Match ended. " + t.getRawName() + " wins!", null, null, null));
 		setCurrentState(eMatchStatus.COMPLETED);
@@ -979,9 +982,6 @@ public class AutoRefMatch
 		
 		plugin.getServer().getScheduler().scheduleSyncDelayedTask(
 			plugin, new MatchEndTask(), termDelay * 20L);
-		
-		// send referees the end event
-		messageReferees("match", getWorld().getName(), "end", t.getRawName());
 	}
 
 	public AutoRefTeam teamNameLookup(String name)
