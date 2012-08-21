@@ -757,7 +757,7 @@ public class AutoRefMatch
 	private int getVanishLevel(Player p)
 	{
 		// if this person is a player, lowest vanish level
-		if (getPlayer(p) != null) return 0;
+		if (isPlayer(p)) return 0;
 
 		// referees have the highest vanish level (see everything)
 		if (p.hasPermission("autoreferee.referee")) return 200;
@@ -887,7 +887,7 @@ public class AutoRefMatch
 		// check if all the players are here
 		boolean ready = true;
 		for ( OfflinePlayer opl : getExpectedPlayers() )
-			ready &= opl.isOnline() && getPlayer(opl.getPlayer()) != null &&
+			ready &= opl.isOnline() && isPlayer(opl.getPlayer()) &&
 				getPlayer(opl.getPlayer()).isReady();
 		
 		// set status based on whether the players are online
@@ -1037,6 +1037,9 @@ public class AutoRefMatch
 		}
 		return null;
 	}
+	
+	public boolean isPlayer(Player pl)
+	{ return getPlayer(pl) != null; }
 	
 	public AutoRefPlayer getNearestPlayer(Location loc)
 	{
