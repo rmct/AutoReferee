@@ -779,6 +779,8 @@ public class AutoRefMatch
 
 	public void setupSpectators(Player focus)
 	{
+		focus.setGameMode(isPlayer(focus) ? GameMode.CREATIVE : GameMode.SURVIVAL);
+
 		for ( Player pl : getWorld().getPlayers() )
 		{
 			// setup vanish in both directions
