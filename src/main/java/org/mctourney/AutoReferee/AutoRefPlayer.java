@@ -18,9 +18,11 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.util.ArmorPoints;
 import org.mctourney.AutoReferee.util.BlockData;
+import org.mctourney.AutoReferee.util.BlockVector3;
 
 import org.apache.commons.collections.map.DefaultedMap;
 
@@ -298,8 +300,11 @@ public class AutoRefPlayer
 	
 		AutoRefMatch match = getTeam().getMatch();
 		Location loc = e.getEntity().getLocation();
+		if (getExitLocation() != null) loc = getExitLocation();
 		
+		match.messageReferees("player", getPlayerName(), "deathpos", BlockVector3.fromLocation(loc).toCoords());
 		match.messageReferees("player", getPlayerName(), "deaths", Integer.toString(totalDeaths));
+		
 		match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DEATH,
 			e.getDeathMessage(), loc, this, dc.p));
 		
