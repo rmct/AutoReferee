@@ -302,9 +302,9 @@ public class AutoRefMatch
 		worldConfig.options().header(AutoReferee.getInstance().getDescription().getFullName());
 		worldConfig.options().copyHeader(false);
 
+		teams = Sets.newHashSet();
 		messageReferees("match", getWorld().getName(), "init");
 
-		teams = Sets.newHashSet();
 		for (Map<?, ?> map : worldConfig.getMapList("match.teams"))
 			teams.add(AutoRefTeam.fromMap((Map<String, Object>) map, this));
 		
