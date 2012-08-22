@@ -86,7 +86,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	{ return color + getRawName() + ChatColor.RESET; }
 
 	// color to use for members of this team
-	private ChatColor color = null;
+	private ChatColor color = ChatColor.WHITE;
 
 	public ChatColor getColor()
 	{ return color; }
@@ -163,6 +163,10 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			try { newTeam.color = ChatColor.valueOf(clr); }
 			catch (IllegalArgumentException e) { }
 		}
+		
+		// initialize this team for referees
+		match.messageReferees("team", newTeam.getRawName(), "init");
+		match.messageReferees("team", newTeam.getRawName(), "color", newTeam.color.toString());
 
 		// get the max size from the map
 		if (conf.containsKey("maxsize"))

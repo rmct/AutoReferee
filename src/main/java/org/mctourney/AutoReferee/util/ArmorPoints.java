@@ -1,6 +1,7 @@
 package org.mctourney.AutoReferee.util;
 
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
@@ -55,4 +56,7 @@ public abstract class ArmorPoints
 			armorPoints += ArmorPoints.fromItemStack(item);
 		return armorPoints;
 	}
+
+	public static int fromPlayer(Player pl)
+	{ return fromPlayerInventory(pl.getInventory()); }
 }

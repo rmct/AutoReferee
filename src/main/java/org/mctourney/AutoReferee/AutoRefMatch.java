@@ -301,6 +301,8 @@ public class AutoRefMatch
 		worldConfig.options().header(AutoReferee.getInstance().getDescription().getFullName());
 		worldConfig.options().copyHeader(false);
 
+		messageReferees("match", getWorld().getName(), "init");
+
 		teams = Sets.newHashSet();
 		for (Map<?, ?> map : worldConfig.getMapList("match.teams"))
 			teams.add(AutoRefTeam.fromMap((Map<String, Object>) map, this));
@@ -423,6 +425,13 @@ public class AutoRefMatch
 		messageReferee(ref, "player", apl.getPlayerName(), "kills", Integer.toString(apl.totalKills));
 		messageReferee(ref, "player", apl.getPlayerName(), "deaths", Integer.toString(apl.totalDeaths));
 		messageReferee(ref, "player", apl.getPlayerName(), "streak", Integer.toString(apl.totalStreak));
+
+		Player pl = apl.getPlayer();
+		if (pl != null)
+		{
+			messageReferee(ref, "player", apl.getPlayerName(), "hp", Integer.toString(pl.getHealth()));
+			messageReferee(ref, "player", apl.getPlayerName(), "armor", Integer.toString(ArmorPoints.fromPlayer(pl)));
+		}
 
 		for (AutoRefPlayer en : getPlayers()) if (apl.isDominating(en))
 			messageReferee(ref, "player", apl.getPlayerName(), "dominate", en.getPlayerName());
