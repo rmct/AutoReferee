@@ -376,20 +376,34 @@ public class AutoReferee extends JavaPlugin
 		return getExpectedTeam(player) != null;
 	}
 
+	private World consoleWorld = null;
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
 	{
-		if (!(sender instanceof Player)) return false;		
-		Player player = (Player) sender;
+		World world = null;
+		Player player = null;
 		
-		World world = player.getWorld();
+		if (sender instanceof Player)
+		{
+			player = (Player) sender;
+			world = player.getWorld();
+		}
+		else world = consoleWorld;
 		AutoRefMatch match = getMatch(world);
 		
 		// reparse the args properly using the string tokenizer from org.apache.commons
 		args = new StrTokenizer(StringUtils.join(args, ' '), StrMatcher.splitMatcher(), 
 			StrMatcher.quoteMatcher()).setTrimmerMatcher(StrMatcher.trimMatcher()).getTokenArray();
 		
-		if ("autoref".equalsIgnoreCase(cmd.getName()) && player.hasPermission("autoreferee.configure"))
+		if ("autoref".equalsIgnoreCase(cmd.getName()) && sender.hasPermission("autoreferee.configure"))
 		{
+			// CMD: /autoref world <world>
+			if (args.length == 2 && "world".equalsIgnoreCase(args[0]))
+			{
+				consoleWorld = getServer().getWorld(args[1]);
+				if (consoleWorld != null) sender.sendMessage("Selected world " + consoleWorld.getName());
+				return consoleWorld != null;
+			}
+
 			// CMD: /autoref save
 			if (args.length >= 1 && "save".equalsIgnoreCase(args[0]) && match != null)
 			{
