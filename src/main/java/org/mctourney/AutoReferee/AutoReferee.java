@@ -725,6 +725,7 @@ public class AutoReferee extends JavaPlugin
 			}
 			return true;
 		}
+		
 		if ("matchinfo".equalsIgnoreCase(cmd.getName()))
 		{
 			if (match != null) match.sendMatchInfo(player);
@@ -733,6 +734,7 @@ public class AutoReferee extends JavaPlugin
 			
 			return true;
 		}
+		
 		if ("jointeam".equalsIgnoreCase(cmd.getName()) && match != null && !isAutoMode())
 		{
 			// get the target team
@@ -763,6 +765,7 @@ public class AutoReferee extends JavaPlugin
 			match.joinTeam(target, team);
 			return true;
 		}
+		
 		if ("leaveteam".equalsIgnoreCase(cmd.getName()) && match != null && !isAutoMode())
 		{
 			// get the target player to affect (no arg = command sender)
@@ -778,6 +781,7 @@ public class AutoReferee extends JavaPlugin
 			match.leaveTeam(target);
 			return true;
 		}
+		
 		if ("viewinventory".equalsIgnoreCase(cmd.getName()) && args.length == 1 
 			&& match != null && player != null)
 		{
