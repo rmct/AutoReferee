@@ -12,10 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 
 import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
