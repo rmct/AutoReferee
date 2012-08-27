@@ -17,15 +17,17 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -64,6 +66,10 @@ import com.google.common.collect.Sets;
 
 public class AutoRefMatch
 {
+	// online map list
+	private static final String MAPREPO = "http://s3.amazonaws.com/autoreferee/maps/";
+	private static final String MAPLIST = MAPREPO + "list.csv"; 
+	
 	// world this match is taking place on
 	private World world;
 	private boolean tmp;
@@ -446,6 +452,29 @@ public class AutoRefMatch
 
 	public String getVersionString()
 	{ return String.format("%s-v%s", this.getMapName().replaceAll("[^0-9a-zA-Z]+", ""), this.getVersion()); }
+	
+	public static File unzipMapFolder(File zip) throws IOException
+	{
+		ZipFile zfile = new ZipFile(zip);
+		Enumeration<? extends ZipEntry> entries = zfile.entries();
+		
+		File f, basedir = null;
+		
+		File lib = AutoRefMatch.getMapLibrary();
+		while (entries.hasMoreElements())
+		{
+			ZipEntry entry = entries.nextElement();			
+			if (!entry.isDirectory()) FileUtils.copyInputStreamToFile(
+				zfile.getInputStream(entry), f = new File(lib, entry.getName()));
+			else (f = new File(lib, entry.getName())).mkdirs();
+			
+			if (entry.isDirectory() && (basedir == null || 
+				basedir.getName().startsWith(f.getName()))) basedir = f;
+		}
+		
+		zfile.close();
+		return basedir;
+	}
 
 	public static File getMapFolder(String worldName, Long checksum) throws IOException
 	{
@@ -460,6 +489,10 @@ public class AutoRefMatch
 		// find the map being requested
 		for (File f : mapLibrary.listFiles())
 		{
+			// if this is a zipfile containing the right world, unzip it
+			if (f.getName().toLowerCase().startsWith(worldName) && 
+				f.getName().toLowerCase().endsWith(".zip")) return unzipMapFolder(f);
+			
 			// skip non-directories
 			if (!f.isDirectory()) continue;
 			
@@ -477,6 +510,54 @@ public class AutoRefMatch
 			
 			// this is the map we want
 			return f;
+		}
+		
+		// look for map online
+		InputStream rd = null;
+		StringWriter mlist = new StringWriter();
+		
+		try
+		{
+			URL url = new URL(MAPLIST);
+			URLConnection conn = url.openConnection();
+			conn.setDoOutput(true);
+			
+			// read the contents of the URL
+			IOUtils.copy(rd = conn.getInputStream(), mlist);
+		}
+		
+		// just drop out
+		catch (Exception e) { return null; }
+		
+		finally
+		{
+			try
+			{
+				// close the stream pointer
+				if (rd != null) rd.close();
+			}
+			// meh. don't bother, if something goes wrong here.
+			catch (Exception e) {  }
+		}
+		
+		for (String line : mlist.toString().split("[\\r\\n]+"))
+		{
+			// go through the file until we find the right map
+			String[] parts = line.split(";", 4);
+			if (!worldName.equalsIgnoreCase(normalizeMapName(parts[0]))) continue;
+			
+			// download the file
+			URL url = new URL(MAPREPO + parts[2]);
+			File zip = new File(AutoRefMatch.getMapLibrary(), parts[2]);
+			FileUtils.copyURLToFile(url, zip);
+			
+			// if the md5s match, return the unzipped folder
+			String md5sum = DigestUtils.md5Hex(new FileInputStream(zip));
+			if (md5sum.equalsIgnoreCase(parts[3])) return unzipMapFolder(zip);
+			
+			// if the md5sum did not match, quit here
+			zip.delete(); throw new IOException(
+				"MD5 Mismatch: " + md5sum + " != " + parts[3]);
 		}
 		
 		// no map matches

@@ -435,24 +435,22 @@ public class AutoReferee extends JavaPlugin
 			{	
 				// get generate a map name from the args
 				String mapName = args[1];
-				World mw;
 				
 				// may specify a custom world name as the 3rd argument
 				String customName = args.length >= 3 ? args[2] : null;
-
-				File existingWorld = new File(mapName);
-				if (existingWorld.exists() && existingWorld.isDirectory() &&
-					new File(existingWorld, AutoReferee.CFG_FILENAME).exists())
-						mw = getServer().createWorld(WorldCreator.name(mapName));
-				else mw = createMatchWorld(mapName, customName);
 				
-				// if there is a map folder, print the CRC
-				if (mw == null) getLogger().info("No such map: [" + mapName + "]");
+				// get world setup for match
+				World mw = createMatchWorld(mapName, customName);
+				
+				// if there is no map, just let the sender know
+				if (mw == null) sender.sendMessage(
+					"No such map: " + ChatColor.GREEN + mapName);
+				
 				else
 				{
 					getLogger().info("World created for [" + mapName + 
 						"] at the request of " + player.getName());
-					player.teleport(mw.getSpawnLocation());
+					if (player != null) player.teleport(mw.getSpawnLocation());
 				}
 				
 				return true;
