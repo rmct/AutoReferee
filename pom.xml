@@ -87,6 +87,11 @@
     	<artifactId>gson</artifactId>
     	<version>2.2.2</version>
     </dependency>
+    <dependency>
+    	<groupId>commons-codec</groupId>
+    	<artifactId>commons-codec</artifactId>
+    	<version>1.4</version>
+    </dependency>
   </dependencies>
   
   <build>
@@ -121,6 +126,19 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>org.mctourney.AutoReferee.AutoReferee</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+          
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <source>${java.target.version}</source>
@@ -146,6 +164,7 @@
                 <includes>
                   <include>org.apache.commons:commons-lang3</include>
                   <include>commons-io:commons-io</include>
+                  <include>commons-codec:commons-codec</include>
                   <include>commons-collections:commons-collections</include>
     	          <include>com.google.code.gson:gson</include>
                 </includes>
