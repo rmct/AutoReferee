@@ -17,9 +17,9 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMatch;
+import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
 import org.mctourney.AutoReferee.AutoRefTeam;
 import org.mctourney.AutoReferee.AutoReferee;
-import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 
 public class TeamListener implements Listener 
 {
@@ -53,7 +53,7 @@ public class TeamListener implements Listener
 			// if listener is on a team, and its not the same team as the
 			// speaker, remove them from the recipients list
 			AutoRefTeam oteam = match.getPlayerTeam(recipient);
-			if (match.getCurrentState() == eMatchStatus.PLAYING &&
+			if (match.getCurrentState() == MatchStatus.PLAYING &&
 				oteam != null && oteam != t) { iter.remove(); continue; }
 		}
 	}
@@ -98,7 +98,7 @@ public class TeamListener implements Listener
 		// leave the team, if necessary
 		AutoRefTeam team = plugin.getTeam(player);
 		if (team != null && match != null && 
-			match.getCurrentState() != eMatchStatus.PLAYING)
+			match.getCurrentState() != MatchStatus.PLAYING)
 				team.leave(player);
 		
 		// re-check world ready
@@ -113,7 +113,7 @@ public class TeamListener implements Listener
 		
 		// if there is a match currently in progress on this world...
 		if (match != null && plugin.isAutoMode() &&
-			match.getCurrentState() == eMatchStatus.PLAYING)
+			match.getCurrentState() == MatchStatus.PLAYING)
 		{
 			// cancel the gamemode change if the player is a participant
 			if (event.getNewGameMode() == GameMode.CREATIVE && 

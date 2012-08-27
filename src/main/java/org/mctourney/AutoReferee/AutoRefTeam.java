@@ -14,7 +14,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
+import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.source.SourceInventory;
 import org.mctourney.AutoReferee.source.SourceInventoryBlock;
@@ -286,13 +286,13 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		// prepare the player
 		if (!match.isDebugMode())
 		{
-			if (match != null && match.getCurrentState() != eMatchStatus.PLAYING)
+			if (match != null && match.getCurrentState() != MatchStatus.PLAYING)
 				pl.teleport(getSpawnLocation());
 			pl.setGameMode(GameMode.SURVIVAL);
 		}
 		
 		// if the match is in progress, no one may join
-		if (match.getCurrentState().ordinal() >= eMatchStatus.PLAYING.ordinal()) return;
+		if (match.getCurrentState().ordinal() >= MatchStatus.PLAYING.ordinal()) return;
 		
 		players.add(apl);
 		match.messageReferees("team", getRawName(), "player", "+" + apl.getPlayerName());

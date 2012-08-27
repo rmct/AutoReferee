@@ -38,6 +38,7 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 
+import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
 import org.mctourney.AutoReferee.listeners.ObjectiveTracker;
 import org.mctourney.AutoReferee.listeners.PlayerVersusPlayerListener;
 import org.mctourney.AutoReferee.listeners.RefereeChannelListener;
@@ -88,10 +89,6 @@ public class AutoReferee extends JavaPlugin
 	// query server object
 	public QueryServer qserv = null;
 
-	public enum eMatchStatus {
-		NONE, WAITING, READY, PLAYING, COMPLETED,
-	};
-	
 	private World lobby = null;
 
 	public World getLobbyWorld()
@@ -420,7 +417,7 @@ public class AutoReferee extends JavaPlugin
 				{
 					addMatch(match = new AutoRefMatch(world, false));
 					match.saveWorldConfiguration();
-					match.setCurrentState(eMatchStatus.NONE);
+					match.setCurrentState(MatchStatus.NONE);
 					
 					sender.sendMessage(ChatColor.GREEN + CFG_FILENAME + " generated.");
 				}
@@ -536,7 +533,7 @@ public class AutoReferee extends JavaPlugin
 			if (args.length >= 1 && "state".equalsIgnoreCase(args[0]) && match != null) try
 			{
 				if (args.length >= 2)
-					match.setCurrentState(eMatchStatus.valueOf(args[1].toUpperCase()));
+					match.setCurrentState(MatchStatus.valueOf(args[1].toUpperCase()));
 				getLogger().info("Match Status is now " + match.getCurrentState().name());
 				
 				return true;
@@ -795,7 +792,7 @@ public class AutoReferee extends JavaPlugin
 		// WARNING: using ordinals on enums is typically frowned upon,
 		// but we will consider the enums "partially-ordered"
 		if ("ready".equalsIgnoreCase(cmd.getName()) && match != null &&
-			match.getCurrentState().ordinal() < eMatchStatus.PLAYING.ordinal())
+			match.getCurrentState().ordinal() < MatchStatus.PLAYING.ordinal())
 		{
 			boolean rstate = true;
 			if (args.length > 0)

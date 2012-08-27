@@ -41,7 +41,7 @@ import org.mctourney.AutoReferee.AutoRefPlayer;
 import org.mctourney.AutoReferee.AutoRefTeam;
 import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.AutoRefMatch.StartMechanism;
-import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
+import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
 import org.mctourney.AutoReferee.source.SourceInventory;
 import org.mctourney.AutoReferee.source.SourceInventoryBlock;
 import org.mctourney.AutoReferee.source.SourceInventoryEntity;
@@ -131,7 +131,7 @@ public class ZoneListener implements Listener
 			!match.inStartRegion(event.getTo()))
 		{
 			// if game isn't going yet, they are leaving the start region
-			if (match.getCurrentState() == eMatchStatus.PLAYING)
+			if (match.getCurrentState() == MatchStatus.PLAYING)
 				player.getInventory().clear();
 		}
 		
@@ -180,14 +180,14 @@ public class ZoneListener implements Listener
 	{
 		// if the match is not under our control, allowed
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
-		if (match == null || match.getCurrentState() == eMatchStatus.NONE) return true;
+		if (match == null || match.getCurrentState() == MatchStatus.NONE) return true;
 		
 		// if the player is a referee, nothing is off-limits
 		if (match.isReferee(player)) return true;
 		
 		// if the match isn't currently in progress, a player should
 		// not be allowed to place or destroy blocks anywhere
-		if (match.getCurrentState() != eMatchStatus.PLAYING) return false;
+		if (match.getCurrentState() != MatchStatus.PLAYING) return false;
 		
 		// if the player is not in their lane, they shouldn't be allowed to interact
 		AutoRefPlayer apl = match.getPlayer(player);
@@ -272,7 +272,7 @@ public class ZoneListener implements Listener
 	public void refereePickup(PlayerPickupItemEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
-		if (match != null && match.getCurrentState() == eMatchStatus.PLAYING 
+		if (match != null && match.getCurrentState() == MatchStatus.PLAYING 
 			&& match.getPlayer(event.getPlayer()) == null) event.setCancelled(true);
 	}
 
@@ -524,7 +524,7 @@ public class ZoneListener implements Listener
 	public void creatureSpawn(CreatureSpawnEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
-		if (match == null || match.getCurrentState() == eMatchStatus.NONE) return;
+		if (match == null || match.getCurrentState() == MatchStatus.NONE) return;
 		
 		if (event.getSpawnReason() == SpawnReason.SPAWNER_EGG)
 		{
@@ -551,7 +551,7 @@ public class ZoneListener implements Listener
 		{ event.setCancelled(true); return; }
 		
 		// if the match hasn't started, cancel
-		if (match.getCurrentState() != eMatchStatus.PLAYING)
+		if (match.getCurrentState() != MatchStatus.PLAYING)
 		{ event.setCancelled(true); return; }
 
 		// if this is a safe zone, cancel
@@ -565,7 +565,7 @@ public class ZoneListener implements Listener
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
 		if (match == null || event.getTarget() == null) return;
 		
-		if (match.getCurrentState() != eMatchStatus.PLAYING || 
+		if (match.getCurrentState() != MatchStatus.PLAYING || 
 			match.isSafeZone(event.getTarget().getLocation()))
 		{ event.setTarget(null); return; }
 	}

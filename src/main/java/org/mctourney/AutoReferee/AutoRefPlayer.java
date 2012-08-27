@@ -19,6 +19,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.util.ArmorPoints;
 import org.mctourney.AutoReferee.util.BlockData;
@@ -247,7 +248,7 @@ public class AutoRefPlayer
 		if (player == null || player.isDead()) return;
 		
 		// "die" when the match isn't in progress just means a teleport
-		if (getTeam().getMatch().getCurrentState() != AutoReferee.eMatchStatus.PLAYING)
+		if (getTeam().getMatch().getCurrentState() != MatchStatus.PLAYING)
 		{
 			player.teleport(getTeam().getSpawnLocation());
 			player.setVelocity(new org.bukkit.util.Vector());

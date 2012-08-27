@@ -54,7 +54,6 @@ import org.bukkit.material.*;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
-import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.util.ArmorPoints;
 import org.mctourney.AutoReferee.util.BlockData;
@@ -89,13 +88,17 @@ public class AutoRefMatch
 	public void setStartTime(long startTime)
 	{ this.startTime = startTime; }
 	
+	public enum MatchStatus {
+		NONE, WAITING, READY, PLAYING, COMPLETED,
+	}
+	
 	// status of the match
-	private eMatchStatus currentState = eMatchStatus.NONE;
+	private MatchStatus currentState = MatchStatus.NONE;
 
-	public eMatchStatus getCurrentState()
+	public MatchStatus getCurrentState()
 	{ return currentState; }
 
-	public void setCurrentState(eMatchStatus s)
+	public void setCurrentState(MatchStatus s)
 	{ this.currentState = s; this.setupSpectators(); }
 	
 	// teams participating in the match
@@ -190,7 +193,7 @@ public class AutoRefMatch
 
 	public long getMatchTime()
 	{
-		if (getCurrentState() != eMatchStatus.PLAYING) return 0L;
+		if (getCurrentState() != MatchStatus.PLAYING) return 0L;
 		return (getWorld().getFullTime() - getStartTicks()) / 20L;
 	}
 
@@ -242,7 +245,7 @@ public class AutoRefMatch
 	public static final int READY_SECONDS = 15;
 	public static final int COMPLETED_SECONDS = 180;
 
-	public AutoRefMatch(World world, boolean tmp, eMatchStatus state)
+	public AutoRefMatch(World world, boolean tmp, MatchStatus state)
 	{ this(world, tmp); setCurrentState(state); }
 
 	public AutoRefMatch(World world, boolean tmp)
@@ -408,7 +411,7 @@ public class AutoRefMatch
 		messageReferee(ref, "match", getWorld().getName(), "init");
 		messageReferee(ref, "match", getWorld().getName(), "map", getMapName());
 
-		if (getCurrentState() == eMatchStatus.PLAYING)
+		if (getCurrentState() == MatchStatus.PLAYING)
 			messageReferee(ref, "match", getWorld().getName(), "time", getTimestamp(","));
 		
 		for (AutoRefTeam team : getTeams())
@@ -593,7 +596,7 @@ public class AutoRefMatch
 	{
 		// if this map isn't compatible with AutoReferee, quit...
 		if (AutoReferee.getInstance().getMatch(w) != null || !isCompatible(w)) return;
-		AutoReferee.getInstance().addMatch(new AutoRefMatch(w, b, eMatchStatus.WAITING));
+		AutoReferee.getInstance().addMatch(new AutoRefMatch(w, b, MatchStatus.WAITING));
 	}
 
 	public File archiveMapData() throws IOException
@@ -642,7 +645,7 @@ public class AutoRefMatch
 
 	public void destroy() throws IOException
 	{
-		this.setCurrentState(eMatchStatus.NONE);
+		this.setCurrentState(MatchStatus.NONE);
 		AutoReferee.getInstance().clearMatch(this);
 		
 		// if everyone has been moved out of this world, clean it up
@@ -842,7 +845,7 @@ public class AutoRefMatch
 		}
 			
 		// set the current state to playing
-		setCurrentState(eMatchStatus.PLAYING);
+		setCurrentState(MatchStatus.PLAYING);
 	}
 
 	private int getVanishLevel(Player p)
@@ -864,7 +867,7 @@ public class AutoRefMatch
 	private void setupVanish(Player view, Player subj)
 	{
 		if (getVanishLevel(view) >= getVanishLevel(subj) || 
-			this.getCurrentState() != eMatchStatus.PLAYING) view.showPlayer(subj);
+			this.getCurrentState() != MatchStatus.PLAYING) view.showPlayer(subj);
 		else view.hidePlayer(subj);
 	}
 
@@ -968,14 +971,14 @@ public class AutoRefMatch
 		{
 			// set all the teams to not ready and status as waiting
 			for ( AutoRefTeam t : teams ) t.setReady(false);
-			setCurrentState(eMatchStatus.WAITING); return;
+			setCurrentState(MatchStatus.WAITING); return;
 		}
 		
 		// this function is only useful if we are waiting
-		if (getCurrentState() != eMatchStatus.WAITING) return;
+		if (getCurrentState() != MatchStatus.WAITING) return;
 		
 		// if we aren't in online mode, assume we are always ready
-		if (!AutoReferee.getInstance().isAutoMode()) { setCurrentState(eMatchStatus.READY); return; }
+		if (!AutoReferee.getInstance().isAutoMode()) { setCurrentState(MatchStatus.READY); return; }
 		
 		// check if all the players are here
 		boolean ready = true;
@@ -984,7 +987,7 @@ public class AutoRefMatch
 				getPlayer(opl.getPlayer()).isReady();
 		
 		// set status based on whether the players are online
-		setCurrentState(ready ? eMatchStatus.READY : eMatchStatus.WAITING);
+		setCurrentState(ready ? MatchStatus.READY : MatchStatus.WAITING);
 	}
 	
 	public void checkTeamsStart()
@@ -1014,7 +1017,7 @@ public class AutoRefMatch
 		// we have confirmed that the state is PLAYING, so we know we are definitely
 		// in a match if this function is being called
 		
-		if (getCurrentState() == eMatchStatus.PLAYING) for (AutoRefTeam t : this.teams)
+		if (getCurrentState() == MatchStatus.PLAYING) for (AutoRefTeam t : this.teams)
 		{
 			// if there are no win conditions set, skip this team
 			if (t.winConditions.size() == 0) continue;
@@ -1062,7 +1065,7 @@ public class AutoRefMatch
 		
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_END,
 			"Match ended. " + t.getRawName() + " wins!", null, null, null));
-		setCurrentState(eMatchStatus.COMPLETED);
+		setCurrentState(MatchStatus.COMPLETED);
 		
 		setWinningTeam(t);
 		logPlayerStats(null);
@@ -1377,7 +1380,7 @@ public class AutoRefMatch
 		public String toString()
 		{ return String.format("[%s] %s", this.getTimestamp(), this.getMessage()); }
 	}
-	
+
 	public void addEvent(TranscriptEvent event)
 	{
 		AutoReferee plugin = AutoReferee.getInstance();
@@ -1435,7 +1438,7 @@ public class AutoRefMatch
 		
 		long timestamp = (getWorld().getFullTime() - getStartTicks()) / 20L;
 		player.sendMessage("Match status is currently " + ChatColor.GRAY + getCurrentState().name());
-		if (getCurrentState() == eMatchStatus.PLAYING)
+		if (getCurrentState() == MatchStatus.PLAYING)
 			player.sendMessage(String.format(ChatColor.GRAY + "The current match time is: %02d:%02d:%02d", 
 				timestamp/3600L, (timestamp/60L)%60L, timestamp%60L));
 	}

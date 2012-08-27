@@ -29,8 +29,7 @@ import org.mctourney.AutoReferee.AutoRefPlayer;
 import org.mctourney.AutoReferee.AutoRefTeam;
 import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
-import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent.EventType;
-import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
+import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
 import org.mctourney.AutoReferee.source.*;
 import org.mctourney.AutoReferee.util.BlockData;
 
@@ -215,7 +214,7 @@ public class ObjectiveTracker implements Listener
 		AutoRefMatch match = plugin.getMatch(entity.getWorld());
 		if (match == null) return;
 		
-		if (match.getCurrentState() == eMatchStatus.PLAYING &&
+		if (match.getCurrentState() == MatchStatus.PLAYING &&
 			entity.getType() == EntityType.PLAYER)
 		{
 			AutoRefPlayer apl = match.getPlayer((Player) entity);

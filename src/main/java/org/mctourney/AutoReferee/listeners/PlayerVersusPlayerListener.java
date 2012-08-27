@@ -23,10 +23,10 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMatch;
+import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
 import org.mctourney.AutoReferee.AutoRefPlayer;
 import org.mctourney.AutoReferee.AutoRefTeam;
 import org.mctourney.AutoReferee.AutoReferee;
-import org.mctourney.AutoReferee.AutoReferee.eMatchStatus;
 
 import com.google.common.collect.Maps;
 
@@ -69,11 +69,11 @@ public class PlayerVersusPlayerListener implements Listener
 			event.setDeathMessage(dmsg);
 			
 			// register the death of the victim
-			if (match.getCurrentState() == eMatchStatus.PLAYING &&
+			if (match.getCurrentState() == MatchStatus.PLAYING &&
 				vdata != null) vdata.registerDeath(event);
 			
 			// register the kill for the killer
-			if (match.getCurrentState() == eMatchStatus.PLAYING &&
+			if (match.getCurrentState() == MatchStatus.PLAYING &&
 				kdata != null) kdata.registerKill(event);
 			
 			// now remove the death message (so we can control who receives it)
@@ -107,7 +107,7 @@ public class PlayerVersusPlayerListener implements Listener
 			Player damager = entityToPlayer(ed.getDamager());
 			Player damaged = entityToPlayer(ed.getEntity());
 			
-			if (null != damager && match.getCurrentState() == eMatchStatus.PLAYING
+			if (null != damager && match.getCurrentState() == MatchStatus.PLAYING
 				&& ed.getDamager() instanceof Arrow)
 			{
 				AutoRefPlayer apl = match.getPlayer(damager);
@@ -122,7 +122,7 @@ public class PlayerVersusPlayerListener implements Listener
 			{
 				// if the match is in progress and player is in start region
 				// cancel any damage dealt to the player
-				if (match.getCurrentState() == eMatchStatus.PLAYING && 
+				if (match.getCurrentState() == MatchStatus.PLAYING && 
 						match.inStartRegion(damaged.getLocation()))
 				{ event.setCancelled(true); return; }
 			}
@@ -141,7 +141,7 @@ public class PlayerVersusPlayerListener implements Listener
 
 		// save player data if the damaged entity was a player	
 		if (event.getEntityType() == EntityType.PLAYER && 
-			match.getCurrentState() == eMatchStatus.PLAYING)
+			match.getCurrentState() == MatchStatus.PLAYING)
 		{
 			AutoRefPlayer pdata = match.getPlayer((Player) event.getEntity());	
 			if (pdata != null) pdata.registerDamage(event);
@@ -156,7 +156,7 @@ public class PlayerVersusPlayerListener implements Listener
 		
 		Player player = (Player) event.getEntity();
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
-		if (match == null || match.getCurrentState() != eMatchStatus.PLAYING) return;
+		if (match == null || match.getCurrentState() != MatchStatus.PLAYING) return;
 		
 		AutoRefPlayer apl = match.getPlayer(player);
 		if (apl != null) ++apl.shotsFired;
@@ -166,7 +166,7 @@ public class PlayerVersusPlayerListener implements Listener
 	public void hungerChange(FoodLevelChangeEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
-		if (match != null && match.getCurrentState() != eMatchStatus.PLAYING)
+		if (match != null && match.getCurrentState() != MatchStatus.PLAYING)
 			event.setFoodLevel(20);
 	}
 	
