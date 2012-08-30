@@ -14,6 +14,9 @@ import org.apache.commons.collections.map.DefaultedMap;
 
 public class BlockData
 {
+	// placeholder for bedrock block data
+	public static final BlockData BEDROCK = new BlockData(Material.BEDROCK);
+	
 	private Material mat;
 
 	public Material getMaterial()

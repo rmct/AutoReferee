@@ -31,6 +31,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.material.Redstone;
@@ -56,7 +58,7 @@ public class ZoneListener implements Listener
 	AutoReferee plugin = null;
 	
 	// distance a player may travel outside of their lane without penalty
-	private static final double VOID_SAFE_TRAVEL_DISTANCE = 1.595;
+	private static final double SAFE_TRAVEL_DISTANCE = 1.595;
 
 	public static final double SNEAK_DISTANCE = 0.301;
 	public static final double FREEFALL_THRESHOLD = 0.350;
@@ -565,6 +567,48 @@ public class ZoneListener implements Listener
 		// if this is a safe zone, cancel
 		if (match.isSafeZone(event.getLocation()))
 		{ event.setCancelled(true); return; }
+	}
+	
+	public void teleportEvent(Player pl, Location loc)
+	{
+		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+		if (match == null || match.getCurrentState() == MatchStatus.NONE) return;
+		
+		// get the player that teleported
+		AutoRefPlayer apl = match.getPlayer(pl);
+		if (apl == null) return;
+		
+		// generate message regarding the teleport event
+		String bedrock = match.blockInRange(BlockData.BEDROCK, loc, 5) ? " (near bedrock)" : "";
+		String message = apl.getName() + ChatColor.GRAY + " has teleported @ " +
+			BlockVector3.fromLocation(loc).toCoords() + bedrock;
+		
+		for (Player ref : match.getReferees()) ref.sendMessage(message);
+		AutoReferee.getInstance().getLogger().info(ChatColor.stripColor(message));
+	}
+	
+	@EventHandler(priority=EventPriority.MONITOR)
+	public void playerTeleport(PlayerTeleportEvent event)
+	{
+		// if this teleport is far enough to actually be a problem
+		if (event.getTo().distance(event.getPlayer().getLocation()) > SAFE_TRAVEL_DISTANCE) 
+			switch (event.getCause())
+		{
+			case PLUGIN: // if this teleport is caused by a plugin
+			case COMMAND: // or a vanilla command of some sort, do nothing
+				break;
+			
+			default: // otherwise, fire a teleport event (to notify)
+				teleportEvent(event.getPlayer(), event.getTo());
+				return;
+		}
+	}
+	
+	@EventHandler(priority=EventPriority.MONITOR)
+	public void playerVehicleEnter(VehicleEnterEvent event)
+	{
+		if (event.getVehicle().getLocation().distance(event.getEntered().getLocation()) > SAFE_TRAVEL_DISTANCE)
+			teleportEvent((Player) event.getEntered(), event.getVehicle().getLocation());
 	}
 	
 	@EventHandler
