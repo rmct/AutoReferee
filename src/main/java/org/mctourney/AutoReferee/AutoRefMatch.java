@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -525,34 +524,10 @@ public class AutoRefMatch
 		}
 		
 		// look for map online
-		InputStream rd = null;
-		StringWriter mlist = new StringWriter();
+		String mlist = QueryServer.syncQuery(MAPLIST, null, null);
+		AutoReferee.getInstance().getLogger().info(mlist);
 		
-		try
-		{
-			URL url = new URL(MAPLIST);
-			URLConnection conn = url.openConnection();
-			conn.setDoOutput(true);
-			
-			// read the contents of the URL
-			IOUtils.copy(rd = conn.getInputStream(), mlist);
-		}
-		
-		// just drop out
-		catch (Exception e) { return null; }
-		
-		finally
-		{
-			try
-			{
-				// close the stream pointer
-				if (rd != null) rd.close();
-			}
-			// meh. don't bother, if something goes wrong here.
-			catch (Exception e) {  }
-		}
-		
-		for (String line : mlist.toString().split("[\\r\\n]+"))
+		if (mlist != null) for (String line : mlist.split("[\\r\\n]+"))
 		{
 			// go through the file until we find the right map
 			String[] parts = line.split(";", 4);
@@ -1242,38 +1217,14 @@ public class AutoRefMatch
 	
 	private String uploadReport(String report)
 	{
-		OutputStreamWriter wr = null;
-		InputStream rd = null;
-		
 		try
 		{
-			URL url = new URL("http://pastehtml.com/upload/create?input_type=html&result=address");
-			URLConnection conn = url.openConnection();
-			conn.setDoOutput(true);
-		
-			wr = new OutputStreamWriter(conn.getOutputStream());
-			wr.write("txt=" + URLEncoder.encode(report, "UTF-8")); wr.flush();
-			StringWriter writer = new StringWriter();
-			
-			IOUtils.copy(rd = conn.getInputStream(), writer);
-			return writer.toString();
+			// submit our request to pastehtml, get back a link to the report
+			return QueryServer.syncQuery("http://pastehtml.com/upload/create", 
+				"input_type=html&result=address", "txt=" + URLEncoder.encode(report, "UTF-8"));
 		}
-		
-		// just drop out
-		catch (Exception e)
-		{ return null; }
-		
-		finally
-		{
-			try
-			{
-				// close the stream pointers
-				if (wr != null) wr.close();
-				if (rd != null) rd.close();
-			}
-			// meh. don't bother, if something goes wrong here.
-			catch (Exception e) {  }
-		}
+		catch (UnsupportedEncodingException e) {  }
+		return null;
 	}
 
 	// distance from the closest owned region

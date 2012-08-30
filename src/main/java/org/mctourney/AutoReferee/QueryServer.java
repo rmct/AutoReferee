@@ -6,9 +6,9 @@ import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.List;
+
 import org.apache.commons.io.IOUtils;
+
 import com.google.gson.Gson;
 
 public class QueryServer
@@ -26,7 +26,7 @@ public class QueryServer
 		try
 		{
 			String params = String.format("key=%s", URLEncoder.encode(key, encoding));
-			String json = syncPostQuery("ack.php", params);
+			String json = syncPostQuery(qurl + "/ack.php", params);
 			return json != null && new Gson().fromJson(json, boolean.class);
 		}
 		catch (Exception e) { return false; }
@@ -37,33 +37,36 @@ public class QueryServer
 		try
 		{
 			String params = String.format("key=%s", URLEncoder.encode(key, encoding));
-			String json = syncPostQuery("match.php", params);
+			String json = syncPostQuery(qurl + "/match.php", params);
 			return json == null ? null : new Gson().fromJson(json, AutoRefMatch.MatchParams.class);
 		}
 		catch (Exception e) { return null; }
 	}
 	
-	private String syncGetQuery(String path, String params)
-	{ return syncQuery(path, params, ""); }
+	public static String syncGetQuery(String path, String params)
+	{ return syncQuery(path, params, null); }
 	
-	private String syncPostQuery(String path, String params)
-	{ return syncQuery(path, "", params); }
+	public static String syncPostQuery(String path, String params)
+	{ return syncQuery(path, null, params); }
 
-	private String syncQuery(String path, String getParams, String postParams)
+	public static String syncQuery(String path, String getParams, String postParams)
 	{
 		OutputStreamWriter wr = null;
 		InputStream rd = null;
 		
 		try
 		{
-			URL url = new URL(String.format("%s/%s?%s", qurl, path, getParams));
+			URL url = new URL(String.format("%s?%s", path, getParams));
 			URLConnection conn = url.openConnection();
 			conn.setDoOutput(true);
 		    
-			wr = new OutputStreamWriter(conn.getOutputStream());
-			wr.write(postParams); wr.flush();
-			StringWriter writer = new StringWriter();
+			if (postParams != null)
+			{ 
+				wr = new OutputStreamWriter(conn.getOutputStream());
+				wr.write(postParams); wr.flush();
+			}
 			
+			StringWriter writer = new StringWriter();
 			IOUtils.copy(rd = conn.getInputStream(), writer);
 			return writer.toString();
 		}
