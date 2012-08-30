@@ -803,15 +803,6 @@ public class AutoRefMatch
 		// send referees the start event
 		messageReferees("match", getWorld().getName(), "start");
 		
-		for (AutoRefPlayer apl : getPlayers())
-		{
-			// heal the players one last time
-			apl.heal();
-			
-			// update the status of their objectives
-			apl.updateCarrying();
-		}
-		
 		// remove all mobs, animals, and items (again)
 		this.clearEntities();
 
@@ -843,6 +834,10 @@ public class AutoRefMatch
 			sm.blockState.setData(mdata);
 			sm.blockState.update(true);
 		}
+		
+		// set teams as started
+		for (AutoRefTeam team : getTeams())
+			team.startMatch();
 			
 		// set the current state to playing
 		setCurrentState(MatchStatus.PLAYING);

@@ -126,6 +126,29 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	public Map<Location, BlockData> winConditions;
 	public Map<BlockData, SourceInventory> targetChests;
 	
+	// current placed locations of win conditions
+	public Map<BlockData, Location> placedGoals;
+	
+	// status of objectives
+	public enum GoalStatus
+	{
+		NONE("none"),
+		SEEN("found"),
+		CARRYING("carry"),
+		PLACED("vm");
+		
+		private String messageText;
+		
+		private GoalStatus(String mtext)
+		{ messageText = mtext; }
+		
+		@Override
+		public String toString()
+		{ return messageText; }
+	}
+	
+	public Map<BlockData, GoalStatus> objectiveStatus;
+	
 	// does a provided search string match this team?
 	public boolean matches(String needle)
 	{
@@ -136,6 +159,23 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		if (a != null && -1 != needle.indexOf(a.toLowerCase())) return true;
 		if (b != null && -1 != needle.indexOf(b.toLowerCase())) return true;
 		return false;
+	}
+	
+	public void startMatch()
+	{
+		objectiveStatus = Maps.newHashMap();
+		for (BlockData obj : getObjectives())
+			objectiveStatus.put(obj, GoalStatus.NONE);
+		
+		placedGoals = Maps.newHashMap();
+		for (BlockData wc : winConditions.values())
+			placedGoals.put(wc, null);
+		
+		for (AutoRefPlayer apl : getPlayers())
+		{
+			apl.heal();
+			apl.updateCarrying();
+		}
 	}
 
 	// a factory for processing config maps
