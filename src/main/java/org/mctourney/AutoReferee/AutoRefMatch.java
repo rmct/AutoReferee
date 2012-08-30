@@ -868,16 +868,20 @@ public class AutoRefMatch
 
 	public void setupSpectators(Player focus)
 	{
-		focus.setGameMode(isPlayer(focus) ? GameMode.SURVIVAL : GameMode.CREATIVE);
-		AutoReferee.setAffectsSpawning(focus, isPlayer(focus));
-		AutoReferee.setCollidesWithEntities(focus, isPlayer(focus));
-
+		setSpectatorMode(focus, isPlayer(focus));
 		for ( Player pl : getWorld().getPlayers() )
 		{
 			// setup vanish in both directions
 			setupVanish(focus, pl);
 			setupVanish(pl, focus);
 		}
+	}
+
+	public void setSpectatorMode(Player p, boolean b)
+	{
+		p.setGameMode(b ? GameMode.SURVIVAL : GameMode.CREATIVE);
+		AutoReferee.setAffectsSpawning(p, b);
+		AutoReferee.setCollidesWithEntities(p, b);
 	}
 
 	public void setupSpectators()
