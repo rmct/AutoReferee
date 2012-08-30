@@ -26,6 +26,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -611,6 +612,13 @@ public class ZoneListener implements Listener
 	{
 		if (event.getVehicle().getLocation().distance(event.getEntered().getLocation()) > SAFE_TRAVEL_DISTANCE)
 			teleportEvent((Player) event.getEntered(), event.getVehicle().getLocation());
+	}
+	
+	@EventHandler(priority=EventPriority.MONITOR)
+	public void playerBedEnter(PlayerBedEnterEvent event)
+	{
+		if (event.getBed().getLocation().distance(event.getPlayer().getLocation()) > SAFE_TRAVEL_DISTANCE)
+			teleportEvent(event.getPlayer(), event.getBed().getLocation());
 	}
 	
 	@EventHandler
