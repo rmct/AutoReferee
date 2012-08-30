@@ -1014,6 +1014,17 @@ public class AutoRefMatch
 		if (ready) this.prepareMatch();
 	}
 	
+	public boolean blockInRange(BlockData bd, Location loc, int r)
+	{
+		Block b = getWorld().getBlockAt(loc);
+		for (int x = -r; x <= r; ++x)
+		for (int y = -r; y <= r; ++y)
+		for (int z = -r; z <= r; ++z)
+			if (bd.matches(b.getRelative(x, y, z))) return true;
+					
+		return false;
+	}
+	
 	public void checkWinConditions()
 	{
 		Plugin plugin = AutoReferee.getInstance();
