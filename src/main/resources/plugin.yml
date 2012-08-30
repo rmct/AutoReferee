@@ -1,10 +1,7 @@
 name: AutoReferee
 main: org.mctourney.AutoReferee.AutoReferee
-version: 0.8
-
-authors:
-  - authorblues
-  - TomShar
+version: 0.9
+author: authorblues
 
 softdepend:
   - WorldEdit
