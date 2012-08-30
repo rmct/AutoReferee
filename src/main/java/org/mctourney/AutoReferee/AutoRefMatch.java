@@ -67,7 +67,7 @@ public class AutoRefMatch
 {
 	// online map list
 	private static final String MAPREPO = "http://s3.amazonaws.com/autoreferee/maps/";
-	private static final String MAPLIST = MAPREPO + "list.csv"; 
+	private static final String MAPLIST = MAPREPO + "list.csv";
 	
 	// world this match is taking place on
 	private World world;
@@ -873,7 +873,8 @@ public class AutoRefMatch
 
 	public void setupSpectators(Player focus)
 	{
-		focus.setGameMode(isPlayer(focus) ? GameMode.CREATIVE : GameMode.SURVIVAL);
+		focus.setGameMode(isPlayer(focus) ? GameMode.SURVIVAL : GameMode.CREATIVE);
+		AutoReferee.setAffectsSpawning(focus, isPlayer(focus));
 
 		for ( Player pl : getWorld().getPlayers() )
 		{
@@ -1017,16 +1018,16 @@ public class AutoRefMatch
 		// we have confirmed that the state is PLAYING, so we know we are definitely
 		// in a match if this function is being called
 		
-		if (getCurrentState() == MatchStatus.PLAYING) for (AutoRefTeam t : this.teams)
+		if (getCurrentState() == MatchStatus.PLAYING) for (AutoRefTeam team : this.teams)
 		{
 			// if there are no win conditions set, skip this team
-			if (t.winConditions.size() == 0) continue;
+			if (team.winConditions.size() == 0) continue;
 			
 			// check all win condition blocks (AND together)
 			boolean win = true;
-			for (Map.Entry<Location, BlockData> pair : t.winConditions.entrySet())
+			for (Map.Entry<Location, BlockData> pair : team.winConditions.entrySet())
 				win &= pair.getValue().matches(world.getBlockAt(pair.getKey()));
-			if (win) matchComplete(t);
+			if (win) matchComplete(team);
 		}
 	}
 
