@@ -57,7 +57,8 @@ public class ObjectiveTracker implements Listener
 			for (Map.Entry<Location, BlockData> e : apl.getTeam().winConditions.entrySet())
 			{
 				Location loc = e.getKey(); BlockData bd = e.getValue();
-				if (match.blockInRange(bd, loc, match.getInexactRange()) && bd.matches(block))
+				if (match.blockInRange(bd, loc, match.getInexactRange()) != null && 
+					apl.getTeam().placedGoals.get(bd) == null && bd.matches(block))
 					match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.OBJECTIVE_PLACED,
 						String.format("%s has placed %s", apl.getPlayerName(), bd.getRawName()), loc, apl, bd));
 			}

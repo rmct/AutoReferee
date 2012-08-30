@@ -584,7 +584,7 @@ public class ZoneListener implements Listener
 		if (apl == null) return;
 		
 		// generate message regarding the teleport event
-		String bedrock = match.blockInRange(BlockData.BEDROCK, to, 5) ? " (near bedrock)" : "";
+		String bedrock = match.blockInRange(BlockData.BEDROCK, to, 5) != null ? " (near bedrock)" : "";
 		String message = apl.getName() + ChatColor.GRAY + " has teleported @ " +
 			BlockVector3.fromLocation(to).toCoords() + bedrock;
 		
