@@ -6,7 +6,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.inventory.InventoryHolder;
 
 import org.mctourney.AutoReferee.util.BlockData;
 import org.mctourney.AutoReferee.util.BlockVector3;

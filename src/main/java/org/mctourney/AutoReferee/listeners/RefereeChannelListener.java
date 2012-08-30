@@ -1,6 +1,5 @@
 package org.mctourney.AutoReferee.listeners;
 
-import java.util.Set;
 import java.io.UnsupportedEncodingException;
 
 import org.bukkit.entity.Player;
@@ -12,8 +11,6 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 
 import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.AutoRefMatch;
-
-import com.google.common.collect.Sets;
 
 public class RefereeChannelListener implements PluginMessageListener, Listener
 {

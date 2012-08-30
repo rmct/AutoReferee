@@ -1,7 +1,6 @@
 package org.mctourney.AutoReferee.util;
 
 import org.bukkit.Location;
-import org.bukkit.World;
 
 public class BlockVector3 extends Vector3
 {
