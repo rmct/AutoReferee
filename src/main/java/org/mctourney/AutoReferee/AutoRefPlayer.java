@@ -247,6 +247,9 @@ public class AutoRefPlayer
 		Player player = getPlayer();
 		if (player == null || player.isDead()) return;
 		
+		// if the inventory needs to be cleared, clear it
+		if (clearDrops) player.getInventory().clear();
+		
 		// "die" when the match isn't in progress just means a teleport
 		if (!getTeam().getMatch().getCurrentState().inProgress())
 		{
@@ -255,14 +258,14 @@ public class AutoRefPlayer
 			player.setFallDistance(0.0f);
 		}
 		
-		// if a cause of death is specified, set it
-		if (deathCause != null) player.setLastDamageCause(deathCause);
-		
-		// if the inventory needs to be cleared, clear it
-		if (clearDrops) player.getInventory().clear();
-		
-		// kill the player
-		player.setHealth(0);
+		else
+		{
+			// if a cause of death is specified, set it
+			if (deathCause != null) player.setLastDamageCause(deathCause);
+			
+			// kill the player
+			player.setHealth(0);
+		}
 	}
 
 	public void respawn()
