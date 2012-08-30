@@ -229,6 +229,12 @@ public class AutoRefMatch
 	
 	// list of items players may not craft
 	private Set<BlockData> prohibitCraft = Sets.newHashSet();
+	
+	// range of inexact placement
+	private int inexactRange = 2;
+	
+	public int getInexactRange()
+	{ return inexactRange; }
 
 	// transcript of every event in the match
 	private List<TranscriptEvent> transcript;
@@ -1021,7 +1027,7 @@ public class AutoRefMatch
 			// check all win condition blocks (AND together)
 			boolean win = true;
 			for (Map.Entry<Location, BlockData> pair : team.winConditions.entrySet())
-				win &= pair.getValue().matches(world.getBlockAt(pair.getKey()));
+				win &= blockInRange(pair.getValue(), pair.getKey(), getInexactRange());
 			if (win) matchComplete(team);
 		}
 	}
