@@ -590,16 +590,18 @@ public class ZoneListener implements Listener
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void playerTeleport(PlayerTeleportEvent event)
 	{
-		// if this teleport is far enough to actually be a problem
-		if (event.getTo().distance(event.getPlayer().getLocation()) > SAFE_TRAVEL_DISTANCE) 
-			switch (event.getCause())
+		switch (event.getCause())
 		{
 			case PLUGIN: // if this teleport is caused by a plugin
 			case COMMAND: // or a vanilla command of some sort, do nothing
 				break;
 			
 			default: // otherwise, fire a teleport event (to notify)
-				teleportEvent(event.getPlayer(), event.getTo());
+				
+				// if this teleport is far enough to actually be a problem
+				if (event.getTo().getWorld() == event.getFrom().getWorld() && 
+					event.getTo().distance(event.getPlayer().getLocation()) > SAFE_TRAVEL_DISTANCE)
+						teleportEvent(event.getPlayer(), event.getTo());
 				return;
 		}
 	}
