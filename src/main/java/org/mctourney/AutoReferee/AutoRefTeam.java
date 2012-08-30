@@ -464,6 +464,38 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		objectives.addAll(targetChests.keySet());
 		return objectives;
 	}
+	
+	public void updateObjectives()
+	{
+		objloop: for (BlockData bd : getObjectives())
+		{
+			if (placedGoals.get(bd) != null)
+			{ setObjectiveStatus(bd, GoalStatus.PLACED); continue; }
+			
+			for (AutoRefPlayer apl : getPlayers())
+			{
+				if (!apl.getCarrying().contains(bd)) continue;
+				setObjectiveStatus(bd, GoalStatus.CARRYING);
+				continue objloop;
+			}
+			
+			if (objectiveStatus.get(bd) != GoalStatus.NONE)
+			{ setObjectiveStatus(bd, GoalStatus.SEEN); continue; }
+		}
+	}
+	
+	public void setObjectiveStatus(BlockData objective, GoalStatus status)
+	{
+		// if this is going to be a proper update to an established objective
+		if (objectiveStatus.containsKey(objective) && 
+			objectiveStatus.get(objective) != status)
+		{
+			// message referees and update the objective status
+			getMatch().messageReferees("team", getRawName(), 
+				"state", objective.toString(), status.toString());
+			objectiveStatus.put(objective, status);
+		}
+	}
 
 	public void updateCarrying(AutoRefPlayer apl, Set<BlockData> carrying, Set<BlockData> newCarrying)
 	{
