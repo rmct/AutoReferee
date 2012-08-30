@@ -870,6 +870,7 @@ public class AutoRefMatch
 	{
 		focus.setGameMode(isPlayer(focus) ? GameMode.SURVIVAL : GameMode.CREATIVE);
 		AutoReferee.setAffectsSpawning(focus, isPlayer(focus));
+		AutoReferee.setCollidesWithEntities(focus, isPlayer(focus));
 
 		for ( Player pl : getWorld().getPlayers() )
 		{

@@ -3,6 +3,7 @@ package org.mctourney.AutoReferee;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.Iterator;
@@ -26,6 +27,7 @@ import org.bukkit.WorldCreator;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -218,7 +220,8 @@ public class AutoReferee extends JavaPlugin
 		setupPluginChannels();
 
 		// wrap up, debug to follow this message
-		getLogger().info(this.getName() + " loaded successfully.");
+		getLogger().info(this.getName() + " loaded successfully" +
+			(hasSportBukkitApi() ? " with SportBukkit API" : "") + ".");
 		
 		// save the "lobby" world as a sort of drop-zone for discharged players
 		String lobbyname = getConfig().getString("lobby-world", null);
@@ -856,5 +859,37 @@ public class AutoReferee extends JavaPlugin
 		
 		// default time: 6am
 		return 0L;
+	}
+	
+	// ************************ CUSTOM API ************************
+
+	private static Method mAffectsSpawning = null;
+	private static Method mCollidesWithEntities = null;
+	
+	static
+	{
+		try
+		{
+			mAffectsSpawning = HumanEntity.class.getDeclaredMethod("setAffectsSpawning", boolean.class);
+			mCollidesWithEntities = Player.class.getDeclaredMethod("setCollidesWithEntities", boolean.class);
+		} 
+		catch (Exception e) {  }
+	}
+	
+	public static boolean hasSportBukkitApi()
+	{ return mAffectsSpawning != null && mCollidesWithEntities != null; }
+	
+	public static void setAffectsSpawning(Player p, boolean yes)
+	{
+		if (mAffectsSpawning != null) try
+		{ mAffectsSpawning.invoke(p, yes); }
+		catch (Exception e) {  }
+	}
+	
+	public static void setCollidesWithEntities(Player p, boolean yes)
+	{
+		if (mCollidesWithEntities != null) try
+		{ mCollidesWithEntities.invoke(p, yes); }
+		catch (Exception e) {  }
 	}
 }
