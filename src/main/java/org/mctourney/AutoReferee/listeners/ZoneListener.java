@@ -153,7 +153,7 @@ public class ZoneListener implements Listener
 			else if (exit == null) apl.setExitLocation(player.getLocation());
 			
 			// if there is an exit position and they aren't falling, kill them
-			else if (exit != null && fallspeed == 0.0)
+			else if (exit != null && fallspeed == 0.0 && onGround)
 				apl.die(AutoRefPlayer.VOID_DEATH, true);
 		}
 		
