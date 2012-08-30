@@ -416,7 +416,7 @@ public class AutoRefPlayer
 		{
 			if (inv != null) for (ItemStack itm : inv)
 				if (itm != null) newCarrying.add(BlockData.fromItemStack(itm));
-			newCarrying.retainAll(getTeam().winConditions.values());
+			newCarrying.retainAll(getTeam().getObjectives());
 			
 			if (newCarrying != carrying)
 				getTeam().updateCarrying(this, carrying, newCarrying);
