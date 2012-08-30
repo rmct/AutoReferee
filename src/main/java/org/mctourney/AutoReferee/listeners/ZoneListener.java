@@ -166,7 +166,7 @@ public class ZoneListener implements Listener
 			if (exit != null)
 			{
 				// if the player traveled too far through the void, kill them
-				if (player.getLocation().distance(exit) > VOID_SAFE_TRAVEL_DISTANCE)
+				if (player.getLocation().distance(exit) > SAFE_TRAVEL_DISTANCE)
 					apl.die(AutoRefPlayer.VOID_DEATH, true);
 				
 				// reset exit location since player in region
