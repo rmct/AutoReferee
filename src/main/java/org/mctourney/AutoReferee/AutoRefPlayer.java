@@ -421,10 +421,12 @@ public class AutoRefPlayer
 				if (itm != null) newCarrying.add(BlockData.fromItemStack(itm));
 			newCarrying.retainAll(getTeam().getObjectives());
 			
-			if (newCarrying != carrying)
-				getTeam().updateCarrying(this, carrying, newCarrying);
+			Set<BlockData> oldCarrying = carrying;
+			carrying = newCarrying;
+			
+			if (newCarrying != oldCarrying)
+				getTeam().updateCarrying(this, oldCarrying, newCarrying);
 		}
-		carrying = newCarrying;
 	}
 
 	public void updateHealthArmor()

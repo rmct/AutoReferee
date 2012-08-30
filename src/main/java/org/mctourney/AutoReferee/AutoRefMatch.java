@@ -1030,7 +1030,21 @@ public class AutoRefMatch
 			// check all win condition blocks (AND together)
 			boolean win = true;
 			for (Map.Entry<Location, BlockData> pair : team.winConditions.entrySet())
-				win &= blockInRange(pair.getValue(), pair.getKey(), getInexactRange());
+			{
+				// check to see if the old location is still correct...
+				Location prevLoc = team.placedGoals.get(pair.getValue());
+				if (prevLoc != null && pair.getValue().equals(
+					BlockData.fromBlock(getWorld().getBlockAt(prevLoc)))) continue;
+				else team.placedGoals.remove(pair.getValue());
+				
+				Location placedLoc = blockInRange(pair.getValue(), pair.getKey(), getInexactRange());
+				team.placedGoals.put(pair.getValue(), placedLoc);
+				win &= (placedLoc != null);
+			}
+			
+			// force an update of objective status
+			team.updateObjectives();
+			
 			if (win) matchComplete(team);
 		}
 	}

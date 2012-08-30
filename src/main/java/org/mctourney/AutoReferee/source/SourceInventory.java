@@ -8,6 +8,8 @@ import org.bukkit.inventory.Inventory;
 
 import org.mctourney.AutoReferee.AutoRefPlayer;
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
+import org.mctourney.AutoReferee.AutoRefTeam;
+import org.mctourney.AutoReferee.AutoRefTeam.GoalStatus;
 import org.mctourney.AutoReferee.util.BlockData;
 import org.mctourney.AutoReferee.util.BlockVector3;
 
@@ -48,9 +50,13 @@ public class SourceInventory
 		
 		if (apl != null)
 		{
+			AutoRefTeam team = apl.getTeam();
+			if (team.getObjectiveStatus(blockdata) == GoalStatus.NONE)
+				team.setObjectiveStatus(blockdata, GoalStatus.SEEN);
+			
 			// generate a transcript event for seeing the box
 			String m = String.format("%s is carrying %s", apl.getPlayerName(), blockdata.getRawName());
-			apl.getTeam().getMatch().addEvent(new TranscriptEvent(apl.getTeam().getMatch(),
+			team.getMatch().addEvent(new TranscriptEvent(team.getMatch(),
 				TranscriptEvent.EventType.OBJECTIVE_FOUND, m, this.getLocation(), apl, blockdata));
 		}
 		

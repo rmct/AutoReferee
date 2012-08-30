@@ -15,6 +15,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
+import org.mctourney.AutoReferee.AutoRefTeam.GoalStatus;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.source.SourceInventory;
 import org.mctourney.AutoReferee.source.SourceInventoryBlock;
@@ -497,10 +498,13 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		}
 	}
 
+	public GoalStatus getObjectiveStatus(BlockData objective)
+	{ return objectiveStatus.get(objective); }
+
 	public void updateCarrying(AutoRefPlayer apl, Set<BlockData> carrying, Set<BlockData> newCarrying)
 	{
-		// TODO: perhaps store team-level carrying information?
 		match.updateCarrying(apl, carrying, newCarrying);
+		this.updateObjectives();
 	}
 
 	public void updateHealthArmor(AutoRefPlayer apl,
