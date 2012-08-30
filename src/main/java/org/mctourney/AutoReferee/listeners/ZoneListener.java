@@ -570,9 +570,13 @@ public class ZoneListener implements Listener
 		{ event.setCancelled(true); return; }
 	}
 	
-	public void teleportEvent(Player pl, Location loc)
+	public void teleportEvent(Player pl, Location fm, Location to)
 	{
-		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+		// if distance is too small to matter, forget about it
+		if (fm.getWorld() != to.getWorld() || 
+			fm.distanceSquared(to) <= SAFE_TRAVEL_DISTANCE * SAFE_TRAVEL_DISTANCE) return;
+		
+		AutoRefMatch match = plugin.getMatch(to.getWorld());
 		if (match == null || match.getCurrentState() == MatchStatus.NONE) return;
 		
 		// get the player that teleported
@@ -580,9 +584,9 @@ public class ZoneListener implements Listener
 		if (apl == null) return;
 		
 		// generate message regarding the teleport event
-		String bedrock = match.blockInRange(BlockData.BEDROCK, loc, 5) ? " (near bedrock)" : "";
+		String bedrock = match.blockInRange(BlockData.BEDROCK, to, 5) ? " (near bedrock)" : "";
 		String message = apl.getName() + ChatColor.GRAY + " has teleported @ " +
-			BlockVector3.fromLocation(loc).toCoords() + bedrock;
+			BlockVector3.fromLocation(to).toCoords() + bedrock;
 		
 		for (Player ref : match.getReferees()) ref.sendMessage(message);
 		AutoReferee.getInstance().getLogger().info(ChatColor.stripColor(message));
@@ -598,28 +602,18 @@ public class ZoneListener implements Listener
 				break;
 			
 			default: // otherwise, fire a teleport event (to notify)
-				
-				// if this teleport is far enough to actually be a problem
-				if (event.getTo().getWorld() == event.getFrom().getWorld() && 
-					event.getTo().distance(event.getPlayer().getLocation()) > SAFE_TRAVEL_DISTANCE)
-						teleportEvent(event.getPlayer(), event.getTo());
+				teleportEvent(event.getPlayer(), event.getFrom(), event.getTo());
 				return;
 		}
 	}
 	
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void playerVehicleEnter(VehicleEnterEvent event)
-	{
-		if (event.getVehicle().getLocation().distance(event.getEntered().getLocation()) > SAFE_TRAVEL_DISTANCE)
-			teleportEvent((Player) event.getEntered(), event.getVehicle().getLocation());
-	}
+	{ teleportEvent((Player) event.getEntered(), event.getEntered().getLocation(), event.getVehicle().getLocation()); }
 	
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void playerBedEnter(PlayerBedEnterEvent event)
-	{
-		if (event.getBed().getLocation().distance(event.getPlayer().getLocation()) > SAFE_TRAVEL_DISTANCE)
-			teleportEvent(event.getPlayer(), event.getBed().getLocation());
-	}
+	{ teleportEvent(event.getPlayer(), event.getPlayer().getLocation(), event.getBed().getLocation()); }
 	
 	@EventHandler
 	public void creatureTarget(EntityTargetEvent event)
