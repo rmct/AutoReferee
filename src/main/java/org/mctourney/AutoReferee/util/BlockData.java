@@ -36,6 +36,9 @@ public class BlockData
 	// material value and metadata (-1 = no metadata)
 	public BlockData(Material m, byte d) { setMaterial(m); setData(d); }
 
+	// material value and no metadata
+	public BlockData(Material m) { this(m, (byte)-1); }
+
 	@Override public int hashCode()
 	{ return getMaterial().hashCode() ^ new Byte(getData()).hashCode(); }
 
