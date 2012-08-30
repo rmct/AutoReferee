@@ -432,7 +432,7 @@ public class AutoRefPlayer
 		Player player = this.getPlayer();
 		if (player == null) return;
 		
-		int newHealth = player.getHealth();
+		int newHealth = Math.max(0, player.getHealth());
 		int newArmor = ArmorPoints.fromPlayerInventory(player.getInventory());
 		
 		getTeam().updateHealthArmor(this, 
