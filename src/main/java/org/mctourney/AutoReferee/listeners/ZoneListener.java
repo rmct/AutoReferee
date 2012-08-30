@@ -126,13 +126,21 @@ public class ZoneListener implements Listener
 		if (player.getGameMode() != GameMode.SURVIVAL 
 			|| match.inStartRegion(event.getTo())) return;
 		
+		int blockUnder = match.getWorld().getBlockTypeIdAt(event.getTo().add(0.0, -0.1, 0.0));
+		boolean onGround = (blockUnder != Material.AIR.getId());
+		
 		// if a player leaves the start region... 
-		if (match.inStartRegion(event.getFrom()) && 
-			!match.inStartRegion(event.getTo()))
+		if (!match.inStartRegion(event.getTo()))
 		{
 			// if game isn't going yet, they are leaving the start region
-			if (match.getCurrentState() == MatchStatus.PLAYING)
+			if (match.getCurrentState().inProgress() && match.inStartRegion(event.getFrom()))
 				player.getInventory().clear();
+			
+			else if (match.getCurrentState().isBeforeMatch())
+			{
+				if (onGround) apl.die(null, false);
+				return;
+			}
 		}
 		
 		// if they have left their region, mark their exit location
