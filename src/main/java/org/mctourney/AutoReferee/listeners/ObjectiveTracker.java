@@ -121,6 +121,23 @@ public class ObjectiveTracker implements Listener
 	// ------------------ END WINCONDITION ------------------------
 	
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void blockBreak(BlockBreakEvent event)
+	{
+		Player pl = event.getPlayer();
+		Block block = event.getBlock();
+		
+		AutoRefMatch match = plugin.getMatch(block.getWorld());
+		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
+		
+		if (match != null && apl != null && block != null)
+		{
+			for (SourceInventory sinv : apl.getTeam().targetChests.values())
+				if (sinv.matchesBlock(block)) sinv.seenBy(apl);
+			match.checkWinConditions();
+		}
+	}
+	
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void blockInteract(PlayerInteractEvent event)
 	{
 		Player pl = event.getPlayer();
