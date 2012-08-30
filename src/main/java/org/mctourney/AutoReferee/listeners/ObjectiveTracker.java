@@ -214,7 +214,7 @@ public class ObjectiveTracker implements Listener
 		AutoRefMatch match = plugin.getMatch(entity.getWorld());
 		if (match == null) return;
 		
-		if (match.getCurrentState() == MatchStatus.PLAYING &&
+		if (match.getCurrentState().inProgress() &&
 			entity.getType() == EntityType.PLAYER)
 		{
 			AutoRefPlayer apl = match.getPlayer((Player) entity);

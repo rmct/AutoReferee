@@ -89,7 +89,16 @@ public class AutoRefMatch
 	{ this.startTime = startTime; }
 	
 	public enum MatchStatus {
-		NONE, WAITING, READY, PLAYING, COMPLETED,
+		NONE, WAITING, READY, PLAYING, COMPLETED;
+
+		public boolean isBeforeMatch()
+		{ return this.ordinal() < PLAYING.ordinal() && this != NONE; }
+
+		public boolean isAfterMatch()
+		{ return this.ordinal() > PLAYING.ordinal() && this != NONE; }
+
+		public boolean inProgress()
+		{ return this == PLAYING; }
 	}
 	
 	// status of the match
@@ -193,7 +202,7 @@ public class AutoRefMatch
 
 	public long getMatchTime()
 	{
-		if (getCurrentState() != MatchStatus.PLAYING) return 0L;
+		if (!getCurrentState().inProgress()) return 0L;
 		return (getWorld().getFullTime() - getStartTicks()) / 20L;
 	}
 
@@ -411,7 +420,7 @@ public class AutoRefMatch
 		messageReferee(ref, "match", getWorld().getName(), "init");
 		messageReferee(ref, "match", getWorld().getName(), "map", getMapName());
 
-		if (getCurrentState() == MatchStatus.PLAYING)
+		if (getCurrentState().inProgress())
 			messageReferee(ref, "match", getWorld().getName(), "time", getTimestamp(","));
 		
 		for (AutoRefTeam team : getTeams())
@@ -862,7 +871,7 @@ public class AutoRefMatch
 	private void setupVanish(Player view, Player subj)
 	{
 		if (getVanishLevel(view) >= getVanishLevel(subj) || 
-			this.getCurrentState() != MatchStatus.PLAYING) view.showPlayer(subj);
+			!this.getCurrentState().inProgress()) view.showPlayer(subj);
 		else view.hidePlayer(subj);
 	}
 
@@ -1018,7 +1027,7 @@ public class AutoRefMatch
 		// we have confirmed that the state is PLAYING, so we know we are definitely
 		// in a match if this function is being called
 		
-		if (getCurrentState() == MatchStatus.PLAYING) for (AutoRefTeam team : this.teams)
+		if (getCurrentState().inProgress()) for (AutoRefTeam team : this.teams)
 		{
 			// if there are no win conditions set, skip this team
 			if (team.winConditions.size() == 0) continue;
@@ -1439,7 +1448,7 @@ public class AutoRefMatch
 		
 		long timestamp = (getWorld().getFullTime() - getStartTicks()) / 20L;
 		player.sendMessage("Match status is currently " + ChatColor.GRAY + getCurrentState().name());
-		if (getCurrentState() == MatchStatus.PLAYING)
+		if (getCurrentState().inProgress())
 			player.sendMessage(String.format(ChatColor.GRAY + "The current match time is: %02d:%02d:%02d", 
 				timestamp/3600L, (timestamp/60L)%60L, timestamp%60L));
 	}

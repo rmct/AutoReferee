@@ -792,10 +792,8 @@ public class AutoReferee extends JavaPlugin
 			return true;
 		}
 		
-		// WARNING: using ordinals on enums is typically frowned upon,
-		// but we will consider the enums "partially-ordered"
-		if ("ready".equalsIgnoreCase(cmd.getName()) && match != null &&
-			match.getCurrentState().ordinal() < MatchStatus.PLAYING.ordinal())
+		if ("ready".equalsIgnoreCase(cmd.getName()) && 
+			match != null && match.getCurrentState().isBeforeMatch())
 		{
 			boolean rstate = true;
 			if (args.length > 0)

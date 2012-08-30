@@ -187,7 +187,7 @@ public class ZoneListener implements Listener
 		
 		// if the match isn't currently in progress, a player should
 		// not be allowed to place or destroy blocks anywhere
-		if (match.getCurrentState() != MatchStatus.PLAYING) return false;
+		if (!match.getCurrentState().inProgress()) return false;
 		
 		// if the player is not in their lane, they shouldn't be allowed to interact
 		AutoRefPlayer apl = match.getPlayer(player);
@@ -272,7 +272,7 @@ public class ZoneListener implements Listener
 	public void refereePickup(PlayerPickupItemEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
-		if (match != null && match.getCurrentState() == MatchStatus.PLAYING 
+		if (match != null && match.getCurrentState().inProgress() 
 			&& match.getPlayer(event.getPlayer()) == null) event.setCancelled(true);
 	}
 
@@ -551,7 +551,7 @@ public class ZoneListener implements Listener
 		{ event.setCancelled(true); return; }
 		
 		// if the match hasn't started, cancel
-		if (match.getCurrentState() != MatchStatus.PLAYING)
+		if (!match.getCurrentState().inProgress())
 		{ event.setCancelled(true); return; }
 
 		// if this is a safe zone, cancel
@@ -565,7 +565,7 @@ public class ZoneListener implements Listener
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
 		if (match == null || event.getTarget() == null) return;
 		
-		if (match.getCurrentState() != MatchStatus.PLAYING || 
+		if (!match.getCurrentState().inProgress() || 
 			match.isSafeZone(event.getTarget().getLocation()))
 		{ event.setTarget(null); return; }
 	}

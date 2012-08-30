@@ -248,7 +248,7 @@ public class AutoRefPlayer
 		if (player == null || player.isDead()) return;
 		
 		// "die" when the match isn't in progress just means a teleport
-		if (getTeam().getMatch().getCurrentState() != MatchStatus.PLAYING)
+		if (!getTeam().getMatch().getCurrentState().inProgress())
 		{
 			player.teleport(getTeam().getSpawnLocation());
 			player.setVelocity(new org.bukkit.util.Vector());

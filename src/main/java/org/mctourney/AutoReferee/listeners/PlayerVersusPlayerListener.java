@@ -68,13 +68,12 @@ public class PlayerVersusPlayerListener implements Listener
 			// update the death message with the changes
 			event.setDeathMessage(dmsg);
 			
-			// register the death of the victim
-			if (match.getCurrentState() == MatchStatus.PLAYING &&
-				vdata != null) vdata.registerDeath(event);
-			
-			// register the kill for the killer
-			if (match.getCurrentState() == MatchStatus.PLAYING &&
-				kdata != null) kdata.registerKill(event);
+			if (match.getCurrentState().inProgress())
+			{
+				// register the death and kill
+				if (vdata != null) vdata.registerDeath(event);
+				if (kdata != null) kdata.registerKill(event);
+			}
 			
 			// now remove the death message (so we can control who receives it)
 			event.setDeathMessage(null);
@@ -107,7 +106,7 @@ public class PlayerVersusPlayerListener implements Listener
 			Player damager = entityToPlayer(ed.getDamager());
 			Player damaged = entityToPlayer(ed.getEntity());
 			
-			if (null != damager && match.getCurrentState() == MatchStatus.PLAYING
+			if (null != damager && match.getCurrentState().inProgress()
 				&& ed.getDamager() instanceof Arrow)
 			{
 				AutoRefPlayer apl = match.getPlayer(damager);
@@ -122,7 +121,7 @@ public class PlayerVersusPlayerListener implements Listener
 			{
 				// if the match is in progress and player is in start region
 				// cancel any damage dealt to the player
-				if (match.getCurrentState() == MatchStatus.PLAYING && 
+				if (match.getCurrentState().inProgress() && 
 						match.inStartRegion(damaged.getLocation()))
 				{ event.setCancelled(true); return; }
 			}
@@ -141,7 +140,7 @@ public class PlayerVersusPlayerListener implements Listener
 
 		// save player data if the damaged entity was a player	
 		if (event.getEntityType() == EntityType.PLAYER && 
-			match.getCurrentState() == MatchStatus.PLAYING)
+			match.getCurrentState().inProgress())
 		{
 			AutoRefPlayer pdata = match.getPlayer((Player) event.getEntity());	
 			if (pdata != null) pdata.registerDamage(event);
@@ -156,7 +155,7 @@ public class PlayerVersusPlayerListener implements Listener
 		
 		Player player = (Player) event.getEntity();
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
-		if (match == null || match.getCurrentState() != MatchStatus.PLAYING) return;
+		if (match == null || !match.getCurrentState().inProgress()) return;
 		
 		AutoRefPlayer apl = match.getPlayer(player);
 		if (apl != null) ++apl.shotsFired;
@@ -166,7 +165,7 @@ public class PlayerVersusPlayerListener implements Listener
 	public void hungerChange(FoodLevelChangeEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
-		if (match != null && match.getCurrentState() != MatchStatus.PLAYING)
+		if (match != null && !match.getCurrentState().inProgress())
 			event.setFoodLevel(20);
 	}
 	

@@ -326,13 +326,13 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		// prepare the player
 		if (!match.isDebugMode())
 		{
-			if (match != null && match.getCurrentState() != MatchStatus.PLAYING)
+			if (match != null && !match.getCurrentState().inProgress())
 				pl.teleport(getSpawnLocation());
 			pl.setGameMode(GameMode.SURVIVAL);
 		}
 		
 		// if the match is in progress, no one may join
-		if (match.getCurrentState().ordinal() >= MatchStatus.PLAYING.ordinal()) return;
+		if (!match.getCurrentState().isBeforeMatch()) return;
 		
 		players.add(apl);
 		match.messageReferees("team", getRawName(), "player", "+" + apl.getPlayerName());
