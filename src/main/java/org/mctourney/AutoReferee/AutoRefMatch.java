@@ -492,7 +492,7 @@ public class AutoRefMatch
 		return basedir;
 	}
 	
-	public static class MapInfo
+	public static class MapInfo implements Comparable<MapInfo>
 	{
 		public String name;
 		public String version;
@@ -517,6 +517,9 @@ public class AutoRefMatch
 			this.filename = parts[2];
 			this.md5sum = parts[3];
 		}
+
+		public String getVersionString()
+		{ return name + " v" + version; }
 
 		public boolean isInstalled()
 		{ return folder != null; }
@@ -551,6 +554,10 @@ public class AutoRefMatch
 			return name.equalsIgnoreCase(map.name) 
 				&& version.equalsIgnoreCase(map.version);
 		}
+
+		@Override
+		public int compareTo(MapInfo other)
+		{ return name.compareTo(other.name); }
 	}
 	
 	public static MapInfo getMapInfo(File folder)

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -52,6 +53,7 @@ import org.mctourney.AutoReferee.util.BlockData;
 import org.mctourney.AutoReferee.util.CuboidRegion;
 import org.mctourney.AutoReferee.util.Vector3;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
@@ -461,12 +463,14 @@ public class AutoReferee extends JavaPlugin
 			// CMD: /autoref listmaps
 			if (args.length == 1 && "listmaps".equalsIgnoreCase(args[0]))
 			{
-				Set<MapInfo> maps = AutoRefMatch.getAvailableMaps();
+				List<MapInfo> maps = Lists.newArrayList(AutoRefMatch.getAvailableMaps());
+				Collections.sort(maps);
+				
 				sender.sendMessage(ChatColor.GOLD + String.format("Available Maps (%d):", maps.size()));
 				for (AutoRefMatch.MapInfo mapInfo : maps)
 				{
 					ChatColor color = mapInfo.isInstalled() ? ChatColor.WHITE : ChatColor.DARK_GRAY;
-					sender.sendMessage("* " + color + mapInfo.name + " v" + mapInfo.version);
+					sender.sendMessage("* " + color + mapInfo.getVersionString());
 				}
 				
 				return true;
