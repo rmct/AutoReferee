@@ -40,6 +40,7 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 
+import org.mctourney.AutoReferee.AutoRefMatch.MapInfo;
 import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
 import org.mctourney.AutoReferee.listeners.ObjectiveTracker;
 import org.mctourney.AutoReferee.listeners.PlayerVersusPlayerListener;
@@ -455,7 +456,21 @@ public class AutoReferee extends JavaPlugin
 				
 				return true;
 			}
-			catch (Exception e) { return false; }
+			catch (Exception e) { e.printStackTrace(); return false; }
+			
+			// CMD: /autoref listmaps
+			if (args.length == 1 && "listmaps".equalsIgnoreCase(args[0]))
+			{
+				Set<MapInfo> maps = AutoRefMatch.getAvailableMaps();
+				sender.sendMessage(ChatColor.GOLD + String.format("Available Maps (%d):", maps.size()));
+				for (AutoRefMatch.MapInfo mapInfo : maps)
+				{
+					ChatColor color = mapInfo.isInstalled() ? ChatColor.WHITE : ChatColor.DARK_GRAY;
+					sender.sendMessage("* " + color + mapInfo.name + " v" + mapInfo.version);
+				}
+				
+				return true;
+			}
 			
 			// reloads the autoreferee.yml for this match only
 			// CMD: /autoref reload

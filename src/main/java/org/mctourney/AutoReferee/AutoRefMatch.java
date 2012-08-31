@@ -7,10 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -465,7 +463,7 @@ public class AutoRefMatch
 	{ for (Player p : world.getPlayers()) p.sendMessage(msg); }
 
 	public static String normalizeMapName(String m)
-	{ return m == null ? null : m.toLowerCase().replaceAll("[^0-9a-z]+", ""); }
+	{ return m == null ? null : m.replaceAll("[^0-9a-zA-Z]+", ""); }
 
 	public String getVersionString()
 	{ return String.format("%s-v%s", this.getMapName().replaceAll("[^0-9a-zA-Z]+", ""), this.getVersion()); }
@@ -490,7 +488,112 @@ public class AutoRefMatch
 		}
 		
 		zfile.close();
+		zip.delete();
 		return basedir;
+	}
+	
+	public static class MapInfo
+	{
+		public String name;
+		public String version;
+		
+		public File folder = null;
+		
+		public String filename;
+		public String md5sum;
+		
+		public MapInfo(String name, String version, File folder)
+		{ this.name = name; this.version = version; this.folder = folder; }
+
+		public MapInfo(String csv)
+		{
+			String[] parts = csv.split(";", 5);
+			
+			// normalized name and version are first 2 columns
+			this.name = AutoRefMatch.normalizeMapName(parts[0]);
+			this.version = parts[1];
+			
+			// followed by the filename and an md5sum
+			this.filename = parts[2];
+			this.md5sum = parts[3];
+		}
+
+		public boolean isInstalled()
+		{ return folder != null; }
+		
+		public File download() throws IOException
+		{
+			if (isInstalled()) return folder;
+			
+			URL url = new URL(MAPREPO + filename);
+			File zip = new File(AutoRefMatch.getMapLibrary(), filename);
+			FileUtils.copyURLToFile(url, zip);
+			
+			// if the md5s match, return the unzipped folder
+			String md5comp = DigestUtils.md5Hex(new FileInputStream(zip));
+			if (md5comp.equalsIgnoreCase(md5sum)) return folder = unzipMapFolder(zip);
+			
+			// if the md5sum did not match, quit here
+			zip.delete(); throw new IOException(
+				"MD5 Mismatch: " + md5comp + " != " + md5sum);
+		}
+		
+		@Override
+		public int hashCode()
+		{ return name.toLowerCase().hashCode(); }
+		
+		@Override
+		public boolean equals(Object o)
+		{
+			if (!(o instanceof MapInfo)) return false;
+			MapInfo map = (MapInfo) o;
+			
+			return name.equalsIgnoreCase(map.name) 
+				&& version.equalsIgnoreCase(map.version);
+		}
+	}
+	
+	public static MapInfo getMapInfo(File folder)
+	{
+		// skip non-directories
+		if (!folder.isDirectory()) return null;
+		
+		// if it doesn't have an autoreferee config file
+		File cfgFile = new File(folder, AutoReferee.CFG_FILENAME);
+		if (!cfgFile.exists()) return null;
+		
+		// check the map name, if it matches, this is the one we want
+		FileConfiguration cfg = YamlConfiguration.loadConfiguration(cfgFile);
+		return new MapInfo(AutoRefMatch.normalizeMapName(cfg.getString("map.name")),
+			cfg.getString("map.version", "1.0"), folder);
+	}
+	
+	public static Set<MapInfo> getInstalledMaps()
+	{
+		Set<MapInfo> maps = Sets.newHashSet();
+		
+		// look through the zip files for what's already installed
+		for (File f : getMapLibrary().listFiles())
+		{
+			// if this is a zipfile containing the right world, unzip it
+			if (f.getName().toLowerCase().endsWith(".zip"))
+			try { f = unzipMapFolder(f); } catch (IOException e) { continue; }
+			
+			MapInfo mapInfo = getMapInfo(f);
+			if (mapInfo != null) maps.add(mapInfo);
+		}
+		
+		return maps;
+	}
+	
+	public static Set<MapInfo> getAvailableMaps()
+	{
+		Set<MapInfo> maps = Sets.newHashSet(getInstalledMaps());
+		String mlist = QueryServer.syncQuery(MAPLIST, null, null);
+		
+		if (mlist != null) for (String line : mlist.split("[\\r\\n]+")) 
+			maps.add(new MapInfo(line));
+		return maps;
 	}
 
 	public static File getMapFolder(String worldName, Long checksum) throws IOException
@@ -503,54 +606,10 @@ public class AutoRefMatch
 		File mapLibrary = getMapLibrary();
 		if (!mapLibrary.exists()) return null;
 		
-		// find the map being requested
-		for (File f : mapLibrary.listFiles())
+		for (MapInfo map : getAvailableMaps())
 		{
-			// if this is a zipfile containing the right world, unzip it
-			if (f.getName().toLowerCase().startsWith(worldName) && 
-				f.getName().toLowerCase().endsWith(".zip")) return unzipMapFolder(f);
-			
-			// skip non-directories
-			if (!f.isDirectory()) continue;
-			
-			// if it doesn't have an autoreferee config file
-			File cfgFile = new File(f, AutoReferee.CFG_FILENAME);
-			if (!cfgFile.exists()) continue;
-			
-			// check the map name, if it matches, this is the one we want
-			FileConfiguration cfg = YamlConfiguration.loadConfiguration(cfgFile);
-			String cMapName = AutoRefMatch.normalizeMapName(cfg.getString("map.name"));
-			if (!worldName.equals(cMapName)) continue;
-			
-			// compute the checksum of the directory, make sure it matches
-			if (checksum != null &&	recursiveCRC32(f) != checksum) continue;
-			
-			// this is the map we want
-			return f;
-		}
-		
-		// look for map online
-		String mlist = QueryServer.syncQuery(MAPLIST, null, null);
-		AutoReferee.getInstance().getLogger().info(mlist);
-		
-		if (mlist != null) for (String line : mlist.split("[\\r\\n]+"))
-		{
-			// go through the file until we find the right map
-			String[] parts = line.split(";", 4);
-			if (!worldName.equalsIgnoreCase(normalizeMapName(parts[0]))) continue;
-			
-			// download the file
-			URL url = new URL(MAPREPO + parts[2]);
-			File zip = new File(AutoRefMatch.getMapLibrary(), parts[2]);
-			FileUtils.copyURLToFile(url, zip);
-			
-			// if the md5s match, return the unzipped folder
-			String md5sum = DigestUtils.md5Hex(new FileInputStream(zip));
-			if (md5sum.equalsIgnoreCase(parts[3])) return unzipMapFolder(zip);
-			
-			// if the md5sum did not match, quit here
-			zip.delete(); throw new IOException(
-				"MD5 Mismatch: " + md5sum + " != " + parts[3]);
+			String mapName = AutoRefMatch.normalizeMapName(map.name);
+			if (worldName.equalsIgnoreCase(mapName)) return map.download();
 		}
 		
 		// no map matches
