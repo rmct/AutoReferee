@@ -465,8 +465,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		objloop: for (BlockData bd : getObjectives())
 		{
 			for (Map.Entry<Location, BlockData> e : winConditions.entrySet())
+				if (bd.equals(e.getValue()))
 			{
-				if (getMatch().blockInRange(e.getValue(), e.getKey(), inexactRange) != null)
+				if (getMatch().blockInRange(bd, e.getKey(), inexactRange) != null)
 				{ setObjectiveStatus(bd, GoalStatus.PLACED); continue objloop; }
 			}
 			
