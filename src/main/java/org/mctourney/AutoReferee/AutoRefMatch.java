@@ -917,7 +917,9 @@ public class AutoRefMatch
 
 	public void setupSpectators(Player focus)
 	{
-		setSpectatorMode(focus, isPlayer(focus));
+		boolean ended = getCurrentState().isAfterMatch();
+		setSpectatorMode(focus, !isPlayer(focus) || ended);
+		
 		for ( Player pl : getWorld().getPlayers() )
 		{
 			// setup vanish in both directions
@@ -928,9 +930,9 @@ public class AutoRefMatch
 
 	public void setSpectatorMode(Player p, boolean b)
 	{
-		p.setGameMode(b ? GameMode.SURVIVAL : GameMode.CREATIVE);
-		AutoReferee.setAffectsSpawning(p, b);
-		AutoReferee.setCollidesWithEntities(p, b);
+		p.setGameMode(b ? GameMode.CREATIVE : GameMode.SURVIVAL);
+		AutoReferee.setAffectsSpawning(p, !b);
+		AutoReferee.setCollidesWithEntities(p, !b);
 	}
 
 	public void setupSpectators()
@@ -1133,8 +1135,6 @@ public class AutoRefMatch
 		{
 			Player pl = apl.getPlayer();
 			if (pl == null) continue;
-			
-			pl.setGameMode(GameMode.CREATIVE);
 			pl.getInventory().clear();
 		}
 		
