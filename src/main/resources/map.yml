@@ -33,7 +33,7 @@ match:
   start-time: 8am
   
   # allow friendly fire: should players take damage from teammates
-  allow-ff: false
+  allow-ff: true
   
   # allow craft: if true, players may craft objective items (such as dyeing wool)
   allow-craft: false
