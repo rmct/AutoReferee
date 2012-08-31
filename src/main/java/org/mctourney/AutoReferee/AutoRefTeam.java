@@ -127,9 +127,6 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	public Map<Location, BlockData> winConditions;
 	public Map<BlockData, SourceInventory> targetChests;
 	
-	// current placed locations of win conditions
-	public Map<BlockData, Location> placedGoals;
-	
 	// status of objectives
 	public enum GoalStatus
 	{
@@ -167,10 +164,6 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		objectiveStatus = Maps.newHashMap();
 		for (BlockData obj : getObjectives())
 			objectiveStatus.put(obj, GoalStatus.NONE);
-		
-		placedGoals = Maps.newHashMap();
-		for (BlockData wc : winConditions.values())
-			placedGoals.put(wc, null);
 		
 		for (AutoRefPlayer apl : getPlayers())
 		{
@@ -468,10 +461,14 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	
 	public void updateObjectives()
 	{
+		int inexactRange = getMatch().getInexactRange();
 		objloop: for (BlockData bd : getObjectives())
 		{
-			if (placedGoals.get(bd) != null)
-			{ setObjectiveStatus(bd, GoalStatus.PLACED); continue; }
+			for (Map.Entry<Location, BlockData> e : winConditions.entrySet())
+			{
+				if (getMatch().blockInRange(e.getValue(), e.getKey(), inexactRange) != null)
+				{ setObjectiveStatus(bd, GoalStatus.PLACED); continue objloop; }
+			}
 			
 			for (AutoRefPlayer apl : getPlayers())
 			{
