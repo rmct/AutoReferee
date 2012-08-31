@@ -460,8 +460,8 @@ public class AutoReferee extends JavaPlugin
 			}
 			catch (Exception e) { e.printStackTrace(); return false; }
 			
-			// CMD: /autoref listmaps
-			if (args.length == 1 && "listmaps".equalsIgnoreCase(args[0]))
+			// CMD: /autoref maplist
+			if (args.length == 1 && "maplist".equalsIgnoreCase(args[0]))
 			{
 				List<MapInfo> maps = Lists.newArrayList(AutoRefMatch.getAvailableMaps());
 				Collections.sort(maps);
