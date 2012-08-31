@@ -25,6 +25,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -624,6 +625,22 @@ public class ZoneListener implements Listener
 		if (!match.getCurrentState().inProgress() || 
 			match.isSafeZone(event.getTarget().getLocation()))
 		{ event.setTarget(null); return; }
+	}
+	
+	@EventHandler
+	public void nobuildExplosion(EntityExplodeEvent event)
+	{
+		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
+		if (match == null) return;
+		
+		Iterator<Block> iter = event.blockList().iterator();
+		blockloop: while (iter.hasNext())
+		{
+			Block b = iter.next();
+			for (AutoRefTeam team : match.getTeams())
+				if (!team.canBuild(b.getLocation()))
+				{ iter.remove(); continue blockloop; }
+		}
 	}
 
 	@EventHandler
