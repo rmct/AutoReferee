@@ -241,6 +241,15 @@ public class ZoneListener implements Listener
 		AutoRefPlayer apl = match.getPlayer(player);
 		if (apl != null && !apl.getTeam().canBuild(loc))
 		{ event.setCancelled(true); return; }
+		
+		// make sure this isn't another team's source container
+		for (AutoRefTeam team : match.getTeams())
+		{
+			if (team == apl.getTeam()) continue;
+			for (SourceInventory src : team.targetChests.values())
+				if (src.matchesBlock(event.getBlock()))
+				{ event.setCancelled(true); return; }
+		}
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
@@ -260,6 +269,15 @@ public class ZoneListener implements Listener
 		
 		if (apl != null && !apl.getTeam().canEnter(loc, 0.0))
 		{ event.setCancelled(true); return; }
+		
+		// make sure this isn't another team's source container
+		for (AutoRefTeam team : match.getTeams())
+		{
+			if (team == apl.getTeam()) continue;
+			for (SourceInventory src : team.targetChests.values())
+				if (src.matchesBlock(event.getClickedBlock()))
+				{ event.setCancelled(true); return; }
+		}
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
@@ -277,6 +295,15 @@ public class ZoneListener implements Listener
 		AutoRefPlayer apl = match.getPlayer(player);
 		if (apl != null && !apl.getTeam().canEnter(loc, 0.0))
 		{ event.setCancelled(true); return; }
+		
+		// make sure this isn't another team's source container
+		for (AutoRefTeam team : match.getTeams())
+		{
+			if (team == apl.getTeam()) continue;
+			for (SourceInventory src : team.targetChests.values())
+				if (src.matchesEntity(event.getRightClicked()))
+				{ event.setCancelled(true); return; }
+		}
 	}
 	
 	// restrict block pickup by referees
