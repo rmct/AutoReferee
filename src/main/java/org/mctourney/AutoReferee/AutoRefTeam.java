@@ -121,7 +121,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	private Location spawn;
 	
 	public Location getSpawnLocation()
-	{ return spawn == null ? match.getWorld().getSpawnLocation() : spawn; }
+	{ return spawn == null ? match.getWorldSpawn() : spawn; }
 
 	// win-conditions, locations mapped to expected block data
 	public Map<Location, BlockData> winConditions;

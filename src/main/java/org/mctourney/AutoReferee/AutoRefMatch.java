@@ -68,10 +68,24 @@ public class AutoRefMatch
 	
 	// world this match is taking place on
 	private World world;
-	private boolean tmp;
+	public Location worldSpawn = null;
+	
+	private void setWorld(World w)
+	{
+		world = w;
+		
+		worldSpawn = world.getSpawnLocation();
+		while (world.getBlockTypeIdAt(worldSpawn) != Material.AIR.getId())
+			worldSpawn = worldSpawn.add(0, 1, 0);
+	}
 
 	public World getWorld()
 	{ return world; }
+	
+	public Location getWorldSpawn()
+	{ return worldSpawn; }
+	
+	private boolean tmp;
 
 	private boolean isTemporaryWorld()
 	{ return tmp; }
@@ -262,7 +276,7 @@ public class AutoRefMatch
 
 	public AutoRefMatch(World world, boolean tmp)
 	{
-		this.world = world;
+		setWorld(world);
 		loadWorldConfiguration();
 		
 		// is this world a temporary world?
