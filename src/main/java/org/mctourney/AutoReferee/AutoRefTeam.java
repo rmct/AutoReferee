@@ -14,8 +14,6 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
-import org.mctourney.AutoReferee.AutoRefTeam.GoalStatus;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.source.SourceInventory;
 import org.mctourney.AutoReferee.source.SourceInventoryBlock;
