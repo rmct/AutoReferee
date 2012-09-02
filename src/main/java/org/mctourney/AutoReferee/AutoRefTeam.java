@@ -512,4 +512,24 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 	public int compareTo(AutoRefTeam team)
 	{ return this.getRawName().compareTo(team.getRawName()); }
+	
+	public static void switchTeams(AutoRefTeam team1, AutoRefTeam team2)
+	{
+		// switch the sets of players
+		Set<AutoRefPlayer> t1apls = team1.getPlayers();
+		Set<AutoRefPlayer> t2apls = team2.getPlayers();
+		
+		team1.players = t2apls;
+		team2.players = t1apls;
+		
+		for (AutoRefPlayer apl1 : team1.getPlayers()) apl1.setTeam(team1);
+		for (AutoRefPlayer apl2 : team2.getPlayers()) apl2.setTeam(team2);
+
+		// switch the custom names
+		String t1cname = team1.customName;
+		String t2cname = team2.customName;
+		
+		team1.customName = t2cname;
+		team2.customName = t1cname;
+	}
 }

@@ -165,7 +165,7 @@ public class AutoRefPlayer
 	public AutoRefTeam getTeam()
 	{ return team; }
 
-	private void setTeam(AutoRefTeam t)
+	public void setTeam(AutoRefTeam t)
 	{ team = t; }
 	
 	// number of times this player has killed other players
