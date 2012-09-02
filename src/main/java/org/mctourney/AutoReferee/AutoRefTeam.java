@@ -76,7 +76,12 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	{ return getRawName().toLowerCase().replaceAll("[^a-z0-9]+", ""); }
 	
 	public void setName(String name)
-	{ customName = name; }
+	{
+		// send name change event before we actually change the name
+		match.messageReferees("team", getRawName(), "name", name);
+		
+		customName = name;
+	}
 
 	public String getName()
 	{ return color + getRawName() + ChatColor.RESET; }
@@ -152,8 +157,8 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		needle = needle.toLowerCase();
 
 		String a = name, b = customName;
-		if (a != null && -1 != needle.indexOf(a.toLowerCase())) return true;
 		if (b != null && -1 != needle.indexOf(b.toLowerCase())) return true;
+		if (a != null && -1 != needle.indexOf(a.toLowerCase())) return true;
 		return false;
 	}
 	
