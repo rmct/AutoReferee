@@ -38,7 +38,8 @@ public class TeamListener implements Listener
 		event.setFormat("<" + match.getPlayerName(player) + "> " + event.getMessage());
 
 		// if we are currently playing and speaker on a team, restrict recipients
-		AutoRefTeam t = match.getPlayerTeam(player);
+		boolean speakerReferee = match.isReferee(player);
+		AutoRefTeam team = match.getPlayerTeam(player);
 		
 		Iterator<Player> iter = event.getRecipients().iterator();
 		while (iter.hasNext())
@@ -51,9 +52,8 @@ public class TeamListener implements Listener
 			
 			// if listener is on a team, and its not the same team as the
 			// speaker, remove them from the recipients list
-			AutoRefTeam oteam = match.getPlayerTeam(recipient);
-			if (match.getCurrentState().inProgress() &&
-				oteam != null && oteam != t) { iter.remove(); continue; }
+			if (match.getCurrentState().inProgress() && !speakerReferee &&
+				team != match.getPlayerTeam(recipient)) { iter.remove(); continue; }
 		}
 	}
 
