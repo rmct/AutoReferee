@@ -712,21 +712,49 @@ public class AutoRefMatch
 		zip.close();
 		return archiveFolder;
 	}
+	
+	public class WorldFolderDeleter implements Runnable
+	{
+		private File worldFolder;
+		public int task = -1;
+		
+		WorldFolderDeleter(World w)
+		{ this.worldFolder = w.getWorldFolder(); }
+		
+		@Override
+		public void run()
+		{
+			AutoReferee autoref = AutoReferee.getInstance();
+			try
+			{
+				FileUtils.deleteDirectory(worldFolder);
+				autoref.getLogger().info(worldFolder.getName() + " deleted!");
+				autoref.getServer().getScheduler().cancelTask(task);
+			}
+			catch (IOException e)
+			{ autoref.getLogger().info("File lock held on " + worldFolder.getName()); }
+		}
+	}
 
 	public void destroy() throws IOException
 	{
+		AutoReferee autoref = AutoReferee.getInstance();
 		this.setCurrentState(MatchStatus.NONE);
-		AutoReferee.getInstance().clearMatch(this);
+		autoref.clearMatch(this);
 		
 		// if everyone has been moved out of this world, clean it up
 		if (world.getPlayers().size() == 0)
 		{
 			// if we are running in auto-mode and this is OUR world
-			if (AutoReferee.getInstance().isAutoMode() || this.isTemporaryWorld())
+			if (autoref.isAutoMode() || this.isTemporaryWorld())
 			{
-				AutoReferee.getInstance().getServer().unloadWorld(world, false);
-				if (!AutoReferee.getInstance().getConfig().getBoolean("save-worlds", false))
-					FileUtils.deleteDirectory(world.getWorldFolder());
+				autoref.getServer().unloadWorld(world, false);
+				if (!autoref.getConfig().getBoolean("save-worlds", false))
+				{
+					WorldFolderDeleter wfd = new WorldFolderDeleter(world);
+					wfd.task = autoref.getServer().getScheduler()
+						.scheduleSyncRepeatingTask(autoref, wfd, 0L, 10 * 20L);
+				}
 			}
 		}
 	}
