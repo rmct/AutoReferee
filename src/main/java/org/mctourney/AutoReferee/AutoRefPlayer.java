@@ -467,8 +467,10 @@ public class AutoRefPlayer
 		newContents[oldContents.length + 7] = new ItemStack(Material.APPLE, player.getHealth());
 		newContents[oldContents.length + 8] = new ItemStack(Material.COOKED_BEEF, player.getFoodLevel());
 		
-		inventoryView.setContents(newContents);
+		for (int i = 0; i < oldContents.length; ++i)
+			if (newContents[i] != null) newContents[i] = newContents[i].clone();
 		
+		inventoryView.setContents(newContents);
 		return inventoryView;
 	}
 

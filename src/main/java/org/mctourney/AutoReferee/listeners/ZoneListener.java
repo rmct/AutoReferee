@@ -243,7 +243,7 @@ public class ZoneListener implements Listener
 		{ event.setCancelled(true); return; }
 		
 		// make sure this isn't another team's source container
-		for (AutoRefTeam team : match.getTeams())
+		if (apl != null) for (AutoRefTeam team : match.getTeams())
 		{
 			if (team == apl.getTeam()) continue;
 			for (SourceInventory src : team.targetChests.values())
@@ -271,7 +271,7 @@ public class ZoneListener implements Listener
 		{ event.setCancelled(true); return; }
 		
 		// make sure this isn't another team's source container
-		for (AutoRefTeam team : match.getTeams())
+		if (apl != null) for (AutoRefTeam team : match.getTeams())
 		{
 			if (team == apl.getTeam()) continue;
 			for (SourceInventory src : team.targetChests.values())
@@ -297,7 +297,7 @@ public class ZoneListener implements Listener
 		{ event.setCancelled(true); return; }
 		
 		// make sure this isn't another team's source container
-		for (AutoRefTeam team : match.getTeams())
+		if (apl != null) for (AutoRefTeam team : match.getTeams())
 		{
 			if (team == apl.getTeam()) continue;
 			for (SourceInventory src : team.targetChests.values())
