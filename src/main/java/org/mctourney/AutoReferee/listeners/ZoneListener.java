@@ -688,9 +688,8 @@ public class ZoneListener implements Listener
 		blockloop: while (iter.hasNext())
 		{
 			Block b = iter.next();
-			for (AutoRefTeam team : match.getTeams())
-				if (!team.canBuild(b.getLocation()))
-				{ iter.remove(); continue blockloop; }
+			if (match.isSafeZone(b.getLocation()))
+			{ iter.remove(); continue blockloop; }
 		}
 	}
 
