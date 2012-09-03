@@ -673,6 +673,11 @@ public class ZoneListener implements Listener
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
 		if (match == null || event.getTarget() == null) return;
 		
+		// if the target is a player that isn't on a team, get rid of the target
+		if (event.getTarget().getType() == EntityType.PLAYER &&
+			!match.isPlayer((Player) event.getTarget()))
+		{ event.setTarget(null); return; }
+		
 		if (!match.getCurrentState().inProgress() || 
 			match.isSafeZone(event.getTarget().getLocation()))
 		{ event.setTarget(null); return; }
