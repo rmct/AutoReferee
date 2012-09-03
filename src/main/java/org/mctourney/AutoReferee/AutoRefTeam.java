@@ -526,6 +526,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	
 	public static void switchTeams(AutoRefTeam team1, AutoRefTeam team2)
 	{
+		// no work to be done
+		if (team1 == null || team2 == null || team1 == team2) return;
+		
 		// switch the sets of players
 		Set<AutoRefPlayer> t1apls = team1.getPlayers();
 		Set<AutoRefPlayer> t2apls = team2.getPlayers();

@@ -614,6 +614,48 @@ public class AutoReferee extends JavaPlugin
 		
 		if ("autoref".equalsIgnoreCase(cmd.getName()) && sender.hasPermission("autoreferee.referee"))
 		{
+			// CMD: /autoref teamname <currentname> <newname>
+			if (args.length == 3 && "teamname".equalsIgnoreCase(args[0]) && match != null)
+			{
+				AutoRefTeam team = null;
+				for (AutoRefTeam t : match.getTeams())
+					if (t.matches(args[1])) team = t;
+				
+				if (team == null)
+				{
+					sender.sendMessage(ChatColor.DARK_GRAY + args[1] + 
+						ChatColor.RESET + "is not a valid team.");
+					sender.sendMessage("Teams are " + match.getTeamList());
+				}
+				else team.setName(args[2]);
+				return true;
+			}
+			
+			// CMD: /autoref swapteams <team1> <team2>
+			if (args.length == 3 && "swapteams".equalsIgnoreCase(args[0]) && match != null)
+			{
+				AutoRefTeam team1 = null, team2 = null;
+				for (AutoRefTeam t : match.getTeams())
+				{
+					if (t.matches(args[1])) team1 = t;
+					if (t.matches(args[2])) team2 = t;
+				}
+				
+				if (team1 == null)
+				{
+					sender.sendMessage(ChatColor.DARK_GRAY + args[1] + 
+						ChatColor.RESET + "is not a valid team.");
+					sender.sendMessage("Teams are " + match.getTeamList());
+				}
+				else if (team2 == null)
+				{
+					sender.sendMessage(ChatColor.DARK_GRAY + args[2] + 
+						ChatColor.RESET + "is not a valid team.");
+					sender.sendMessage("Teams are " + match.getTeamList());
+				}
+				else AutoRefTeam.switchTeams(team1, team2);
+				return true;
+			}
 		}
 			
 		if ("zones".equalsIgnoreCase(cmd.getName()) && match != null)
@@ -627,7 +669,8 @@ public class AutoReferee extends JavaPlugin
 				if (t == null)
 				{
 					// team name is invalid. let the player know
-					sender.sendMessage("Not a valid team: " + args[1]);
+					sender.sendMessage(ChatColor.DARK_GRAY + args[1] + 
+						ChatColor.RESET + "is not a valid team.");
 					return true;
 				}
 
@@ -685,7 +728,8 @@ public class AutoReferee extends JavaPlugin
 			if (t == null)
 			{
 				// team name is invalid. let the player know
-				sender.sendMessage("Not a valid team: " + tname);
+				sender.sendMessage(ChatColor.DARK_GRAY + tname + 
+					ChatColor.RESET + "is not a valid team.");
 				sender.sendMessage("Teams are " + match.getTeamList());
 				return true;
 			}
@@ -741,7 +785,8 @@ public class AutoReferee extends JavaPlugin
 				// team name is invalid. let the player know
 				if (args.length > 0)
 				{
-					sender.sendMessage("Not a valid team: " + args[0]);
+					sender.sendMessage(ChatColor.DARK_GRAY + args[0] + 
+						ChatColor.RESET + "is not a valid team.");
 					sender.sendMessage("Teams are " + match.getTeamList());
 				}
 				return true;
