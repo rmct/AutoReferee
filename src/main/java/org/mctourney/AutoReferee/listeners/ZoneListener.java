@@ -641,7 +641,7 @@ public class ZoneListener implements Listener
 			BlockVector3.fromLocation(to).toCoords() + bedrock;
 		
 		for (Player ref : match.getReferees()) ref.sendMessage(message);
-		AutoReferee.getInstance().getLogger().info(ChatColor.stripColor(message));
+		plugin.getLogger().info(ChatColor.stripColor(message));
 	}
 	
 	@EventHandler(priority=EventPriority.MONITOR)

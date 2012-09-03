@@ -78,8 +78,9 @@ public class BlockData
 		if ((getMaterial().getNewData((byte) 0) instanceof Colorable))
 		{
 			DyeColor color = DyeColor.getByData(getData());
-			ChatColor nameColor = ColorConverter.dyeToChat(color);
-			return nameColor + color.name() + " " + bname + ChatColor.RESET;
+			ChatColor chatColor = ColorConverter.dyeToChat(color);
+			String colorName = color.name().replaceAll("_+", " ");
+			bname = chatColor + colorName + " " + bname + ChatColor.RESET;
 			
 		}
 		return bname;
