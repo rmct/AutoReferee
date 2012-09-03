@@ -1312,22 +1312,6 @@ public class AutoRefMatch
 
 	public void logPlayerStats(String h)
 	{
-		String hdl = h != null ? h : 
-			new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-		
-		try
-		{
-			File sfile = new File(AutoReferee.getInstance().getLogDirectory(), hdl + ".log");
-			PrintWriter fw = new PrintWriter(sfile);
-			
-			for (AutoRefPlayer apl : getPlayers()) apl.writeStats(fw);
-			for (TranscriptEvent e : transcript) fw.println(e);
-			
-			fw.close();
-		}
-		catch (IOException e)
-		{ AutoReferee.getInstance().getLogger().severe("Could not write player stat logfile."); }
-		
 		// upload WEBSTATS (do via an async query in case uploading the stats lags the main thread)
 		Plugin plugin = AutoReferee.getInstance();
 		plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, new Runnable()
