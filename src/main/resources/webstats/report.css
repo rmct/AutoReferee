@@ -13,6 +13,10 @@ h4 {
 	margin-bottom: 10px;
 }
 
+#match-detail table th {
+	width: 9em;
+}
+
 .ar_rank {
     width: 20px;
 }
