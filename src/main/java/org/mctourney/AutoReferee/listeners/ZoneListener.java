@@ -336,7 +336,7 @@ public class ZoneListener implements Listener
 	{
 		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
 		if (match != null && match.getCurrentState().inProgress() 
-			&& match.getPlayer(event.getPlayer()) == null) event.setCancelled(true);
+			&& !match.isPlayer(event.getPlayer())) event.setCancelled(true);
 	}
 
 	@EventHandler
