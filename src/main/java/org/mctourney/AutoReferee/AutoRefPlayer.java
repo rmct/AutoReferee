@@ -268,6 +268,21 @@ public class AutoRefPlayer
 		}
 	}
 
+	public void clearInventory()
+	{
+		Player p = getPlayer();
+		if (p == null) return;
+		
+		// clear the player's inventory
+		p.getInventory().clear();
+		
+		// clear the armor slots seperately
+		p.getInventory().setHelmet(null);
+		p.getInventory().setChestplate(null);
+		p.getInventory().setLeggings(null);
+		p.getInventory().setBoots(null);
+	}
+
 	public void respawn()
 	{
 		this.setExitLocation(null);
