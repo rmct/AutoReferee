@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -36,7 +37,9 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 
@@ -261,22 +264,43 @@ public class ZoneListener implements Listener
 		AutoRefMatch match = plugin.getMatch(loc.getWorld());
 		if (match == null) return;
 		
-		if (!validPlayer(player))
-		{ event.setCancelled(true); return; }
-		
-		AutoRefPlayer apl = match.getPlayer(player);
-		if (!plugin.isAutoMode() && match.isStartMechanism(loc)) return;
-		
-		if (apl != null && !apl.getTeam().canEnter(loc, 0.0))
-		{ event.setCancelled(true); return; }
-		
-		// make sure this isn't another team's source container
-		if (apl != null) for (AutoRefTeam team : match.getTeams())
+		if (match.isPlayer(player))
 		{
-			if (team == apl.getTeam()) continue;
-			for (SourceInventory src : team.targetChests.values())
-				if (src.matchesBlock(event.getClickedBlock()))
-				{ event.setCancelled(true); return; }
+			if (!validPlayer(player))
+			{ event.setCancelled(true); return; }
+			
+			if (!plugin.isAutoMode() && match.isStartMechanism(loc)) return;
+			AutoRefPlayer apl = match.getPlayer(player);
+			
+			if (apl != null && !apl.getTeam().canEnter(loc, 0.0))
+			{ event.setCancelled(true); return; }
+			
+			// make sure this isn't another team's source container
+			if (apl != null) for (AutoRefTeam team : match.getTeams())
+			{
+				if (team == apl.getTeam()) continue;
+				for (SourceInventory src : team.targetChests.values())
+					if (src.matchesBlock(event.getClickedBlock()))
+					{ event.setCancelled(true); return; }
+			}
+		}
+		else // is spectator
+		{
+			if (event.getClickedBlock().getState() instanceof InventoryHolder)
+			{
+				InventoryHolder invh = (InventoryHolder) event.getClickedBlock().getState();
+				Inventory inv = invh.getInventory();
+				
+				ItemStack[] contents = inv.getContents();
+				for (int i = 0; i < contents.length; ++i)
+					if (contents[i] != null) contents[i] = contents[i].clone();
+				
+				Inventory newinv = Bukkit.getServer().createInventory(null, inv.getType());
+				newinv.setContents(contents);
+				
+				player.openInventory(newinv);
+				event.setCancelled(true); return;
+			}
 		}
 	}
 	
