@@ -191,7 +191,7 @@ public class ObjectiveTracker implements Listener
 		}
 
 		if (entity.getType() == EntityType.PLAYER && match != null
-			&& match.isReferee(pl))
+			&& match.isReferee(pl) && match.isPlayer((Player) entity))
 		{
 			AutoRefPlayer a = match.getPlayer((Player) entity);
 			a.showInventory(pl);
