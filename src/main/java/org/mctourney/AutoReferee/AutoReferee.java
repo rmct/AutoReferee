@@ -399,14 +399,6 @@ public class AutoReferee extends JavaPlugin
 		
 		if ("autoref".equalsIgnoreCase(cmd.getName()) && sender.hasPermission("autoreferee.configure"))
 		{
-			// CMD: /autoref world <world>
-			if (args.length == 2 && "world".equalsIgnoreCase(args[0]))
-			{
-				consoleWorld = getServer().getWorld(args[1]);
-				if (consoleWorld != null) sender.sendMessage("Selected world " + consoleWorld.getName());
-				return consoleWorld != null;
-			}
-
 			// CMD: /autoref save
 			if (args.length >= 1 && "save".equalsIgnoreCase(args[0]) && match != null)
 			{
@@ -433,49 +425,6 @@ public class AutoReferee extends JavaPlugin
 				return true;
 			}
 
-			// CMD: /autoref load <map> [<custom>]
-			if (args.length >= 2 && "load".equalsIgnoreCase(args[0])) try
-			{	
-				// get generate a map name from the args
-				String mapName = args[1];
-				
-				// may specify a custom world name as the 3rd argument
-				String customName = args.length >= 3 ? args[2] : null;
-				
-				// get world setup for match
-				World mw = createMatchWorld(mapName, customName);
-				
-				// if there is no map, just let the sender know
-				if (mw == null) sender.sendMessage(
-					"No such map: " + ChatColor.GREEN + mapName);
-				
-				else
-				{
-					getLogger().info("World created for [" + mapName + 
-						"] at the request of " + player.getName());
-					if (player != null) player.teleport(mw.getSpawnLocation());
-				}
-				
-				return true;
-			}
-			catch (Exception e) { e.printStackTrace(); return false; }
-			
-			// CMD: /autoref maplist
-			if (args.length == 1 && "maplist".equalsIgnoreCase(args[0]))
-			{
-				List<MapInfo> maps = Lists.newArrayList(AutoRefMatch.getAvailableMaps());
-				Collections.sort(maps);
-				
-				sender.sendMessage(ChatColor.GOLD + String.format("Available Maps (%d):", maps.size()));
-				for (AutoRefMatch.MapInfo mapInfo : maps)
-				{
-					ChatColor color = mapInfo.isInstalled() ? ChatColor.WHITE : ChatColor.DARK_GRAY;
-					sender.sendMessage("* " + color + mapInfo.getVersionString());
-				}
-				
-				return true;
-			}
-			
 			// reloads the autoreferee.yml for this match only
 			// CMD: /autoref reload
 			if (args.length == 1 && "reload".equalsIgnoreCase(args[0]) && match != null)
@@ -484,30 +433,6 @@ public class AutoReferee extends JavaPlugin
 				sender.sendMessage(ChatColor.GREEN + CFG_FILENAME + " reload complete!");
 				return true;
 			}
-
-			// CMD: /autoref crc
-			if (args.length >= 2 && args[0].toLowerCase().startsWith("crc")) try
-			{
-				// get map folder from the name provided
-				String mapName = args[1];
-				File mapFolder = AutoRefMatch.getMapFolder(mapName, null);
-				
-				// if there is a map folder, print the CRC
-				if (null != mapFolder) 
-				{
-					long checksum = AutoRefMatch.recursiveCRC32(mapFolder);
-					File cfgFile = new File(mapFolder, CFG_FILENAME);
-					if (!cfgFile.exists()) return true;
-					
-					mapName = YamlConfiguration.loadConfiguration(cfgFile)
-						.getString("map.name", "<Untitled>");
-					getLogger().info(mapName + ": [" + Long.toHexString(checksum) + "]");
-				}
-				else getLogger().info("No such map: " + mapName);
-				
-				return true;
-			}
-			catch (Exception e) { return false; }
 
 			// CMD: /autoref archive [zip]
 			if (args.length >= 1 && "archive".equalsIgnoreCase(args[0]) && match != null) try
@@ -532,17 +457,6 @@ public class AutoReferee extends JavaPlugin
 			}
 			catch (Exception e) { return false; }
 			
-			// CMD: /autoref stats [dump]
-			if (args.length >= 1 && "stats".equalsIgnoreCase(args[0]) && match != null) try
-			{
-				if (args.length >= 2 && "dump".equalsIgnoreCase(args[1]))
-				{ match.logPlayerStats(args.length >= 3 ? args[2] : null); }
-
-				else return false;
-				return true;
-			}
-			catch (Exception e) { return false; }
-			
 			// CMD: /autoref debug [<bool>]
 			if (args.length >= 1 && "debug".equalsIgnoreCase(args[0]) && match != null)
 			{
@@ -550,17 +464,6 @@ public class AutoReferee extends JavaPlugin
 					Boolean.parseBoolean(args[1]) : !match.isDebugMode());
 				return true;
 			}
-			
-			// CMD: /autoref state [<new state>]
-			if (args.length >= 1 && "state".equalsIgnoreCase(args[0]) && match != null) try
-			{
-				if (args.length >= 2)
-					match.setCurrentState(MatchStatus.valueOf(args[1].toUpperCase()));
-				getLogger().info("Match Status is now " + match.getCurrentState().name());
-				
-				return true;
-			}
-			catch (Exception e) { return false; }
 			
 			// CMD: /autoref tool <type>
 			if (args.length >= 1 && "tool".equalsIgnoreCase(args[0]))
@@ -626,9 +529,76 @@ public class AutoReferee extends JavaPlugin
 				if (item != null) match.addIllegalCraft(BlockData.fromItemStack(item));
 				return true;
 			}
+		}
 
+		if ("autoref".equalsIgnoreCase(cmd.getName()) && sender.hasPermission("autoreferee.admin"))
+		{
+			// CMD: /autoref world <world>
+			if (args.length == 2 && "world".equalsIgnoreCase(args[0]))
+			{
+				consoleWorld = getServer().getWorld(args[1]);
+				if (consoleWorld != null) sender.sendMessage("Selected world " + consoleWorld.getName());
+				return consoleWorld != null;
+			}
+
+			// CMD: /autoref load <map> [<custom>]
+			if (args.length >= 2 && "load".equalsIgnoreCase(args[0])) try
+			{	
+				// get generate a map name from the args
+				String mapName = args[1];
+				
+				// may specify a custom world name as the 3rd argument
+				String customName = args.length >= 3 ? args[2] : null;
+				
+				// get world setup for match
+				World mw = createMatchWorld(mapName, customName);
+				
+				// if there is no map, just let the sender know
+				if (mw == null) sender.sendMessage(
+					"No such map: " + ChatColor.GREEN + mapName);
+				
+				else
+				{
+					getLogger().info("World created for [" + mapName + 
+						"] at the request of " + player.getName());
+					if (player != null) player.teleport(mw.getSpawnLocation());
+				}
+				
+				return true;
+			}
+			catch (Exception e) { e.printStackTrace(); return false; }
+			
+			// CMD: /autoref maplist
+			if (args.length == 1 && "maplist".equalsIgnoreCase(args[0]))
+			{
+				List<MapInfo> maps = Lists.newArrayList(AutoRefMatch.getAvailableMaps());
+				Collections.sort(maps);
+				
+				sender.sendMessage(ChatColor.GOLD + String.format("Available Maps (%d):", maps.size()));
+				for (AutoRefMatch.MapInfo mapInfo : maps)
+				{
+					ChatColor color = mapInfo.isInstalled() ? ChatColor.WHITE : ChatColor.DARK_GRAY;
+					sender.sendMessage("* " + color + mapInfo.getVersionString());
+				}
+				
+				return true;
+			}
+						
+			// CMD: /autoref state [<new state>]
+			if (args.length >= 1 && "state".equalsIgnoreCase(args[0]) && 
+				match != null && match.isDebugMode()) try
+			{
+				if (args.length >= 2)
+					match.setCurrentState(MatchStatus.valueOf(args[1].toUpperCase()));
+				getLogger().info("Match Status is now " + match.getCurrentState().name());
+				
+				return true;
+			}
+			catch (Exception e) { return false; }
+			
 			// CMD: /autoref send <msg> [<recipient>]
-			if (args.length >= 2 && "send".equalsIgnoreCase(args[0]) && match.isDebugMode())
+			if (args.length >= 2 && "send".equalsIgnoreCase(args[0]) && 
+				match != null && match.isDebugMode())
 			{
 				Set<Player> targets = match.getReferees();
 				if (args.length >= 3) targets = Sets.newHashSet(getServer().getPlayer(args[2]));
@@ -637,7 +607,11 @@ public class AutoReferee extends JavaPlugin
 					AutoReferee.REFEREE_PLUGIN_CHANNEL, args[1].getBytes());
 			}
 		}
-
+		
+		if ("autoref".equalsIgnoreCase(cmd.getName()) && sender.hasPermission("autoreferee.referee"))
+		{
+		}
+			
 		if ("zones".equalsIgnoreCase(cmd.getName()) && match != null)
 		{
 			Set<AutoRefTeam> lookupTeams = null;
