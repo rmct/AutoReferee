@@ -457,11 +457,15 @@ public class AutoReferee extends JavaPlugin
 			}
 			catch (Exception e) { return false; }
 			
-			// CMD: /autoref debug [<bool>]
+			// CMD: /autoref debug [console]
 			if (args.length >= 1 && "debug".equalsIgnoreCase(args[0]) && match != null)
 			{
-				match.setDebugMode(args.length >= 2 ? 
-					Boolean.parseBoolean(args[1]) : !match.isDebugMode());
+				if (match.isDebugMode())
+				{ match.setDebug(null); return true; }
+				
+				boolean consoleDebug = args.length >= 2 && "console".equalsIgnoreCase(args[1]);
+				match.setDebug(consoleDebug ? getServer().getConsoleSender() : sender);
+				
 				return true;
 			}
 			

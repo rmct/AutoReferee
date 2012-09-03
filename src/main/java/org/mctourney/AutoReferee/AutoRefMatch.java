@@ -38,6 +38,7 @@ import org.bukkit.World;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Animals;
@@ -259,13 +260,20 @@ public class AutoRefMatch
 	public void setRefereeReady(boolean r)
 	{ refereeReady = r; }
 
-	private boolean debugMode = false;
+	private CommandSender debugRecipient = null;
 
 	public boolean isDebugMode()
-	{ return debugMode; }
+	{ return debugRecipient != null; }
+
+	public void debug(String msg)
+	{ debugRecipient.sendMessage(msg); }
 	
-	public void setDebugMode(boolean d)
-	{ broadcast(ChatColor.GREEN + "Debug mode is now " + ((debugMode = d) ? "on" : "off")); }
+	public void setDebug(CommandSender recp)
+	{
+		debugRecipient = recp;
+		debug(ChatColor.GREEN + "Debug mode is now " + 
+			(isDebugMode() ? "on" : "off"));
+	}
 	
 	// number of seconds for each phase
 	public static final int READY_SECONDS = 15;
@@ -417,7 +425,7 @@ public class AutoRefMatch
 
 	public void messageReferees(String ...parts)
 	{
-		if (this.isDebugMode()) broadcast(ChatColor.DARK_GRAY + StringUtils.join(parts, ":"));
+		if (this.isDebugMode()) debug(ChatColor.DARK_GRAY + StringUtils.join(parts, ":"));
 		for (Player ref : getReferees()) messageReferee(ref, parts);
 	}	
 	
