@@ -779,7 +779,7 @@ public class AutoReferee extends JavaPlugin
 			if (target != player && !player.hasPermission("autoreferee.referee"))
 			{ sender.sendMessage("You do not have permission."); return true; }
 
-			match.joinTeam(target, team);
+			match.joinTeam(target, team, player.hasPermission("autoreferee.referee"));
 			return true;
 		}
 		
@@ -795,7 +795,7 @@ public class AutoReferee extends JavaPlugin
 			if (target != player && !player.hasPermission("autoreferee.referee"))
 			{ sender.sendMessage("You do not have permission."); return true; }
 
-			match.leaveTeam(target);
+			match.leaveTeam(target, player.hasPermission("autoreferee.referee"));
 			return true;
 		}
 		

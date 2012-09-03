@@ -313,6 +313,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	{ return pl == null ? null : getPlayer(pl.getName()); }
 
 	public void join(Player pl)
+	{ join(pl, false); }
+	
+	public void join(Player pl, boolean force)
 	{
 		// create an APL object for this player.
 		AutoRefPlayer apl = new AutoRefPlayer(pl, this);
@@ -320,16 +323,13 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		// quit if they are already on this team
 		if (players.contains(apl)) return;
 		
-		// prepare the player
-		if (!match.isDebugMode())
-		{
-			if (match != null && !match.getCurrentState().inProgress())
-				pl.teleport(getSpawnLocation());
-			pl.setGameMode(GameMode.SURVIVAL);
-		}
-		
 		// if the match is in progress, no one may join
-		if (!match.getCurrentState().isBeforeMatch()) return;
+		if (!match.getCurrentState().isBeforeMatch() && !force) return;
+		
+		// prepare the player
+		if (match != null && !match.getCurrentState().inProgress())
+			pl.teleport(getSpawnLocation());
+		pl.setGameMode(GameMode.SURVIVAL);
 		
 		players.add(apl);
 		match.messageReferees("team", getRawName(), "player", "+" + apl.getPlayerName());
@@ -343,9 +343,15 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		match.setupSpectators();
 		match.checkTeamsReady();
 	}
-
+	
 	public void leave(Player pl)
+	{ leave(pl, false); }
+
+	public void leave(Player pl, boolean force)
 	{
+		// if the match is in progress, no one may leave their team
+		if (!match.getCurrentState().isBeforeMatch() && !force) return;
+		
 		// create an APL object for this player.
 		AutoRefPlayer apl = new AutoRefPlayer(pl);
 		if (!players.remove(apl)) return;

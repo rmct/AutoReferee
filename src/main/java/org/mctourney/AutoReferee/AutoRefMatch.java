@@ -1232,17 +1232,17 @@ public class AutoRefMatch
 	public boolean isPlayerExpected(OfflinePlayer opl)
 	{ return expectedTeam(opl) != null; }
 	
-	public boolean joinTeam(Player pl, AutoRefTeam t)
+	public boolean joinTeam(Player pl, AutoRefTeam t, boolean force)
 	{
 		AutoRefTeam pteam = getPlayerTeam(pl);
 		if (t == pteam) return true;
 		
-		if (pteam != null) pteam.leave(pl);
-		t.join(pl); return true;
+		if (pteam != null) pteam.leave(pl, force);
+		t.join(pl, force); return true;
 	}
 	
-	public void leaveTeam(Player pl)
-	{ for (AutoRefTeam team : teams) team.leave(pl); }
+	public void leaveTeam(Player pl, boolean force)
+	{ for (AutoRefTeam team : teams) team.leave(pl, force); }
 	
 	public AutoRefPlayer getPlayer(Player pl)
 	{
