@@ -313,12 +313,14 @@ public class AutoRefMatch
 	}
 
 	public Set<Player> getReferees()
+	{ return getReferees(true); }
+
+	public Set<Player> getReferees(boolean excludeStreamers)
 	{
 		Set<Player> refs = Sets.newHashSet();
 		for (Player p : world.getPlayers())
-			if (p.hasPermission("autoreferee.referee")) refs.add(p);
-		for (AutoRefPlayer apl : getPlayers())
-			if (apl.getPlayer() != null) refs.remove(apl.getPlayer());
+			if (p.hasPermission("autoreferee.referee") && !isPlayer(p))
+				if (!excludeStreamers || !p.hasPermission("autoreferee.streamer")) refs.add(p);
 		return refs;
 	}
 

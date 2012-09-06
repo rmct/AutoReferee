@@ -640,7 +640,7 @@ public class ZoneListener implements Listener
 		String message = apl.getName() + ChatColor.GRAY + " has teleported @ " +
 			BlockVector3.fromLocation(to).toCoords() + bedrock;
 		
-		for (Player ref : match.getReferees()) ref.sendMessage(message);
+		for (Player ref : match.getReferees(true)) ref.sendMessage(message);
 		plugin.getLogger().info(ChatColor.stripColor(message));
 	}
 	
