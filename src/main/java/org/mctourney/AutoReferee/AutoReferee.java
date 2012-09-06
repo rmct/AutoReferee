@@ -219,6 +219,10 @@ public class AutoReferee extends JavaPlugin
 		setAutoMode(getServer().getOnlineMode() && qurl != null && 
 			this.getConfig().getBoolean("server-mode.online", true));
 		
+		// setup a possible alternate map repository
+		String mrepo = this.getConfig().getString("server-mode.map-repo", null);
+		if (mrepo != null) AutoRefMatch.changeMapRepo(mrepo);
+		
 		// attempt to setup the plugin channels
 		setupPluginChannels();
 

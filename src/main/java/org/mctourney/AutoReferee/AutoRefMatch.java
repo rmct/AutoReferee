@@ -64,8 +64,11 @@ import com.google.common.collect.Sets;
 public class AutoRefMatch
 {
 	// online map list
-	private static final String MAPREPO = "http://s3.amazonaws.com/autoreferee/maps/";
-	private static final String MAPLIST = MAPREPO + "list.csv";
+	private static String MAPREPO = "http://s3.amazonaws.com/autoreferee/maps/";
+	
+	// set new map repo
+	public static void changeMapRepo(String s)
+	{ MAPREPO = s + "/"; }
 	
 	// world this match is taking place on
 	private World world;
@@ -618,7 +621,7 @@ public class AutoRefMatch
 	public static Set<MapInfo> getAvailableMaps()
 	{
 		Set<MapInfo> maps = Sets.newHashSet(getInstalledMaps());
-		String mlist = QueryServer.syncQuery(MAPLIST, null, null);
+		String mlist = QueryServer.syncQuery(MAPREPO + "list.csv", null, null);
 		
 		if (mlist != null) for (String line : mlist.split("[\\r\\n]+")) 
 			maps.add(new MapInfo(line));
