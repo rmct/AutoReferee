@@ -273,6 +273,10 @@ public class AutoRefMatch
 	
 	public void setDebug(CommandSender recp)
 	{
+		if (recp.hasPermission("autoreferee.streamer"))
+			AutoReferee.getInstance().getLogger().info(
+				"You may not direct debug message to a streamer!");
+			
 		debugRecipient = recp;
 		debug(ChatColor.GREEN + "Debug mode is now " + 
 			(isDebugMode() ? "on" : "off"));
