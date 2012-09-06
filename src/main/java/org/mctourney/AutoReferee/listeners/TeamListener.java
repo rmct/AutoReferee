@@ -2,6 +2,7 @@ package org.mctourney.AutoReferee.listeners;
 
 import java.util.Iterator;
 
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -17,6 +18,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMatch;
+import org.mctourney.AutoReferee.AutoRefPlayer;
 import org.mctourney.AutoReferee.AutoRefTeam;
 import org.mctourney.AutoReferee.AutoReferee;
 
@@ -102,6 +104,18 @@ public class TeamListener implements Listener
 		
 		// re-check world ready
 		if (match != null) match.checkTeamsReady();
+		
+		// if this player was damaged recently (during the match), notify
+		if (match != null && match.getCurrentState().inProgress())
+		{
+			AutoRefPlayer apl = match.getPlayer(player);
+			if (apl != null && apl.wasDamagedRecently())
+			{
+				String message = apl.getName() + ChatColor.GRAY + " logged out during combat " +
+					String.format("with %2.1f hearts remaining", apl.getPlayer().getHealth() / 2.0);
+				for (Player ref : match.getReferees(true)) ref.sendMessage(message);
+			}
+		}
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
