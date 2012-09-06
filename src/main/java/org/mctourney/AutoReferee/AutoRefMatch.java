@@ -991,8 +991,8 @@ public class AutoRefMatch
 
 	public void setupSpectators(Player focus)
 	{
-		boolean ended = getCurrentState().isAfterMatch();
-		setSpectatorMode(focus, !isPlayer(focus) || ended);
+		if (getCurrentState().isBeforeMatch()) setSpectatorMode(focus, isReferee(focus));
+		else setSpectatorMode(focus, !isPlayer(focus) || getCurrentState().isAfterMatch());
 		
 		for ( Player pl : getWorld().getPlayers() )
 		{
