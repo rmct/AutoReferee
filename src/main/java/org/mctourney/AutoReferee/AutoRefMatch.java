@@ -634,7 +634,7 @@ public class AutoRefMatch
 		return maps;
 	}
 
-	public static File getMapFolder(String worldName, Long checksum) throws IOException
+	public static File getMapFolder(String worldName) throws IOException
 	{
 		// assume worldName exists
 		if (worldName == null) return null;

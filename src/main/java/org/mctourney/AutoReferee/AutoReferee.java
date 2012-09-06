@@ -304,15 +304,13 @@ public class AutoReferee extends JavaPlugin
 		}
 	}
 
-	public World createMatchWorld(String worldName, Long checksum, String loadedName) throws IOException
+	public World createMatchWorld(String worldName, String loadedName) throws IOException
 	{
-		File existingWorld = new File(worldName);
-		if (existingWorld.exists() && existingWorld.isDirectory() &&
-			new File(existingWorld, AutoReferee.CFG_FILENAME).exists())
-				return getServer().createWorld(WorldCreator.name(worldName));
+		if (loadedName == null)
+			loadedName = WORLD_PREFIX + Long.toHexString(new Date().getTime());
 		
 		// get the folder associated with this world name
-		File mapFolder = AutoRefMatch.getMapFolder(worldName, checksum);
+		File mapFolder = AutoRefMatch.getMapFolder(worldName);
 		if (mapFolder == null) return null;
 		
 		// create the temporary directory where this map will be
@@ -327,15 +325,9 @@ public class AutoReferee extends JavaPlugin
 		this.addMatch(new AutoRefMatch(w, true)); return w;
 	}
 	
-	public World createMatchWorld(String worldName, String loadedName) throws IOException
-	{
-		if (loadedName == null) loadedName = WORLD_PREFIX + Long.toHexString(new Date().getTime());
-		return createMatchWorld(worldName, null, loadedName);
-	}
-	
 	public AutoRefMatch createMatch(AutoRefMatch.MatchParams params) throws IOException
 	{
-		World world = createMatchWorld(params.getMap(), params.getChecksum(), null);
+		World world = createMatchWorld(params.getMap(), null);
 		AutoRefMatch m = new AutoRefMatch(world, true);
 		
 		Iterator<AutoRefTeam> teamiter = m.getTeams().iterator();
