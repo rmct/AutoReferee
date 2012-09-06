@@ -80,7 +80,10 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		// send name change event before we actually change the name
 		match.messageReferees("team", getRawName(), "name", name);
 		
+		String oldName = getName();
 		customName = name;
+		
+		match.broadcast(oldName + " is now known as " + getName());
 	}
 
 	public String getName()
@@ -528,6 +531,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	{
 		// no work to be done
 		if (team1 == null || team2 == null || team1 == team2) return;
+		
+		// must be in the same match
+		if (team1.getMatch() != team2.getMatch()) return;
 		
 		// switch the sets of players
 		Set<AutoRefPlayer> t1apls = team1.getPlayers();

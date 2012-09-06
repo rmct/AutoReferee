@@ -634,6 +634,17 @@ public class AutoReferee extends JavaPlugin
 				return true;
 			}
 			
+			// CMD: /autoref hud ...
+			if (args.length >= 1 && "hud".equalsIgnoreCase(args[0]) && match != null)
+			{
+				// CMD: /autoref hud swap
+				if (args.length >= 2 && "swap".equalsIgnoreCase(args[1]))
+				{
+					match.messageReferee(player, "match", match.getWorld().getName(), "swap");
+					return true;
+				}
+			}
+			
 			// CMD: /autoref swapteams <team1> <team2>
 			if (args.length == 3 && "swapteams".equalsIgnoreCase(args[0]) && match != null)
 			{
