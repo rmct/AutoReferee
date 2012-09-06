@@ -744,7 +744,10 @@ public class AutoRefMatch
 			AutoReferee autoref = AutoReferee.getInstance();
 			try
 			{
+				// if we fail, we loop back around again on the next try...
 				FileUtils.deleteDirectory(worldFolder);
+				
+				// otherwise, stop the repeating task
 				autoref.getLogger().info(worldFolder.getName() + " deleted!");
 				autoref.getServer().getScheduler().cancelTask(task);
 			}
@@ -753,18 +756,23 @@ public class AutoRefMatch
 		}
 	}
 
-	public void destroy() throws IOException
+	public void destroy()
 	{
 		AutoReferee autoref = AutoReferee.getInstance();
-		this.setCurrentState(MatchStatus.NONE);
-		autoref.clearMatch(this);
 		
+		// first, handle all the players
+		for (Player p : world.getPlayers()) autoref.playerDone(p);
+					
 		// if everyone has been moved out of this world, clean it up
 		if (world.getPlayers().size() == 0)
 		{
 			// if we are running in auto-mode and this is OUR world
 			if (autoref.isAutoMode() || this.isTemporaryWorld())
 			{
+				// only change the state if we are sure we are going to unload
+				this.setCurrentState(MatchStatus.NONE);
+				autoref.clearMatch(this);
+				
 				autoref.getServer().unloadWorld(world, false);
 				if (!autoref.getConfig().getBoolean("save-worlds", false))
 				{
@@ -1173,13 +1181,7 @@ public class AutoRefMatch
 	class MatchEndTask implements Runnable
 	{
 		public void run()
-		{
-			// first, handle all the players
-			for (Player p : world.getPlayers()) AutoReferee.getInstance().playerDone(p);
-			
-			// then, cleanup the match object (swallow exceptions)
-			try { destroy(); } catch (Exception e) {  };
-		}
+		{ destroy(); }
 	}
 
 	public void matchComplete(AutoRefTeam t)

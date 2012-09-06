@@ -568,6 +568,13 @@ public class AutoReferee extends JavaPlugin
 			}
 			catch (Exception e) { e.printStackTrace(); return false; }
 			
+			// CMD: /autoref unload
+			if (args.length == 1 && "unload".equalsIgnoreCase(args[0]) && match != null)
+			{
+				match.destroy();
+				return true;
+			}
+			
 			// CMD: /autoref maplist
 			if (args.length == 1 && "maplist".equalsIgnoreCase(args[0]))
 			{
