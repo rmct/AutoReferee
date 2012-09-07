@@ -56,6 +56,11 @@ permissions:
   autoreferee.configure:
     description: AutoReferee configuration
     default: false
+  autoreferee.streamer:
+    description: AutoReferee streamer
+    default: false
+    children:
+      autoreferee.referee: true
   autoreferee.referee:
     description: AutoReferee referees
     default: false
