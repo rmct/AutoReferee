@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -116,6 +117,9 @@ public class AutoReferee extends JavaPlugin
 
 	public AutoRefMatch getMatch(World w)
 	{ return w != null ? matches.get(w.getUID()) : null; }
+	
+	public Collection<AutoRefMatch> getMatches()
+	{ return matches.values(); }
 
 	public void addMatch(AutoRefMatch match)
 	{ matches.put(match.getWorld().getUID(), match); }
