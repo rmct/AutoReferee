@@ -180,17 +180,6 @@ public class ZoneListener implements Listener
 		}
 	}
 	
-	@EventHandler
-	public void playerRespawn(PlayerRespawnEvent event)
-	{
-		Player player = event.getPlayer();
-		AutoRefMatch match = plugin.getMatch(player.getWorld());
-		if (match == null) return;
-
-		AutoRefPlayer apl = match.getPlayer(player);
-		if (apl != null) apl.respawn();
-	}
-	
 	public boolean validPlayer(Player player)
 	{
 		// if the match is not under our control, allowed
