@@ -13,7 +13,7 @@ public abstract class ColorConverter
 	static
 	{
 		dyeChatMap = Maps.newHashMap();
-		dyeChatMap.put(DyeColor.BLACK, ChatColor.BLACK);
+		dyeChatMap.put(DyeColor.BLACK, ChatColor.DARK_GRAY);
 		dyeChatMap.put(DyeColor.BLUE, ChatColor.DARK_BLUE);
 		dyeChatMap.put(DyeColor.BROWN, ChatColor.GOLD);
 		dyeChatMap.put(DyeColor.CYAN, ChatColor.AQUA);
