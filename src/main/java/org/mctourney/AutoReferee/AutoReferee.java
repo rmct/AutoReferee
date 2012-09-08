@@ -527,7 +527,7 @@ public class AutoReferee extends JavaPlugin
 			}
 			
 			// CMD: /autoref nocraft
-			if (args.length >= 1 && "nocraft".equalsIgnoreCase(args[0]))
+			if (args.length >= 1 && "nocraft".equalsIgnoreCase(args[0]) && match != null)
 			{
 				ItemStack item = player.getItemInHand();
 				if (item != null) match.addIllegalCraft(BlockData.fromItemStack(item));
