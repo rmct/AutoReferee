@@ -36,6 +36,8 @@ public class AutoRefPlayer
 	private static final int MIN_KILLSTREAK = 5;
 	private static final int MIN_DOMINATE = 3;
 	
+	private static final long DAMAGE_COOLDOWN_TICKS = 3 * 20L;
+	
 	static class DamageCause
 	{
 		// cause of damage, primary value for damage cause
@@ -189,7 +191,16 @@ public class AutoRefPlayer
 	// streak information - kill streak, domination, revenge
 	public int totalStreak = 0;
 	private Map<AutoRefPlayer, Integer> playerStreak;
-
+	
+	// last damage tick
+	private long lastDamageTick;
+	
+	public long damageCooldownLength()
+	{ return this.getTeam().getMatch().getWorld().getFullTime() - lastDamageTick; }
+	
+	public boolean wasDamagedRecently()
+	{ return damageCooldownLength() < DAMAGE_COOLDOWN_TICKS; }
+	
 	// constructor for simply setting up the variables
 	@SuppressWarnings("unchecked")
 	public AutoRefPlayer(Player p, AutoRefTeam t)
@@ -304,6 +315,9 @@ public class AutoRefPlayer
 		// get the last damage cause, and mark that as the cause of the damage
 		AutoRefPlayer.DamageCause dc = AutoRefPlayer.DamageCause.fromDamageEvent(e);
 		damage.put(dc, e.getDamage() + damage.get(dc));
+		
+		// reset the damage tick
+		lastDamageTick = this.getTeam().getMatch().getWorld().getFullTime();
 	}
 	
 	// register that we just died
