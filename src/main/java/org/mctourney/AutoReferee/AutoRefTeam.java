@@ -126,6 +126,13 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	// location of custom spawn
 	private Location spawn;
 	
+	public void setSpawnLocation(Location loc)
+	{
+		getMatch().broadcast("Set " + getName() + "'s spawn to " + 
+			BlockVector3.fromLocation(loc).toCoords());
+		this.spawn = loc;
+	}
+	
 	public Location getSpawnLocation()
 	{ return spawn == null ? match.getWorldSpawn() : spawn; }
 
@@ -222,6 +229,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 				if (creg != null) newTeam.regions.add(creg);
 			}
 		}
+		
+		newTeam.spawn = !conf.containsKey("spawn") ? null :
+			BlockVector3.fromCoords((String) conf.get("spawn")).toLocation(w);
 
 		// setup both objective-based data-structures together
 		// -- avoids an NPE with getObjectives()
@@ -275,6 +285,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		// add the maximum team size
 		map.put("maxsize", new Integer(maxSize));
+		
+		// set the team spawn (if there is a custom spawn)
+		if (spawn != null) map.put("spawn", BlockVector3.fromLocation(spawn).toCoords());
 		
 		// convert the win conditions to strings
 		List<String> wcond = Lists.newArrayList();

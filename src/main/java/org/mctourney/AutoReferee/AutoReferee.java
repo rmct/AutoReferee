@@ -533,6 +533,21 @@ public class AutoReferee extends JavaPlugin
 				if (item != null) match.addIllegalCraft(BlockData.fromItemStack(item));
 				return true;
 			}
+			
+			// CMD: /autoref setspawn <team>
+			if (args.length >= 2 && "setspawn".equalsIgnoreCase(args[0]) && match != null && player != null)
+			{
+				AutoRefTeam team = match.teamNameLookup(args[1]);
+				if (team == null)
+				{
+					// team name is invalid. let the player know
+					sender.sendMessage(ChatColor.DARK_GRAY + args[1] + 
+						ChatColor.RESET + "is not a valid team.");
+					sender.sendMessage("Teams are " + match.getTeamList());
+				}
+				else team.setSpawnLocation(player.getLocation());
+				return true;
+			}
 		}
 
 		if ("autoref".equalsIgnoreCase(cmd.getName()) && sender.hasPermission("autoreferee.admin"))
