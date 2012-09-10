@@ -44,8 +44,11 @@ public class WorldListener implements Listener
 	public void playerQuit(PlayerQuitEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
-		if (match != null) 
+		if (match != null)
+		{
 			event.setQuitMessage(match.colorMessage(event.getQuitMessage()));
+			match.checkTeamsReady();
+		}
 	}
 	
 	@EventHandler
