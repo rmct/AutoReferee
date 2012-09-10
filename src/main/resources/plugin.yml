@@ -1,6 +1,6 @@
 name: AutoReferee
 main: org.mctourney.AutoReferee.AutoReferee
-version: 0.9
+version: 0.10
 author: authorblues
 
 softdepend:
