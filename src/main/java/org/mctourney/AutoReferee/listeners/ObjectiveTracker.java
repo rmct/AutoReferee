@@ -166,10 +166,10 @@ public class ObjectiveTracker implements Listener
 		AutoRefMatch match = plugin.getMatch(world);
 		if (match != null)
 		{
-			Location loc = block.getLocation();
-			for (AutoRefTeam team : match.getTeams())
+			AutoRefPlayer nearest = match.getNearestPlayer(block.getLocation());
+			if (nearest != null) for (AutoRefTeam team : match.getTeams())
 				for (SourceInventory sinv : team.targetChests.values())
-					if (sinv.matchesBlock(block)) sinv.seenBy(match.getNearestPlayer(loc));
+					if (sinv.matchesBlock(block)) sinv.seenBy(nearest);
 		}
 	}
 	
