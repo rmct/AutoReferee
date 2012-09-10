@@ -20,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
+import org.mctourney.AutoReferee.AutoRefTeam.GoalStatus;
 import org.mctourney.AutoReferee.util.ArmorPoints;
 import org.mctourney.AutoReferee.util.BlockData;
 import org.mctourney.AutoReferee.util.BlockVector3;
@@ -453,7 +454,19 @@ public class AutoRefPlayer
 			carrying = newCarrying;
 			
 			if (newCarrying != oldCarrying)
+			{
+				Map<BlockData, GoalStatus> oldStatus = getTeam().getObjectiveStatuses();
 				getTeam().updateCarrying(this, oldCarrying, newCarrying);
+				
+				for (Map.Entry<BlockData, GoalStatus> e : getTeam().getObjectiveStatuses().entrySet())
+				if (oldStatus.get(e.getKey()) == GoalStatus.NONE && e.getValue() != GoalStatus.NONE)
+				{
+					// generate a transcript event for seeing the box
+					String m = String.format("%s is carrying %s", getPlayerName(), e.getKey().getRawName());
+					getTeam().getMatch().addEvent(new TranscriptEvent(getTeam().getMatch(),
+						TranscriptEvent.EventType.OBJECTIVE_FOUND, m, getPlayer().getLocation(), this, e.getKey()));
+				}
+			}
 		}
 	}
 

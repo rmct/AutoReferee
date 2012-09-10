@@ -3,7 +3,6 @@ package org.mctourney.AutoReferee.listeners;
 import java.util.Map;
 
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
@@ -30,7 +29,6 @@ import org.mctourney.AutoReferee.AutoRefTeam;
 import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.AutoRefTeam.GoalStatus;
-import org.mctourney.AutoReferee.source.*;
 import org.mctourney.AutoReferee.util.BlockData;
 
 public class ObjectiveTracker implements Listener 
@@ -124,52 +122,17 @@ public class ObjectiveTracker implements Listener
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void blockBreak(BlockBreakEvent event)
 	{
-		Player pl = event.getPlayer();
-		Block block = event.getBlock();
-		
-		AutoRefMatch match = plugin.getMatch(block.getWorld());
-		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
-		
-		if (match != null && apl != null && block != null)
-		{
-			for (SourceInventory sinv : apl.getTeam().targetChests.values())
-				if (sinv.matchesBlock(block)) sinv.seenBy(apl);
-			match.checkWinConditions();
-		}
+		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
+		if (match != null) match.checkWinConditions();
 	}
 	
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void blockInteract(PlayerInteractEvent event)
 	{
-		Player pl = event.getPlayer();
 		if (event.hasBlock())
 		{
-			Block block = event.getClickedBlock();
-			AutoRefMatch match = plugin.getMatch(block.getWorld());
-			AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
-			
-			if (match != null && apl != null && block != null)
-			{
-				for (SourceInventory sinv : apl.getTeam().targetChests.values())
-					if (sinv.matchesBlock(block)) sinv.seenBy(apl);
-				match.checkWinConditions();
-			}
-		}
-	}
-	
-	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
-	public void blockDispense(BlockDispenseEvent event)
-	{
-		Block block = event.getBlock();
-		World world = block.getWorld();
-		
-		AutoRefMatch match = plugin.getMatch(world);
-		if (match != null)
-		{
-			AutoRefPlayer nearest = match.getNearestPlayer(block.getLocation());
-			if (nearest != null) for (AutoRefTeam team : match.getTeams())
-				for (SourceInventory sinv : team.targetChests.values())
-					if (sinv.matchesBlock(block)) sinv.seenBy(nearest);
+			AutoRefMatch match = plugin.getMatch(event.getClickedBlock().getWorld());
+			if (match != null) match.checkWinConditions();
 		}
 	}
 	
@@ -180,15 +143,7 @@ public class ObjectiveTracker implements Listener
 		Entity entity = event.getRightClicked();
 		
 		AutoRefMatch match = plugin.getMatch(pl.getWorld());
-		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
-		
-		if (match != null && apl != null && entity != null)
-		{
-			for (AutoRefTeam team : match.getTeams())
-				for (SourceInventory sinv : team.targetChests.values())
-					if (sinv.matchesEntity(entity)) sinv.seenBy(apl);
-			match.checkWinConditions();
-		}
+		if (match != null) match.checkWinConditions();
 
 		if (entity.getType() == EntityType.PLAYER && match != null
 			&& match.isReferee(pl) && match.isPlayer((Player) entity))

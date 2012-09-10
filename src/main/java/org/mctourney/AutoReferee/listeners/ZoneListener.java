@@ -2,7 +2,6 @@ package org.mctourney.AutoReferee.listeners;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -12,10 +11,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.conversations.BooleanPrompt;
-import org.bukkit.conversations.Conversation;
-import org.bukkit.conversations.ConversationContext;
-import org.bukkit.conversations.Prompt;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -33,10 +28,10 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
+import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -49,14 +44,10 @@ import org.mctourney.AutoReferee.AutoRefTeam;
 import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.AutoRefMatch.StartMechanism;
 import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
-import org.mctourney.AutoReferee.source.SourceInventory;
-import org.mctourney.AutoReferee.source.SourceInventoryBlock;
-import org.mctourney.AutoReferee.source.SourceInventoryEntity;
 import org.mctourney.AutoReferee.util.BlockVector3;
 import org.mctourney.AutoReferee.util.BlockData;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 public class ZoneListener implements Listener 
 {
@@ -233,15 +224,6 @@ public class ZoneListener implements Listener
 		AutoRefPlayer apl = match.getPlayer(player);
 		if (apl != null && !apl.getTeam().canBuild(loc))
 		{ event.setCancelled(true); return; }
-		
-		// make sure this isn't another team's source container
-		if (apl != null) for (AutoRefTeam team : match.getTeams())
-		{
-			if (team == apl.getTeam()) continue;
-			for (SourceInventory src : team.targetChests.values())
-				if (src.matchesBlock(event.getBlock()))
-				{ event.setCancelled(true); return; }
-		}
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
@@ -263,15 +245,6 @@ public class ZoneListener implements Listener
 			
 			if (apl != null && !apl.getTeam().canEnter(loc, 0.0))
 			{ event.setCancelled(true); return; }
-			
-			// make sure this isn't another team's source container
-			if (apl != null) for (AutoRefTeam team : match.getTeams())
-			{
-				if (team == apl.getTeam()) continue;
-				for (SourceInventory src : team.targetChests.values())
-					if (src.matchesBlock(event.getClickedBlock()))
-					{ event.setCancelled(true); return; }
-			}
 		}
 		else // is spectator
 		{
@@ -311,15 +284,6 @@ public class ZoneListener implements Listener
 		AutoRefPlayer apl = match.getPlayer(player);
 		if (apl != null && !apl.getTeam().canEnter(loc, 0.0))
 		{ event.setCancelled(true); return; }
-		
-		// make sure this isn't another team's source container
-		if (apl != null) for (AutoRefTeam team : match.getTeams())
-		{
-			if (team == apl.getTeam()) continue;
-			for (SourceInventory src : team.targetChests.values())
-				if (src.matchesEntity(event.getRightClicked()))
-				{ event.setCancelled(true); return; }
-		}
 	}
 	
 	// restrict block pickup by referees
@@ -360,38 +324,7 @@ public class ZoneListener implements Listener
 				// if the player doesn't have configure permissions, nothing
 				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
 				
-				if (block.getState() instanceof InventoryHolder)
-				{
-					// setup source inventory
-					SourceInventory src = SourceInventoryBlock.fromBlock(block);
-					Set<AutoRefTeam> cfgTeams = Sets.newLinkedHashSet();
-					
-					boolean removed = false, r;
-					for (AutoRefTeam team : match.getTeams())
-						if (team.checkPosition(block.getLocation()))
-					{
-						Set<BlockData> prevObj = team.getObjectives();
-						removed |= (r = team.targetChests.values().remove(src));
-						Set<BlockData> newObj = team.getObjectives();
-
-						prevObj.removeAll(newObj);
-						for (BlockData bd : prevObj) match.messageReferees(
-							"team", team.getRawName(), "obj", "-" + bd.toString());
-
-						if (r) match.broadcast(String.format("%s is no longer a source for %s for %s", 
-							src.getName(), src.blockdata.getName(), team.getName()));
-						else cfgTeams.add(team);
-					}
-					
-					if (!removed && !cfgTeams.isEmpty())
-					{
-						if (cfgTeams.size() == 1) for (AutoRefTeam team : cfgTeams)
-							team.addSourceInventory(src);
-						else new Conversation(plugin, event.getPlayer(), 
-							new SourceInventoryConfirmation(src, cfgTeams)).begin();
-					}
-				}
-				else for (AutoRefTeam team : match.getTeams())
+				for (AutoRefTeam team : match.getTeams())
 					if (team.checkPosition(block.getLocation()))
 						team.addWinCondition(block);
 				
@@ -451,46 +384,6 @@ public class ZoneListener implements Listener
 		// get which action to perform
 		switch (toolMap.get(typeID))
 		{
-			// this is the tool built for setting win conditions
-			case TOOL_WINCOND:
-				
-				// if there is no entity involved in this event, nothing
-				if (event.getRightClicked() == null) return;
-				
-				// if the player doesn't have configure permissions, nothing
-				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
-				
-				// setup source inventory
-				SourceInventory src = SourceInventoryEntity.fromEntity(event.getRightClicked());
-				Set<AutoRefTeam> cfgTeams = Sets.newLinkedHashSet();
-				
-				boolean removed = false, r;
-				for (AutoRefTeam team : match.getTeams())
-					if (team.checkPosition(event.getRightClicked().getLocation()))
-				{
-					Set<BlockData> prevObj = team.getObjectives();
-					removed |= (r = team.targetChests.values().remove(src));
-					Set<BlockData> newObj = team.getObjectives();
-
-					prevObj.removeAll(newObj);
-					for (BlockData bd : prevObj) match.messageReferees(
-						"team", team.getRawName(), "obj", "-" + bd.toString());
-					
-					if (r) match.broadcast(String.format("%s is no longer a source for %s for %s", 
-						src.getName(), src.blockdata.getName(), team.getName()));
-					else cfgTeams.add(team);
-				}
-				
-				if (!removed && !cfgTeams.isEmpty())
-				{
-					if (cfgTeams.size() == 1) for (AutoRefTeam team : cfgTeams)
-						team.addSourceInventory(src);
-					else new Conversation(plugin, event.getPlayer(), 
-						new SourceInventoryConfirmation(src, cfgTeams)).begin();
-				}
-				
-				break;
-				
 			// this is the tool built for protecting entities
 			case TOOL_PROTECT:
 				
@@ -528,51 +421,6 @@ public class ZoneListener implements Listener
 		
 		// cancel the event, since it was one of our tools being used properly
 		event.setCancelled(true);
-	}
-	
-	private class SourceInventoryConfirmation extends BooleanPrompt
-	{
-		// inventory that is being set up
-		private SourceInventory src = null;
-		
-		// teams to add this source inventory to
-		private Set<AutoRefTeam> teams = null;
-		private Iterator<AutoRefTeam> teamIterator = null;
-		
-		public SourceInventoryConfirmation(SourceInventory s, Set<AutoRefTeam> t)
-		{
-			this.teams = t;
-			this.teamIterator = this.teams.iterator();
-			this.src = s;
-		}
-
-		public String getPromptText(ConversationContext context)
-		{
-			if (!teamIterator.hasNext()) return null;
-			
-			// get the team for this specific prompt
-			AutoRefTeam team = teamIterator.next();
-			
-			return String.format("Set %s as source for %s for %s?", 
-				src.getName(), src.blockdata.getName(), team.getName());
-		}
-
-		@Override
-		protected Prompt acceptValidatedInput(ConversationContext context, boolean res)
-		{
-			// if the configuration was rejected, remove the team
-			if (!res) teamIterator.remove();
-			
-			// if there are more teams, return this prompt again
-			if (teamIterator.hasNext()) return this;
-			
-			// add the source inventory to the remaining teams
-			for (AutoRefTeam team : this.teams)
-				team.addSourceInventory(this.src);
-			
-			// done with conversation
-			return Prompt.END_OF_CONVERSATION;
-		}
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST)

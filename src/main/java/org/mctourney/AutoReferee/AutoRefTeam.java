@@ -3,7 +3,6 @@ package org.mctourney.AutoReferee;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
@@ -15,9 +14,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 import org.mctourney.AutoReferee.listeners.ZoneListener;
-import org.mctourney.AutoReferee.source.SourceInventory;
-import org.mctourney.AutoReferee.source.SourceInventoryBlock;
-import org.mctourney.AutoReferee.source.SourceInventoryEntity;
 import org.mctourney.AutoReferee.util.*;
 
 import com.google.common.collect.Lists;
@@ -138,7 +134,6 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 	// win-conditions, locations mapped to expected block data
 	public Map<Location, BlockData> winConditions;
-	public Map<BlockData, SourceInventory> targetChests;
 	
 	// status of objectives
 	public enum GoalStatus
@@ -236,8 +231,6 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		// setup both objective-based data-structures together
 		// -- avoids an NPE with getObjectives()
 		newTeam.winConditions = Maps.newHashMap();
-		newTeam.targetChests = Maps.newHashMap();
-		
 		if (conf.containsKey("win-condition"))
 		{
 			List<String> slist = (List<String>) conf.get("win-condition");
@@ -248,24 +241,6 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 				BlockVector3 v = BlockVector3.fromCoords(sp[0]);
 				newTeam.addWinCondition(w.getBlockAt(v.toLocation(w)), 
 					BlockData.fromString(sp[1]));
-			}
-		}
-		
-		if (conf.containsKey("target-container"))
-		{
-			List<String> slist = (List<String>) conf.get("target-container");
-			if (slist != null) for (String s : slist)
-			{
-				BlockVector3 bvec = BlockVector3.fromCoords(s);
-				if (bvec != null) newTeam.addSourceInventory(
-					SourceInventoryBlock.fromBlock(w.getBlockAt(bvec.toLocation(w))));
-				
-				else try
-				{
-					SourceInventory srce = SourceInventoryEntity.fromUUID(w, UUID.fromString(s));
-					newTeam.addSourceInventory(srce);
-				}
-				catch (IllegalArgumentException e) {  }
 			}
 		}
 
@@ -297,14 +272,6 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		// add the win condition list
 		map.put("win-condition", wcond);
-		
-		// convert the target containers to strings
-		List<String> tcon = Lists.newArrayList();
-		for (Map.Entry<BlockData, SourceInventory> e : targetChests.entrySet())
-			tcon.add(e.getValue().toString());
-
-		// add the target container list
-		map.put("target-container", tcon);
 
 		// convert regions to strings
 		List<String> regstr = Lists.newArrayList();
@@ -431,23 +398,6 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		return build;
 	}
 	
-	public void addSourceInventory(SourceInventory src)
-	{
-		// actually quite possible...
-		if (src == null) return;
-		
-		Set<BlockData> prevObj = getObjectives();
-		targetChests.put(src.blockdata, src);
-		Set<BlockData> newObj = getObjectives();
-		
-		newObj.removeAll(prevObj);
-		for (BlockData bd : newObj) match.messageReferees(
-			"team", this.getRawName(), "obj", "+" + bd.toString());
-		
-		match.broadcast(String.format("%s is a source for %s", 
-			src.getName(), src.blockdata.getName()));
-	}
-	
 	public void addWinCondition(Block block)
 	{
 		// if the block is null, forget it
@@ -480,7 +430,6 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	{
 		Set<BlockData> objectives = Sets.newHashSet();
 		objectives.addAll(winConditions.values());
-		objectives.addAll(targetChests.keySet());
 		return objectives;
 	}
 	
@@ -523,6 +472,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 	public GoalStatus getObjectiveStatus(BlockData objective)
 	{ return objectiveStatus.get(objective); }
+
+	public Map<BlockData, GoalStatus> getObjectiveStatuses()
+	{ return Maps.newHashMap(objectiveStatus); }
 
 	public void updateCarrying(AutoRefPlayer apl, Set<BlockData> carrying, Set<BlockData> newCarrying)
 	{
