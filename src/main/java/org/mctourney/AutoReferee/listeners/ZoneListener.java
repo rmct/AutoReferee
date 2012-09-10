@@ -284,7 +284,10 @@ public class ZoneListener implements Listener
 				for (int i = 0; i < contents.length; ++i)
 					if (contents[i] != null) contents[i] = contents[i].clone();
 				
-				Inventory newinv = Bukkit.getServer().createInventory(null, inv.getType());
+				Inventory newinv;
+				if (inv instanceof DoubleChestInventory)
+					newinv = Bukkit.getServer().createInventory(null, 54, "Large Chest");
+				else newinv = Bukkit.getServer().createInventory(null, inv.getType());
 				newinv.setContents(contents);
 				
 				player.openInventory(newinv);
