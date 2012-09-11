@@ -1,14 +1,10 @@
 package org.mctourney.AutoReferee;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +12,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrMatcher;
@@ -25,7 +22,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.WorldCreator;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -42,7 +38,6 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 
-import org.mctourney.AutoReferee.AutoRefMatch.MapInfo;
 import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
 import org.mctourney.AutoReferee.listeners.ObjectiveTracker;
 import org.mctourney.AutoReferee.listeners.PlayerVersusPlayerListener;
@@ -57,8 +52,6 @@ import org.mctourney.AutoReferee.util.Vector3;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 public class AutoReferee extends JavaPlugin
 {
@@ -247,11 +240,14 @@ public class AutoReferee extends JavaPlugin
 		if (isAutoMode()) setAutoMode(checkPlugins(pm));
 		
 		// setup the map library folder
-		AutoRefMatch.getMapLibrary();
+		AutoRefMap.getMapLibrary();
 		
 		// process initial world(s), just in case
 		for ( World w : getServer().getWorlds() )
 			AutoRefMatch.setupWorld(w, false);
+		
+		// update maps automatically if auto-update is enabled
+		if (getConfig().getBoolean("auto-update", true)) AutoRefMap.getUpdates();
 	}
 
 	public boolean makeServerConnection(String qurl)
@@ -308,59 +304,6 @@ public class AutoReferee extends JavaPlugin
 		}
 	}
 
-	public World createMatchWorld(String worldName, String loadedName) throws IOException
-	{
-		if (loadedName == null)
-			loadedName = WORLD_PREFIX + Long.toHexString(new Date().getTime());
-		
-		// get the folder associated with this world name
-		File mapFolder = AutoRefMatch.getMapFolder(worldName);
-		if (mapFolder == null) return null;
-		
-		// create the temporary directory where this map will be
-		File destWorld = new File(loadedName);
-		if (!destWorld.mkdir()) throw new IOException("Could not make temporary directory.");
-		
-		// copy the files over and fire up the world
-		FileUtils.copyDirectory(mapFolder, destWorld);
-		World w = getServer().createWorld(WorldCreator.name(destWorld.getName()));
-		
-		// add a match object now marked as temporary, return the world
-		this.addMatch(new AutoRefMatch(w, true)); return w;
-	}
-	
-	public AutoRefMatch createMatch(AutoRefMatch.MatchParams params) throws IOException
-	{
-		World world = createMatchWorld(params.getMap(), null);
-		AutoRefMatch m = new AutoRefMatch(world, true);
-		
-		Iterator<AutoRefTeam> teamiter = m.getTeams().iterator();
-		for (AutoRefMatch.MatchParams.TeamInfo teaminfo : params.getTeams())
-		{
-			if (!teamiter.hasNext()) break;
-			AutoRefTeam team = teamiter.next();
-			
-			team.setName(teaminfo.getName());
-			for (String name : teaminfo.getPlayers())
-				team.addExpectedPlayer(name);
-		}
-	   	return m;
-	}
-	
-	public boolean parseMatchInitialization(String json) // TODO
-	{
-		Type type = new TypeToken<List<AutoRefMatch.MatchParams>>() {}.getType();
-		List<AutoRefMatch.MatchParams> paramList = new Gson().fromJson(json, type);
-		
-		try
-		{
-			for (AutoRefMatch.MatchParams params : paramList)
-				this.addMatch(createMatch(params));
-		}
-		catch (IOException e) { return false; }
-		return true;
-	}
-	
 	private WorldEditPlugin getWorldEdit()
 	{
 		Plugin plugin = getServer().getPluginManager().getPlugin("WorldEdit");
@@ -450,8 +393,9 @@ public class AutoReferee extends JavaPlugin
 					archiveFolder = match.distributeMap();
 				else archiveFolder = match.archiveMapData();
 				
-				long checksum = AutoRefMatch.recursiveCRC32(archiveFolder);
-				String resp = match.getMapName() + ": [" + Long.toHexString(checksum) + "]";
+				String md5 = DigestUtils.md5Hex(FileUtils.openInputStream(archiveFolder));
+				String resp = match.getMapName() + ": [" + md5 + "]";
+				
 				sender.sendMessage(ChatColor.GREEN + resp); getLogger().info(resp);
 				return true;
 			}
@@ -570,19 +514,7 @@ public class AutoReferee extends JavaPlugin
 				String customName = args.length >= 3 ? args[2] : null;
 				
 				// get world setup for match
-				World mw = createMatchWorld(mapName, customName);
-				
-				// if there is no map, just let the sender know
-				if (mw == null) sender.sendMessage(
-					"No such map: " + ChatColor.GREEN + mapName);
-				
-				else
-				{
-					getLogger().info("World created for [" + mapName + 
-						"] at the request of " + player.getName());
-					if (player != null) player.teleport(mw.getSpawnLocation());
-				}
-				
+				AutoRefMap.loadMap(sender, mapName, customName);
 				return true;
 			}
 			catch (Exception e) { e.printStackTrace(); return false; }
@@ -597,16 +529,23 @@ public class AutoReferee extends JavaPlugin
 			// CMD: /autoref maplist
 			if (args.length == 1 && "maplist".equalsIgnoreCase(args[0]))
 			{
-				List<MapInfo> maps = Lists.newArrayList(AutoRefMatch.getAvailableMaps());
+				List<AutoRefMap> maps = Lists.newArrayList(AutoRefMap.getAvailableMaps());
 				Collections.sort(maps);
 				
 				sender.sendMessage(ChatColor.GOLD + String.format("Available Maps (%d):", maps.size()));
-				for (AutoRefMatch.MapInfo mapInfo : maps)
+				for (AutoRefMap mapInfo : maps)
 				{
 					ChatColor color = mapInfo.isInstalled() ? ChatColor.WHITE : ChatColor.DARK_GRAY;
 					sender.sendMessage("* " + color + mapInfo.getVersionString());
 				}
 				
+				return true;
+			}
+			
+			// CMD: /autoref update
+			if (args.length == 1 && "update".equalsIgnoreCase(args[0]))
+			{
+				AutoRefMap.getUpdates();
 				return true;
 			}
 						

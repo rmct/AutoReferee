@@ -7,23 +7,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -64,6 +60,9 @@ public class AutoRefMatch
 {
 	// online map list
 	private static String MAPREPO = "http://s3.amazonaws.com/autoreferee/maps/";
+	
+	public static String getMapRepo()
+	{ return MAPREPO; }
 	
 	// set new map repo
 	public static void changeMapRepo(String s)
@@ -497,186 +496,6 @@ public class AutoRefMatch
 
 	public String getVersionString()
 	{ return String.format("%s-v%s", this.getMapName().replaceAll("[^0-9a-zA-Z]+", ""), this.getVersion()); }
-	
-	public static File unzipMapFolder(File zip) throws IOException
-	{
-		ZipFile zfile = new ZipFile(zip);
-		Enumeration<? extends ZipEntry> entries = zfile.entries();
-		
-		File f, basedir = null;
-		
-		File lib = AutoRefMatch.getMapLibrary();
-		while (entries.hasMoreElements())
-		{
-			ZipEntry entry = entries.nextElement();			
-			if (!entry.isDirectory()) FileUtils.copyInputStreamToFile(
-				zfile.getInputStream(entry), f = new File(lib, entry.getName()));
-			else (f = new File(lib, entry.getName())).mkdirs();
-			
-			if (entry.isDirectory() && (basedir == null || 
-				basedir.getName().startsWith(f.getName()))) basedir = f;
-		}
-		
-		zfile.close();
-		zip.delete();
-		return basedir;
-	}
-	
-	public static class MapInfo implements Comparable<MapInfo>
-	{
-		public String name;
-		public String version;
-		
-		public File folder = null;
-		
-		public String filename;
-		public String md5sum;
-		
-		public MapInfo(String name, String version, File folder)
-		{ this.name = name; this.version = version; this.folder = folder; }
-
-		public MapInfo(String csv)
-		{
-			String[] parts = csv.split(";", 5);
-			
-			// normalized name and version are first 2 columns
-			this.name = AutoRefMatch.normalizeMapName(parts[0]);
-			this.version = parts[1];
-			
-			// followed by the filename and an md5sum
-			this.filename = parts[2];
-			this.md5sum = parts[3];
-		}
-
-		public String getVersionString()
-		{ return name + " v" + version; }
-
-		public boolean isInstalled()
-		{ return folder != null; }
-		
-		public File download() throws IOException
-		{
-			if (isInstalled()) return folder;
-			
-			URL url = new URL(MAPREPO + filename);
-			File zip = new File(AutoRefMatch.getMapLibrary(), filename);
-			FileUtils.copyURLToFile(url, zip);
-			
-			// if the md5s match, return the unzipped folder
-			String md5comp = DigestUtils.md5Hex(new FileInputStream(zip));
-			if (md5comp.equalsIgnoreCase(md5sum)) return folder = unzipMapFolder(zip);
-			
-			// if the md5sum did not match, quit here
-			zip.delete(); throw new IOException(
-				"MD5 Mismatch: " + md5comp + " != " + md5sum);
-		}
-		
-		@Override
-		public int hashCode()
-		{ return name.toLowerCase().hashCode(); }
-		
-		@Override
-		public boolean equals(Object o)
-		{
-			if (!(o instanceof MapInfo)) return false;
-			MapInfo map = (MapInfo) o;
-			
-			return name.equalsIgnoreCase(map.name) 
-				&& version.equalsIgnoreCase(map.version);
-		}
-
-		@Override
-		public int compareTo(MapInfo other)
-		{ return name.compareTo(other.name); }
-	}
-	
-	public static MapInfo getMapInfo(File folder)
-	{
-		// skip non-directories
-		if (!folder.isDirectory()) return null;
-		
-		// if it doesn't have an autoreferee config file
-		File cfgFile = new File(folder, AutoReferee.CFG_FILENAME);
-		if (!cfgFile.exists()) return null;
-		
-		// check the map name, if it matches, this is the one we want
-		FileConfiguration cfg = YamlConfiguration.loadConfiguration(cfgFile);
-		return new MapInfo(AutoRefMatch.normalizeMapName(cfg.getString("map.name")),
-			cfg.getString("map.version", "1.0"), folder);
-	}
-	
-	public static Set<MapInfo> getInstalledMaps()
-	{
-		Set<MapInfo> maps = Sets.newHashSet();
-		
-		// look through the zip files for what's already installed
-		for (File f : getMapLibrary().listFiles())
-		{
-			// if this is a zipfile containing the right world, unzip it
-			if (f.getName().toLowerCase().endsWith(".zip"))
-			try { f = unzipMapFolder(f); } catch (IOException e) { continue; }
-			
-			MapInfo mapInfo = getMapInfo(f);
-			if (mapInfo != null) maps.add(mapInfo);
-		}
-		
-		return maps;
-	}
-	
-	public static Set<MapInfo> getAvailableMaps()
-	{
-		Set<MapInfo> maps = Sets.newHashSet(getInstalledMaps());
-		String mlist = QueryServer.syncQuery(MAPREPO + "list.csv", null, null);
-		
-		if (mlist != null) for (String line : mlist.split("[\\r\\n]+")) 
-			maps.add(new MapInfo(line));
-		return maps;
-	}
-
-	public static File getMapFolder(String worldName) throws IOException
-	{
-		// assume worldName exists
-		if (worldName == null) return null;
-		worldName = AutoRefMatch.normalizeMapName(worldName);
-		
-		// if there is no map library, quit
-		File mapLibrary = getMapLibrary();
-		if (!mapLibrary.exists()) return null;
-		
-		for (MapInfo map : getAvailableMaps())
-		{
-			String mapName = AutoRefMatch.normalizeMapName(map.name);
-			if (worldName.equalsIgnoreCase(mapName)) return map.download();
-		}
-		
-		// no map matches
-		return null;
-	}
-
-	public static long recursiveCRC32(File file) throws IOException
-	{
-		if (file.isDirectory())
-		{
-			long checksum = 0L;
-			for (File f : file.listFiles())
-				checksum ^= recursiveCRC32(f);
-			return checksum;
-		}
-		else return FileUtils.checksumCRC32(file);
-	}
-
-	public static File getMapLibrary()
-	{
-		// maps library is a folder called `maps/`
-		File m = new File("maps");
-		
-		// if it doesn't exist, make the directory
-		if (m.exists() && !m.isDirectory()) m.delete();
-		if (!m.exists()) m.mkdir();
-		
-		// return the maps library
-		return m;
-	}
 
 	public static void setupWorld(World w, boolean b)
 	{
@@ -688,7 +507,7 @@ public class AutoRefMatch
 	public File archiveMapData() throws IOException
 	{
 		// make sure the folder exists first
-		File archiveFolder = new File(getMapLibrary(), this.getVersionString());
+		File archiveFolder = new File(AutoRefMap.getMapLibrary(), this.getVersionString());
 		if (!archiveFolder.exists()) archiveFolder.mkdir();
 		
 		// (1) copy the configuration file:
@@ -718,12 +537,12 @@ public class AutoRefMatch
 	public File distributeMap() throws IOException
 	{
 		File archiveFolder = this.archiveMapData();
-		File outZipfile = new File(getMapLibrary(), this.getVersionString() + ".zip");
+		File outZipfile = new File(AutoRefMap.getMapLibrary(), this.getVersionString() + ".zip");
 		
 		ZipOutputStream zip = new ZipOutputStream(new 
 			BufferedOutputStream(new FileOutputStream(outZipfile)));
 		zip.setMethod(ZipOutputStream.DEFLATED);
-		addToZip(zip, archiveFolder, getMapLibrary());
+		addToZip(zip, archiveFolder, AutoRefMap.getMapLibrary());
 		
 		zip.close();
 		return archiveFolder;

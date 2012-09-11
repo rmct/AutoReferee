@@ -1,5 +1,6 @@
 config-version: 2
 console-log: true
+auto-update: true
 
 server-mode:
   online: false
