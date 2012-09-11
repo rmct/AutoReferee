@@ -105,6 +105,9 @@ public class PlayerVersusPlayerListener implements Listener
 			Player damager = entityToPlayer(ed.getDamager());
 			Player damaged = entityToPlayer(ed.getEntity());
 			
+			// enderpearls are a special case!
+			if (ed.getDamager().getType() == EntityType.ENDER_PEARL) return;
+			
 			if (null != damager && match.getCurrentState().inProgress()
 				&& ed.getDamager() instanceof Arrow)
 			{
@@ -133,7 +136,6 @@ public class PlayerVersusPlayerListener implements Listener
 			// if the attacked isn't on a team, or same team (w/ no FF), cancel
 			event.setCancelled(d2team == null ||
 				(d1team == d2team && match.allowFriendlyFire));
-
 			if (event.isCancelled()) return;
 		}
 
