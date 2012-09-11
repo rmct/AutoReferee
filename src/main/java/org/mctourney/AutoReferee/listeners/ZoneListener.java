@@ -299,7 +299,7 @@ public class ZoneListener implements Listener
 	public void toolUsage(PlayerInteractEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
-		if (match == null) return;
+		if (match == null || match.getCurrentState().inProgress()) return;
 		
 		Block block;
 		BlockState blockState;
@@ -372,7 +372,7 @@ public class ZoneListener implements Listener
 	public void toolUsage(PlayerInteractEntityEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
-		if (match == null) return;
+		if (match == null || match.getCurrentState().inProgress()) return;
 		
 		// this event is not an "item" event
 		if (event.getPlayer().getItemInHand() == null) return;
