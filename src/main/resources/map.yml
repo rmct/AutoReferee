@@ -15,6 +15,9 @@ map:
 # information needed to run a match
 match:
 
+  # match difficulty, words or numbers allowed (default: 3, HARD)
+  difficulty: HARD
+
   # a list of all teams. each team has several basic features:
   # name, unique color, size of a team, and owned regions
   teams:

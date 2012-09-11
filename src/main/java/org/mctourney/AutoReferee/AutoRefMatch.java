@@ -26,6 +26,7 @@ import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang.StringUtils;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Difficulty;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -391,6 +392,13 @@ public class AutoRefMatch
 		
 		allowFriendlyFire = worldConfig.getBoolean("match.allow-ff", false);
 		allowCraft = worldConfig.getBoolean("match.allow-craft", false);
+
+		// attempt to set world difficulty as best as possible
+		String dstr = worldConfig.getString("match.difficulty", "HARD");
+		Difficulty diff = Difficulty.valueOf(dstr.toUpperCase());
+		try { diff = Difficulty.getByValue(Integer.parseInt(dstr)); }
+		catch (NumberFormatException e) {  }
+		world.setDifficulty(diff);
 	}
 
 	public void saveWorldConfiguration() 
@@ -1355,6 +1363,7 @@ public class AutoRefMatch
 		
 		long timestamp = (getWorld().getFullTime() - getStartTicks()) / 20L;
 		player.sendMessage("Match status is currently " + ChatColor.GRAY + getCurrentState().name());
+		player.sendMessage("Map difficulty is set to: " + ChatColor.GRAY + getWorld().getDifficulty().name());
 		if (getCurrentState().inProgress())
 			player.sendMessage(String.format(ChatColor.GRAY + "The current match time is: %02d:%02d:%02d", 
 				timestamp/3600L, (timestamp/60L)%60L, timestamp%60L));
