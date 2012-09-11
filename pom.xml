@@ -9,7 +9,7 @@
 
   <groupId>org.mctourney.autoreferee</groupId>
   <artifactId>AutoReferee</artifactId>
-  <version>0.10</version>
+  <version>0.11</version>
   <name>AutoReferee</name>
   <url>http://www.reddit.com/r/mctourney</url>
   <description>Bukkit plugin for automatically refereeing competitive Minecraft matches.</description>
