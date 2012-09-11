@@ -17,6 +17,8 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -172,24 +174,28 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		return m;
 	}
 
-	public static File getMapFolder(String worldName) throws IOException
+	private static final int MAX_NAME_DISTANCE = 5;
+	
+	public static File getMapFolder(String name) throws IOException
 	{
 		// assume worldName exists
-		if (worldName == null) return null;
-		worldName = AutoRefMatch.normalizeMapName(worldName);
+		if (name == null) return null;
+		name = AutoRefMatch.normalizeMapName(name);
 		
 		// if there is no map library, quit
 		File mapLibrary = AutoRefMap.getMapLibrary();
 		if (!mapLibrary.exists()) return null;
 		
+		AutoRefMap bmap = null; int ldist = MAX_NAME_DISTANCE;
 		for (AutoRefMap map : getAvailableMaps())
 		{
 			String mapName = AutoRefMatch.normalizeMapName(map.name);
-			if (worldName.equalsIgnoreCase(mapName)) return map.download();
+			int namedist = StringUtils.getLevenshteinDistance(name, mapName);
+			if (namedist <= ldist) { bmap = map; ldist = namedist; }
 		}
 		
-		// no map matches
-		return null;
+		// get best match
+		return bmap == null ? null : bmap.download();
 	}
 
 	public static Set<AutoRefMap> getAvailableMaps()
