@@ -393,9 +393,7 @@ public class AutoReferee extends JavaPlugin
 					archiveFolder = match.distributeMap();
 				else archiveFolder = match.archiveMapData();
 				
-				String md5 = DigestUtils.md5Hex(FileUtils.openInputStream(archiveFolder));
-				String resp = match.getMapName() + ": [" + md5 + "]";
-				
+				String resp = match.getVersionString() + " archived!";
 				sender.sendMessage(ChatColor.GREEN + resp); getLogger().info(resp);
 				return true;
 			}
