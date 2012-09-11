@@ -134,9 +134,8 @@ public class PlayerVersusPlayerListener implements Listener
 			if (d1team == null && d2team == null) return;
 
 			// if the attacked isn't on a team, or same team (w/ no FF), cancel
-			event.setCancelled(d2team == null ||
-				(d1team == d2team && match.allowFriendlyFire));
-			if (event.isCancelled()) return;
+			if (d2team == null || (d1team == d2team && !match.allowFriendlyFire))
+			{ event.setCancelled(true); return; }
 		}
 
 		// save player data if the damaged entity was a player	
