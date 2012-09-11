@@ -898,6 +898,7 @@ public class AutoRefMatch
 
 		int readyDelay = AutoReferee.getInstance().getConfig().getInt(
 			"delay-seconds.ready", AutoRefMatch.READY_SECONDS);
+		if (isDebugMode()) readyDelay = 0;
 		
 		// announce the match starting in X seconds
 		this.broadcast(MatchStartTask.COLOR + "Match will begin in "
