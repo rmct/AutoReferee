@@ -429,7 +429,6 @@ public class AutoReferee extends JavaPlugin
 					// let the player know what the tool is and how to use it
 					sender.sendMessage("Given win condition tool: " + toolitem.getType().name());
 					sender.sendMessage("Right-click on a block to set it as a win-condition.");
-					sender.sendMessage("Right-click on a chest/container to set it as an objective source.");
 					return true;
 				}
 				// get the tool for setting starting mechanisms
