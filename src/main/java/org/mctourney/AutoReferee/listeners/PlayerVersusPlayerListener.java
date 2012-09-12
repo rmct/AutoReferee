@@ -73,10 +73,12 @@ public class PlayerVersusPlayerListener implements Listener
 				if (vdata != null) vdata.registerDeath(event);
 				if (kdata != null) kdata.registerKill(event);
 			}
-			
-			// now remove the death message (so we can control who receives it)
-			event.setDeathMessage(null);
 		}
+		else for (Player pl : event.getEntity().getWorld().getPlayers())
+			pl.sendMessage(event.getDeathMessage());
+		
+		// remove the death message (so we can control who receives it)
+		event.setDeathMessage(null);
 	}
 
 	public static Player entityToPlayer(Entity e)
