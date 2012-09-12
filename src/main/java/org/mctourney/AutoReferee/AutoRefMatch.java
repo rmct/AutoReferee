@@ -1058,14 +1058,20 @@ public class AutoRefMatch
 		return mteam;
 	}
 	
+	// teamless expected players
+	Set<OfflinePlayer> expectedPlayers = Sets.newHashSet();
+	
 	// get all expected players
 	public Set<OfflinePlayer> getExpectedPlayers()
 	{
-		Set<OfflinePlayer> eps = Sets.newHashSet();
+		Set<OfflinePlayer> eps = Sets.newHashSet(expectedPlayers);
 		for (AutoRefTeam team : teams)
 			eps.addAll(team.getExpectedPlayers());
 		return eps;
 	}
+
+	public void addExpectedPlayer(OfflinePlayer opl)
+	{ expectedPlayers.add(opl); }
 	
 	// returns the team for the expected player
 	public AutoRefTeam expectedTeam(OfflinePlayer opl)
@@ -1077,7 +1083,26 @@ public class AutoRefMatch
 	
 	// returns if the player is meant to join this match
 	public boolean isPlayerExpected(OfflinePlayer opl)
-	{ return expectedTeam(opl) != null; }
+	{ return getExpectedPlayers().contains(opl); }
+
+	public void acceptInvitation(Player pl)
+	{
+		// if already here, skip this
+		if (this.isPlayer(pl)) return;
+		
+		// if this player needs to be placed on a team, go for it
+		AutoRefTeam team = this.expectedTeam(pl);
+		if (team != null) this.joinTeam(pl, team, false);
+		
+		// otherwise, get them into the world
+		else if (pl.getWorld() != this.getWorld())
+			pl.teleport(this.getPlayerSpawn(pl));
+		
+		// remove name from all lists
+		for (AutoRefTeam t : teams)
+			t.getExpectedPlayers().remove(pl);
+		expectedPlayers.remove(pl);
+	}
 	
 	public boolean joinTeam(Player pl, AutoRefTeam t, boolean force)
 	{

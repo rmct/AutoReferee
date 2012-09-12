@@ -26,6 +26,11 @@ import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.conversations.BooleanPrompt;
+import org.bukkit.conversations.Conversable;
+import org.bukkit.conversations.Conversation;
+import org.bukkit.conversations.ConversationContext;
+import org.bukkit.conversations.Prompt;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -561,6 +566,29 @@ public class AutoReferee extends JavaPlugin
 			}
 			catch (Exception e) { return false; }
 			
+			// CMD: /autoref autoinvite <players...>
+			if (args.length > 1 && "autoinvite".equalsIgnoreCase(args[0]))
+			{
+				for (int i = 1; i < args.length; ++i)
+				{
+					// add them to the expected players list FIRST
+					match.addExpectedPlayer(getServer().getOfflinePlayer(args[i]));
+					
+					// if this player cannot be found, skip
+					Player invited = getServer().getPlayer(args[i]);
+					if (invited == null) continue;
+					
+					// if this player is already busy competing in a match, skip
+					AutoRefMatch m = getMatch(invited.getWorld());
+					if (m != null && m.isPlayer(invited) && m.getCurrentState().inProgress()) continue;
+					
+					// otherwise, let's drag them in (no asking)
+					match.acceptInvitation(invited);
+				}
+				
+				return true;
+			}
+			
 			// CMD: /autoref send <msg> [<recipient>]
 			if (args.length >= 2 && "send".equalsIgnoreCase(args[0]) && 
 				match != null && match.isDebugMode())
@@ -630,6 +658,34 @@ public class AutoReferee extends JavaPlugin
 			}
 		}
 			
+		if ("autoref".equalsIgnoreCase(cmd.getName()))
+		{
+			// CMD: /autoref invite <players...>
+			if (args.length > 1 && "invite".equalsIgnoreCase(args[0]) && 
+				match != null && match.getCurrentState().isBeforeMatch())
+			{
+				// who is doing the inviting
+				String from = (sender instanceof Player) ? match.getPlayerName(player) : "This server";
+				
+				for (int i = 1; i < args.length; ++i)
+				{
+					// if this player cannot be found, skip
+					Player invited = getServer().getPlayer(args[i]);
+					if (invited == null) continue;
+					
+					// if this player is already busy competing in a match, skip
+					AutoRefMatch m = getMatch(invited.getWorld());
+					if (m != null && m.isPlayer(invited) && m.getCurrentState().inProgress()) continue;
+					
+					// otherwise, invite them
+					if (invited.getWorld() != match.getWorld())
+						new Conversation(this, invited, new InvitationPrompt(match, from)).begin();
+				}
+				
+				return true;
+			}
+		}
+		
 		if ("zones".equalsIgnoreCase(cmd.getName()) && match != null)
 		{
 			Set<AutoRefTeam> lookupTeams = null;
@@ -829,6 +885,28 @@ public class AutoReferee extends JavaPlugin
 		}
 
 		return false;
+	}
+	
+	public class InvitationPrompt extends BooleanPrompt
+	{
+		public InvitationPrompt(AutoRefMatch match, String from)
+		{ this.match = match; this.from = from; }
+
+		private AutoRefMatch match;
+		private String from;
+		
+		@Override
+		public String getPromptText(ConversationContext context)
+		{ return String.format("%s is inviting you to a match on %s. Do you accept?", from, match.getMapName()); }
+
+		@Override
+		protected Prompt acceptValidatedInput(ConversationContext context, boolean response)
+		{
+			if (response && context.getForWhom() instanceof Player)
+				match.acceptInvitation((Player) context.getForWhom());
+			return Prompt.END_OF_CONVERSATION;
+		}
+		
 	}
 
 	File getLogDirectory()

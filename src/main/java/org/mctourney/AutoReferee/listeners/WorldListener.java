@@ -1,5 +1,6 @@
 package org.mctourney.AutoReferee.listeners;
 
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -28,15 +29,28 @@ public class WorldListener implements Listener
 	@EventHandler
 	public void playerJoin(PlayerJoinEvent event)
 	{
-		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
+		Player player = event.getPlayer();
+		
+		// get the match for the world the player is logging into
+		AutoRefMatch match = plugin.getMatch(player.getWorld());
+		
+		// if there is no match here, or they aren't meant to play in this world,
+		// check if there is a world they are expected in
+		if (match == null || !match.isPlayer(player))
+			for (AutoRefMatch m : plugin.getMatches())
+				if (m.isPlayerExpected(player)) match = m;
+		
 		if (match != null)
 		{
+			// if we are logging in to the wrong world, teleport to the correct world
+			if (player.getWorld() != match.getWorld()) match.acceptInvitation(player);
+			
 			event.setJoinMessage(match.colorMessage(event.getJoinMessage()));
-			match.sendMatchInfo(event.getPlayer());
-			match.setupSpectators(event.getPlayer());
+			match.sendMatchInfo(player);
+			match.setupSpectators(player);
 
-			if (match.isReferee(event.getPlayer()))
-				match.updateReferee(event.getPlayer());
+			if (match.isReferee(player))
+				match.updateReferee(player);
 		}
 	}
 	
