@@ -18,6 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrMatcher;
 import org.apache.commons.lang.text.StrTokenizer;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -247,7 +248,8 @@ public class AutoReferee extends JavaPlugin
 			AutoRefMatch.setupWorld(w, false);
 		
 		// update maps automatically if auto-update is enabled
-		if (getConfig().getBoolean("auto-update", true)) AutoRefMap.getUpdates();
+		if (getConfig().getBoolean("auto-update", true))
+			AutoRefMap.getUpdates(Bukkit.getConsoleSender(), false);
 	}
 
 	public boolean makeServerConnection(String qurl)
@@ -539,10 +541,11 @@ public class AutoReferee extends JavaPlugin
 				return true;
 			}
 			
-			// CMD: /autoref update
-			if (args.length == 1 && "update".equalsIgnoreCase(args[0]))
+			// CMD: /autoref update [force]
+			if (args.length >= 1 && "update".equalsIgnoreCase(args[0]))
 			{
-				AutoRefMap.getUpdates();
+				boolean force = (args.length >= 2 && args[1].startsWith("f"));
+				AutoRefMap.getUpdates(sender, force);
 				return true;
 			}
 						

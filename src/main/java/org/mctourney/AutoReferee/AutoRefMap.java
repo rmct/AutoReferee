@@ -208,11 +208,15 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	
 	private static class MapUpdateTask implements Runnable
 	{
+		private CommandSender sender;
+		private boolean force;
+		
+		public MapUpdateTask(CommandSender sender, boolean force)
+		{ this.sender = sender; this.force = force; }
+		
 		@Override
 		public void run()
 		{
-			Logger logger = AutoReferee.getInstance().getLogger();
-			
 			// get remote map directory
 			Map<String, AutoRefMap> remote = Maps.newHashMap();
 			for (AutoRefMap map : getRemoteMaps()) remote.put(map.name, map);
@@ -224,13 +228,13 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 				AutoRefMap rmap = remote.get(map.name);
 				if (rmap != null && !map.version.equalsIgnoreCase(rmap.version))
 				{
-					logger.info(String.format("UPDATING %s (%s -> %s)...", 
+					sender.sendMessage(String.format("UPDATING %s (%s -> %s)...", 
 						rmap.name, map.version, rmap.version));
-					if (rmap.download() == null) logger.info("Update FAILED");
+					if (rmap.download() == null) sender.sendMessage("Update FAILED");
 					else
 					{
 						if (map.isInstalled()) FileUtils.deleteDirectory(map.folder);
-						logger.info("Update SUCCESS: " + rmap.getVersionString());
+						sender.sendMessage("Update SUCCESS: " + rmap.getVersionString());
 					}
 				}
 			}
@@ -238,11 +242,11 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		}
 	}
 	
-	public static void getUpdates()
+	public static void getUpdates(CommandSender sender, boolean force)
 	{
 		AutoReferee instance = AutoReferee.getInstance();
 		instance.getServer().getScheduler().scheduleAsyncDelayedTask(
-			instance, new MapUpdateTask());
+			instance, new MapUpdateTask(sender, force));
 	}
 
 	public static Set<AutoRefMap> getRemoteMaps()
