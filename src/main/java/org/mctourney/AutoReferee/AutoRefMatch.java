@@ -25,6 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang.StringUtils;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Difficulty;
 import org.bukkit.GameMode;
@@ -268,11 +269,11 @@ public class AutoRefMatch
 	{ return debugRecipient != null; }
 
 	public void debug(String msg)
-	{ debugRecipient.sendMessage(msg); }
+	{ if (debugRecipient != null) debugRecipient.sendMessage(msg); }
 	
 	public void setDebug(CommandSender recp)
 	{
-		if (recp.hasPermission("autoreferee.streamer"))
+		if (recp != null && recp.hasPermission("autoreferee.streamer"))
 			AutoReferee.getInstance().getLogger().info(
 				"You may not direct debug message to a streamer!");
 			
