@@ -350,38 +350,39 @@ public class AutoReferee extends JavaPlugin
 		
 		if ("autoref".equalsIgnoreCase(cmd.getName()) && sender.hasPermission("autoreferee.configure"))
 		{
-			// CMD: /autoref save
-			if (args.length >= 1 && "save".equalsIgnoreCase(args[0]) && match != null)
+			// CMD: /autoref cfg ...
+			if (args.length > 1 && "cfg".equalsIgnoreCase(args[0]))
 			{
-				match.saveWorldConfiguration(); 
-				sender.sendMessage(ChatColor.GREEN + CFG_FILENAME + " saved.");
-				return true;
-			}
-
-			// CMD: /autoref init
-			if (args.length >= 1 && "init".equalsIgnoreCase(args[0]))
-			{
-				// if there is not yet a match object for this map
-				if (match == null)
+				// CMD: /autoref cfg save
+				if (args.length >= 2 && "save".equalsIgnoreCase(args[1]) && match != null)
 				{
-					addMatch(match = new AutoRefMatch(world, false));
-					match.saveWorldConfiguration();
-					match.setCurrentState(MatchStatus.NONE);
-					
-					sender.sendMessage(ChatColor.GREEN + CFG_FILENAME + " generated.");
+					match.saveWorldConfiguration(); 
+					sender.sendMessage(ChatColor.GREEN + CFG_FILENAME + " saved.");
 				}
-				else sender.sendMessage(this.getName() + " already initialized for " + 
-					match.worldConfig.getString("map.name", "this map") + ".");
-				
-				return true;
-			}
 
-			// reloads the autoreferee.yml for this match only
-			// CMD: /autoref reload
-			if (args.length == 1 && "reload".equalsIgnoreCase(args[0]) && match != null)
-			{
-				match.reload();
-				sender.sendMessage(ChatColor.GREEN + CFG_FILENAME + " reload complete!");
+				// CMD: /autoref init
+				if (args.length >= 2 && "init".equalsIgnoreCase(args[1]))
+				{
+					// if there is not yet a match object for this map
+					if (match == null)
+					{
+						addMatch(match = new AutoRefMatch(world, false));
+						match.saveWorldConfiguration();
+						match.setCurrentState(MatchStatus.NONE);
+						
+						sender.sendMessage(ChatColor.GREEN + CFG_FILENAME + " generated.");
+					}
+					else sender.sendMessage(this.getName() + " already initialized for " + 
+						match.worldConfig.getString("map.name", "this map") + ".");
+				}
+				
+				// CMD: /autoref cfg reload
+				if (args.length >= 2 && "reload".equalsIgnoreCase(args[1]) && match != null)
+				{
+					match.reload();
+					sender.sendMessage(ChatColor.GREEN + CFG_FILENAME + " reload complete!");
+				}
+				
 				return true;
 			}
 
