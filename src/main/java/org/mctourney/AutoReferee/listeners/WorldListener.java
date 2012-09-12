@@ -78,6 +78,9 @@ public class WorldListener implements Listener
 			matchTo.checkTeamsReady();
 			matchTo.sendMatchInfo(event.getPlayer());
 			matchTo.setupSpectators(event.getPlayer());
+			
+			if (matchTo.isReferee(event.getPlayer()))
+				matchTo.updateReferee(event.getPlayer());
 		}
 	}
 }
