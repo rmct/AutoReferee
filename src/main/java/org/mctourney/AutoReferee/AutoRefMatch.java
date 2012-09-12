@@ -474,12 +474,12 @@ public class AutoRefMatch
 			for (AutoRefPlayer apl : team.getPlayers())
 			{
 				messageReferee(ref, "team", team.getRawName(), "player", "+" + apl.getPlayerName());
-				updateReferee(ref, apl);
+				updateRefereePlayerInfo(ref, apl);
 			}
 		}
 	}
 
-	public void updateReferee(Player ref, AutoRefPlayer apl)
+	private void updateRefereePlayerInfo(Player ref, AutoRefPlayer apl)
 	{
 		messageReferee(ref, "player", apl.getPlayerName(), "kills", Integer.toString(apl.totalKills));
 		messageReferee(ref, "player", apl.getPlayerName(), "deaths", Integer.toString(apl.totalDeaths));
