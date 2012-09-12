@@ -248,7 +248,8 @@ public class ZoneListener implements Listener
 		}
 		else // is spectator
 		{
-			if (event.getClickedBlock().getState() instanceof InventoryHolder)
+			if (event.getClickedBlock().getState() instanceof InventoryHolder 
+				&& match.getCurrentState().inProgress())
 			{
 				InventoryHolder invh = (InventoryHolder) event.getClickedBlock().getState();
 				Inventory inv = invh.getInventory();
