@@ -54,8 +54,9 @@ public class TeamListener implements Listener
 			
 			// if listener is on a team, and its not the same team as the
 			// speaker, remove them from the recipients list
-			if (match.getCurrentState().inProgress() && !speakerReferee &&
-				team != match.getPlayerTeam(recipient)) { iter.remove(); continue; }
+			if (AutoReferee.getInstance().isAutoMode() && !speakerReferee && 
+				match.getCurrentState().inProgress() && team != match.getPlayerTeam(recipient))
+					{ iter.remove(); continue; }
 		}
 	}
 
