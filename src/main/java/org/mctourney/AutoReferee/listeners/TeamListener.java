@@ -69,15 +69,13 @@ public class TeamListener implements Listener
 		if (match == null) for (AutoRefMatch m : plugin.getMatches())
 			if (m.isPlayer(event.getPlayer())) match = m;
 		
-		if (match != null && match.isPlayer(event.getPlayer())
-			&& (event.getPlayer().getBedSpawnLocation() == null 
-				|| event.getRespawnLocation().getWorld() != match.getWorld()))
+		if (match != null && match.isPlayer(event.getPlayer()))
 		{
-			// get the location for the respawn event
-			Location spawn = match.getPlayerSpawn(event.getPlayer());
-			event.setRespawnLocation(spawn == null ? match.getWorldSpawn() : spawn);
-			
-			// setup respawn
+			// if the player attempts to respawn in a different world, bring them back
+			if (event.getRespawnLocation().getWorld() != match.getWorld())
+				event.setRespawnLocation(match.getPlayerSpawn(event.getPlayer()));
+
+			// setup respawn for the player
 			match.getPlayer(event.getPlayer()).respawn();
 		}
 	}
