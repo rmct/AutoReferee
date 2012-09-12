@@ -1084,6 +1084,13 @@ public class AutoRefMatch
 	// returns if the player is meant to join this match
 	public boolean isPlayerExpected(OfflinePlayer opl)
 	{ return getExpectedPlayers().contains(opl); }
+	
+	public void removeExpectedPlayer(OfflinePlayer opl)
+	{
+		for (AutoRefTeam t : teams)
+			t.getExpectedPlayers().remove(opl);
+		expectedPlayers.remove(opl);
+	}
 
 	public void acceptInvitation(Player pl)
 	{
@@ -1099,9 +1106,7 @@ public class AutoRefMatch
 			pl.teleport(this.getPlayerSpawn(pl));
 		
 		// remove name from all lists
-		for (AutoRefTeam t : teams)
-			t.getExpectedPlayers().remove(pl);
-		expectedPlayers.remove(pl);
+		this.removeExpectedPlayer(pl);
 	}
 	
 	public boolean joinTeam(Player pl, AutoRefTeam t, boolean force)

@@ -22,6 +22,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -571,8 +572,12 @@ public class AutoReferee extends JavaPlugin
 			{
 				for (int i = 1; i < args.length; ++i)
 				{
-					// add them to the expected players list FIRST
-					match.addExpectedPlayer(getServer().getOfflinePlayer(args[i]));
+					// first, remove this player from all expected player lists
+					OfflinePlayer opl = getServer().getOfflinePlayer(args[i]);
+					for (AutoRefMatch m : getMatches()) m.removeExpectedPlayer(opl);
+					
+					// add them to the expected players list
+					match.addExpectedPlayer(opl);
 					
 					// if this player cannot be found, skip
 					Player invited = getServer().getPlayer(args[i]);
