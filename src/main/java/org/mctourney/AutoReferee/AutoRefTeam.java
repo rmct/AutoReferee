@@ -300,6 +300,16 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	
 	public void join(Player pl, boolean force)
 	{
+		// if this player is using the client mod, they may not join
+		if (pl.getListeningPluginChannels().contains(AutoReferee.REFEREE_PLUGIN_CHANNEL))
+		{
+			if (!getMatch().isReferee(pl)) pl.sendMessage("You may not join a team with a modified client");
+			String warning = ChatColor.DARK_GRAY + pl.getName() + " attempted to join " + this.getName() + 
+				ChatColor.DARK_GRAY + " with a modified client";
+			for (Player ref : getMatch().getReferees(true)) ref.sendMessage(warning);
+			return;
+		}
+		
 		// create an APL object for this player.
 		AutoRefPlayer apl = new AutoRefPlayer(pl, this);
 		
