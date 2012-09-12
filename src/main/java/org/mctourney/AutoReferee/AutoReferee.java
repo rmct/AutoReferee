@@ -604,6 +604,8 @@ public class AutoReferee extends JavaPlugin
 
 				for (Player ref : targets) if (ref != null) ref.sendPluginMessage(this, 
 					AutoReferee.REFEREE_PLUGIN_CHANNEL, args[1].getBytes());
+				
+				return true;
 			}
 		}
 		
