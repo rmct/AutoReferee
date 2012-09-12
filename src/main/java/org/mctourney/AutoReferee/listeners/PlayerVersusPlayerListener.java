@@ -114,7 +114,7 @@ public class PlayerVersusPlayerListener implements Listener
 				&& ed.getDamager() instanceof Arrow)
 			{
 				AutoRefPlayer apl = match.getPlayer(damager);
-				if (apl != null) ++apl.shotsHit;
+				if (apl != null) { ++apl.shotsHit; apl.sendAccuracyUpdate(); }
 			}
 
 			// if either of these aren't players, nothing to do here
@@ -160,7 +160,7 @@ public class PlayerVersusPlayerListener implements Listener
 		if (match == null || !match.getCurrentState().inProgress()) return;
 		
 		AutoRefPlayer apl = match.getPlayer(player);
-		if (apl != null) ++apl.shotsFired;
+		if (apl != null) { ++apl.shotsFired; apl.sendAccuracyUpdate(); }
 	}
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
