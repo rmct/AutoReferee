@@ -229,7 +229,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 			{
 				// get the remote version and check if there is an update
 				AutoRefMap rmap = remote.get(map.name);
-				if (rmap != null && !map.version.equalsIgnoreCase(rmap.version))
+				if (rmap != null && (force || !map.version.equalsIgnoreCase(rmap.version)))
 				{
 					sender.sendMessage(String.format("UPDATING %s (%s -> %s)...", 
 						rmap.name, map.version, rmap.version));
