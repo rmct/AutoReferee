@@ -237,12 +237,13 @@ public class ZoneListener implements Listener
 		
 		if (match.isPlayer(player))
 		{
+			// if this is a start mechanism, this should always be allowed
+			if (!plugin.isAutoMode() && match.isStartMechanism(loc)) return;
+			
 			if (!validPlayer(player))
 			{ event.setCancelled(true); return; }
-			
-			if (!plugin.isAutoMode() && match.isStartMechanism(loc)) return;
+
 			AutoRefPlayer apl = match.getPlayer(player);
-			
 			if (apl != null && !apl.getTeam().canEnter(loc, 0.0))
 			{ event.setCancelled(true); return; }
 		}
