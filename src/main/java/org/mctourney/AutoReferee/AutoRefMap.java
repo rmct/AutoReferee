@@ -77,7 +77,8 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		
 		// if the md5s match, return the unzipped folder
 		String md5comp = DigestUtils.md5Hex(new FileInputStream(zip));
-		if (md5comp.equalsIgnoreCase(md5sum)) return;
+		if (md5comp.equalsIgnoreCase(md5sum))
+		{ this.folder = AutoRefMap.unzipMapFolder(zip); return; }
 		
 		// if the md5sum did not match, quit here
 		zip.delete(); throw new IOException(
