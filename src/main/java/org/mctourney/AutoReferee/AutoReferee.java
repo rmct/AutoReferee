@@ -834,33 +834,31 @@ public class AutoReferee extends JavaPlugin
 				return true;
 			}
 
-			// get the target player to affect (no arg = command sender)
-			Player target = args.length > 1 ? 
-				getServer().getPlayer(args[1]) : player;
-
-			if (target == null)
-			{ sender.sendMessage("Must specify a valid user."); return true; }
-				
-			if (target != player && !player.hasPermission("autoreferee.referee"))
-			{ sender.sendMessage("You do not have permission."); return true; }
-
-			match.joinTeam(target, team, player.hasPermission("autoreferee.referee"));
+			// if there are players specified on the command line, add them
+			if (args.length >= 2 && player.hasPermission("autoreferee.referee"))
+				for (int i = 1; i < args.length; ++i)
+			{
+				Player target = getServer().getPlayer(args[i]);
+				if (target != null) match.joinTeam(target, team, true);
+			}
+			
+			// otherwise, add yourself
+			else match.joinTeam(player, team, player.hasPermission("autoreferee.referee"));
 			return true;
 		}
 		
 		if ("leaveteam".equalsIgnoreCase(cmd.getName()) && match != null && !isAutoMode())
 		{
-			// get the target player to affect (no arg = command sender)
-			Player target = args.length > 0 ? 
-				getServer().getPlayer(args[0]) : player;
-
-			if (target == null)
-			{ sender.sendMessage("Must specify a valid user."); return true; }
+			// if there are players specified on the command line, remove them
+			if (args.length >= 1 && player.hasPermission("autoreferee.referee"))
+				for (int i = 0; i < args.length; ++i)
+			{
+				Player target = getServer().getPlayer(args[i]);
+				if (target != null) match.leaveTeam(target, true);
+			}
 			
-			if (target != player && !player.hasPermission("autoreferee.referee"))
-			{ sender.sendMessage("You do not have permission."); return true; }
-
-			match.leaveTeam(target, player.hasPermission("autoreferee.referee"));
+			// otherwise, remove yourself
+			else match.leaveTeam(player, player.hasPermission("autoreferee.referee"));
 			return true;
 		}
 		
