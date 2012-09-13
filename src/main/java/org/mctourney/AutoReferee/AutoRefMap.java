@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -64,17 +63,21 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	public boolean isInstalled()
 	{ return folder != null; }
 	
-	public File download() throws IOException
+	public File getFolder() throws IOException
 	{
-		if (isInstalled()) return folder;
-		
+		if (!isInstalled()) download();
+		return folder;
+	}
+	
+	public void download() throws IOException
+	{
 		URL url = new URL(AutoRefMatch.getMapRepo() + filename);
 		File zip = new File(AutoRefMap.getMapLibrary(), filename);
 		FileUtils.copyURLToFile(url, zip);
 		
 		// if the md5s match, return the unzipped folder
 		String md5comp = DigestUtils.md5Hex(new FileInputStream(zip));
-		if (md5comp.equalsIgnoreCase(md5sum)) return folder = AutoRefMap.unzipMapFolder(zip);
+		if (md5comp.equalsIgnoreCase(md5sum)) return;
 		
 		// if the md5sum did not match, quit here
 		zip.delete(); throw new IOException(
@@ -195,7 +198,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		}
 		
 		// get best match
-		return bmap == null ? null : bmap.download();
+		return bmap == null ? null : bmap.getFolder();
 	}
 
 	public static Set<AutoRefMap> getAvailableMaps()
@@ -230,7 +233,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 				{
 					sender.sendMessage(String.format("UPDATING %s (%s -> %s)...", 
 						rmap.name, map.version, rmap.version));
-					if (rmap.download() == null) sender.sendMessage("Update FAILED");
+					if (rmap.getFolder() == null) sender.sendMessage("Update FAILED");
 					else
 					{
 						if (map.isInstalled()) FileUtils.deleteDirectory(map.folder);
