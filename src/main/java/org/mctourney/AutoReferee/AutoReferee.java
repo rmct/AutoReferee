@@ -531,7 +531,7 @@ public class AutoReferee extends JavaPlugin
 				
 				return true;
 			}
-			catch (Exception e) { e.printStackTrace(); return false; }
+			catch (Exception e) { e.printStackTrace(); return true; }
 			
 			// CMD: /autoref unload
 			if (args.length == 1 && "unload".equalsIgnoreCase(args[0]) && match != null)
@@ -539,6 +539,29 @@ public class AutoReferee extends JavaPlugin
 				match.destroy();
 				return true;
 			}
+			
+			// CMD: /autoref reload
+			if (args.length == 1 && "reload".equalsIgnoreCase(args[0]) && match != null) try
+			{
+				AutoRefMap map = AutoRefMap.getMap(match.getMapName());
+				if (map == null || !map.isInstalled())
+				{
+					sender.sendMessage(ChatColor.DARK_GRAY + 
+						"No archive of this map exists " + match.getMapName());
+					return true;
+				}
+				
+				sender.sendMessage(ChatColor.DARK_GRAY + 
+					"Preparing a new copy of " + map.getVersionString());
+				
+				AutoRefMatch newmatch = AutoRefMap.createMatch(map, null);
+				for (Player p : match.getWorld().getPlayers())
+					p.teleport(newmatch.getWorldSpawn());
+				
+				match.destroy();
+				return true;
+			}
+			catch (Exception e) { e.printStackTrace(); return true; }
 			
 			// CMD: /autoref maplist
 			if (args.length == 1 && "maplist".equalsIgnoreCase(args[0]))

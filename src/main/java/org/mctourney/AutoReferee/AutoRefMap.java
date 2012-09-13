@@ -102,11 +102,11 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	public int compareTo(AutoRefMap other)
 	{ return name.compareTo(other.name); }
 	
-	public static AutoRefMatch createMatch(String worldName, String loadedName) throws IOException
+	public static AutoRefMatch createMatch(String map, String world) throws IOException
 	{
 		// add a match object now marked as temporary
 		AutoReferee plugin = AutoReferee.getInstance();
-		World w = createMatchWorld(worldName, loadedName);
+		World w = createMatchWorld(map, world);
 		
 		if (w == null) return null;
 		
@@ -114,24 +114,40 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		AutoRefMatch match = new AutoRefMatch(w, true);
 		plugin.addMatch(match); return match;
 	}
-
-	public static World createMatchWorld(String worldName, String loadedName) throws IOException
+	
+	public static AutoRefMatch createMatch(AutoRefMap map, String world) throws IOException
 	{
-		if (loadedName == null)
-			loadedName = AutoReferee.WORLD_PREFIX + Long.toHexString(new Date().getTime());
+		// add a match object now marked as temporary
+		AutoReferee plugin = AutoReferee.getInstance();
+		World w = createMatchWorld(map, world);
+		
+		if (w == null) return null;
+		
+		// return the added temporary match
+		AutoRefMatch match = new AutoRefMatch(w, true);
+		plugin.addMatch(match); return match;
+	}
+	
+	public static World createMatchWorld(AutoRefMap map, String world) throws IOException
+	{
+		if (world == null)
+			world = AutoReferee.WORLD_PREFIX + Long.toHexString(new Date().getTime());
 		
 		// get the folder associated with this world name
-		File mapFolder = getMapFolder(worldName);
+		File mapFolder = map.getFolder();
 		if (mapFolder == null) return null;
 		
 		// create the temporary directory where this map will be
-		File destWorld = new File(loadedName);
+		File destWorld = new File(world);
 		if (!destWorld.mkdir()) throw new IOException("Could not make temporary directory.");
 		
 		// copy the files over and return the loaded world
 		FileUtils.copyDirectory(mapFolder, destWorld);
 		return AutoReferee.getInstance().getServer().createWorld(WorldCreator.name(destWorld.getName()));
 	}
+
+	public static World createMatchWorld(String map, String world) throws IOException
+	{ return createMatchWorld(AutoRefMap.getMap(map), world); }
 
 	public static boolean parseMatchInitialization(String json) // TODO
 	{
@@ -179,7 +195,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 
 	private static final int MAX_NAME_DISTANCE = 5;
 	
-	public static File getMapFolder(String name) throws IOException
+	public static AutoRefMap getMap(String name) throws IOException
 	{
 		// assume worldName exists
 		if (name == null) return null;
@@ -198,6 +214,12 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		}
 		
 		// get best match
+		return bmap;
+	}
+	
+	public static File getMapFolder(String name) throws IOException
+	{
+		AutoRefMap bmap = AutoRefMap.getMap(name);
 		return bmap == null ? null : bmap.getFolder();
 	}
 
