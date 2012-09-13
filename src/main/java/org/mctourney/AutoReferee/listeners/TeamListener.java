@@ -71,8 +71,11 @@ public class TeamListener implements Listener
 		
 		if (match != null && match.isPlayer(event.getPlayer()))
 		{
+			// does this player have a bed spawn?
+			boolean hasBed = event.getPlayer().getBedSpawnLocation() != null;
+			
 			// if the player attempts to respawn in a different world, bring them back
-			if (event.getRespawnLocation().getWorld() != match.getWorld())
+			if (!hasBed || event.getRespawnLocation().getWorld() != match.getWorld())
 				event.setRespawnLocation(match.getPlayerSpawn(event.getPlayer()));
 
 			// setup respawn for the player
