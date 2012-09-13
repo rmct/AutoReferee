@@ -402,9 +402,12 @@ public class AutoRefPlayer
 	{ return shotsFired == 0 ? "N/A" : (Integer.toString(100 * shotsHit / shotsFired) + "%"); }
 
 	public void sendAccuracyUpdate()
+	{ for (Player ref : getTeam().getMatch().getReferees()) sendAccuracyUpdate(ref); }
+
+	public void sendAccuracyUpdate(Player ref)
 	{
 		String acc = Integer.toString(shotsFired == 0 ? 0 : (100 * shotsHit / shotsFired));
-		getTeam().getMatch().messageReferees("player", getPlayerName(), "accuracy", acc);
+		getTeam().getMatch().messageReferee(ref, "player", getPlayerName(), "accuracy", acc);
 	}
 
 	public String getExtendedAccuracyInfo()
