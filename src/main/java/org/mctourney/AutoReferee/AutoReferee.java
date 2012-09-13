@@ -526,7 +526,9 @@ public class AutoReferee extends JavaPlugin
 				String customName = args.length >= 3 ? args[2] : null;
 				
 				// get world setup for match
+				sender.sendMessage(ChatColor.GREEN + "Please wait...");
 				AutoRefMap.loadMap(sender, mapName, customName);
+				
 				return true;
 			}
 			catch (Exception e) { e.printStackTrace(); return false; }
