@@ -351,6 +351,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		
 		String colorName = getPlayerName(pl);
 		match.broadcast(colorName + " has left " + getName());
+		pl.teleport(match.getWorldSpawn());
 		
 		if (pl.isOnline() && (pl instanceof Player))
 			((Player) pl).setPlayerListName(pl.getName());
