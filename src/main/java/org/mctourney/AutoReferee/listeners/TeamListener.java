@@ -4,14 +4,16 @@ import java.util.Iterator;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -125,6 +127,25 @@ public class TeamListener implements Listener
 					String.format("with %2.1f hearts remaining", apl.getPlayer().getHealth() / 2.0);
 				for (Player ref : match.getReferees(true)) ref.sendMessage(message);
 			}
+		}
+	}
+	
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void signCommand(PlayerInteractEvent event)
+	{
+		Player player = event.getPlayer();
+		AutoRefMatch match = plugin.getMatch(player.getWorld());
+		
+		if (match != null && match.getCurrentState().isBeforeMatch() && event.hasBlock() && 
+			event.getClickedBlock().getState() instanceof Sign && match.inStartRegion(event.getClickedBlock().getLocation()))
+		{
+			String[] lines = ((Sign) event.getClickedBlock().getState()).getLines();
+			if (lines[0] == null || !"[AutoReferee]".equals(lines[0])) return;
+			
+			// execute the command on the sign (and hope like hell that AutoReferee picks it up)
+			if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
+				player.performCommand(ChatColor.stripColor(lines[1] + " " + lines[2]).trim());
+			event.setCancelled(true);
 		}
 	}
 	
