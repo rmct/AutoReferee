@@ -53,6 +53,7 @@ import org.mctourney.AutoReferee.listeners.TeamListener;
 import org.mctourney.AutoReferee.listeners.WorldListener;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.util.BlockData;
+import org.mctourney.AutoReferee.util.BlockVector3;
 import org.mctourney.AutoReferee.util.CuboidRegion;
 import org.mctourney.AutoReferee.util.Vector3;
 
@@ -495,7 +496,12 @@ public class AutoReferee extends JavaPlugin
 						ChatColor.RESET + "is not a valid team.");
 					sender.sendMessage("Teams are " + match.getTeamList());
 				}
-				else team.setSpawnLocation(player.getLocation());
+				else
+				{
+					team.setSpawnLocation(player.getLocation());
+					String coords = BlockVector3.fromLocation(player.getLocation()).toCoords();
+					sender.sendMessage(ChatColor.GRAY + "Spawn set to " + coords + " for " + team.getName());
+				}
 				return true;
 			}
 		}
