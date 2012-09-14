@@ -328,7 +328,7 @@ public class ZoneListener implements Listener
 				
 				for (AutoRefTeam team : match.getTeams())
 					if (team.checkPosition(block.getLocation()))
-						team.addWinCondition(block);
+						team.addWinCondition(block, match.getInexactRange());
 				
 				break;
 				

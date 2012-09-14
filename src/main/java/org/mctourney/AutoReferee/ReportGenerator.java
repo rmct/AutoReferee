@@ -21,6 +21,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.material.Colorable;
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
+import org.mctourney.AutoReferee.AutoRefTeam.WinCondition;
 import org.mctourney.AutoReferee.util.BlockData;
 import org.mctourney.AutoReferee.util.BlockVector3;
 import org.mctourney.AutoReferee.util.ColorConverter;
@@ -203,7 +204,8 @@ public class ReportGenerator
 	{
 		Set<BlockData> blocks = Sets.newHashSet();
 		for (AutoRefTeam team : match.getTeams())
-			blocks.addAll(team.winConditions.values());
+			for (WinCondition wc : team.winConditions)
+				blocks.add(wc.getBlockData());
 		
 		StringWriter css = new StringWriter();
 		for (BlockData bd : blocks)

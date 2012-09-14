@@ -14,8 +14,9 @@ import org.apache.commons.collections.map.DefaultedMap;
 
 public class BlockData
 {
-	// placeholder for bedrock block data
+	// placeholder for a few common block data values
 	public static final BlockData BEDROCK = new BlockData(Material.BEDROCK);
+	public static final BlockData AIR     = new BlockData(Material.AIR);
 	
 	private Material mat;
 

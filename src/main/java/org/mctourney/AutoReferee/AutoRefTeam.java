@@ -136,8 +136,27 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	public Location getSpawnLocation()
 	{ return spawn == null ? match.getWorldSpawn() : spawn; }
 
-	// win-conditions, locations mapped to expected block data
-	public Map<Location, BlockData> winConditions;
+	// win-conditions
+	public class WinCondition
+	{
+		private Location loc;
+		private BlockData bd;
+		private int range;
+		
+		public WinCondition(Location loc, BlockData bd, int range)
+		{ this.loc = loc; this.bd = bd; this.range = range; }
+		
+		public Location getLocation()
+		{ return loc; }
+		
+		public BlockData getBlockData()
+		{ return bd; }
+		
+		public int getInexactRange()
+		{ return range; }
+	}
+	
+	public Set<WinCondition> winConditions;
 	
 	// status of objectives
 	public enum GoalStatus
@@ -234,17 +253,18 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		// setup both objective-based data-structures together
 		// -- avoids an NPE with getObjectives()
-		newTeam.winConditions = Maps.newHashMap();
+		newTeam.winConditions = Sets.newHashSet();
 		if (conf.containsKey("win-condition"))
 		{
 			List<String> slist = (List<String>) conf.get("win-condition");
 			if (slist != null) for (String s : slist)
 			{
 				String[] sp = s.split(":");
+				int range = sp.length > 2 ? Integer.parseInt(sp[2]) : match.getInexactRange();
 				
 				BlockVector3 v = BlockVector3.fromCoords(sp[0]);
 				newTeam.addWinCondition(w.getBlockAt(v.toLocation(w)), 
-					BlockData.fromString(sp[1]));
+					BlockData.fromString(sp[1]), range);
 			}
 		}
 
@@ -270,9 +290,15 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		
 		// convert the win conditions to strings
 		List<String> wcond = Lists.newArrayList();
-		for (Map.Entry<Location, BlockData> e : winConditions.entrySet())
-			wcond.add(BlockVector3.fromLocation(e.getKey()).toCoords() 
-				+ ":" + e.getValue());
+		for (WinCondition wc : winConditions)
+		{
+			String range = "";
+			if (wc.getInexactRange() != match.getInexactRange())
+				range = ":" + wc.getInexactRange();
+			
+			wcond.add(BlockVector3.fromLocation(wc.getLocation()).toCoords() 
+				+ ":" + wc.getBlockData().toString() + range);
+		}
 
 		// add the win condition list
 		map.put("win-condition", wcond);
@@ -413,23 +439,23 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		return build;
 	}
 	
-	public void addWinCondition(Block block)
+	public void addWinCondition(Block block, int range)
 	{
 		// if the block is null, forget it
 		if (block == null) return;
 		
 		// add the block data to the win-condition listing
 		BlockData bd = BlockData.fromBlock(block);
-		this.addWinCondition(block, bd);
+		this.addWinCondition(block, bd, range);
 	}
 	
-	public void addWinCondition(Block block, BlockData bd)
+	public void addWinCondition(Block block, BlockData bd, int range)
 	{
 		// if the block is null, forget it
 		if (block == null || bd == null) return;
 		
 		Set<BlockData> prevObj = getObjectives();
-		winConditions.put(block.getLocation(), bd);
+		winConditions.add(new WinCondition(block.getLocation(), bd, range));
 		Set<BlockData> newObj = getObjectives();
 		
 		newObj.removeAll(prevObj);
@@ -444,7 +470,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	public Set<BlockData> getObjectives()
 	{
 		Set<BlockData> objectives = Sets.newHashSet();
-		objectives.addAll(winConditions.values());
+		for (WinCondition wc : winConditions)
+			objectives.add(wc.getBlockData());
+		objectives.remove(BlockData.AIR);
 		return objectives;
 	}
 	
@@ -453,10 +481,10 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		int inexactRange = getMatch().getInexactRange();
 		objloop: for (BlockData bd : getObjectives())
 		{
-			for (Map.Entry<Location, BlockData> e : winConditions.entrySet())
-				if (bd.equals(e.getValue()))
+			for (WinCondition wc : winConditions)
+				if (bd.equals(wc.getBlockData()))
 			{
-				if (getMatch().blockInRange(bd, e.getKey(), inexactRange) != null)
+				if (getMatch().blockInRange(bd, wc.getLocation(), inexactRange) != null)
 				{ setObjectiveStatus(bd, GoalStatus.PLACED); continue objloop; }
 			}
 			

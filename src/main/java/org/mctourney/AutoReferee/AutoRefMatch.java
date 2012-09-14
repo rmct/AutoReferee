@@ -25,7 +25,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang.StringUtils;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Difficulty;
 import org.bukkit.GameMode;
@@ -49,6 +48,7 @@ import org.bukkit.material.*;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
+import org.mctourney.AutoReferee.AutoRefTeam.WinCondition;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.util.ArmorPoints;
 import org.mctourney.AutoReferee.util.BlockData;
@@ -983,6 +983,9 @@ public class AutoRefMatch
 					
 		return null;
 	}
+
+	private Location blockInRange(WinCondition wc)
+	{ return blockInRange(wc.getBlockData(), wc.getLocation(), wc.getInexactRange()); }
 	
 	public void checkWinConditions()
 	{
@@ -1004,9 +1007,9 @@ public class AutoRefMatch
 			
 			// check all win condition blocks (AND together)
 			boolean win = true;
-			for (Map.Entry<Location, BlockData> pair : team.winConditions.entrySet())
+			for (WinCondition wc : team.winConditions)
 			{
-				Location placedLoc = blockInRange(pair.getValue(), pair.getKey(), getInexactRange());
+				Location placedLoc = blockInRange(wc);
 				win &= (placedLoc != null);
 			}
 			
@@ -1384,8 +1387,8 @@ public class AutoRefMatch
 		for (AutoRefPlayer apl : getPlayers()) if (apl != null)
 			message = message.replaceAll(apl.getPlayerName(), apl.getName());
 		for (AutoRefTeam team : getTeams()) if (team.winConditions != null)
-			for (BlockData bd : team.winConditions.values()) if (bd != null)
-				message = message.replaceAll(bd.getRawName(), bd.getName());
+			for (WinCondition wc : team.winConditions) message = message.replaceAll(
+				wc.getBlockData().getRawName(), wc.getBlockData().getName());
 		return ChatColor.RESET + message;
 	}
 

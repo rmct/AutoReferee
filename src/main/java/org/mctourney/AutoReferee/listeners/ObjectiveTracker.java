@@ -1,7 +1,5 @@
 package org.mctourney.AutoReferee.listeners;
 
-import java.util.Map;
-
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -26,6 +24,7 @@ import org.bukkit.plugin.Plugin;
 import org.mctourney.AutoReferee.AutoRefMatch;
 import org.mctourney.AutoReferee.AutoRefPlayer;
 import org.mctourney.AutoReferee.AutoRefTeam;
+import org.mctourney.AutoReferee.AutoRefTeam.WinCondition;
 import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.AutoRefTeam.GoalStatus;
@@ -53,9 +52,9 @@ public class ObjectiveTracker implements Listener
 		
 		if (match != null && apl != null)
 		{
-			for (Map.Entry<Location, BlockData> e : apl.getTeam().winConditions.entrySet())
+			for (WinCondition wc : apl.getTeam().winConditions)
 			{
-				Location loc = e.getKey(); BlockData bd = e.getValue();
+				Location loc = wc.getLocation(); BlockData bd = wc.getBlockData();
 				if (match.blockInRange(bd, loc, match.getInexactRange()) != null &&  
 					apl.getTeam().getObjectiveStatus(bd) != GoalStatus.PLACED && bd.matches(block))
 						match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.OBJECTIVE_PLACED,
@@ -255,7 +254,7 @@ public class ObjectiveTracker implements Listener
 		AutoRefTeam team = plugin.getTeam((Player) event.getWhoClicked());
 		
 		BlockData recipeTarget = BlockData.fromItemStack(event.getRecipe().getResult());
-		if (team != null && team.winConditions.containsValue(recipeTarget) && !match.allowCraft)
+		if (team != null && team.getObjectives().contains(recipeTarget) && !match.allowCraft)
 			event.setCancelled(true);
 		
 		// if this is on the blacklist, cancel
