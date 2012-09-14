@@ -400,7 +400,8 @@ public class AutoReferee extends JavaPlugin
 					archiveFolder = match.distributeMap();
 				else archiveFolder = match.archiveMapData();
 				
-				String resp = match.getVersionString() + " archived!";
+				String resp = String.format("%s %s", match.getVersionString(), 
+					archiveFolder == null ? "failed to archive." : "archived!");
 				sender.sendMessage(ChatColor.GREEN + resp); getLogger().info(resp);
 				return true;
 			}
