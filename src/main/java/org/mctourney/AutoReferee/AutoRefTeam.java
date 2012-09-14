@@ -467,7 +467,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 				continue objloop;
 			}
 			
-			if (objectiveStatus.get(bd) != GoalStatus.NONE)
+			if (getObjectiveStatus(bd) != GoalStatus.NONE)
 			{ setObjectiveStatus(bd, GoalStatus.SEEN); continue; }
 		}
 	}
@@ -486,7 +486,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	}
 
 	public GoalStatus getObjectiveStatus(BlockData objective)
-	{ return objectiveStatus.get(objective); }
+	{ return objectiveStatus == null ? GoalStatus.NONE : objectiveStatus.get(objective); }
 
 	public Map<BlockData, GoalStatus> getObjectiveStatuses()
 	{ return Maps.newHashMap(objectiveStatus); }
