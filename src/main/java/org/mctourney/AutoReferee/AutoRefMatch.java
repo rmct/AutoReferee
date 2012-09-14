@@ -285,7 +285,19 @@ public class AutoRefMatch
 	// number of seconds for each phase
 	public static final int READY_SECONDS = 15;
 	public static final int COMPLETED_SECONDS = 180;
-
+	
+	private int customReadyDelay = -1;
+	
+	public int getReadyDelay()
+	{
+		if (customReadyDelay >= 0) return customReadyDelay;
+		return AutoReferee.getInstance().getConfig().getInt(
+			"delay-seconds.ready", AutoRefMatch.READY_SECONDS);
+	}
+	
+	public void setReadyDelay(int delay)
+	{ this.customReadyDelay = delay; }
+	
 	public AutoRefMatch(World world, boolean tmp, MatchStatus state)
 	{ this(world, tmp); setCurrentState(state); }
 
@@ -909,9 +921,7 @@ public class AutoRefMatch
 		// prepare all players for the match
 		for (AutoRefPlayer apl : getPlayers()) apl.heal();
 
-		int readyDelay = AutoReferee.getInstance().getConfig().getInt(
-			"delay-seconds.ready", AutoRefMatch.READY_SECONDS);
-		if (isDebugMode()) readyDelay = 0;
+		int readyDelay = this.getReadyDelay();
 		
 		// announce the match starting in X seconds
 		this.broadcast(MatchStartTask.COLOR + "Match will begin in "

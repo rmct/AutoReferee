@@ -908,7 +908,13 @@ public class AutoReferee extends JavaPlugin
 			}
 			
 			if (match.isReferee(player))
+			{
+				// attempt to set the ready delay if one is specified
+				if (args.length > 0) try { match.setReadyDelay(Integer.parseInt(args[0])); }
+				catch (NumberFormatException e) {  };
+				
 				match.setRefereeReady(rstate);
+			}
 			else
 			{
 				AutoRefTeam team = match.getPlayerTeam(player);
