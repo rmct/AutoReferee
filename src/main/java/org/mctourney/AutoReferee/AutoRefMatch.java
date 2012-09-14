@@ -953,7 +953,7 @@ public class AutoRefMatch
 	{
 		boolean teamsReady = true;
 		for ( AutoRefTeam t : teams )
-			teamsReady &= t.isReady();
+			teamsReady &= t.isReady() || t.isEmptyTeam();
 		
 		boolean ready = getReferees().size() == 0 ? teamsReady : isRefereeReady();
 		if (teamsReady && !ready) for (Player p : getReferees())

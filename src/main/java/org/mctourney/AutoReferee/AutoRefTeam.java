@@ -101,7 +101,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	private boolean ready = false;
 
 	public boolean isReady()
-	{ return ready || (getPlayers().isEmpty() && getMatch().isDebugMode()); }
+	{ return ready; }
 
 	public void setReady(boolean ready)
 	{
@@ -112,6 +112,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			pl.sendMessage(getName() + " is now marked as " + 
 				ChatColor.DARK_GRAY + (this.ready ? "READY" : "NOT READY"));
 	}
+	
+	public boolean isEmptyTeam()
+	{ return getPlayers().size() == 0 && getExpectedPlayers().size() == 0; }
 
 	// list of regions
 	private Set<AutoRefRegion> regions = null;
