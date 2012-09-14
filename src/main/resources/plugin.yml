@@ -8,6 +8,7 @@ softdepend:
 
 commands:
   autoref:
+    aliases: ar
     description: AutoReferee configuration
     permission: autoreferee.admin
     usage: /<command> [<action>] [args...]
@@ -25,10 +26,12 @@ commands:
     permission: autoreferee.player
     usage: /<command>
   jointeam:
+    aliases: [join, j]
     description: Set player's team
     permission: autoreferee.player
     usage: /<command> [<teamname>] [<playername>]
   leaveteam:
+    aliases: leave
     description: Remove player's team
     permission: autoreferee.player
     usage: /<command> [<playername>]
@@ -37,6 +40,7 @@ commands:
     permission: autoreferee.player
     usage: /<command> [true|false|yes|no]
   viewinventory:
+    aliases: vi
     description: View the inventory of the player
     permission: autoreferee.referee
     usage: /<command> <playername>
