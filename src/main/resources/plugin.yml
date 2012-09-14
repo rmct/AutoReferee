@@ -8,7 +8,7 @@ softdepend:
 
 commands:
   autoref:
-    aliases: ar
+    aliases: [ar, autoreferee]
     description: AutoReferee configuration
     permission: autoreferee.admin
     usage: /<command> [<action>] [args...]
