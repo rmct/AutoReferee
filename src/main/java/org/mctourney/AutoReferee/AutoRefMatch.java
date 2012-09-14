@@ -851,6 +851,13 @@ public class AutoRefMatch
 			if (!protectedEntities.contains(e.getUniqueId())) e.remove();
 	}
 
+	public void cancelCountdown()
+	{
+		if (matchStarter != null && matchStarter.task != -1)
+			AutoReferee.getInstance().getServer().getScheduler().cancelTask(matchStarter.task);
+		matchStarter = null;
+	}
+
 	// helper class for starting match, synchronous task
 	static class MatchStartTask implements Runnable
 	{
@@ -875,7 +882,7 @@ public class AutoRefMatch
 				match.broadcast(">>> " + MatchStartTask.COLOR + "GO!");
 				
 				// cancel the task
-				AutoReferee.getInstance().getServer().getScheduler().cancelTask(task);
+				match.cancelCountdown();
 			}
 			
 			// report number of seconds remaining

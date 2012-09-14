@@ -111,6 +111,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		for (Player pl : getMatch().getWorld().getPlayers())
 			pl.sendMessage(getName() + " is now marked as " + 
 				ChatColor.DARK_GRAY + (this.ready ? "READY" : "NOT READY"));
+		if (!this.ready) getMatch().cancelCountdown();
 	}
 	
 	public boolean isEmptyTeam()
