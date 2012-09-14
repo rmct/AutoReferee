@@ -342,12 +342,38 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		return basedir;
 	}
 	
+	private static class MapDownloader implements Runnable
+	{
+		private CommandSender sender;
+		private String mapName, custom;
+		
+		public MapDownloader(CommandSender sender, String map, String custom)
+		{ this.sender = sender; this.mapName = map; this.custom = custom; }
+
+		@Override
+		public void run()
+		{
+			AutoRefMap map = null;
+			try { map = AutoRefMap.getMap(this.mapName); } catch (IOException e) {  }
+			
+			if (map == null) sender.sendMessage("No such map: " + this.mapName);
+			else try
+			{
+				if (!map.isInstalled()) map.download();
+				AutoReferee.getInstance().getServer().getScheduler().scheduleSyncDelayedTask(
+					AutoReferee.getInstance(), new MapLoader(sender, map, custom));
+			}
+			catch (IOException e) {  }
+		}
+	}
+	
 	private static class MapLoader implements Runnable
 	{
 		private CommandSender sender;
-		private String map, custom;
+		private AutoRefMap map;
+		private String custom;
 		
-		public MapLoader(CommandSender sender, String map, String custom)
+		public MapLoader(CommandSender sender, AutoRefMap map, String custom)
 		{ this.sender = sender; this.map = map; this.custom = custom; }
 
 		@Override
@@ -357,23 +383,6 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 			try { match = AutoRefMap.createMatch(this.map, this.custom); }
 			catch (IOException e) {  }
 			
-			if (match == null) sender.sendMessage("No such map: " + this.map);
-			else AutoReferee.getInstance().getServer().getScheduler().scheduleSyncDelayedTask(
-				AutoReferee.getInstance(), new MapPostLoader(sender, match));
-		}
-	}
-	
-	private static class MapPostLoader implements Runnable
-	{
-		private CommandSender sender;
-		private AutoRefMatch match;
-		
-		public MapPostLoader(CommandSender sender, AutoRefMatch match)
-		{ this.sender = sender; this.match = match; }
-
-		@Override
-		public void run()
-		{
 			sender.sendMessage(ChatColor.DARK_GRAY + match.getVersionString() + " setup!");
 			if (sender instanceof Player) ((Player) sender).teleport(match.getWorldSpawn());
 		}
@@ -383,6 +392,6 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	{
 		AutoReferee instance = AutoReferee.getInstance();
 		instance.getServer().getScheduler().scheduleAsyncDelayedTask(
-			instance, new MapLoader(sender, mapName, customName));
+			instance, new MapDownloader(sender, mapName, customName));
 	}
 }
