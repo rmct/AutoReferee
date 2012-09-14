@@ -1,16 +1,20 @@
 package org.mctourney.AutoReferee.listeners;
 
 import java.util.Iterator;
+import java.util.Map;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -24,9 +28,14 @@ import org.mctourney.AutoReferee.AutoRefPlayer;
 import org.mctourney.AutoReferee.AutoRefTeam;
 import org.mctourney.AutoReferee.AutoReferee;
 
+import com.google.common.collect.Maps;
+
 public class TeamListener implements Listener 
 {
 	AutoReferee plugin = null;
+	
+	// mapping spectators to the matches they died in
+	Map<String, AutoRefMatch> deadSpectators = Maps.newHashMap();
 
 	public TeamListener(Plugin p)
 	{ plugin = (AutoReferee) p; }
@@ -61,10 +70,45 @@ public class TeamListener implements Listener
 					{ iter.remove(); continue; }
 		}
 	}
+	
+	@EventHandler(priority=EventPriority.MONITOR)
+	public void spectatorDeath(PlayerDeathEvent event)
+	{
+		World world = event.getEntity().getWorld();
+		AutoRefMatch match = plugin.getMatch(world);
+		
+		if (match != null && !match.isPlayer(event.getEntity()))
+			deadSpectators.put(event.getEntity().getName(), match);
+	}
+	
+	@EventHandler(priority=EventPriority.MONITOR)
+	public void spectatorDeath(EntityDamageEvent event)
+	{
+		World world = event.getEntity().getWorld();
+		AutoRefMatch match = plugin.getMatch(world);
+		
+		if (event.getEntityType() != EntityType.PLAYER) return;
+		Player player = (Player) event.getEntity();
+		
+		if (match != null && event.getDamage() >= player.getHealth() && !match.isPlayer(player))
+		{
+			player.teleport(match.getPlayerSpawn(player));
+			player.setHealth(20);
+			player.setFallDistance(0);
+		}
+	}
 
 	@EventHandler
 	public void playerRespawn(PlayerRespawnEvent event)
 	{
+		String name = event.getPlayer().getName();
+		if (deadSpectators.containsKey(name))
+		{
+			AutoRefMatch match = deadSpectators.get(name);
+			if (match != null) event.setRespawnLocation(match.getWorldSpawn());
+			deadSpectators.remove(name); return;
+		}
+		
 		World world = event.getPlayer().getWorld();
 		AutoRefMatch match = plugin.getMatch(world);
 		
