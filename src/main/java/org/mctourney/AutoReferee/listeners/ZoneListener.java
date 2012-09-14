@@ -526,7 +526,7 @@ public class ZoneListener implements Listener
 	}
 	
 	@EventHandler
-	public void nobuildExplosion(EntityExplodeEvent event)
+	public void safezoneExplosion(EntityExplodeEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
 		if (match == null) return;
