@@ -177,8 +177,8 @@ public class ZoneListener implements Listener
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
 		if (match == null || match.getCurrentState() == MatchStatus.NONE) return true;
 		
-		// if the player is a referee, nothing is off-limits
-		if (match.isReferee(player)) return true;
+		// if the player is a referee or is creative, nothing is off-limits
+		if (match.isReferee(player) || player.getGameMode() == GameMode.CREATIVE) return true;
 		
 		// if the match isn't currently in progress, a player should
 		// not be allowed to place or destroy blocks anywhere
