@@ -260,10 +260,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			if (slist != null) for (String s : slist)
 			{
 				String[] sp = s.split(":");
-				int range = sp.length > 2 ? Integer.parseInt(sp[2]) : match.getInexactRange();
 				
-				BlockVector3 v = BlockVector3.fromCoords(sp[0]);
-				newTeam.addWinCondition(w.getBlockAt(v.toLocation(w)), 
+				int range = sp.length > 2 ? Integer.parseInt(sp[2]) : match.getInexactRange();
+				newTeam.addWinCondition(BlockVector3.fromCoords(sp[0]).toLocation(w), 
 					BlockData.fromString(sp[1]), range);
 			}
 		}
@@ -446,16 +445,16 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		
 		// add the block data to the win-condition listing
 		BlockData bd = BlockData.fromBlock(block);
-		this.addWinCondition(block, bd, range);
+		this.addWinCondition(block.getLocation(), bd, range);
 	}
 	
-	public void addWinCondition(Block block, BlockData bd, int range)
+	public void addWinCondition(Location loc, BlockData bd, int range)
 	{
 		// if the block is null, forget it
-		if (block == null || bd == null) return;
+		if (loc == null || bd == null) return;
 		
 		Set<BlockData> prevObj = getObjectives();
-		winConditions.add(new WinCondition(block.getLocation(), bd, range));
+		winConditions.add(new WinCondition(loc, bd, range));
 		Set<BlockData> newObj = getObjectives();
 		
 		newObj.removeAll(prevObj);
@@ -464,7 +463,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		
 		// broadcast the update
 		match.broadcast(bd.getName() + " is now a win condition for " + getName() + 
-			" @ " + BlockVector3.fromLocation(block.getLocation()).toCoords());
+			" @ " + BlockVector3.fromLocation(loc).toCoords());
 	}
 
 	public Set<BlockData> getObjectives()
