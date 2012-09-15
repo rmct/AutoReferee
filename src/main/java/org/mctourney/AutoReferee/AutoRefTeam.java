@@ -408,7 +408,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	public double distanceToClosestRegion(Location loc)
 	{
 		double distance = match.getStartRegion().distanceToRegion(loc);
-		for ( CuboidRegion reg : regions ) if (distance > 0)
+		if (regions != null) for ( CuboidRegion reg : regions ) if (distance > 0)
 			distance = Math.min(distance, reg.distanceToRegion(loc));
 		return distance;
 	}
@@ -419,7 +419,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	public boolean canEnter(Location loc, Double dist)
 	{
 		double distance = match.getStartRegion().distanceToRegion(loc);
-		for ( AutoRefRegion reg : regions ) if (distance > 0)
+		if (regions != null) for ( AutoRefRegion reg : regions ) if (distance > 0)
 		{
 			distance = Math.min(distance, reg.distanceToRegion(loc));
 			if (!reg.canEnter() && reg.distanceToRegion(loc) <= dist) return false; 
@@ -433,7 +433,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		if (getMatch().inStartRegion(loc)) return false;
 		
 		boolean build = false;
-		for ( AutoRefRegion reg : regions )
+		if (regions != null) for ( AutoRefRegion reg : regions )
 			if (reg.contains(BlockVector3.fromLocation(loc)))
 			{ build = true; if (!reg.canBuild()) return false; }
 		return build;

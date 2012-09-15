@@ -327,7 +327,7 @@ public class ZoneListener implements Listener
 				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
 				
 				for (AutoRefTeam team : match.getTeams())
-					if (team.checkPosition(block.getLocation()))
+					if (team.canBuild(block.getLocation()))
 						team.addWinCondition(block, match.getInexactRange());
 				
 				break;
