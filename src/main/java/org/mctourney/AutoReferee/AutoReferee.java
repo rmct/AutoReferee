@@ -295,19 +295,12 @@ public class AutoReferee extends JavaPlugin
 	
 	public void playerDone(Player p)
 	{		
-		// if the server is in online mode, remove them
-		if (isAutoMode())
-		{
-			p.setGameMode(GameMode.SURVIVAL);
-			p.kickPlayer(AutoReferee.COMPLETED_KICK_MESSAGE);
-		}
-		
-		// otherwise, take them back to the lobby
-		else if (p.getWorld() != getLobbyWorld())
-		{
-			p.setGameMode(GameMode.SURVIVAL);
+		// take them back to the lobby, one way or another
+		if (p.getWorld() != getLobbyWorld())
 			p.teleport(getLobbyWorld().getSpawnLocation());
-		}
+		
+		// if the server is in online mode, remove them as well
+		if (isAutoMode()) p.kickPlayer(AutoReferee.COMPLETED_KICK_MESSAGE);
 	}
 
 	private WorldEditPlugin getWorldEdit()

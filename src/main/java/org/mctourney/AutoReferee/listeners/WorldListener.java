@@ -1,5 +1,10 @@
 package org.mctourney.AutoReferee.listeners;
 
+import java.util.Map;
+
+import org.apache.commons.collections.map.DefaultedMap;
+import org.bukkit.GameMode;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -64,6 +69,20 @@ public class WorldListener implements Listener
 			match.checkTeamsReady();
 		}
 	}
+
+	@SuppressWarnings("unchecked")
+	public static GameMode getDefaultGamemode(World world)
+	{
+		Map<GameMode, Integer> cnt = new DefaultedMap(0);
+		GameMode best = GameMode.SURVIVAL; int x, max = 0;
+		for (Player p : world.getPlayers()) if (!p.isOp())
+		{
+			cnt.put(p.getGameMode(), x = 1+cnt.get(p.getGameMode()));
+			if (x > max) { max = x; best = p.getGameMode(); }
+		}
+		
+		return best;
+	}
 	
 	@EventHandler
 	public void worldJoin(PlayerChangedWorldEvent event)
@@ -81,6 +100,13 @@ public class WorldListener implements Listener
 			
 			if (matchTo.isReferee(event.getPlayer()))
 				matchTo.updateReferee(event.getPlayer());
+		}
+		
+		// if they are leaving AutoReferee-managed worlds
+		if (matchFm != null && matchTo == null)
+		{
+			GameMode dgm = getDefaultGamemode(event.getPlayer().getWorld());
+			matchFm.setSpectatorMode(event.getPlayer(), false, dgm);
 		}
 	}
 }
