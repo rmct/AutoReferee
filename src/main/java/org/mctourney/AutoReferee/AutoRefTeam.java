@@ -386,6 +386,8 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			((Player) pl).setPlayerListName(pl.getName());
 
 		match.messageReferees("team", getRawName(), "player", "-" + apl.getPlayerName());
+		
+		match.setupSpectators();
 		match.checkTeamsReady();
 	}
 	

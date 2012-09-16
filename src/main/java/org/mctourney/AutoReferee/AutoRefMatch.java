@@ -847,10 +847,15 @@ public class AutoRefMatch
 	}
 
 	public void setSpectatorMode(Player p, boolean b)
+	{ setSpectatorMode(p, b, b ? GameMode.CREATIVE : GameMode.SURVIVAL); }
+
+	public void setSpectatorMode(Player p, boolean b, GameMode gm)
 	{
-		p.setGameMode(b ? GameMode.CREATIVE : GameMode.SURVIVAL);
+		p.setGameMode(gm);
 		AutoReferee.setAffectsSpawning(p, !b);
-		AutoReferee.setCollidesWithEntities(p, !b);
+		
+		boolean noEntityCollide = b && getCurrentState().inProgress();
+		AutoReferee.setCollidesWithEntities(p, !noEntityCollide);
 	}
 
 	public void setupSpectators()

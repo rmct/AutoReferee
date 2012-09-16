@@ -24,6 +24,7 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -288,9 +289,18 @@ public class ZoneListener implements Listener
 		{ event.setCancelled(true); return; }
 	}
 	
-	// restrict block pickup by referees
+	// restrict item pickup by referees
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void refereePickup(PlayerPickupItemEvent event)
+	{
+		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
+		if (match != null && match.getCurrentState().inProgress() 
+			&& !match.isPlayer(event.getPlayer())) event.setCancelled(true);
+	}
+	
+	// restrict item pickup by referees
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void refereeDrop(PlayerDropItemEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
 		if (match != null && match.getCurrentState().inProgress() 
