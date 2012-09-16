@@ -947,6 +947,9 @@ public class AutoRefMatch
 
 	public void checkTeamsReady() 
 	{
+		// this function is only useful if called prior to the match
+		if (!getCurrentState().isBeforeMatch()) return;
+		
 		// if there are no players on the server
 		if (getPlayers().size() == 0)
 		{
@@ -955,11 +958,9 @@ public class AutoRefMatch
 			setCurrentState(MatchStatus.WAITING); return;
 		}
 		
-		// this function is only useful if we are waiting
-		if (getCurrentState() != MatchStatus.WAITING) return;
-		
 		// if we aren't in online mode, assume we are always ready
-		if (!AutoReferee.getInstance().isAutoMode()) { setCurrentState(MatchStatus.READY); return; }
+		if (!AutoReferee.getInstance().isAutoMode())
+		{ setCurrentState(MatchStatus.READY); return; }
 		
 		// check if all the players are here
 		boolean ready = true;
