@@ -714,6 +714,14 @@ public class AutoReferee extends JavaPlugin
 				
 				return true;
 			}
+			
+			// CMD: /autoref version
+			if (args.length >= 1 && "version".equalsIgnoreCase(args[0]))
+			{
+				sender.sendMessage(ChatColor.DARK_GRAY + "This server is running " + 
+					ChatColor.BLUE + this.getDescription().getFullName());
+				return true;
+			}
 		}
 		
 		if ("zones".equalsIgnoreCase(cmd.getName()) && match != null)
