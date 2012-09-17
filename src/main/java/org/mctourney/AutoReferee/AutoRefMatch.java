@@ -414,6 +414,9 @@ public class AutoRefMatch
 		try { diff = Difficulty.getByValue(Integer.parseInt(dstr)); }
 		catch (NumberFormatException e) {  }
 		world.setDifficulty(diff);
+		
+		// last, send an update about the match to everyone logged in
+		for (Player pl : world.getPlayers()) sendMatchInfo(pl);
 	}
 
 	public void saveWorldConfiguration() 

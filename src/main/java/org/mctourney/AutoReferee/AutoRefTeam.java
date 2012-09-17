@@ -464,8 +464,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			"team", this.getRawName(), "obj", "+" + nbd.toString());
 		
 		// broadcast the update
-		match.broadcast(bd.getName() + " is now a win condition for " + getName() + 
-			" @ " + BlockVector3.fromLocation(loc).toCoords());
+		for (Player cfg : loc.getWorld().getPlayers()) if (cfg.hasPermission("autoreferee.configure"))
+			cfg.sendMessage(bd.getName() + " is now a win condition for " + getName() + 
+				" @ " + BlockVector3.fromLocation(loc).toCoords());
 	}
 
 	public Set<BlockData> getObjectives()
