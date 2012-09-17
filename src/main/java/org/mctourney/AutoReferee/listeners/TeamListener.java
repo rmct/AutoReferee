@@ -90,9 +90,11 @@ public class TeamListener implements Listener
 		if (event.getEntityType() != EntityType.PLAYER) return;
 		Player player = (Player) event.getEntity();
 		
-		if (match != null && event.getDamage() >= player.getHealth() && !match.isPlayer(player))
+		if (match != null && !match.isPlayer(player))
 		{
-			player.teleport(match.getPlayerSpawn(player));
+			if (player.getLocation().getY() < -64)
+				player.teleport(match.getPlayerSpawn(player));
+			
 			player.setHealth(20);
 			player.setFallDistance(0);
 		}
