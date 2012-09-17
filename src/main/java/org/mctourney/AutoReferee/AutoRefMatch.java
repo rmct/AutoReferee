@@ -103,7 +103,8 @@ public class AutoRefMatch
 	public void setStartTime(long startTime)
 	{ this.startTime = startTime; }
 	
-	public enum MatchStatus {
+	public enum MatchStatus
+	{
 		NONE, WAITING, READY, PLAYING, COMPLETED;
 
 		public boolean isBeforeMatch()
@@ -368,6 +369,7 @@ public class AutoRefMatch
 
 		teams = Sets.newHashSet();
 		messageReferees("match", getWorld().getName(), "init");
+		setCurrentState(MatchStatus.WAITING);
 
 		for (Map<?, ?> map : worldConfig.getMapList("match.teams"))
 			teams.add(AutoRefTeam.fromMap((Map<String, Object>) map, this));
