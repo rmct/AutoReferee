@@ -487,7 +487,7 @@ public class AutoReferee extends JavaPlugin
 				{
 					// team name is invalid. let the player know
 					sender.sendMessage(ChatColor.DARK_GRAY + args[1] + 
-						ChatColor.RESET + "is not a valid team.");
+						ChatColor.RESET + " is not a valid team.");
 					sender.sendMessage("Teams are " + match.getTeamList());
 				}
 				else
@@ -646,7 +646,7 @@ public class AutoReferee extends JavaPlugin
 				if (team == null)
 				{
 					sender.sendMessage(ChatColor.DARK_GRAY + args[1] + 
-						ChatColor.RESET + "is not a valid team.");
+						ChatColor.RESET + " is not a valid team.");
 					sender.sendMessage("Teams are " + match.getTeamList());
 				}
 				else team.setName(args[2]);
@@ -677,13 +677,13 @@ public class AutoReferee extends JavaPlugin
 				if (team1 == null)
 				{
 					sender.sendMessage(ChatColor.DARK_GRAY + args[1] + 
-						ChatColor.RESET + "is not a valid team.");
+						ChatColor.RESET + " is not a valid team.");
 					sender.sendMessage("Teams are " + match.getTeamList());
 				}
 				else if (team2 == null)
 				{
 					sender.sendMessage(ChatColor.DARK_GRAY + args[2] + 
-						ChatColor.RESET + "is not a valid team.");
+						ChatColor.RESET + " is not a valid team.");
 					sender.sendMessage("Teams are " + match.getTeamList());
 				}
 				else AutoRefTeam.switchTeams(team1, team2);
@@ -746,7 +746,7 @@ public class AutoReferee extends JavaPlugin
 				{
 					// team name is invalid. let the player know
 					sender.sendMessage(ChatColor.DARK_GRAY + args[1] + 
-						ChatColor.RESET + "is not a valid team.");
+						ChatColor.RESET + " is not a valid team.");
 					return true;
 				}
 
@@ -805,7 +805,7 @@ public class AutoReferee extends JavaPlugin
 			{
 				// team name is invalid. let the player know
 				sender.sendMessage(ChatColor.DARK_GRAY + tname + 
-					ChatColor.RESET + "is not a valid team.");
+					ChatColor.RESET + " is not a valid team.");
 				sender.sendMessage("Teams are " + match.getTeamList());
 				return true;
 			}
@@ -862,7 +862,7 @@ public class AutoReferee extends JavaPlugin
 				if (args.length > 0)
 				{
 					sender.sendMessage(ChatColor.DARK_GRAY + args[0] + 
-						ChatColor.RESET + "is not a valid team.");
+						ChatColor.RESET + " is not a valid team.");
 					sender.sendMessage("Teams are " + match.getTeamList());
 				}
 				return true;
