@@ -689,6 +689,13 @@ public class AutoReferee extends JavaPlugin
 				else AutoRefTeam.switchTeams(team1, team2);
 				return true;
 			}
+			
+			// CMD: /autoref countdown
+			if (args.length == 1 && "countdown".equalsIgnoreCase(args[0]) && match != null)
+			{
+				match.startCountdown(0, false);
+				return true;
+			}
 		}
 			
 		if ("autoref".equalsIgnoreCase(cmd.getName()))

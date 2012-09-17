@@ -233,7 +233,7 @@ public class AutoRefMatch
 	}
 
 	// task that starts the match
-	public AutoRefMatch.MatchStartTask matchStarter = null;
+	public AutoRefMatch.CountdownTask matchStarter = null;
 	
 	// mechanisms to open the starting gates
 	public Set<StartMechanism> startMechanisms = null;
@@ -878,43 +878,44 @@ public class AutoRefMatch
 	}
 
 	// helper class for starting match, synchronous task
-	static class MatchStartTask implements Runnable
+	static class CountdownTask implements Runnable
 	{
 		public static final ChatColor COLOR = ChatColor.GREEN;
 		
 		public int task = -1;
-		private int secs = 3;
+		private int remainingSeconds = 3;
 		
 		private AutoRefMatch match = null;
-		public MatchStartTask(AutoRefMatch m)
+		private boolean start = false;
+		
+		public CountdownTask(AutoRefMatch m, boolean start)
 		{
 			match = m;
+			this.start = start;
 		}
 		
 		public void run()
 		{
 			// if the countdown has ended...
-			if (secs == 0)
+			if (remainingSeconds == 0)
 			{
 				// setup world to go!
-				match.start();
-				match.broadcast(">>> " + MatchStartTask.COLOR + "GO!");
+				if (this.start) match.start();
+				match.broadcast(">>> " + CountdownTask.COLOR + "GO!");
 				
 				// cancel the task
 				match.cancelCountdown();
 			}
 			
 			// report number of seconds remaining
-			else match.broadcast(">>> " + MatchStartTask.COLOR + 
-				Integer.toString(secs--) + "...");
+			else match.broadcast(">>> " + CountdownTask.COLOR + 
+				Integer.toString(remainingSeconds--) + "...");
 		}
 	}
 
 	// prepare this world to start
 	private void prepareMatch()
 	{
-		BukkitScheduler scheduler = AutoReferee.getInstance().getServer().getScheduler();
-		
 		// set the current time to the start time
 		world.setTime(this.startTime);
 		
@@ -931,18 +932,25 @@ public class AutoRefMatch
 		int readyDelay = this.getReadyDelay();
 		
 		// announce the match starting in X seconds
-		this.broadcast(MatchStartTask.COLOR + "Match will begin in "
-			+ ChatColor.WHITE + Integer.toString(readyDelay) + MatchStartTask.COLOR + " seconds.");
+		this.broadcast(CountdownTask.COLOR + "Match will begin in "
+			+ ChatColor.WHITE + Integer.toString(readyDelay) + CountdownTask.COLOR + " seconds.");
 
 		// send referees countdown notification
 		messageReferees("match", getWorld().getName(), "countdown", Integer.toString(readyDelay));
+		startCountdown(readyDelay, true);
+	}
+
+	public void startCountdown(int readyDelay, boolean startMatch)
+	{
+		// get a copy of the bukkit scheduling daemon
+		BukkitScheduler scheduler = AutoReferee.getInstance().getServer().getScheduler();
 		
 		// cancel any previous match-start task
 		if (this.matchStarter != null && this.matchStarter.task != -1)
 			scheduler.cancelTask(this.matchStarter.task);
 		
 		// schedule the task to announce and prepare the match
-		this.matchStarter = new MatchStartTask(this);
+		this.matchStarter = new CountdownTask(this, startMatch);
 		this.matchStarter.task = scheduler.scheduleSyncRepeatingTask(
 				AutoReferee.getInstance(), this.matchStarter, readyDelay * 20L, 20L);
 	}
