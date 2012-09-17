@@ -457,17 +457,14 @@ public class AutoRefMatch
 	}
 
 	public void messageReferees(String ...parts)
-	{
-		if (this.isDebugMode()) debug(ChatColor.DARK_GRAY + StringUtils.join(parts, ":"));
-		for (Player ref : getReferees()) messageReferee(ref, parts);
-	}	
+	{ for (Player ref : getReferees()) messageReferee(ref, parts); }	
 	
 	public void messageReferee(Player ref, String ...parts)
 	{
 		try
 		{
 			ref.sendPluginMessage(AutoReferee.getInstance(), AutoReferee.REFEREE_PLUGIN_CHANNEL, 
-				StringUtils.join(parts, ":").getBytes(AutoReferee.PLUGIN_CHANNEL_ENC));
+				StringUtils.join(parts, "|").getBytes(AutoReferee.PLUGIN_CHANNEL_ENC));
 		}
 		catch (UnsupportedEncodingException e)
 		{ AutoReferee.getInstance().getLogger().info("Unsupported encoding: " + AutoReferee.PLUGIN_CHANNEL_ENC); }
