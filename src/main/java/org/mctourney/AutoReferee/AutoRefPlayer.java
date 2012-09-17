@@ -366,10 +366,11 @@ public class AutoRefPlayer
 		
 		// one more kill for kill streak
 		++totalStreak;
-
-		match.messageReferees("player", getPlayerName(), "kills", Integer.toString(totalKills));
-		match.messageReferees("player", getPlayerName(), "streak", Integer.toString(totalStreak));
 		
+		if (totalStreak >= MIN_KILLSTREAK)
+			match.messageReferees("player", getPlayerName(), "streak", Integer.toString(totalStreak));
+		match.messageReferees("player", getPlayerName(), "kills", Integer.toString(totalKills));
+
 		if (playerStreak.get(apl) + 1 == MIN_DOMINATE)
 		{
 			match.messageReferees("player", getPlayerName(), "dominate", apl.getPlayerName());
