@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.commons.collections.map.DefaultedMap;
 import org.bukkit.GameMode;
 import org.bukkit.World;
+import org.bukkit.WorldType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -73,8 +74,8 @@ public class WorldListener implements Listener
 	@SuppressWarnings("unchecked")
 	public static GameMode getDefaultGamemode(World world)
 	{
-		Map<GameMode, Integer> cnt = new DefaultedMap(0);
-		GameMode best = GameMode.SURVIVAL; int x, max = 0;
+		Map<GameMode, Integer> cnt = new DefaultedMap(0); int x, max = 0;
+		GameMode best = AutoReferee.getInstance().getServer().getDefaultGameMode();
 		for (Player p : world.getPlayers()) if (!p.isOp())
 		{
 			cnt.put(p.getGameMode(), x = 1+cnt.get(p.getGameMode()));

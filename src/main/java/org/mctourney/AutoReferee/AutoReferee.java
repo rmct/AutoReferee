@@ -297,7 +297,10 @@ public class AutoReferee extends JavaPlugin
 	{		
 		// take them back to the lobby, one way or another
 		if (p.getWorld() != getLobbyWorld())
+		{
+			p.setGameMode(WorldListener.getDefaultGamemode(getLobbyWorld()));
 			p.teleport(getLobbyWorld().getSpawnLocation());
+		}
 		
 		// if the server is in online mode, remove them as well
 		if (isAutoMode()) p.kickPlayer(AutoReferee.COMPLETED_KICK_MESSAGE);
