@@ -14,6 +14,7 @@ import org.mctourney.AutoReferee.AutoRefMatch;
 
 public class RefereeChannelListener implements PluginMessageListener, Listener
 {
+	public static final char DELIMITER = '|';	
 	AutoReferee plugin = null;
 
 	public RefereeChannelListener(Plugin p)

@@ -49,6 +49,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import org.mctourney.AutoReferee.AutoRefTeam.WinCondition;
+import org.mctourney.AutoReferee.listeners.RefereeChannelListener;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.util.ArmorPoints;
 import org.mctourney.AutoReferee.util.BlockData;
@@ -463,8 +464,9 @@ public class AutoRefMatch
 	{
 		try
 		{
+			String msg = StringUtils.join(parts, RefereeChannelListener.DELIMITER);
 			ref.sendPluginMessage(AutoReferee.getInstance(), AutoReferee.REFEREE_PLUGIN_CHANNEL, 
-				StringUtils.join(parts, "|").getBytes(AutoReferee.PLUGIN_CHANNEL_ENC));
+				msg.getBytes(AutoReferee.PLUGIN_CHANNEL_ENC));
 		}
 		catch (UnsupportedEncodingException e)
 		{ AutoReferee.getInstance().getLogger().info("Unsupported encoding: " + AutoReferee.PLUGIN_CHANNEL_ENC); }
