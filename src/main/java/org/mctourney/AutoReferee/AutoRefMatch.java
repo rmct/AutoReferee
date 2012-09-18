@@ -778,7 +778,7 @@ public class AutoRefMatch
 		this.clearEntities();
 
 		// loop through all the redstone mechanisms required to start / FIXME BUKKIT-1858
-		if (AutoReferee.getInstance().isAutoMode())
+		if (AutoReferee.getInstance().isAutoMode() || AutoReferee.hasSportBukkitApi())
 			for (StartMechanism sm : startMechanisms)
 		{
 			MaterialData mdata = sm.blockState.getData();
