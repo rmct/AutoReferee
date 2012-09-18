@@ -92,11 +92,12 @@ public class TeamListener implements Listener
 		
 		if (match != null && !match.isPlayer(player))
 		{
+			event.setCancelled(true);
 			if (player.getLocation().getY() < -64)
+			{
 				player.teleport(match.getPlayerSpawn(player));
-			
-			player.setHealth(20);
-			player.setFallDistance(0);
+				player.setFallDistance(0);
+			}
 		}
 	}
 
