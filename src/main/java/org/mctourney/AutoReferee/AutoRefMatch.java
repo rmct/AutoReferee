@@ -410,14 +410,27 @@ public class AutoRefMatch
 		allowCraft = worldConfig.getBoolean("match.allow-craft", false);
 
 		// attempt to set world difficulty as best as possible
-		String dstr = worldConfig.getString("match.difficulty", "HARD");
-		Difficulty diff = Difficulty.valueOf(dstr.toUpperCase());
-		try { diff = Difficulty.getByValue(Integer.parseInt(dstr)); }
-		catch (NumberFormatException e) {  }
-		world.setDifficulty(diff);
+		String diff = worldConfig.getString("match.difficulty", "HARD");
+		world.setDifficulty(getDifficulty(diff));
+
+		// restore competitive settings and some default values
+		world.setPVP(true);
+		world.setSpawnFlags(true, true);
+
+		world.setTicksPerAnimalSpawns(-1);
+		world.setTicksPerMonsterSpawns(-1);
 		
 		// last, send an update about the match to everyone logged in
 		for (Player pl : world.getPlayers()) sendMatchInfo(pl);
+	}
+
+	private static Difficulty getDifficulty(String d)
+	{
+		Difficulty diff = Difficulty.valueOf(d.toUpperCase());
+		try { diff = Difficulty.getByValue(Integer.parseInt(d)); }
+		catch (NumberFormatException e) {  }
+
+		return diff;
 	}
 
 	public void saveWorldConfiguration() 

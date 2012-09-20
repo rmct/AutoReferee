@@ -26,6 +26,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
+import org.mctourney.AutoReferee.util.NullChunkGenerator;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
@@ -144,7 +146,9 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		
 		// copy the files over and return the loaded world
 		FileUtils.copyDirectory(mapFolder, destWorld);
-		return AutoReferee.getInstance().getServer().createWorld(WorldCreator.name(destWorld.getName()));
+		return AutoReferee.getInstance().getServer().createWorld(
+			WorldCreator.name(destWorld.getName()).generateStructures(false)
+				.generator(new NullChunkGenerator()));
 	}
 
 	public static World createMatchWorld(String map, String world) throws IOException
