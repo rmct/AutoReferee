@@ -78,7 +78,10 @@ public class TeamListener implements Listener
 		AutoRefMatch match = plugin.getMatch(world);
 		
 		if (match != null && !match.isPlayer(event.getEntity()))
+		{
 			deadSpectators.put(event.getEntity().getName(), match);
+			event.getDrops().clear();
+		}
 	}
 	
 	@EventHandler(priority=EventPriority.MONITOR)
