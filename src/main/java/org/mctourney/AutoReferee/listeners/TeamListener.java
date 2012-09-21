@@ -93,7 +93,8 @@ public class TeamListener implements Listener
 		if (event.getEntityType() != EntityType.PLAYER) return;
 		Player player = (Player) event.getEntity();
 		
-		if (match != null && !match.isPlayer(player))
+		if (match != null && match.getCurrentState().inProgress() && 
+			!match.isPlayer(player))
 		{
 			event.setCancelled(true);
 			if (player.getLocation().getY() < -64)
