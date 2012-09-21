@@ -471,7 +471,7 @@ public class AutoRefMatch
 	}
 
 	public void messageReferees(String ...parts)
-	{ for (Player ref : getReferees()) messageReferee(ref, parts); }	
+	{ for (Player ref : getReferees(false)) messageReferee(ref, parts); }	
 	
 	public void messageReferee(Player ref, String ...parts)
 	{
@@ -1402,7 +1402,7 @@ public class AutoRefMatch
 		Collection<Player> recipients = null;
 		switch (event.getType().getVisibility())
 		{
-			case REFEREES: recipients = getReferees(); break;
+			case REFEREES: recipients = getReferees(false); break;
 			case ALL: recipients = getWorld().getPlayers(); break;
 		}
 		
