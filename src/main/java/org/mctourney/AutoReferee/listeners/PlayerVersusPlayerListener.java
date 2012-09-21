@@ -126,7 +126,7 @@ public class PlayerVersusPlayerListener implements Listener
 				// if the match is in progress and player is in start region
 				// cancel any damage dealt to the player
 				if (match.getCurrentState().inProgress() && 
-						match.inStartRegion(damaged.getLocation()))
+					match.inStartRegion(damaged.getLocation()))
 				{ event.setCancelled(true); return; }
 			}
 			
