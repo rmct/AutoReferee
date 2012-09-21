@@ -832,11 +832,11 @@ public class AutoRefMatch
 		// if this person is a player, lowest vanish level
 		if (isPlayer(p)) return 0;
 
-		// referees have the highest vanish level (see everything)
-		if (p.hasPermission("autoreferee.referee")) return 200;
-		
 		// streamers are ONLY able to see streamers and players
 		if (p.hasPermission("autoreferee.streamer")) return 1;
+		
+		// referees have the highest vanish level (see everything)
+		if (p.hasPermission("autoreferee.referee")) return 200;
 		
 		// spectators can only be seen by referees
 		return 100;
