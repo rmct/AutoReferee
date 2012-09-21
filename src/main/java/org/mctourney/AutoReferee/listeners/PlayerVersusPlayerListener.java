@@ -139,6 +139,13 @@ public class PlayerVersusPlayerListener implements Listener
 			if (d2team == null || (d1team == d2team && !match.allowFriendlyFire))
 			{ event.setCancelled(true); return; }
 		}
+	}
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void damageDealtMonitor(EntityDamageEvent event)
+	{
+		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
+		if (match == null) return;
 
 		// save player data if the damaged entity was a player	
 		if (event.getEntityType() == EntityType.PLAYER && 
