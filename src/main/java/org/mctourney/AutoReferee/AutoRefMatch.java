@@ -885,9 +885,12 @@ public class AutoRefMatch
 			if (!protectedEntities.contains(e.getUniqueId())) e.remove();
 	}
 
+	public boolean isCountdownRunning()
+	{ return matchStarter != null && matchStarter.task != -1; }
+
 	public void cancelCountdown()
 	{
-		if (matchStarter != null && matchStarter.task != -1)
+		if (isCountdownRunning())
 			AutoReferee.getInstance().getServer().getScheduler().cancelTask(matchStarter.task);
 		matchStarter = null;
 	}
@@ -903,16 +906,22 @@ public class AutoRefMatch
 		private AutoRefMatch match = null;
 		private boolean start = false;
 		
-		public CountdownTask(AutoRefMatch m, boolean start)
+		public CountdownTask(AutoRefMatch m, int time, boolean start)
 		{
 			match = m;
+			remainingSeconds = time;
 			this.start = start;
 		}
 		
 		public void run()
 		{
+			if (remainingSeconds > 3)
+			{
+				// currently nothing...
+			}
+
 			// if the countdown has ended...
-			if (remainingSeconds == 0)
+			else if (remainingSeconds == 0)
 			{
 				// setup world to go!
 				if (this.start) match.start();
@@ -924,13 +933,22 @@ public class AutoRefMatch
 			
 			// report number of seconds remaining
 			else match.broadcast(">>> " + CountdownTask.COLOR + 
-				Integer.toString(remainingSeconds--) + "...");
+				Integer.toString(remainingSeconds) + "...");
+
+			// count down
+			--remainingSeconds;
 		}
+
+		public int getRemainingSeconds()
+		{ return remainingSeconds; }
 	}
 
 	// prepare this world to start
 	private void prepareMatch()
 	{
+		// nothing to do if the countdown is running
+		if (isCountdownRunning()) return;
+
 		// set the current time to the start time
 		world.setTime(this.startTime);
 		
@@ -965,9 +983,9 @@ public class AutoRefMatch
 			scheduler.cancelTask(this.matchStarter.task);
 		
 		// schedule the task to announce and prepare the match
-		this.matchStarter = new CountdownTask(this, startMatch);
+		this.matchStarter = new CountdownTask(this, readyDelay, startMatch);
 		this.matchStarter.task = scheduler.scheduleSyncRepeatingTask(
-				AutoReferee.getInstance(), this.matchStarter, readyDelay * 20L, 20L);
+				AutoReferee.getInstance(), this.matchStarter, 0L, 20L);
 	}
 
 	public void checkTeamsReady() 
