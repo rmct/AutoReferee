@@ -690,10 +690,15 @@ public class AutoReferee extends JavaPlugin
 				return true;
 			}
 			
-			// CMD: /autoref countdown
-			if (args.length == 1 && "countdown".equalsIgnoreCase(args[0]) && match != null)
+			// CMD: /autoref countdown [<seconds>]
+			if (args.length >= 1 && "countdown".equalsIgnoreCase(args[0]) && match != null)
 			{
-				match.startCountdown(0, false);
+				int sec = 3;
+				if (args.length >= 2)
+					try { sec = Integer.parseInt(args[1]); }
+					catch (NumberFormatException e) {  }
+
+				match.startCountdown(sec, false);
 				return true;
 			}
 		}
