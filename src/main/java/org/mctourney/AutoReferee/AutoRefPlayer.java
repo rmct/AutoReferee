@@ -403,7 +403,7 @@ public class AutoRefPlayer
 	{ return shotsFired == 0 ? "N/A" : (Integer.toString(100 * shotsHit / shotsFired) + "%"); }
 
 	public void sendAccuracyUpdate()
-	{ for (Player ref : getTeam().getMatch().getReferees()) sendAccuracyUpdate(ref); }
+	{ for (Player ref : getTeam().getMatch().getReferees(false)) sendAccuracyUpdate(ref); }
 
 	public void sendAccuracyUpdate(Player ref)
 	{
