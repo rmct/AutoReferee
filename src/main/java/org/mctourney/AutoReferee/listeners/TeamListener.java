@@ -210,7 +210,7 @@ public class TeamListener implements Listener
 		{
 			// cancel the gamemode change if the player is a participant
 			if (event.getNewGameMode() == GameMode.CREATIVE && 
-				match.getPlayer(player) != null) event.setCancelled(true);
+				match.isPlayer(player)) event.setCancelled(true);
 		}
 	}
 }
