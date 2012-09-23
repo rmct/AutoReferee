@@ -56,6 +56,9 @@ public class ZoneListener implements Listener
 	
 	// distance a player may travel outside of their lane without penalty
 	private static final double SAFE_TRAVEL_DISTANCE = 1.595;
+	
+	// minimum teleport distance worth reporting to streamers
+	private static final double LONG_TELE_DISTANCE = 6.0;
 
 	public static final double SNEAK_DISTANCE = 0.301;
 	public static final double FREEFALL_THRESHOLD = 0.350;
@@ -481,8 +484,10 @@ public class ZoneListener implements Listener
 	public void teleportEvent(Player pl, Location fm, Location to)
 	{
 		// if distance is too small to matter, forget about it
-		if (fm.getWorld() != to.getWorld() || 
-			fm.distanceSquared(to) <= SAFE_TRAVEL_DISTANCE * SAFE_TRAVEL_DISTANCE) return;
+		if (fm.getWorld() != to.getWorld()) return;
+
+		double dsq = fm.distanceSquared(to);
+		if (dsq <= SAFE_TRAVEL_DISTANCE * SAFE_TRAVEL_DISTANCE) return;
 		
 		AutoRefMatch match = plugin.getMatch(to.getWorld());
 		if (match == null || match.getCurrentState() == MatchStatus.NONE) return;
@@ -496,7 +501,8 @@ public class ZoneListener implements Listener
 		String message = apl.getName() + ChatColor.GRAY + " has teleported @ " +
 			BlockVector3.fromLocation(to).toCoords() + bedrock;
 		
-		for (Player ref : match.getReferees(true)) ref.sendMessage(message);
+		boolean excludeReferees = dsq <= LONG_TELE_DISTANCE * LONG_TELE_DISTANCE;	
+		for (Player ref : match.getReferees(excludeReferees)) ref.sendMessage(message);
 		plugin.getLogger().info(ChatColor.stripColor(message));
 	}
 	
