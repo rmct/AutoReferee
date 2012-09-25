@@ -640,10 +640,7 @@ public class AutoReferee extends JavaPlugin
 			// CMD: /autoref teamname <currentname> <newname>
 			if (args.length == 3 && "teamname".equalsIgnoreCase(args[0]) && match != null)
 			{
-				AutoRefTeam team = null;
-				for (AutoRefTeam t : match.getTeams())
-					if (t.matches(args[1])) team = t;
-				
+				AutoRefTeam team = match.teamNameLookup(args[1]);
 				if (team == null)
 				{
 					sender.sendMessage(ChatColor.DARK_GRAY + args[1] + 
@@ -668,12 +665,8 @@ public class AutoReferee extends JavaPlugin
 			// CMD: /autoref swapteams <team1> <team2>
 			if (args.length == 3 && "swapteams".equalsIgnoreCase(args[0]) && match != null)
 			{
-				AutoRefTeam team1 = null, team2 = null;
-				for (AutoRefTeam t : match.getTeams())
-				{
-					if (t.matches(args[1])) team1 = t;
-					if (t.matches(args[2])) team2 = t;
-				}
+				AutoRefTeam team1 = match.teamNameLookup(args[1]);
+				AutoRefTeam team2 = match.teamNameLookup(args[2]);
 				
 				if (team1 == null)
 				{
