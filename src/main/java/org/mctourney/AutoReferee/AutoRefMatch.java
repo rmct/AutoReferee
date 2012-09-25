@@ -782,15 +782,11 @@ public class AutoRefMatch
 		public String getTag()
 		{ return tag; }
 		
-		// map name and checksum
+		// map name
 		private String map;
-		private Long checksum;
 		
 		public String getMap()
 		{ return map; }
-		
-		public Long getChecksum()
-		{ return checksum; }
 	}
 
 	public void start()
