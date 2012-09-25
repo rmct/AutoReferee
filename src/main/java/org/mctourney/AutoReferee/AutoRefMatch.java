@@ -354,6 +354,10 @@ public class AutoRefMatch
 
 	public boolean isReferee(Player p)
 	{
+		// pretty much the only reason we would send a null player
+		// is if we are checking the ConsoleCommandSender
+		if (p == null) return true;
+
 		for (AutoRefPlayer apl : getPlayers())
 			if (apl.getPlayerName() == p.getName()) return false;
 		return p.hasPermission("autoreferee.referee");

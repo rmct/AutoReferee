@@ -330,12 +330,13 @@ public class AutoReferee extends JavaPlugin
 		World world = null;
 		Player player = null;
 		
+		List<World> worlds = getServer().getWorlds();
 		if (sender instanceof Player)
 		{
 			player = (Player) sender;
 			world = player.getWorld();
 		}
-		else world = consoleWorld;
+		else world = worlds.size() == 1 ? worlds.get(0) : consoleWorld;
 		AutoRefMatch match = getMatch(world);
 		
 		// reparse the args properly using the string tokenizer from org.apache.commons
