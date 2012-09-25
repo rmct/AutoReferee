@@ -741,6 +741,14 @@ public class AutoReferee extends JavaPlugin
 					ChatColor.BLUE + this.getDescription().getFullName());
 				return true;
 			}
+
+			// CMD: /autoref getrole <player>
+			if (args.length >= 2 && "getrole".equalsIgnoreCase(args[0]))
+			{
+				AutoRefRole role = getRole(args[1]);
+				sender.sendMessage(ChatColor.RED + args[1] + "'s role is: " + role);
+				return true;
+			}
 		}
 		
 		if ("zones".equalsIgnoreCase(cmd.getName()) && match != null)
@@ -968,6 +976,53 @@ public class AutoReferee extends JavaPlugin
 			return Prompt.END_OF_CONVERSATION;
 		}
 		
+	}
+
+	public enum AutoRefRole
+	{
+		NONE("None"),
+		PLAYER("Player"),
+		SPECTATOR("Spectator"),
+		REFEREE("Referee"),
+		STREAMER("Streamer"),
+		ADMIN("Administrator");
+
+		private String title;
+
+		AutoRefRole(String title)
+		{ this.title = title; }
+
+		@Override
+		public String toString()
+		{ return title; }
+	}
+
+	public AutoRefRole getRole(String pname)
+	{
+		OfflinePlayer opl = getServer().getOfflinePlayer(pname);
+		if (opl.isOnline())
+		{
+			Player pl = opl.getPlayer();
+			if (pl == null) return AutoRefRole.NONE;
+
+			// get the match that the player is in
+			AutoRefMatch match = getMatch(pl.getWorld());
+
+			if (match != null && match.isPlayer(pl)) return AutoRefRole.PLAYER;
+			if (pl.hasPermission("autoreferee.admin")) return AutoRefRole.ADMIN;
+			if (pl.hasPermission("autoreferee.streamer")) return AutoRefRole.STREAMER;
+			if (match != null && match.isReferee(pl)) return AutoRefRole.REFEREE;
+			if (match != null) return AutoRefRole.SPECTATOR;
+		}
+		else
+		{
+			//if (opl.hasPermission("autoreferee.admin")) return AutoRefRole.ADMIN;
+			//if (opl.hasPermission("autoreferee.streamer")) return AutoRefRole.STREAMER;
+			//if (opl.hasPermission("autoreferee.referee")) return AutoRefRole.REFEREE;
+		}
+		
+		// if everything else fails, return none
+		return AutoRefRole.NONE;
 	}
 
 	File getLogDirectory()
