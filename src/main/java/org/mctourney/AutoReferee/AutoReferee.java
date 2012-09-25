@@ -702,6 +702,16 @@ public class AutoReferee extends JavaPlugin
 				match.startCountdown(sec, false);
 				return true;
 			}
+
+			// CMD: /autoref endmatch [<winner>]
+			if (args.length >= 1 && "endmatch".equalsIgnoreCase(args[0]) && match != null)
+			{
+				AutoRefTeam winner = null;
+				if (args.length >= 2) winner = match.teamNameLookup(args[1]);
+
+				match.matchComplete(winner);
+				return true; 
+			}
 		}
 			
 		if ("autoref".equalsIgnoreCase(cmd.getName()))

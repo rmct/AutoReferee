@@ -1088,7 +1088,8 @@ public class AutoRefMatch
 			
 			// force an update of objective status
 			team.updateObjectives();
-			
+		
+			// if the team won, mark the match as completed	
 			if (win) matchComplete(team);
 		}
 	}
@@ -1100,10 +1101,17 @@ public class AutoRefMatch
 		{ destroy(); }
 	}
 
+	public void matchComplete()
+	{
+		// TODO: attempt to discern a winner
+		matchComplete(null);
+	}
+
 	public void matchComplete(AutoRefTeam t)
 	{
 		// announce the victory and set the match to completed
-		this.broadcast(t.getName() + " Wins!");
+		if (t != null) this.broadcast(t.getName() + " Wins!");
+		else this.broadcast("Match terminated!");
 		
 		// remove all mobs, animals, and items
 		this.clearEntities();
@@ -1116,10 +1124,12 @@ public class AutoRefMatch
 		}
 		
 		// send referees the end event
-		messageReferees("match", getWorld().getName(), "end", t.getRawName());
+		if (t != null) messageReferees("match", getWorld().getName(), "end", t.getRawName());
+		else messageReferees("match", getWorld().getName(), "end");
 		
+		String winner = t == null ? "" : (" " + t.getRawName() + " wins!");
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_END,
-			"Match ended. " + t.getRawName() + " wins!", null, null, null));
+			"Match ended." + winner, null, null, null));
 		setCurrentState(MatchStatus.COMPLETED);
 		
 		setWinningTeam(t);
