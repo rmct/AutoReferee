@@ -12,6 +12,11 @@ delay-seconds:
   ready: 15
   completed: 180
 
+# all paths relative to the server-root
+local-storage:
+  match-summary: plugins/AutoReferee/summary
+  local-database: plugins/AutoReferee/autoref.sdb
+
 config-mode:
   tools:
     win-condition: GOLD_SPADE

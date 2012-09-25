@@ -70,6 +70,20 @@ public class AutoRefMatch
 	// set new map repo
 	public static void changeMapRepo(String s)
 	{ MAPREPO = s + "/"; }
+
+	// local storage locations
+	private static File matchSummaryDirectory = null;
+	static
+	{
+		// determine the location of the match-summary directory
+		FileConfiguration config = AutoReferee.getInstance().getConfig();
+		if (config.isString("local-storage.match-summary"))
+			matchSummaryDirectory = new File(config.getString("local-storage.match-summary"));
+		else matchSummaryDirectory = new File(AutoReferee.getInstance().getDataFolder(), "summary");
+
+		// if the folder doesnt exist, create it...
+		if (!matchSummaryDirectory.exists()) matchSummaryDirectory.mkdir();
+	}
 	
 	// world this match is taking place on
 	private World world;
@@ -1253,25 +1267,43 @@ public class AutoRefMatch
 		return false;
 	}
 
+	public class MatchReportSaver implements Runnable
+	{
+		private File localStorage = null;
+
+		public MatchReportSaver(File f)
+		{ this.localStorage = f; }
+
+		public MatchReportSaver()
+		{ this(new File(AutoReferee.getInstance().getConfig()
+			.getString("local-storage.match-summary", null))); }
+
+		public void run()
+		{
+			broadcast(ChatColor.RED + "Generating Match Summary...");
+			String report = ReportGenerator.generate(AutoRefMatch.this);
+
+			String localFileID = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss").format(new Date());
+			File localReport = new File(this.localStorage, localFileID + ".html");
+			
+			try { FileUtils.writeStringToFile(localReport, report); }
+			catch (IOException e) { e.printStackTrace(); }
+
+			String webstats = uploadReport(report);
+			if (webstats != null)
+			{
+				AutoReferee.getInstance().getLogger().info("Match Summary - " + webstats);
+				broadcast(ChatColor.RED + "Match Summary: " + ChatColor.RESET + webstats);
+			}
+			else broadcast(ChatColor.RED + AutoReferee.NO_WEBSTATS_MESSAGE);
+		}
+	}
+
 	public void logPlayerStats(String h)
 	{
 		// upload WEBSTATS (do via an async query in case uploading the stats lags the main thread)
 		Plugin plugin = AutoReferee.getInstance();
-		plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, new Runnable()
-		{
-			public void run()
-			{
-				broadcast(ChatColor.RED + "Generating Match Summary...");
-				String webstats = uploadReport(ReportGenerator.generate(AutoRefMatch.this));
-				
-				if (webstats != null)
-				{
-					AutoReferee.getInstance().getLogger().info("Match Summary - " + webstats);
-					broadcast(ChatColor.RED + "Match Summary: " + ChatColor.RESET + webstats);
-				}
-				else broadcast(ChatColor.RED + AutoReferee.NO_WEBSTATS_MESSAGE);
-			}
-		});
+		plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, new MatchReportSaver());
 	}
 	
 	private String uploadReport(String report)
