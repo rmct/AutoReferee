@@ -913,13 +913,15 @@ public class AutoReferee extends JavaPlugin
 			return true;
 		}
 		
-		if ("viewinventory".equalsIgnoreCase(cmd.getName()) && args.length == 1 
+		if ("viewinventory".equalsIgnoreCase(cmd.getName()) && args.length >= 0 
 			&& match != null && player != null)
 		{
 			if (!match.isReferee(player))
 			{ sender.sendMessage("You do not have permission."); return true; }
 			
-			AutoRefPlayer target = match.getPlayer(getServer().getPlayer(args[0]));
+			AutoRefPlayer target = args.length > 0 
+				? match.getPlayer(getServer().getPlayer(args[0])) 
+				: match.getNearestPlayer(player.getLocation());
 			if (target != null) target.showInventory(player);
 			
 			return true;
