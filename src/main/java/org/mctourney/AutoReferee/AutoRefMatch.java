@@ -1115,6 +1115,9 @@ public class AutoRefMatch
 		
 		// remove all mobs, animals, and items
 		this.clearEntities();
+
+		// set the time to day
+		getWorld().setTime(0L);
 		
 		for (AutoRefPlayer apl : getPlayers())
 		{
