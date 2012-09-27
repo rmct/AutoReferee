@@ -16,6 +16,8 @@ import org.bukkit.entity.Player;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.util.*;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Maps;
@@ -520,6 +522,15 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 	public Map<BlockData, GoalStatus> getObjectiveStatuses()
 	{ return Maps.newHashMap(objectiveStatus); }
+
+	private int objCount(GoalStatus status)
+	{ return CollectionUtils.cardinality(status, objectiveStatus.values()); }
+
+	public int getObjectivesPlaced()
+	{ return objCount(GoalStatus.PLACED); }
+
+	public int getObjectivesFound()
+	{ return objectiveStatus.values().size() - objCount(GoalStatus.NONE); }
 
 	public void updateCarrying(AutoRefPlayer apl, Set<BlockData> carrying, Set<BlockData> newCarrying)
 	{

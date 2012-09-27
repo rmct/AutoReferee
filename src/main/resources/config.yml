@@ -2,6 +2,8 @@ config-version: 2
 console-log: true
 auto-update: true
 
+allow-ties: false
+
 server-mode:
   online: false
   keyserver: server.mlm.net

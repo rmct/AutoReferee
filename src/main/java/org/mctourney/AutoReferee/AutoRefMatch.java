@@ -11,6 +11,7 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -258,6 +259,9 @@ public class AutoRefMatch
 	
 	public boolean allowFriendlyFire = false;
 	public boolean allowCraft = false;
+
+	// provided by configuration file
+	public static boolean allowTies = false;
 	
 	// list of items players may not craft
 	private Set<BlockData> prohibitCraft = Sets.newHashSet();
@@ -1101,10 +1105,37 @@ public class AutoRefMatch
 		{ destroy(); }
 	}
 
+	public static class TiebreakerComparator implements Comparator<AutoRefTeam>
+	{
+		public int compare(AutoRefTeam a, AutoRefTeam b)
+		{
+			// break ties first on the number of objectives placed, then number found
+			int vmd = a.getObjectivesPlaced() - b.getObjectivesPlaced();
+			return vmd == 0 ? a.getObjectivesFound() - b.getObjectivesFound() : vmd;
+		}
+	}
+
 	public void matchComplete()
 	{
-		// TODO: attempt to discern a winner
-		matchComplete(null);
+		TiebreakerComparator cmp = new TiebreakerComparator();
+		List<AutoRefTeam> sortedTeams = Lists.newArrayList(getTeams());
+
+		// sort the teams based on their "score"
+		Collections.sort(sortedTeams, cmp);
+
+		if (0 != cmp.compare(sortedTeams.get(0), sortedTeams.get(1)))
+		{ matchComplete(sortedTeams.get(0)); return; }
+
+		if (AutoRefMatch.allowTies) { matchComplete(null); return; }
+		for (Player ref : getReferees())
+		{
+			ref.sendMessage(ChatColor.DARK_GRAY + "This match is currently tied.");
+			ref.sendMessage(ChatColor.DARK_GRAY + "Use '/autoref endmatch <team>' to declare a winner.");
+		}
+
+		// let the console know that the match cannot be ruled upon
+		AutoReferee.getInstance().getLogger().info("Match tied. Deferring to referee intervention...");
+		cancelClock();
 	}
 
 	public void matchComplete(AutoRefTeam t)

@@ -243,6 +243,9 @@ public class AutoReferee extends JavaPlugin
 
 		// update online mode to represent whether or not we have a connection
 		if (isAutoMode()) setAutoMode(checkPlugins(pm));
+	
+		// are ties allowed? (auto-mode always allows for ties)
+		AutoRefMatch.allowTies = isAutoMode() || getConfig().getBoolean("allow-ties", false);
 		
 		// setup the map library folder
 		AutoRefMap.getMapLibrary();
@@ -699,10 +702,13 @@ public class AutoReferee extends JavaPlugin
 			// CMD: /autoref endmatch [<winner>]
 			if (args.length >= 1 && "endmatch".equalsIgnoreCase(args[0]) && match != null)
 			{
-				AutoRefTeam winner = null;
-				if (args.length >= 2) winner = match.teamNameLookup(args[1]);
-
-				match.matchComplete(winner);
+				if (args.length >= 2)
+				{
+					if ("none".equalsIgnoreCase(args[1]) || "tie".equalsIgnoreCase(args[1]))
+						match.matchComplete(null);
+					else match.matchComplete(match.teamNameLookup(args[1]));
+				}
+				else match.matchComplete();
 				return true; 
 			}
 		}
