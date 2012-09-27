@@ -699,6 +699,19 @@ public class AutoReferee extends JavaPlugin
 				return true;
 			}
 
+			// CMD: /autoref timelimit <min>
+			if (args.length == 2 && "timelimit".equalsIgnoreCase(args[0]) && match != null)
+			{
+				long time = -1L;
+				if (!"none".equalsIgnoreCase(args[1]))
+					try { time = Integer.parseInt(args[1]) * 60L; }
+					catch (NumberFormatException e) { return true; }
+
+				// set the time limit
+				match.setTimeLimit(time);
+				return true;
+			}
+
 			// CMD: /autoref endmatch [<winner>]
 			if (args.length >= 1 && "endmatch".equalsIgnoreCase(args[0]) && match != null)
 			{

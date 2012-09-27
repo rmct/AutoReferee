@@ -238,6 +238,20 @@ public class AutoRefMatch
 		return (getWorld().getFullTime() - getStartTicks()) / 20L;
 	}
 
+	private long timeLimit = -1L;
+
+	public long getTimeLimit()
+	{ return timeLimit; }
+
+	public boolean hasTimeLimit()
+	{ return timeLimit != -1L; }
+
+	public long getTimeRemaining()
+	{ return timeLimit - getMatchTime(); }
+
+	public void setTimeLimit(long limit)
+	{ this.timeLimit = limit; }
+
 	public String getTimestamp()
 	{ return getTimestamp(":"); }
 
@@ -843,6 +857,51 @@ public class AutoRefMatch
 			
 		// set the current state to playing
 		setCurrentState(MatchStatus.PLAYING);
+
+		// match minute timer
+		Plugin plugin = AutoReferee.getInstance();
+		clockTask = new MatchClockTask();
+
+		clockTask.task = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(
+			plugin, clockTask, 60 * 20L, 60 * 20L);
+	}
+
+	private static final Set<Long> announceMinutes = 
+		Sets.newHashSet(60L, 30L, 10L, 5L, 4L, 3L, 2L, 1L);
+
+	// handle to the clock task
+	private MatchClockTask clockTask = null;
+
+	public void cancelClock()
+	{
+		if (clockTask != null && clockTask.task != -1) AutoReferee.getInstance()
+			.getServer().getScheduler().cancelTask(clockTask.task);
+		clockTask = null;
+	}
+
+	public class MatchClockTask implements Runnable
+	{
+		public int task;
+
+		public void run()
+		{
+			AutoRefMatch match = AutoRefMatch.this;
+			long minutesRemaining = match.getTimeRemaining() / 60L;
+
+			// drop out just in case
+			if (!match.hasTimeLimit()) return;
+
+			if (minutesRemaining == 0L)
+			{
+				String timelimit = (match.getTimeLimit() / 60L) + " min";
+				match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.MATCH_END,
+					"Match time limit reached: " + timelimit, null, null, null));
+				match.matchComplete();
+			}
+			else if (AutoRefMatch.announceMinutes.contains(minutesRemaining))
+				match.broadcast(">>> " + ChatColor.GREEN + 
+					"Match ends in " + minutesRemaining + "m");
+		}
 	}
 
 	private int getVanishLevel(Player p)
@@ -1167,7 +1226,8 @@ public class AutoRefMatch
 		setCurrentState(MatchStatus.COMPLETED);
 		
 		setWinningTeam(t);
-		logPlayerStats(null);
+		logPlayerStats();
+		cancelClock();
 		
 		AutoReferee plugin = AutoReferee.getInstance();
 		int termDelay = plugin.getConfig().getInt(
@@ -1346,7 +1406,7 @@ public class AutoRefMatch
 		}
 	}
 
-	public void logPlayerStats(String h)
+	public void logPlayerStats()
 	{
 		// upload WEBSTATS (do via an async query in case uploading the stats lags the main thread)
 		Plugin plugin = AutoReferee.getInstance();
