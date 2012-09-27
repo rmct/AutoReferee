@@ -1222,6 +1222,9 @@ public class AutoRefMatch
 	public void leaveTeam(Player pl, boolean force)
 	{ for (AutoRefTeam team : teams) team.leave(pl, force); }
 	
+	public AutoRefPlayer getPlayer(String name)
+	{ return getPlayer(AutoReferee.getInstance().getServer().getPlayer(name)); }
+
 	public AutoRefPlayer getPlayer(Player pl)
 	{
 		for (AutoRefTeam team : teams)

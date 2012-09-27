@@ -919,8 +919,7 @@ public class AutoReferee extends JavaPlugin
 			if (!match.isReferee(player))
 			{ sender.sendMessage("You do not have permission."); return true; }
 			
-			AutoRefPlayer target = args.length > 0 
-				? match.getPlayer(getServer().getPlayer(args[0])) 
+			AutoRefPlayer target = args.length > 0 ? match.getPlayer(args[0]) 
 				: match.getNearestPlayer(player.getLocation());
 			if (target != null) target.showInventory(player);
 			
