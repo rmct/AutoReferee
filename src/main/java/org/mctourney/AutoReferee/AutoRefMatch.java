@@ -568,7 +568,11 @@ public class AutoRefMatch
 	}
 
 	public void broadcast(String msg)
-	{ for (Player p : world.getPlayers()) p.sendMessage(msg); }
+	{
+		if (AutoReferee.getInstance().consoleLog)
+			AutoReferee.getInstance().getLogger().info(ChatColor.stripColor(msg));
+		for (Player p : world.getPlayers()) p.sendMessage(msg);
+	}
 
 	public static String normalizeMapName(String m)
 	{ return m == null ? null : m.replaceAll("[^0-9a-zA-Z]+", ""); }
@@ -1397,12 +1401,8 @@ public class AutoRefMatch
 			catch (IOException e) { e.printStackTrace(); }
 
 			String webstats = uploadReport(report);
-			if (webstats != null)
-			{
-				AutoReferee.getInstance().getLogger().info("Match Summary - " + webstats);
-				broadcast(ChatColor.RED + "Match Summary: " + ChatColor.RESET + webstats);
-			}
-			else broadcast(ChatColor.RED + AutoReferee.NO_WEBSTATS_MESSAGE);
+			if (webstats == null) broadcast(ChatColor.RED + AutoReferee.NO_WEBSTATS_MESSAGE);
+			else broadcast(ChatColor.RED + "Match Summary: " + ChatColor.RESET + webstats);
 		}
 	}
 
@@ -1572,8 +1572,7 @@ public class AutoRefMatch
 		if (recipients != null) for (Player player : recipients)
 			player.sendMessage(message);
 		
-		if (plugin.getConfig().getBoolean("console-log", false))
-			plugin.getLogger().info(event.toString());
+		if (plugin.consoleLog) plugin.getLogger().info(event.toString());
 	}
 
 	public List<TranscriptEvent> getTranscript()

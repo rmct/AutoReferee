@@ -110,6 +110,8 @@ public class AutoReferee extends JavaPlugin
 	public boolean setAutoMode(boolean m)
 	{ return this.autoMode = m; }
 
+	public boolean consoleLog = false;
+
 	// get the match associated with the world
 	private Map<UUID, AutoRefMatch> matches = Maps.newHashMap();
 
@@ -246,6 +248,9 @@ public class AutoReferee extends JavaPlugin
 	
 		// are ties allowed? (auto-mode always allows for ties)
 		AutoRefMatch.allowTies = isAutoMode() || getConfig().getBoolean("allow-ties", false);
+
+		// log messages to console?
+		consoleLog = getConfig().getBoolean("console-log", false);
 		
 		// setup the map library folder
 		AutoRefMap.getMapLibrary();
