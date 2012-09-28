@@ -1210,9 +1210,6 @@ public class AutoRefMatch
 		// remove all mobs, animals, and items
 		this.clearEntities();
 
-		// set the time to day
-		getWorld().setTime(0L);
-		
 		for (AutoRefPlayer apl : getPlayers())
 		{
 			Player pl = apl.getPlayer();
@@ -1239,6 +1236,9 @@ public class AutoRefMatch
 		
 		plugin.getServer().getScheduler().scheduleSyncDelayedTask(
 			plugin, new MatchEndTask(), termDelay * 20L);
+		
+		// set the time to day
+		getWorld().setTime(0L);
 	}
 
 	public AutoRefTeam teamNameLookup(String name)
