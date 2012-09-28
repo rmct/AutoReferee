@@ -503,7 +503,8 @@ public class AutoReferee extends JavaPlugin
 				{
 					team.setSpawnLocation(player.getLocation());
 					String coords = BlockVector3.fromLocation(player.getLocation()).toCoords();
-					sender.sendMessage(ChatColor.GRAY + "Spawn set to " + coords + " for " + team.getName());
+					sender.sendMessage(ChatColor.GRAY + "Spawn set to " + 
+						coords + " for " + team.getName());
 				}
 				return true;
 			}
@@ -910,7 +911,7 @@ public class AutoReferee extends JavaPlugin
 			}
 
 			// if there are players specified on the command line, add them
-			if (args.length >= 2 && player.hasPermission("autoreferee.referee"))
+			if (args.length >= 2 && sender.hasPermission("autoreferee.referee"))
 				for (int i = 1; i < args.length; ++i)
 			{
 				Player target = getServer().getPlayer(args[i]);
@@ -918,14 +919,14 @@ public class AutoReferee extends JavaPlugin
 			}
 			
 			// otherwise, add yourself
-			else match.joinTeam(player, team, player.hasPermission("autoreferee.referee"));
+			else match.joinTeam(player, team, sender.hasPermission("autoreferee.referee"));
 			return true;
 		}
 		
 		if ("leaveteam".equalsIgnoreCase(cmd.getName()) && match != null && !isAutoMode())
 		{
 			// if there are players specified on the command line, remove them
-			if (args.length >= 1 && player.hasPermission("autoreferee.referee"))
+			if (args.length >= 1 && sender.hasPermission("autoreferee.referee"))
 				for (int i = 0; i < args.length; ++i)
 			{
 				Player target = getServer().getPlayer(args[i]);
@@ -933,7 +934,7 @@ public class AutoReferee extends JavaPlugin
 			}
 			
 			// otherwise, remove yourself
-			else match.leaveTeam(player, player.hasPermission("autoreferee.referee"));
+			else match.leaveTeam(player, sender.hasPermission("autoreferee.referee"));
 			return true;
 		}
 		
