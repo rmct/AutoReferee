@@ -1228,6 +1228,9 @@ public class AutoRefMatch
 		
 		setWinningTeam(t);
 		logPlayerStats();
+		
+		// update the client clock to ensure it syncs with match summary
+		messageReferees("match", getWorld().getName(), "time", getTimestamp(","));
 		cancelClock();
 		
 		AutoReferee plugin = AutoReferee.getInstance();
