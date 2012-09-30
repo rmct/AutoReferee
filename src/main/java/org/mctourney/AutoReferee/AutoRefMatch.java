@@ -1217,12 +1217,12 @@ public class AutoRefMatch
 			pl.getInventory().clear();
 		}
 		
+		// update the client clock to ensure it syncs with match summary
+		messageReferees("match", getWorld().getName(), "time", getTimestamp(","));
+		
 		// send referees the end event
 		if (t != null) messageReferees("match", getWorld().getName(), "end", t.getRawName());
 		else messageReferees("match", getWorld().getName(), "end");
-		
-		// update the client clock to ensure it syncs with match summary
-		messageReferees("match", getWorld().getName(), "time", getTimestamp(","));
 		
 		String winner = t == null ? "" : (" " + t.getRawName() + " wins!");
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_END,
