@@ -40,12 +40,12 @@ public class ReportGenerator
 			htm = getResourceString("webstats/report.htm");
 			css = getResourceString("webstats/report.css");
 			js  = getResourceString("webstats/report.js" );
-			
+
 			images += getResourceString("webstats/image-block.css");
 		//	images += getResourceString("webstats/image-items.css");
 		}
 		catch (IOException e) { return null; }
-		
+
 		StringWriter transcript = new StringWriter();
 		TranscriptEvent endEvent = null;
 		for (TranscriptEvent e : match.getTranscript())
@@ -53,39 +53,39 @@ public class ReportGenerator
 			transcript.write(transcriptEventHTML(e));
 			if (e.getType() != TranscriptEvent.EventType.MATCH_END) endEvent = e;
 		}
-		
+
 		AutoRefTeam win = match.getWinningTeam();
-		String winningTeam = (win == null) ? "??" : 
+		String winningTeam = (win == null) ? "??" :
 			String.format("<span class='team team-%s'>%s</span>",
 				win.getTag(), ChatColor.stripColor(win.getName()));
-		
+
 		Set<String> refList = Sets.newHashSet();
 		for (Player pl : match.getReferees())
 			refList.add(String.format("<span class='referee'>%s</span>", pl.getName()));
-		
+
 		return (htm
 			// base files get replaced first
 			.replaceAll("#base-css#", css.replaceAll("\\s+", " ") + images)
 			.replaceAll("#base-js#", Matcher.quoteReplacement(js))
-			
+
 			// followed by the team, player, and block styles
 			.replaceAll("#team-css#", getTeamStyles(match).replaceAll("\\s+", " "))
 			.replaceAll("#plyr-css#", getPlayerStyles(match).replaceAll("\\s+", " "))
 			.replaceAll("#blok-css#", getBlockStyles(match).replaceAll("\\s+", " "))
-			
+
 			// then match and map names
 			.replaceAll("#title#", match.getMatchName())
 			.replaceAll("#map#", match.getMapName())
-			
+
 			// date and length of match
 			.replaceAll("#date#", DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.FULL).format(new Date()))
 			.replaceAll("#length#", endEvent == null ? "??" : endEvent.getTimestamp())
-			
+
 			// team information (all teams, and winning team)
 			.replaceAll("#teams#", getTeamList(match))
 			.replaceAll("#winners#", winningTeam)
 			.replaceAll("#referees#", StringUtils.join(refList, ", "))
-			
+
 			// and last, throw in the transcript and stats
 			.replaceAll("#transcript#", transcript.toString())
 			.replaceAll("#plyr-stats#", getPlayerStats(match))
@@ -99,30 +99,30 @@ public class ReportGenerator
 		IOUtils.copy(AutoReferee.getInstance().getResource(path), buffer);
 		return buffer.toString();
 	}
-	
+
 	// generate player.css
 	private static String getPlayerStyles(AutoRefMatch match)
 	{
 		StringWriter css = new StringWriter();
 		for (AutoRefPlayer apl : match.getPlayers())
-			css.write(String.format(".player-%s:before { background-image: url(http://minotar.net/avatar/%s/16.png); }\n", 
+			css.write(String.format(".player-%s:before { background-image: url(http://minotar.net/avatar/%s/16.png); }\n",
 				apl.getTag(), apl.getPlayerName()));
 		return css.toString();
 	}
-	
+
 	// generate team.css
 	private static String getTeamStyles(AutoRefMatch match)
 	{
 		StringWriter css = new StringWriter();
 		for (AutoRefTeam team : match.getTeams())
-			css.write(String.format(".team-%s { color: %s; }\n", 
+			css.write(String.format(".team-%s { color: %s; }\n",
 				team.getTag(), ColorConverter.chatToHex(team.getColor())));
 		return css.toString();
 	}
-	
+
 	private static Map<BlockData, Integer> terrain_png = Maps.newHashMap();
 	private static int terrain_png_size = 16;
-	
+
 	static
 	{
 		terrain_png.put(new BlockData(Material.WOOL, DyeColor.WHITE.getData()), 4 * 16 + 0);
@@ -142,10 +142,10 @@ public class ReportGenerator
 		terrain_png.put(new BlockData(Material.WOOL, DyeColor.ORANGE.getData()), 13 * 16 + 2);
 		terrain_png.put(new BlockData(Material.WOOL, DyeColor.SILVER.getData()), 14 * 16 + 1);
 	}
-	
+
 	private static Map<Material, Integer> items_png = Maps.newHashMap();
 	private static int items_png_size = 16;
-	
+
 	static
 	{
 		items_png.put(Material.LEATHER_HELMET, 0 * 16 + 0);
@@ -198,7 +198,7 @@ public class ReportGenerator
 		items_png.put(Material.BOW, 6 * 16 + 5);
 		items_png.put(Material.POTION, 9 * 16 + 10);
 	}
-	
+
 	// generate block.css
 	private static String getBlockStyles(AutoRefMatch match)
 	{
@@ -206,20 +206,20 @@ public class ReportGenerator
 		for (AutoRefTeam team : match.getTeams())
 			for (WinCondition wc : team.winConditions)
 				blocks.add(wc.getBlockData());
-		
+
 		StringWriter css = new StringWriter();
 		for (BlockData bd : blocks)
 		{
 			Integer x = terrain_png.get(bd);
-			
-			String selector = String.format(".block.mat-%d.data-%d", 
+
+			String selector = String.format(".block.mat-%d.data-%d",
 				bd.getMaterial().getId(), (int) bd.getData());
 			css.write(selector + ":before ");
-			
+
 			if (x == null) css.write("{ display: none; }\n");
 			else css.write(String.format("{ background-position: -%dpx -%dpx; }\n",
 				terrain_png_size * (x % 16), terrain_png_size * (x / 16)));
-			
+
 			if ((bd.getMaterial().getNewData((byte) 0) instanceof Colorable))
 			{
 				DyeColor color = DyeColor.getByData(bd.getData());
@@ -227,10 +227,10 @@ public class ReportGenerator
 				css.write(String.format("%s { color: %s; }\n", selector, hex));
 			}
 		}
-			
+
 		return css.toString();
 	}
-	
+
 	private static String getTeamList(AutoRefMatch match)
 	{
 		StringWriter teamlist = new StringWriter();
@@ -238,25 +238,25 @@ public class ReportGenerator
 		{
 			Set<String> members = Sets.newHashSet();
 			for (AutoRefPlayer apl : team.getPlayers())
-				members.add("<li><input type='checkbox' class='player-toggle' data-player='" + 
+				members.add("<li><input type='checkbox' class='player-toggle' data-player='" +
 					apl.getTag() + "'>" + playerHTML(apl) + "</li>\n");
-			
-			String memberlist = members.size() == 0 
+
+			String memberlist = members.size() == 0
 				? "<li>{none}</li>" : StringUtils.join(members, "");
-			
+
 			teamlist.write("<div class='span3'>");
 			teamlist.write(String.format("<h4 class='team team-%s'>%s</h4>",
 				team.getTag(), ChatColor.stripColor(team.getName())));
 			teamlist.write(String.format("<ul class='teammembers unstyled'>%s</ul></div>\n", memberlist));
 		}
-		
+
 		return teamlist.toString();
 	}
-	
+
 	private static class NemesisComparator implements Comparator<AutoRefPlayer>
 	{
 		private AutoRefPlayer target = null;
-		
+
 		public NemesisComparator(AutoRefPlayer target)
 		{ this.target = target; }
 
@@ -264,13 +264,13 @@ public class ReportGenerator
 		{
 			if (apl1.getTeam() == target.getTeam()) return -1;
 			if (apl2.getTeam() == target.getTeam()) return +1;
-			
+
 			// get the number of kills on this player total
 			int k = apl1.kills.get(target) - apl2.kills.get(target);
 			if (k != 0) return k;
-			
+
 			// get the relative difference in "focus"
-			return apl1.kills.get(target)*apl2.totalKills - 
+			return apl1.kills.get(target)*apl2.totalKills -
 				apl2.kills.get(target)*apl1.totalKills;
 		}
 	};
@@ -284,13 +284,13 @@ public class ReportGenerator
 			public int compare(AutoRefPlayer apl1, AutoRefPlayer apl2)
 			{ return apl2.getScore() - apl1.getScore(); }
 		});
-		
+
 		Map<AutoRefPlayer, Integer> dd = new DefaultedMap(0);
 		for (AutoRefPlayer apl : players)
 			for (Map.Entry<AutoRefPlayer.DamageCause, Integer> dc : apl.damage.entrySet())
 				if (dc.getKey().p instanceof AutoRefPlayer)
 					dd.put((AutoRefPlayer) dc.getKey().p, dd.get(dc.getKey().p) + dc.getValue());
-		
+
 		int rank = 0;
 		StringWriter playerstats = new StringWriter();
 		for (AutoRefPlayer apl : players)
@@ -298,53 +298,53 @@ public class ReportGenerator
 			// get nemesis of this player
 			AutoRefPlayer nms = Collections.max(players, new NemesisComparator(apl));
 			if (nms != null && nms.getTeam() == apl.getTeam()) nms = null;
-			
-			playerstats.write(String.format("<tr><td>%d</td><td>%s</td>", 
+
+			playerstats.write(String.format("<tr><td>%d</td><td>%s</td>",
 					++rank, playerHTML(apl)));
-			playerstats.write(String.format("<td>%d</td><td>%d</td><td>%s</td>", 
+			playerstats.write(String.format("<td>%d</td><td>%d</td><td>%s</td>",
 					apl.totalKills, apl.totalDeaths, apl.getExtendedAccuracyInfo()));
-			playerstats.write(String.format("<td>%d</td><td>%d</td><td>%s</td></tr>\n", 
+			playerstats.write(String.format("<td>%d</td><td>%d</td><td>%s</td></tr>\n",
 					999, dd.get(apl), nms == null ? "none" : playerHTML(nms)));
 		}
-		
+
 		return playerstats.toString();
 	}
-	
+
 	private static String playerHTML(AutoRefPlayer apl)
 	{
 		return String.format("<span class='player player-%s team-%s'>%s</span>",
 			apl.getTag(), apl.getTeam().getTag(), apl.getPlayerName());
 	}
-	
+
 	private static String transcriptEventHTML(TranscriptEvent e)
 	{
 		String m = e.getMessage();
 		Set<String> rowClasses = Sets.newHashSet("type-" + e.getType().getEventClass());
-		
+
 		Set<AutoRefPlayer> players = Sets.newHashSet();
 		if (e.icon1 instanceof AutoRefPlayer) players.add((AutoRefPlayer) e.icon1);
 		if (e.icon2 instanceof AutoRefPlayer) players.add((AutoRefPlayer) e.icon2);
-		
+
 		for (AutoRefPlayer apl : players)
 		{
 			m = m.replaceAll(apl.getPlayerName(), playerHTML(apl));
 			rowClasses.add("type-player-event");
 			rowClasses.add("player-" + apl.getTag());
 		}
-		
+
 		if (e.icon2 instanceof BlockData)
 		{
 			BlockData bd = (BlockData) e.icon2;
 			int mat = bd.getMaterial().getId();
 			int data = bd.getData();
-			
+
 			m = m.replaceAll(bd.getRawName(), String.format(
-				"<span class='block mat-%d data-%d'>%s</span>", 
+				"<span class='block mat-%d data-%d'>%s</span>",
 					mat, data, bd.getRawName()));
 		}
-		
+
 		String coords = BlockVector3.fromLocation(e.location).toCoords();
-		String fmt = "<tr class='transcript-event %s' data-location='%s'>" + 
+		String fmt = "<tr class='transcript-event %s' data-location='%s'>" +
 			"<td class='message'>%s</td><td class='timestamp'>%s</td></tr>\n";
 		return String.format(fmt, StringUtils.join(rowClasses, " "), coords, m, e.getTimestamp());
 	}

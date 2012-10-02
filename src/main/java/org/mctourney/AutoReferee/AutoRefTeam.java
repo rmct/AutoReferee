@@ -26,7 +26,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 {
 	// reference to the match
 	private AutoRefMatch match = null;
-	
+
 	public AutoRefMatch getMatch()
 	{ return match; }
 
@@ -47,18 +47,18 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		if (plist.size() == 0) return "{empty}";
 		return StringUtils.join(plist, ", ");
 	}
-	
+
 	private Set<OfflinePlayer> expectedPlayers = Sets.newHashSet();
-	
+
 	public void addExpectedPlayer(OfflinePlayer op)
 	{ expectedPlayers.add(op); }
-	
+
 	public void addExpectedPlayer(String name)
 	{ addExpectedPlayer(AutoReferee.getInstance().getServer().getOfflinePlayer(name)); }
-	
+
 	public Set<OfflinePlayer> getExpectedPlayers()
 	{ return expectedPlayers; }
-	
+
 	// team's name, may or may not be color-related
 	private String name = null;
 	private String customName = null;
@@ -72,15 +72,15 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 	public String getTag()
 	{ return getRawName().toLowerCase().replaceAll("[^a-z0-9]+", ""); }
-	
+
 	public void setName(String name)
 	{
 		// send name change event before we actually change the name
 		match.messageReferees("team", getRawName(), "name", name);
-		
+
 		String oldName = getName();
 		customName = name;
-		
+
 		match.broadcast(oldName + " is now known as " + getName());
 	}
 
@@ -98,7 +98,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 	// maximum size of a team (for manual mode only)
 	public int maxSize = 0;
-	
+
 	// is this team ready to play?
 	private boolean ready = false;
 
@@ -109,32 +109,32 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	{
 		if (ready == this.ready) return;
 		this.ready = ready;
-		
+
 		for (Player pl : getMatch().getWorld().getPlayers())
-			pl.sendMessage(getName() + " is now marked as " + 
+			pl.sendMessage(getName() + " is now marked as " +
 				ChatColor.DARK_GRAY + (this.ready ? "READY" : "NOT READY"));
 		if (!this.ready) getMatch().cancelCountdown();
 	}
-	
+
 	public boolean isEmptyTeam()
 	{ return getPlayers().size() == 0 && getExpectedPlayers().size() == 0; }
 
 	// list of regions
 	private Set<AutoRefRegion> regions = null;
-	
+
 	public Set<AutoRefRegion> getRegions()
 	{ return regions; }
 
 	// location of custom spawn
 	private Location spawn;
-	
+
 	public void setSpawnLocation(Location loc)
 	{
-		getMatch().broadcast("Set " + getName() + "'s spawn to " + 
+		getMatch().broadcast("Set " + getName() + "'s spawn to " +
 			BlockVector3.fromLocation(loc).toCoords());
 		this.spawn = loc;
 	}
-	
+
 	public Location getSpawnLocation()
 	{ return spawn == null ? match.getWorldSpawn() : spawn; }
 
@@ -144,22 +144,22 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		private Location loc;
 		private BlockData bd;
 		private int range;
-		
+
 		public WinCondition(Location loc, BlockData bd, int range)
 		{ this.loc = loc; this.bd = bd; this.range = range; }
-		
+
 		public Location getLocation()
 		{ return loc; }
-		
+
 		public BlockData getBlockData()
 		{ return bd; }
-		
+
 		public int getInexactRange()
 		{ return range; }
 	}
-	
+
 	public Set<WinCondition> winConditions;
-	
+
 	// status of objectives
 	public enum GoalStatus
 	{
@@ -167,19 +167,19 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		SEEN("found"),
 		CARRYING("carry"),
 		PLACED("vm");
-		
+
 		private String messageText;
-		
+
 		private GoalStatus(String mtext)
 		{ messageText = mtext; }
-		
+
 		@Override
 		public String toString()
 		{ return messageText; }
 	}
-	
+
 	public Map<BlockData, GoalStatus> objectiveStatus;
-	
+
 	// does a provided search string match this team?
 	public boolean matches(String needle)
 	{
@@ -191,13 +191,13 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		if (a != null && -1 != needle.indexOf(a.toLowerCase())) return true;
 		return false;
 	}
-	
+
 	public void startMatch()
 	{
 		objectiveStatus = Maps.newHashMap();
 		for (BlockData obj : getObjectives())
 			objectiveStatus.put(obj, GoalStatus.NONE);
-		
+
 		for (AutoRefPlayer apl : getPlayers())
 		{
 			apl.heal();
@@ -212,7 +212,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		AutoRefTeam newTeam = new AutoRefTeam();
 		newTeam.color = ChatColor.RESET;
 		newTeam.maxSize = 0;
-		
+
 		newTeam.match = match;
 		World w = match.getWorld();
 
@@ -227,7 +227,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			try { newTeam.color = ChatColor.valueOf(clr); }
 			catch (IllegalArgumentException e) { }
 		}
-		
+
 		// initialize this team for referees
 		match.messageReferees("team", newTeam.getRawName(), "init");
 		match.messageReferees("team", newTeam.getRawName(), "color", newTeam.color.toString());
@@ -249,7 +249,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 				if (creg != null) newTeam.regions.add(creg);
 			}
 		}
-		
+
 		newTeam.spawn = !conf.containsKey("spawn") ? null :
 			BlockVector3.fromCoords((String) conf.get("spawn")).toLocation(w);
 
@@ -262,9 +262,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			if (slist != null) for (String s : slist)
 			{
 				String[] sp = s.split(":");
-				
+
 				int range = sp.length > 2 ? Integer.parseInt(sp[2]) : match.getInexactRange();
-				newTeam.addWinCondition(BlockVector3.fromCoords(sp[0]).toLocation(w), 
+				newTeam.addWinCondition(BlockVector3.fromCoords(sp[0]).toLocation(w),
 					BlockData.fromString(sp[1]), range);
 			}
 		}
@@ -285,10 +285,10 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		// add the maximum team size
 		map.put("maxsize", new Integer(maxSize));
-		
+
 		// set the team spawn (if there is a custom spawn)
 		if (spawn != null) map.put("spawn", BlockVector3.fromLocation(spawn).toCoords());
-		
+
 		// convert the win conditions to strings
 		List<String> wcond = Lists.newArrayList();
 		for (WinCondition wc : winConditions)
@@ -296,8 +296,8 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			String range = "";
 			if (wc.getInexactRange() != match.getInexactRange())
 				range = ":" + wc.getInexactRange();
-			
-			wcond.add(BlockVector3.fromLocation(wc.getLocation()).toCoords() 
+
+			wcond.add(BlockVector3.fromLocation(wc.getLocation()).toCoords()
 				+ ":" + wc.getBlockData().toString() + range);
 		}
 
@@ -328,46 +328,46 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 	public void join(Player pl)
 	{ join(pl, false); }
-	
+
 	public void join(Player pl, boolean force)
 	{
 		// if this player is using the client mod, they may not join
 		if (pl.getListeningPluginChannels().contains(AutoReferee.REFEREE_PLUGIN_CHANNEL))
 		{
 			if (!getMatch().isReferee(pl)) pl.sendMessage("You may not join a team with a modified client");
-			String warning = ChatColor.DARK_GRAY + pl.getName() + " attempted to join " + this.getName() + 
+			String warning = ChatColor.DARK_GRAY + pl.getName() + " attempted to join " + this.getName() +
 				ChatColor.DARK_GRAY + " with a modified client";
 			for (Player ref : getMatch().getReferees(true)) ref.sendMessage(warning);
 			return;
 		}
-		
+
 		// create an APL object for this player.
 		AutoRefPlayer apl = new AutoRefPlayer(pl, this);
-		
+
 		// quit if they are already on this team
 		if (players.contains(apl)) return;
-		
+
 		// if the match is in progress, no one may join
 		if (!match.getCurrentState().isBeforeMatch() && !force) return;
-		
+
 		// prepare the player
 		if (match != null && !match.getCurrentState().inProgress())
 			pl.teleport(getSpawnLocation());
 		pl.setGameMode(GameMode.SURVIVAL);
-		
+
 		players.add(apl);
 		match.messageReferees("team", getRawName(), "player", "+" + apl.getPlayerName());
-	
+
 		String colorName = getPlayerName(pl);
 		match.broadcast(colorName + " has joined " + getName());
-		
+
 		//FIXME if (pl.isOnline() && (pl instanceof Player))
 		//	((Player) pl).setPlayerListName(StringUtils.substring(colorName, 0, 16));
 
 		match.setupSpectators();
 		match.checkTeamsReady();
 	}
-	
+
 	public void leave(Player pl)
 	{ leave(pl, false); }
 
@@ -375,24 +375,24 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	{
 		// if the match is in progress, no one may leave their team
 		if (!match.getCurrentState().isBeforeMatch() && !force) return;
-		
+
 		// create an APL object for this player.
 		AutoRefPlayer apl = new AutoRefPlayer(pl);
 		if (!players.remove(apl)) return;
-		
+
 		String colorName = getPlayerName(pl);
 		match.broadcast(colorName + " has left " + getName());
 		pl.teleport(match.getWorldSpawn());
-		
+
 		if (pl.isOnline() && (pl instanceof Player))
 			((Player) pl).setPlayerListName(pl.getName());
 
 		match.messageReferees("team", getRawName(), "player", "-" + apl.getPlayerName());
-		
+
 		match.setupSpectators();
 		match.checkTeamsReady();
 	}
-	
+
 	public String getPlayerName(Player pl)
 	{
 		AutoRefPlayer apl = new AutoRefPlayer(pl);
@@ -415,59 +415,59 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			distance = Math.min(distance, reg.distanceToRegion(loc));
 		return distance;
 	}
-	
+
 	public boolean canEnter(Location loc)
 	{ return canEnter(loc, ZoneListener.SNEAK_DISTANCE); }
-	
+
 	public boolean canEnter(Location loc, Double dist)
 	{
 		double distance = match.getStartRegion().distanceToRegion(loc);
 		if (regions != null) for ( AutoRefRegion reg : regions ) if (distance > 0)
 		{
 			distance = Math.min(distance, reg.distanceToRegion(loc));
-			if (!reg.canEnter() && reg.distanceToRegion(loc) <= dist) return false; 
+			if (!reg.canEnter() && reg.distanceToRegion(loc) <= dist) return false;
 		}
 		return distance <= dist;
 	}
-	
+
 	public boolean canBuild(Location loc)
 	{
 		// start region is a permanent no-build zone
 		if (getMatch().inStartRegion(loc)) return false;
-		
+
 		boolean build = false;
 		if (regions != null) for ( AutoRefRegion reg : regions )
 			if (reg.contains(BlockVector3.fromLocation(loc)))
 			{ build = true; if (!reg.canBuild()) return false; }
 		return build;
 	}
-	
+
 	public void addWinCondition(Block block, int range)
 	{
 		// if the block is null, forget it
 		if (block == null) return;
-		
+
 		// add the block data to the win-condition listing
 		BlockData bd = BlockData.fromBlock(block);
 		this.addWinCondition(block.getLocation(), bd, range);
 	}
-	
+
 	public void addWinCondition(Location loc, BlockData bd, int range)
 	{
 		// if the block is null, forget it
 		if (loc == null || bd == null) return;
-		
+
 		Set<BlockData> prevObj = getObjectives();
 		winConditions.add(new WinCondition(loc, bd, range));
 		Set<BlockData> newObj = getObjectives();
-		
+
 		newObj.removeAll(prevObj);
 		for (BlockData nbd : newObj) match.messageReferees(
 			"team", this.getRawName(), "obj", "+" + nbd.toString());
-		
+
 		// broadcast the update
 		for (Player cfg : loc.getWorld().getPlayers()) if (cfg.hasPermission("autoreferee.configure"))
-			cfg.sendMessage(bd.getName() + " is now a win condition for " + getName() + 
+			cfg.sendMessage(bd.getName() + " is now a win condition for " + getName() +
 				" @ " + BlockVector3.fromLocation(loc).toCoords());
 	}
 
@@ -479,7 +479,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		objectives.remove(BlockData.AIR);
 		return objectives;
 	}
-	
+
 	public void updateObjectives()
 	{
 		int inexactRange = getMatch().getInexactRange();
@@ -491,27 +491,27 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 				if (getMatch().blockInRange(bd, wc.getLocation(), inexactRange) != null)
 				{ setObjectiveStatus(bd, GoalStatus.PLACED); continue objloop; }
 			}
-			
+
 			for (AutoRefPlayer apl : getPlayers())
 			{
 				if (!apl.getCarrying().contains(bd)) continue;
 				setObjectiveStatus(bd, GoalStatus.CARRYING);
 				continue objloop;
 			}
-			
+
 			if (getObjectiveStatus(bd) != GoalStatus.NONE)
 			{ setObjectiveStatus(bd, GoalStatus.SEEN); continue; }
 		}
 	}
-	
+
 	public void setObjectiveStatus(BlockData objective, GoalStatus status)
 	{
 		// if this is going to be a proper update to an established objective
-		if (objectiveStatus.containsKey(objective) && 
+		if (objectiveStatus.containsKey(objective) &&
 			objectiveStatus.get(objective) != status)
 		{
 			// message referees and update the objective status
-			getMatch().messageReferees("team", getRawName(), 
+			getMatch().messageReferees("team", getRawName(),
 				"state", objective.toString(), status.toString());
 			objectiveStatus.put(objective, status);
 		}
@@ -541,35 +541,35 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	public void updateHealthArmor(AutoRefPlayer apl,
 			int currentHealth, int currentArmor, int newHealth, int newArmor)
 	{
-		match.updateHealthArmor(apl, 
+		match.updateHealthArmor(apl,
 			currentHealth, currentArmor, newHealth, newArmor);
 	}
 
 	public int compareTo(AutoRefTeam team)
 	{ return this.getRawName().compareTo(team.getRawName()); }
-	
+
 	public static void switchTeams(AutoRefTeam team1, AutoRefTeam team2)
 	{
 		// no work to be done
 		if (team1 == null || team2 == null || team1 == team2) return;
-		
+
 		// must be in the same match
 		if (team1.getMatch() != team2.getMatch()) return;
-		
+
 		// switch the sets of players
 		Set<AutoRefPlayer> t1apls = team1.getPlayers();
 		Set<AutoRefPlayer> t2apls = team2.getPlayers();
-		
+
 		team1.players = t2apls;
 		team2.players = t1apls;
-		
+
 		for (AutoRefPlayer apl1 : team1.getPlayers()) apl1.setTeam(team1);
 		for (AutoRefPlayer apl2 : team2.getPlayers()) apl2.setTeam(team2);
 
 		// switch the custom names
 		String t1cname = team1.customName;
 		String t2cname = team2.customName;
-		
+
 		team1.customName = t2cname;
 		team2.customName = t1cname;
 	}

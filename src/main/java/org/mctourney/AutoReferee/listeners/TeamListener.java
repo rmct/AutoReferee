@@ -30,10 +30,10 @@ import org.mctourney.AutoReferee.AutoReferee;
 
 import com.google.common.collect.Maps;
 
-public class TeamListener implements Listener 
+public class TeamListener implements Listener
 {
 	AutoReferee plugin = null;
-	
+
 	// mapping spectators to the matches they died in
 	Map<String, AutoRefMatch> deadSpectators = Maps.newHashMap();
 
@@ -46,54 +46,54 @@ public class TeamListener implements Listener
 		// typical chat message format, swap out with colored version
 		Player player = event.getPlayer();
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
-		
+
 		if (match == null) return;
 		event.setFormat("<" + match.getPlayerName(player) + "> " + event.getMessage());
 
 		// if we are currently playing and speaker on a team, restrict recipients
 		boolean speakerReferee = match.isReferee(player);
 		AutoRefTeam team = match.getPlayerTeam(player);
-		
+
 		Iterator<Player> iter = event.getRecipients().iterator();
 		while (iter.hasNext())
 		{
 			Player recipient = iter.next();
-			
+
 			// if the listener is in a different world
 			if (recipient.getWorld() != player.getWorld())
 			{ iter.remove(); continue; }
-			
+
 			// if listener is on a team, and its not the same team as the
 			// speaker, remove them from the recipients list
-			if (AutoReferee.getInstance().isAutoMode() && !speakerReferee && 
+			if (AutoReferee.getInstance().isAutoMode() && !speakerReferee &&
 				match.getCurrentState().inProgress() && team != match.getPlayerTeam(recipient))
 					{ iter.remove(); continue; }
 		}
 	}
-	
+
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void spectatorDeath(PlayerDeathEvent event)
 	{
 		World world = event.getEntity().getWorld();
 		AutoRefMatch match = plugin.getMatch(world);
-		
+
 		if (match != null && !match.isPlayer(event.getEntity()))
 		{
 			deadSpectators.put(event.getEntity().getName(), match);
 			event.getDrops().clear();
 		}
 	}
-	
+
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void spectatorDeath(EntityDamageEvent event)
 	{
 		World world = event.getEntity().getWorld();
 		AutoRefMatch match = plugin.getMatch(world);
-		
+
 		if (event.getEntityType() != EntityType.PLAYER) return;
 		Player player = (Player) event.getEntity();
-		
-		if (match != null && match.getCurrentState().inProgress() && 
+
+		if (match != null && match.getCurrentState().inProgress() &&
 			!match.isPlayer(player))
 		{
 			event.setCancelled(true);
@@ -113,18 +113,18 @@ public class TeamListener implements Listener
 			if (match != null) event.setRespawnLocation(match.getWorldSpawn());
 			deadSpectators.remove(name); return;
 		}
-		
+
 		World world = event.getPlayer().getWorld();
 		AutoRefMatch match = plugin.getMatch(world);
-		
+
 		if (match == null) for (AutoRefMatch m : plugin.getMatches())
 			if (m.isPlayer(event.getPlayer())) match = m;
-		
+
 		if (match != null && match.isPlayer(event.getPlayer()))
 		{
 			// does this player have a bed spawn?
 			boolean hasBed = event.getPlayer().getBedSpawnLocation() != null;
-			
+
 			// if the player attempts to respawn in a different world, bring them back
 			if (!hasBed || event.getRespawnLocation().getWorld() != match.getWorld())
 				event.setRespawnLocation(match.getPlayerSpawn(event.getPlayer()));
@@ -142,10 +142,10 @@ public class TeamListener implements Listener
 		{
 			// if they should be whitelisted, let them in, otherwise, block them
 			if (plugin.playerWhitelisted(player)) event.allow();
-			else event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, 
+			else event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST,
 				AutoReferee.NO_LOGIN_MESSAGE);
-		}	
-		
+		}
+
 		// if this player needs to be in a specific world, put them there
 		AutoRefTeam team = plugin.getExpectedTeam(player);
 		if (team != null) team.join(player);
@@ -156,16 +156,16 @@ public class TeamListener implements Listener
 	{
 		Player player = event.getPlayer();
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
-		
+
 		// leave the team, if necessary
 		AutoRefTeam team = plugin.getTeam(player);
-		if (team != null && match != null && 
+		if (team != null && match != null &&
 			!match.getCurrentState().inProgress())
 				team.leave(player);
-		
+
 		// re-check world ready
 		if (match != null) match.checkTeamsReady();
-		
+
 		// if this player was damaged recently (during the match), notify
 		if (match != null && match.getCurrentState().inProgress())
 		{
@@ -178,38 +178,38 @@ public class TeamListener implements Listener
 			}
 		}
 	}
-	
+
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void signCommand(PlayerInteractEvent event)
 	{
 		Player player = event.getPlayer();
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
-		
-		if (match != null && match.getCurrentState().isBeforeMatch() && event.hasBlock() && 
+
+		if (match != null && match.getCurrentState().isBeforeMatch() && event.hasBlock() &&
 			event.getClickedBlock().getState() instanceof Sign && match.inStartRegion(event.getClickedBlock().getLocation()))
 		{
 			String[] lines = ((Sign) event.getClickedBlock().getState()).getLines();
 			if (lines[0] == null || !"[AutoReferee]".equals(lines[0])) return;
-			
+
 			// execute the command on the sign (and hope like hell that AutoReferee picks it up)
 			if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
 				player.performCommand(ChatColor.stripColor(lines[1] + " " + lines[2]).trim());
 			event.setCancelled(true);
 		}
 	}
-	
+
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void changeGamemode(PlayerGameModeChangeEvent event)
 	{
 		Player player = event.getPlayer();
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
-		
+
 		// if there is a match currently in progress on this world...
 		if (match != null && plugin.isAutoMode() &&
 			match.getCurrentState().inProgress())
 		{
 			// cancel the gamemode change if the player is a participant
-			if (event.getNewGameMode() == GameMode.CREATIVE && 
+			if (event.getNewGameMode() == GameMode.CREATIVE &&
 				match.isPlayer(player)) event.setCancelled(true);
 		}
 	}

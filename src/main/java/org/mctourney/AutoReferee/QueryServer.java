@@ -14,13 +14,13 @@ import com.google.gson.Gson;
 public class QueryServer
 {
 	private static final String encoding = "UTF-8";
-	
+
 	private String qurl = null;
 	private String key = null;
-	
+
 	public QueryServer(String qurl, String key)
 	{ this.qurl = qurl; this.key = key; }
-	
+
 	public boolean ack()
 	{
 		try
@@ -31,7 +31,7 @@ public class QueryServer
 		}
 		catch (Exception e) { return false; }
 	}
-	
+
 	public AutoRefMatch.MatchParams getNextMatch()
 	{
 		try
@@ -42,10 +42,10 @@ public class QueryServer
 		}
 		catch (Exception e) { return null; }
 	}
-	
+
 	public static String syncGetQuery(String path, String params)
 	{ return syncQuery(path, params, null); }
-	
+
 	public static String syncPostQuery(String path, String params)
 	{ return syncQuery(path, null, params); }
 
@@ -53,28 +53,28 @@ public class QueryServer
 	{
 		OutputStreamWriter wr = null;
 		InputStream rd = null;
-		
+
 		try
 		{
 			URL url = new URL(String.format("%s?%s", path, getParams));
 			URLConnection conn = url.openConnection();
 			conn.setDoOutput(true);
-		    
+
 			if (postParams != null)
-			{ 
+			{
 				wr = new OutputStreamWriter(conn.getOutputStream());
 				wr.write(postParams); wr.flush();
 			}
-			
+
 			StringWriter writer = new StringWriter();
 			IOUtils.copy(rd = conn.getInputStream(), writer);
 			return writer.toString();
 		}
-		
+
 		// just drop out
 		catch (Exception e)
 		{ return null; }
-		
+
 		finally
 		{
 			try

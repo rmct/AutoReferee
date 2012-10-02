@@ -30,15 +30,15 @@ import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.AutoRefTeam.GoalStatus;
 import org.mctourney.AutoReferee.util.BlockData;
 
-public class ObjectiveTracker implements Listener 
+public class ObjectiveTracker implements Listener
 {
 	AutoReferee plugin = null;
-	
+
 	public ObjectiveTracker(Plugin p)
 	{
 		plugin = (AutoReferee) p;
 	}
-	
+
 	/* TRACKING OBJECTIVES/WOOL */
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
@@ -46,16 +46,16 @@ public class ObjectiveTracker implements Listener
 	{
 		Player pl = event.getPlayer();
 		Block block = event.getBlock();
-		
+
 		AutoRefMatch match = plugin.getMatch(block.getWorld());
 		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
-		
+
 		if (match != null && apl != null)
 		{
 			for (WinCondition wc : apl.getTeam().winConditions)
 			{
 				Location loc = wc.getLocation(); BlockData bd = wc.getBlockData();
-				if (match.blockInRange(bd, loc, match.getInexactRange()) != null &&  
+				if (match.blockInRange(bd, loc, match.getInexactRange()) != null &&
 					apl.getTeam().getObjectiveStatus(bd) != GoalStatus.PLACED && bd.matches(block))
 						match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.OBJECTIVE_PLACED,
 							String.format("%s has placed %s", apl.getPlayerName(), bd.getRawName()), loc, apl, bd));
@@ -63,9 +63,9 @@ public class ObjectiveTracker implements Listener
 			match.checkWinConditions();
 		}
 	}
-	
+
 	// ----------------- START WINCONDITION -----------------------
-	
+
 	private void delayCheckWinConditions(BlockEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
@@ -115,16 +115,16 @@ public class ObjectiveTracker implements Listener
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void checkWinConditions(LeavesDecayEvent event)
 	{ delayCheckWinConditions(event); }
-	
+
 	// ------------------ END WINCONDITION ------------------------
-	
+
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void blockBreak(BlockBreakEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
 		if (match != null) match.checkWinConditions();
 	}
-	
+
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void blockInteract(PlayerInteractEvent event)
 	{
@@ -134,13 +134,13 @@ public class ObjectiveTracker implements Listener
 			if (match != null) match.checkWinConditions();
 		}
 	}
-	
+
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void entityInteract(PlayerInteractEntityEvent event)
 	{
 		Player pl = event.getPlayer();
 		Entity entity = event.getRightClicked();
-		
+
 		AutoRefMatch match = plugin.getMatch(pl.getWorld());
 		if (match != null) match.checkWinConditions();
 
@@ -151,41 +151,41 @@ public class ObjectiveTracker implements Listener
 			a.showInventory(pl);
 		}
 	}
-	
+
 	/* TRACKING WOOL CARRYING */
-	
+
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void inventoryClick(InventoryClickEvent event)
 	{ inventoryChange(event.getWhoClicked()); }
-	
+
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void itemDrop(PlayerDropItemEvent event)
 	{ inventoryChange(event.getPlayer()); }
-	
+
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void itemPickup(PlayerPickupItemEvent event)
 	{ inventoryChange(event.getPlayer()); }
-	
+
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void blockPlaceInventory(BlockPlaceEvent event)
 	{ inventoryChange(event.getPlayer()); }
-	
+
 	class InventoryChangeTask implements Runnable
 	{
 		AutoRefPlayer apl = null;
-		
+
 		public InventoryChangeTask(AutoRefPlayer apl)
 		{ this.apl = apl; }
-		
+
 		public void run()
 		{ if (apl != null) apl.updateCarrying(); }
 	}
-	
+
 	public void inventoryChange(HumanEntity entity)
 	{
 		AutoRefMatch match = plugin.getMatch(entity.getWorld());
 		if (match == null) return;
-		
+
 		if (match.getCurrentState().inProgress() &&
 			entity.getType() == EntityType.PLAYER)
 		{
@@ -194,36 +194,36 @@ public class ObjectiveTracker implements Listener
 				.scheduleSyncDelayedTask(plugin, new InventoryChangeTask(apl));
 		}
 	}
-	
+
 	/* TRACKING PLAYER HEALTH AND ARMOR */
-	
+
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void playerHealthDown(EntityDamageEvent event)
 	{ healthArmorChange(event.getEntity()); }
-	
+
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void playerHealthUp(EntityRegainHealthEvent event)
 	{ healthArmorChange(event.getEntity()); }
-	
+
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void playerArmorChange(InventoryClickEvent event)
 	{ healthArmorChange(event.getWhoClicked()); }
-	
+
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void playerArmorDrop(PlayerDropItemEvent event)
 	{ healthArmorChange(event.getPlayer()); }
-	
+
 	class HealthArmorChangeTask implements Runnable
 	{
 		AutoRefPlayer apl = null;
-		
+
 		public HealthArmorChangeTask(AutoRefPlayer apl)
 		{ this.apl = apl; }
-		
+
 		public void run()
 		{ if (apl != null) apl.updateHealthArmor(); }
 	}
-	
+
 	public void healthArmorChange(Entity entity)
 	{
 		AutoRefMatch match = plugin.getMatch(entity.getWorld());
@@ -234,29 +234,29 @@ public class ObjectiveTracker implements Listener
 				.scheduleSyncDelayedTask(plugin, new HealthArmorChangeTask(apl));
 		}
 	}
-	
+
 	/* MISC */
-	
+
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void playerRespawn(PlayerRespawnEvent event)
 	{
 		inventoryChange(event.getPlayer());
 		healthArmorChange(event.getPlayer());
 	}
-	
+
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void itemCraft(CraftItemEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getWhoClicked().getWorld());
 		if (match == null) return;
-		
+
 		if (!(event.getWhoClicked() instanceof Player)) return;
 		AutoRefTeam team = plugin.getTeam((Player) event.getWhoClicked());
-		
+
 		BlockData recipeTarget = BlockData.fromItemStack(event.getRecipe().getResult());
 		if (team != null && team.getObjectives().contains(recipeTarget) && !match.allowCraft)
 			event.setCancelled(true);
-		
+
 		// if this is on the blacklist, cancel
 		if (!match.canCraft(recipeTarget)) event.setCancelled(true);
 	}

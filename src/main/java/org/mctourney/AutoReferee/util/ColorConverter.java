@@ -7,7 +7,7 @@ import org.bukkit.DyeColor;
 
 import com.google.common.collect.Maps;
 
-public abstract class ColorConverter 
+public abstract class ColorConverter
 {
 	private static Map<DyeColor, ChatColor> dyeChatMap;
 	static
@@ -30,14 +30,14 @@ public abstract class ColorConverter
 		dyeChatMap.put(DyeColor.WHITE, ChatColor.WHITE);
 		dyeChatMap.put(DyeColor.YELLOW, ChatColor.YELLOW);
 	}
-	
+
 	public static ChatColor dyeToChat(DyeColor dclr)
 	{
 		if (dyeChatMap.containsKey(dclr))
 			return dyeChatMap.get(dclr);
 		return ChatColor.MAGIC;
 	}
-	
+
 	private static Map<ChatColor, String> chatHexMap;
 	static
 	{
@@ -59,14 +59,14 @@ public abstract class ColorConverter
 		chatHexMap.put(ChatColor.YELLOW, "#cc5");
 		chatHexMap.put(ChatColor.WHITE, "#aaa");
 	}
-	
+
 	public static String chatToHex(ChatColor clr)
 	{
 		if (chatHexMap.containsKey(clr))
 			return chatHexMap.get(clr);
 		return "#000";
 	}
-	
+
 	private static Map<DyeColor, String> dyeHexMap;
 	static
 	{
@@ -102,13 +102,13 @@ public abstract class ColorConverter
 
 		str.append("<table><tr><td>Chat Color</td><td>Color</td></tr>");
 		for (Map.Entry<ChatColor, String> e : chatHexMap.entrySet())
-			str.append(String.format("<tr><td style='color: %2$s;'>%1$s</td>" + 
+			str.append(String.format("<tr><td style='color: %2$s;'>%1$s</td>" +
 				"<td style='color: %2$s;'>Test String</td></tr>", e.getKey().name(), e.getValue()));
 		str.append("</table>");
 
 		str.append("<table><tr><td>Dye Color</td><td>Color</td></tr>");
 		for (Map.Entry<DyeColor, String> e : dyeHexMap.entrySet())
-			str.append(String.format("<tr><td style='color: %2$s;'>%1$s</td>" + 
+			str.append(String.format("<tr><td style='color: %2$s;'>%1$s</td>" +
 				"<td style='color: %2$s;'>Test String</td></tr>", e.getKey().name(), e.getValue()));
 		str.append("</table>");
 

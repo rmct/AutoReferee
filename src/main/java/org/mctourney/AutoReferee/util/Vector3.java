@@ -6,13 +6,13 @@ import org.bukkit.World;
 public class Vector3
 {
 	public double x, y, z;
-	
+
 	public Vector3(double x, double y, double z)
 	{ this.x = x; this.y = y; this.z = z; }
-	
+
 	public Vector3(BlockVector3 v)
 	{ this.x = v.x; this.y = v.y; this.z = v.z; }
-	
+
 	public Vector3(com.sk89q.worldedit.Vector v)
 	{
 		this.x = v.getX();
@@ -38,7 +38,7 @@ public class Vector3
 
 	public static Vector3 fromLocation(Location loc)
 	{ return new Vector3(loc.getX(), loc.getY(), loc.getZ()); }
-	
+
 	public Location toLocation(World world)
 	{ return new Location(world, x, y, z); }
 }

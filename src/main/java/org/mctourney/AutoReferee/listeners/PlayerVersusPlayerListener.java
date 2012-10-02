@@ -49,10 +49,10 @@ public class PlayerVersusPlayerListener implements Listener
 			// get victim, and killer (maybe null) of this player
 			Player victim = (Player) event.getEntity();
 			AutoRefPlayer vdata = match.getPlayer(victim);
-			
+
 			Player killer = victim.getKiller();
 			AutoRefPlayer kdata = match.getPlayer(killer);
-			
+
 			String dmsg = event.getDeathMessage();
 			EntityDamageEvent lastDmg = victim.getLastDamageCause();
 
@@ -66,7 +66,7 @@ public class PlayerVersusPlayerListener implements Listener
 
 			// update the death message with the changes
 			event.setDeathMessage(dmsg);
-			
+
 			if (match.getCurrentState().inProgress())
 			{
 				// register the death and kill
@@ -76,7 +76,7 @@ public class PlayerVersusPlayerListener implements Listener
 		}
 		else for (Player pl : event.getEntity().getWorld().getPlayers())
 			pl.sendMessage(event.getDeathMessage());
-		
+
 		// remove the death message (so we can control who receives it)
 		event.setDeathMessage(null);
 	}
@@ -106,10 +106,10 @@ public class PlayerVersusPlayerListener implements Listener
 			EntityDamageByEntityEvent ed = (EntityDamageByEntityEvent) event;
 			Player damager = entityToPlayer(ed.getDamager());
 			Player damaged = entityToPlayer(ed.getEntity());
-			
+
 			// enderpearls are a special case!
 			if (ed.getDamager().getType() == EntityType.ENDER_PEARL) return;
-			
+
 			if (null != damager && match.getCurrentState().inProgress()
 				&& ed.getDamager() instanceof Arrow)
 			{
@@ -125,11 +125,11 @@ public class PlayerVersusPlayerListener implements Listener
 			{
 				// if the match is in progress and player is in start region
 				// cancel any damage dealt to the player
-				if (match.getCurrentState().inProgress() && 
+				if (match.getCurrentState().inProgress() &&
 					match.inStartRegion(damaged.getLocation()))
 				{ event.setCancelled(true); return; }
 			}
-			
+
 			// get team affiliations of these players (maybe null)
 			AutoRefTeam d1team = plugin.getTeam(damager);
 			AutoRefTeam d2team = plugin.getTeam(damaged);
@@ -147,11 +147,11 @@ public class PlayerVersusPlayerListener implements Listener
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
 		if (match == null) return;
 
-		// save player data if the damaged entity was a player	
-		if (event.getEntityType() == EntityType.PLAYER && 
+		// save player data if the damaged entity was a player
+		if (event.getEntityType() == EntityType.PLAYER &&
 			match.getCurrentState().inProgress())
 		{
-			AutoRefPlayer pdata = match.getPlayer((Player) event.getEntity());	
+			AutoRefPlayer pdata = match.getPlayer((Player) event.getEntity());
 			if (pdata != null) pdata.registerDamage(event);
 		}
 	}
@@ -161,15 +161,15 @@ public class PlayerVersusPlayerListener implements Listener
 	{
 		// if the entity is not a player, we don't care
 		if (event.getEntityType() != EntityType.PLAYER) return;
-		
+
 		Player player = (Player) event.getEntity();
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
 		if (match == null || !match.getCurrentState().inProgress()) return;
-		
+
 		AutoRefPlayer apl = match.getPlayer(player);
 		if (apl != null) { ++apl.shotsFired; apl.sendAccuracyUpdate(); }
 	}
-	
+
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void hungerChange(FoodLevelChangeEvent event)
 	{
@@ -177,7 +177,7 @@ public class PlayerVersusPlayerListener implements Listener
 		if (match != null && !match.getCurrentState().inProgress())
 			event.setFoodLevel(20);
 	}
-	
+
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void explosionPrime(ExplosionPrimeEvent event)
 	{
@@ -191,10 +191,10 @@ public class PlayerVersusPlayerListener implements Listener
 			if (apl == null) return;
 		}
 	}
-	
+
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void entityExplode(EntityExplodeEvent event)
 	{
-		
+
 	}
 }

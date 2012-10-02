@@ -14,12 +14,12 @@ import org.mctourney.AutoReferee.AutoRefMatch;
 
 public class RefereeChannelListener implements PluginMessageListener, Listener
 {
-	public static final char DELIMITER = '|';	
+	public static final char DELIMITER = '|';
 	AutoReferee plugin = null;
 
 	public RefereeChannelListener(Plugin p)
 	{ plugin = (AutoReferee) p; }
-	
+
 	public void onPluginMessageReceived(String channel, Player player, byte[] mbytes)
 	{
 		try

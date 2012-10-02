@@ -14,34 +14,34 @@ public class AutoRefRegion extends CuboidRegion
 		NO_BUILD(1 << 0, "nobuild", 'b'),
 		NO_ENTRY(1 << 1, "noentry", 'n'),
 		SAFE_ZONE(1 << 2, "safe", 's');
-		
+
 		// value for the flag set
 		private int value;
-		
+
 		public int getValue() { return value; }
-		
+
 		// name for use with commands
 		private String name;
-		
+
 		public String getName() { return name; }
-		
+
 		// character marker for config files
 		private char mark;
-		
+
 		public char getMark() { return mark; }
-		
+
 		RegionFlag(int val, String name, char c)
 		{ this.value = val; this.name = name; this.mark = c; }
 	}
-	
+
 	private int flags;
-	
+
 	public AutoRefRegion(CuboidRegion reg)
 	{ this(reg.getMinimumPoint(), reg.getMaximumPoint()); }
-	
+
 	public AutoRefRegion(Vector3 a, Vector3 b)
 	{ super(a, b); flags = 0; }
-	
+
 	public static AutoRefRegion fromCoords(String coords)
 	{
 		// split the region string (vec:vec=flags)
@@ -53,22 +53,22 @@ public class AutoRefRegion extends CuboidRegion
 
 		return reg;
 	}
-	
+
 	public String toCoords()
 	{ return super.toCoords() + "=" + getFlagList(); }
-	
+
 	public boolean is(RegionFlag flag)
 	{ return 0 != (flag.getValue() & this.flags); }
-	
+
 	public boolean canBuild()
 	{ return !is(RegionFlag.NO_BUILD); }
-	
+
 	public boolean canEnter()
 	{ return !is(RegionFlag.NO_ENTRY); }
-	
+
 	public boolean isSafeZone()
 	{ return is(RegionFlag.SAFE_ZONE); }
-	
+
 	public Set<RegionFlag> getFlags()
 	{
 		Set<RegionFlag> fset = Sets.newHashSet();
@@ -76,7 +76,7 @@ public class AutoRefRegion extends CuboidRegion
 			if ((f.getValue() & this.flags) != 0) fset.add(f);
 		return fset;
 	}
-	
+
 	public String getFlagList()
 	{
 		String fstr = "";
@@ -91,14 +91,14 @@ public class AutoRefRegion extends CuboidRegion
 	public AutoRefRegion toggle(String nm)
 	{
 		for (RegionFlag f : RegionFlag.values())
-			if (f.getName().equalsIgnoreCase(nm)) return toggle(f); 
+			if (f.getName().equalsIgnoreCase(nm)) return toggle(f);
 		return this;
 	}
 
 	public AutoRefRegion toggle(char c)
 	{
 		for (RegionFlag f : RegionFlag.values())
-			if (f.getMark() == c) return toggle(f); 
+			if (f.getMark() == c) return toggle(f);
 		return this;
 	}
 }

@@ -5,10 +5,10 @@ import org.bukkit.Location;
 public class BlockVector3 extends Vector3
 {
 	private int bx, by, bz;
-	
+
 	public BlockVector3(int x, int y, int z)
 	{ super(x, y, z); bx = x; by = y; bz = z; }
-	
+
 	public BlockVector3(Vector3 v)
 	{ this((int)v.x, (int)v.y, (int)v.z); }
 

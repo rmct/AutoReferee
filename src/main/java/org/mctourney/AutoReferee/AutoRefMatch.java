@@ -64,10 +64,10 @@ public class AutoRefMatch
 {
 	// online map list
 	private static String MAPREPO = "http://s3.amazonaws.com/autoreferee/maps/";
-	
+
 	public static String getMapRepo()
 	{ return MAPREPO; }
-	
+
 	// set new map repo
 	public static void changeMapRepo(String s)
 	{ MAPREPO = s + "/"; }
@@ -85,15 +85,15 @@ public class AutoRefMatch
 		// if the folder doesnt exist, create it...
 		if (!matchSummaryDirectory.exists()) matchSummaryDirectory.mkdir();
 	}
-	
+
 	// world this match is taking place on
 	private World world;
 	public Location worldSpawn = null;
-	
+
 	private void setWorld(World w)
 	{
 		world = w;
-		
+
 		worldSpawn = world.getSpawnLocation();
 		while (world.getBlockTypeIdAt(worldSpawn) != Material.AIR.getId())
 			worldSpawn = worldSpawn.add(0, 1, 0);
@@ -101,10 +101,10 @@ public class AutoRefMatch
 
 	public World getWorld()
 	{ return world; }
-	
+
 	public Location getWorldSpawn()
 	{ return worldSpawn; }
-	
+
 	private boolean tmp;
 
 	private boolean isTemporaryWorld()
@@ -112,13 +112,13 @@ public class AutoRefMatch
 
 	// time to set the world to at the start of the match
 	private long startTime = 8000L;
-	
+
 	public long getStartTime()
 	{ return startTime; }
 
 	public void setStartTime(long startTime)
 	{ this.startTime = startTime; }
-	
+
 	public enum MatchStatus
 	{
 		NONE, WAITING, READY, PLAYING, COMPLETED;
@@ -132,7 +132,7 @@ public class AutoRefMatch
 		public boolean inProgress()
 		{ return this == PLAYING; }
 	}
-	
+
 	// status of the match
 	private MatchStatus currentState = MatchStatus.NONE;
 
@@ -141,7 +141,7 @@ public class AutoRefMatch
 
 	public void setCurrentState(MatchStatus s)
 	{ this.currentState = s; this.setupSpectators(); }
-	
+
 	// teams participating in the match
 	private Set<AutoRefTeam> teams = null;
 
@@ -162,15 +162,15 @@ public class AutoRefMatch
 			tlist.add(team.getName());
 		return StringUtils.join(tlist, ", ");
 	}
-	
+
 	private AutoRefTeam winningTeam = null;
-	
+
 	public AutoRefTeam getWinningTeam()
 	{ return winningTeam; }
-	
+
 	public void setWinningTeam(AutoRefTeam t)
 	{ winningTeam = t; }
-	
+
 	// region defined as the "start" region (safe zone)
 	private CuboidRegion startRegion = null;
 
@@ -179,10 +179,10 @@ public class AutoRefMatch
 
 	public void setStartRegion(CuboidRegion startRegion)
 	{ this.startRegion = startRegion; }
-	
+
 	// name of the match
 	private String matchName = null;
-	
+
 	public void setMatchName(String nm)
 	{ matchName = nm; }
 
@@ -190,30 +190,30 @@ public class AutoRefMatch
 	{
 		// if we have a specific match name...
 		if (matchName != null) return matchName;
-		
+
 		// generate a date string
 		String date = new SimpleDateFormat("dd MMM yyyy").format(new Date());
-		
+
 		// if the map is named, return map name as a placeholder
 		if (mapName != null) return mapName + ": " + date;
-		
+
 		// otherwise, just return the date
 		return date;
 	}
-	
+
 	// configuration information for the world
 	public File worldConfigFile;
 	public FileConfiguration worldConfig;
-	
+
 	// basic variables loaded from file
 	private String mapName = null;
 	private Collection<String> mapAuthors = null;
 
-	public String getMapName() 
+	public String getMapName()
 	{ return mapName; }
-	
+
 	private String versionString = "1.0";
-	
+
 	public String getVersion()
 	{ return versionString; }
 
@@ -223,9 +223,9 @@ public class AutoRefMatch
 			return StringUtils.join(mapAuthors, ", ");
 		return "??";
 	}
-	
+
 	private long startTicks = 0;
-	
+
 	public long getStartTicks()
 	{ return startTicks; }
 
@@ -264,33 +264,33 @@ public class AutoRefMatch
 
 	// task that starts the match
 	public AutoRefMatch.CountdownTask matchStarter = null;
-	
+
 	// mechanisms to open the starting gates
 	public Set<StartMechanism> startMechanisms = null;
-	
+
 	// protected entities - only protected from "butchering"
 	public Set<UUID> protectedEntities = null;
-	
+
 	public boolean allowFriendlyFire = false;
 	public boolean allowCraft = false;
 
 	// provided by configuration file
 	public static boolean allowTies = false;
-	
+
 	// list of items players may not craft
 	private Set<BlockData> prohibitCraft = Sets.newHashSet();
-	
+
 	// range of inexact placement
 	private int inexactRange = 2;
-	
+
 	public int getInexactRange()
 	{ return inexactRange; }
 
 	// transcript of every event in the match
 	private List<TranscriptEvent> transcript;
-	
+
 	private boolean refereeReady = false;
-	
+
 	public boolean isRefereeReady()
 	{ return getReferees().size() == 0 || refereeReady; }
 
@@ -304,34 +304,34 @@ public class AutoRefMatch
 
 	public void debug(String msg)
 	{ if (debugRecipient != null) debugRecipient.sendMessage(msg); }
-	
+
 	public void setDebug(CommandSender recp)
 	{
 		if (recp != null && recp.hasPermission("autoreferee.streamer"))
 			AutoReferee.getInstance().getLogger().info(
 				"You may not direct debug message to a streamer!");
-			
+
 		debugRecipient = recp;
-		debug(ChatColor.GREEN + "Debug mode is now " + 
+		debug(ChatColor.GREEN + "Debug mode is now " +
 			(isDebugMode() ? "on" : "off"));
 	}
-	
+
 	// number of seconds for each phase
 	public static final int READY_SECONDS = 15;
 	public static final int COMPLETED_SECONDS = 180;
-	
+
 	private int customReadyDelay = -1;
-	
+
 	public int getReadyDelay()
 	{
 		if (customReadyDelay >= 0) return customReadyDelay;
 		return AutoReferee.getInstance().getConfig().getInt(
 			"delay-seconds.ready", AutoRefMatch.READY_SECONDS);
 	}
-	
+
 	public void setReadyDelay(int delay)
 	{ this.customReadyDelay = delay; }
-	
+
 	public AutoRefMatch(World world, boolean tmp, MatchStatus state)
 	{ this(world, tmp); setCurrentState(state); }
 
@@ -339,13 +339,13 @@ public class AutoRefMatch
 	{
 		setWorld(world);
 		loadWorldConfiguration();
-		
+
 		// is this world a temporary world?
 		this.tmp = tmp;
-		
+
 		// brand new match transcript
 		transcript = Lists.newLinkedList();
-		
+
 		// fix vanish
 		this.setupSpectators();
 	}
@@ -380,13 +380,13 @@ public class AutoRefMatch
 			if (apl.getPlayerName() == p.getName()) return false;
 		return p.hasPermission("autoreferee.referee");
 	}
-	
+
 	public static boolean isCompatible(World w)
 	{ return new File(w.getWorldFolder(), "autoreferee.yml").exists(); }
-	
+
 	public void reload()
 	{ this.loadWorldConfiguration(); }
-	
+
 	@SuppressWarnings("unchecked")
 	private void loadWorldConfiguration()
 	{
@@ -410,38 +410,38 @@ public class AutoRefMatch
 
 		for (Map<?, ?> map : worldConfig.getMapList("match.teams"))
 			teams.add(AutoRefTeam.fromMap((Map<String, Object>) map, this));
-		
+
 		startMechanisms = Sets.newHashSet();
 		for (String sm : worldConfig.getStringList("match.start-mechanisms"))
 			startMechanisms.add(StartMechanism.unserialize(world, sm));
-		
+
 		protectedEntities = Sets.newHashSet();
 		for (String uid : worldConfig.getStringList("match.protected-entities"))
 			protectedEntities.add(UUID.fromString(uid));
-		
+
 		prohibitCraft = Sets.newHashSet();
 		for (String b : worldConfig.getStringList("match.no-craft"))
 			prohibitCraft.add(BlockData.fromString(b));
-		
+
 		// HELPER: ensure all protected entities are still present in world
 		Set<UUID> uuidSearch = Sets.newHashSet(protectedEntities);
 		for (Entity e : getWorld().getEntities()) uuidSearch.remove(e.getUniqueId());
-		if (!uuidSearch.isEmpty()) this.broadcast(ChatColor.RED + "" + ChatColor.BOLD + "WARNING: " + 
+		if (!uuidSearch.isEmpty()) this.broadcast(ChatColor.RED + "" + ChatColor.BOLD + "WARNING: " +
 			ChatColor.RESET + "One or more protected entities are missing!");
-		
+
 		// get the start region (safe for both teams, no pvp allowed)
 		if (worldConfig.isString("match.start-region"))
 			startRegion = CuboidRegion.fromCoords(worldConfig.getString("match.start-region"));
-		
+
 		// get the time the match is set to start
 		if (worldConfig.isString("match.start-time"))
 			startTime = AutoReferee.parseTimeString(worldConfig.getString("match.start-time"));
-		
+
 		// get the extra settings cached
 		mapName = worldConfig.getString("map.name", "<Untitled>");
 		versionString = worldConfig.getString("map.version", "1.0");
 		mapAuthors = worldConfig.getStringList("map.creators");
-		
+
 		allowFriendlyFire = worldConfig.getBoolean("match.allow-ff", false);
 		allowCraft = worldConfig.getBoolean("match.allow-craft", false);
 
@@ -455,7 +455,7 @@ public class AutoRefMatch
 
 		world.setTicksPerAnimalSpawns(-1);
 		world.setTicksPerMonsterSpawns(-1);
-		
+
 		// last, send an update about the match to everyone logged in
 		for (Player pl : world.getPlayers()) sendMatchInfo(pl);
 	}
@@ -469,7 +469,7 @@ public class AutoRefMatch
 		return diff;
 	}
 
-	public void saveWorldConfiguration() 
+	public void saveWorldConfiguration()
 	{
 		// if there is no configuration object or file, nothin' doin'...
 		if (worldConfigFile == null || worldConfig == null) return;
@@ -478,22 +478,22 @@ public class AutoRefMatch
 		List<Map<String, Object>> teamData = Lists.newArrayList();
 		for (AutoRefTeam t : teams) teamData.add(t.toMap());
 		worldConfig.set("match.teams", teamData);
-		
+
 		// save the start mechanisms
 		List<String> smList = Lists.newArrayList();
 		for ( StartMechanism sm : startMechanisms ) smList.add(sm.serialize());
 		worldConfig.set("match.start-mechanisms", smList);
-		
+
 		// save the protected entities
 		List<String> peList = Lists.newArrayList();
 		for ( UUID uid : protectedEntities ) peList.add(uid.toString());
 		worldConfig.set("match.protected-entities", peList);
-		
+
 		// save the craft blacklist
 		List<String> ncList = Lists.newArrayList();
 		for ( BlockData bd : prohibitCraft ) ncList.add(bd.toString());
 		worldConfig.set("match.no-craft", ncList);
-		
+
 		// save the start region
 		if (startRegion != null)
 			worldConfig.set("match.start-region", startRegion.toCoords());
@@ -507,14 +507,14 @@ public class AutoRefMatch
 	}
 
 	public void messageReferees(String ...parts)
-	{ for (Player ref : getReferees(false)) messageReferee(ref, parts); }	
-	
+	{ for (Player ref : getReferees(false)) messageReferee(ref, parts); }
+
 	public void messageReferee(Player ref, String ...parts)
 	{
 		try
 		{
 			String msg = StringUtils.join(parts, RefereeChannelListener.DELIMITER);
-			ref.sendPluginMessage(AutoReferee.getInstance(), AutoReferee.REFEREE_PLUGIN_CHANNEL, 
+			ref.sendPluginMessage(AutoReferee.getInstance(), AutoReferee.REFEREE_PLUGIN_CHANNEL,
 				msg.getBytes(AutoReferee.PLUGIN_CHANNEL_ENC));
 		}
 		catch (UnsupportedEncodingException e)
@@ -528,7 +528,7 @@ public class AutoRefMatch
 
 		if (getCurrentState().inProgress())
 			messageReferee(ref, "match", getWorld().getName(), "time", getTimestamp(","));
-		
+
 		for (AutoRefTeam team : getTeams())
 		{
 			messageReferee(ref, "team", team.getRawName(), "init");
@@ -537,7 +537,7 @@ public class AutoRefMatch
 			for (BlockData bd : team.getObjectives())
 			{
 				messageReferee(ref, "team", team.getRawName(), "obj", "+" + bd.toString());
-				messageReferee(ref, "team", team.getRawName(), "state", bd.toString(), 
+				messageReferee(ref, "team", team.getRawName(), "state", bd.toString(),
 					team.getObjectiveStatus(bd).toString());
 			}
 
@@ -592,53 +592,53 @@ public class AutoRefMatch
 		// make sure the folder exists first
 		File archiveFolder = new File(AutoRefMap.getMapLibrary(), this.getVersionString());
 		if (!archiveFolder.exists()) archiveFolder.mkdir();
-		
+
 		// (1) copy the configuration file:
 		FileUtils.copyFileToDirectory(
 			new File(getWorld().getWorldFolder(), AutoReferee.CFG_FILENAME), archiveFolder);
-		
+
 		// (2) copy the level.dat:
 		FileUtils.copyFileToDirectory(
 			new File(getWorld().getWorldFolder(), "level.dat"), archiveFolder);
-		
+
 		// (3) copy the region folder (only the .mca files):
-		FileUtils.copyDirectory(new File(getWorld().getWorldFolder(), "region"), 
+		FileUtils.copyDirectory(new File(getWorld().getWorldFolder(), "region"),
 			new File(archiveFolder, "region"), FileFilterUtils.suffixFileFilter(".mca"));
-		
+
 		// (4) make an empty data folder:
 		new File(archiveFolder, "data").mkdir();
 		return archiveFolder;
 	}
-	
+
 	private static void addToZip(ZipOutputStream zip, File f, File base) throws IOException
 	{
 		zip.putNextEntry(new ZipEntry(base.toURI().relativize(f.toURI()).getPath()));
 		if (f.isDirectory()) for (File c : f.listFiles()) addToZip(zip, c, base);
 		else IOUtils.copy(new FileInputStream(f), zip);
 	}
-	
+
 	public File distributeMap() throws IOException
 	{
 		File archiveFolder = this.archiveMapData();
 		File outZipfile = new File(AutoRefMap.getMapLibrary(), this.getVersionString() + ".zip");
-		
-		ZipOutputStream zip = new ZipOutputStream(new 
+
+		ZipOutputStream zip = new ZipOutputStream(new
 			BufferedOutputStream(new FileOutputStream(outZipfile)));
 		zip.setMethod(ZipOutputStream.DEFLATED);
 		addToZip(zip, archiveFolder, AutoRefMap.getMapLibrary());
-		
+
 		zip.close();
 		return archiveFolder;
 	}
-	
+
 	public class WorldFolderDeleter implements Runnable
 	{
 		private File worldFolder;
 		public int task = -1;
-		
+
 		WorldFolderDeleter(World w)
 		{ this.worldFolder = w.getWorldFolder(); }
-		
+
 		@Override
 		public void run()
 		{
@@ -647,7 +647,7 @@ public class AutoRefMatch
 			{
 				// if we fail, we loop back around again on the next try...
 				FileUtils.deleteDirectory(worldFolder);
-				
+
 				// otherwise, stop the repeating task
 				autoref.getLogger().info(worldFolder.getName() + " deleted!");
 				autoref.getServer().getScheduler().cancelTask(task);
@@ -660,10 +660,10 @@ public class AutoRefMatch
 	public void destroy()
 	{
 		AutoReferee autoref = AutoReferee.getInstance();
-		
+
 		// first, handle all the players
 		for (Player p : world.getPlayers()) autoref.playerDone(p);
-					
+
 		// if everyone has been moved out of this world, clean it up
 		if (world.getPlayers().size() == 0)
 		{
@@ -673,7 +673,7 @@ public class AutoRefMatch
 				// only change the state if we are sure we are going to unload
 				this.setCurrentState(MatchStatus.NONE);
 				autoref.clearMatch(this);
-				
+
 				autoref.getServer().unloadWorld(world, false);
 				if (!autoref.getConfig().getBoolean("save-worlds", false))
 				{
@@ -684,7 +684,7 @@ public class AutoRefMatch
 			}
 		}
 	}
-	
+
 	public boolean canCraft(BlockData bd)
 	{
 		for (BlockData nc : prohibitCraft)
@@ -703,16 +703,16 @@ public class AutoRefMatch
 		// minimum size of any one team, and an array to hold valid teams
 		int minsize = Integer.MAX_VALUE;
 		List<AutoRefTeam> vteams = Lists.newArrayList();
-		
+
 		// determine the size of the smallest team
 		for (AutoRefTeam team : getTeams())
 			if (team.getPlayers().size() < minsize)
 				minsize = team.getPlayers().size();
-	
+
 		// make a list of all teams with this size
 		for (AutoRefTeam team : getTeams())
 			if (team.getPlayers().size() == minsize) vteams.add(team);
-	
+
 		// return a random element from this list
 		return vteams.get(new Random().nextInt(vteams.size()));
 	}
@@ -722,26 +722,26 @@ public class AutoRefMatch
 		public Location loc = null;
 		public BlockState blockState = null;
 		public boolean state = true;
-		
+
 		public StartMechanism(Block block, boolean state)
 		{
 			this.state = state;
-			this.loc = block.getLocation(); 
+			this.loc = block.getLocation();
 			this.blockState = block.getState();
 		}
-		
+
 		public StartMechanism(Block block)
 		{ this(block, true); }
-		
+
 		@Override public int hashCode()
 		{ return loc.hashCode() ^ blockState.hashCode(); }
-		
+
 		@Override public boolean equals(Object o)
 		{ return (o instanceof StartMechanism) && hashCode() == o.hashCode(); }
-		
+
 		public String serialize()
 		{ return Vector3.fromLocation(loc).toCoords() + ":" + Boolean.toString(state); }
-		
+
 		public static StartMechanism unserialize(World w, String sm)
 		{
 			String[] p = sm.split(":");
@@ -751,9 +751,9 @@ public class AutoRefMatch
 
 			return new StartMechanism(block, state);
 		}
-		
+
 		@Override public String toString()
-		{ return blockState.getType().name() + "(" + Vector3.fromLocation(loc).toCoords() + 
+		{ return blockState.getType().name() + "(" + Vector3.fromLocation(loc).toCoords() +
 			"):" + Boolean.toString(state); }
 	}
 
@@ -762,7 +762,7 @@ public class AutoRefMatch
 		if (block.getType() != Material.LEVER) state = true;
 		StartMechanism sm = new StartMechanism(block, state);
 		startMechanisms.add(sm);
-		
+
 		AutoReferee.getInstance().getLogger().info(
 			sm.toString() + " is a start mechanism.");
 		return sm;
@@ -775,38 +775,38 @@ public class AutoRefMatch
 			if (loc.equals(sm.loc)) return true;
 		return false;
 	}
-	
+
 	// unserialized match initialization parameters
 	static class MatchParams
 	{
 		public static class TeamInfo
 		{
 			private String name;
-			
+
 			public String getName()
 			{ return name; }
-			
+
 			private List<String> players;
-	
+
 			public List<String> getPlayers()
 			{ return Collections.unmodifiableList(players); }
 		}
-		
+
 		// info about all the teams
 		private List<TeamInfo> teams;
-		
+
 		public List<TeamInfo> getTeams()
 		{ return Collections.unmodifiableList(teams); }
-	
+
 		// match tag for reporting
 		private String tag;
-		
+
 		public String getTag()
 		{ return tag; }
-		
+
 		// map name
 		private String map;
-		
+
 		public String getMap()
 		{ return map; }
 	}
@@ -816,13 +816,13 @@ public class AutoRefMatch
 		// set up the world time one last time
 		world.setTime(startTime);
 		startTicks = world.getFullTime();
-		
+
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_START,
 			"Match began.", null, null, null));
 
 		// send referees the start event
 		messageReferees("match", getWorld().getName(), "start");
-		
+
 		// remove all mobs, animals, and items (again)
 		this.clearEntities();
 
@@ -837,28 +837,28 @@ public class AutoRefMatch
 					// flip the lever to the correct state
 					((Lever) mdata).setPowered(sm.state);
 					break;
-					
+
 				case STONE_BUTTON:
 					// press (or depress) the button
 					((Button) mdata).setPowered(sm.state);
 					break;
-					
+
 				case WOOD_PLATE:
 				case STONE_PLATE:
 					// press (or depress) the pressure plate
 					((PressurePlate) mdata).setData((byte)(sm.state ? 0x1 : 0x0));
 					break;
 			}
-			
+
 			// save the block state and fire an update
 			sm.blockState.setData(mdata);
 			sm.blockState.update(true);
 		}
-		
+
 		// set teams as started
 		for (AutoRefTeam team : getTeams())
 			team.startMatch();
-			
+
 		// set the current state to playing
 		setCurrentState(MatchStatus.PLAYING);
 
@@ -870,7 +870,7 @@ public class AutoRefMatch
 			plugin, clockTask, 60 * 20L, 60 * 20L);
 	}
 
-	private static final Set<Long> announceMinutes = 
+	private static final Set<Long> announceMinutes =
 		Sets.newHashSet(60L, 30L, 10L, 5L, 4L, 3L, 2L, 1L);
 
 	// handle to the clock task
@@ -903,7 +903,7 @@ public class AutoRefMatch
 				match.matchComplete();
 			}
 			else if (AutoRefMatch.announceMinutes.contains(minutesRemaining))
-				match.broadcast(">>> " + ChatColor.GREEN + 
+				match.broadcast(">>> " + ChatColor.GREEN +
 					"Match ends in " + minutesRemaining + "m");
 		}
 	}
@@ -915,18 +915,18 @@ public class AutoRefMatch
 
 		// streamers are ONLY able to see streamers and players
 		if (p.hasPermission("autoreferee.streamer")) return 1;
-		
+
 		// referees have the highest vanish level (see everything)
 		if (p.hasPermission("autoreferee.referee")) return 200;
-		
+
 		// spectators can only be seen by referees
 		return 100;
 	}
-	
+
 	// either vanish or show the player `subj` from perspective of `view`
 	private void setupVanish(Player view, Player subj)
 	{
-		if (getVanishLevel(view) >= getVanishLevel(subj) || 
+		if (getVanishLevel(view) >= getVanishLevel(subj) ||
 			!this.getCurrentState().inProgress()) view.showPlayer(subj);
 		else view.hidePlayer(subj);
 	}
@@ -935,7 +935,7 @@ public class AutoRefMatch
 	{
 		if (getCurrentState().isBeforeMatch()) setSpectatorMode(focus, isReferee(focus));
 		else setSpectatorMode(focus, !isPlayer(focus) || getCurrentState().isAfterMatch());
-		
+
 		for ( Player pl : getWorld().getPlayers() )
 		{
 			// setup vanish in both directions
@@ -951,17 +951,17 @@ public class AutoRefMatch
 	{
 		p.setGameMode(gm);
 		AutoReferee.setAffectsSpawning(p, !b);
-		
+
 		boolean noEntityCollide = b && getCurrentState().inProgress();
 		AutoReferee.setCollidesWithEntities(p, !noEntityCollide);
 	}
 
 	public void setupSpectators()
 	{ for ( Player pl : getWorld().getPlayers() ) setupSpectators(pl); }
-	
+
 	public void clearEntities()
 	{
-		for (Entity e : world.getEntitiesByClasses(Monster.class, 
+		for (Entity e : world.getEntitiesByClasses(Monster.class,
 			Animals.class, Item.class, ExperienceOrb.class, Arrow.class))
 			if (!protectedEntities.contains(e.getUniqueId())) e.remove();
 	}
@@ -980,20 +980,20 @@ public class AutoRefMatch
 	static class CountdownTask implements Runnable
 	{
 		public static final ChatColor COLOR = ChatColor.GREEN;
-		
+
 		public int task = -1;
 		private int remainingSeconds = 3;
-		
+
 		private AutoRefMatch match = null;
 		private boolean start = false;
-		
+
 		public CountdownTask(AutoRefMatch m, int time, boolean start)
 		{
 			match = m;
 			remainingSeconds = time;
 			this.start = start;
 		}
-		
+
 		public void run()
 		{
 			if (remainingSeconds > 3)
@@ -1007,13 +1007,13 @@ public class AutoRefMatch
 				// setup world to go!
 				if (this.start) match.start();
 				match.broadcast(">>> " + CountdownTask.COLOR + "GO!");
-				
+
 				// cancel the task
 				match.cancelCountdown();
 			}
-			
+
 			// report number of seconds remaining
-			else match.broadcast(">>> " + CountdownTask.COLOR + 
+			else match.broadcast(">>> " + CountdownTask.COLOR +
 				Integer.toString(remainingSeconds) + "...");
 
 			// count down
@@ -1032,19 +1032,19 @@ public class AutoRefMatch
 
 		// set the current time to the start time
 		world.setTime(this.startTime);
-		
+
 		// remove all mobs, animals, and items
 		this.clearEntities();
-		
+
 		// turn off weather forever (or for a long time)
 		world.setStorm(false);
 		world.setWeatherDuration(Integer.MAX_VALUE);
-		
+
 		// prepare all players for the match
 		for (AutoRefPlayer apl : getPlayers()) apl.heal();
 
 		int readyDelay = this.getReadyDelay();
-		
+
 		// announce the match starting in X seconds
 		this.broadcast(CountdownTask.COLOR + "Match will begin in "
 			+ ChatColor.WHITE + Integer.toString(readyDelay) + CountdownTask.COLOR + " seconds.");
@@ -1058,22 +1058,22 @@ public class AutoRefMatch
 	{
 		// get a copy of the bukkit scheduling daemon
 		BukkitScheduler scheduler = AutoReferee.getInstance().getServer().getScheduler();
-		
+
 		// cancel any previous match-start task
 		if (this.matchStarter != null && this.matchStarter.task != -1)
 			scheduler.cancelTask(this.matchStarter.task);
-		
+
 		// schedule the task to announce and prepare the match
 		this.matchStarter = new CountdownTask(this, readyDelay, startMatch);
 		this.matchStarter.task = scheduler.scheduleSyncRepeatingTask(
 				AutoReferee.getInstance(), this.matchStarter, 0L, 20L);
 	}
 
-	public void checkTeamsReady() 
+	public void checkTeamsReady()
 	{
 		// this function is only useful if called prior to the match
 		if (!getCurrentState().isBeforeMatch()) return;
-		
+
 		// if there are no players on the server
 		if (getPlayers().size() == 0)
 		{
@@ -1081,35 +1081,35 @@ public class AutoRefMatch
 			for ( AutoRefTeam t : teams ) t.setReady(false);
 			setCurrentState(MatchStatus.WAITING); return;
 		}
-		
+
 		// if we aren't in online mode, assume we are always ready
 		if (!AutoReferee.getInstance().isAutoMode())
 		{ setCurrentState(MatchStatus.READY); return; }
-		
+
 		// check if all the players are here
 		boolean ready = true;
 		for ( OfflinePlayer opl : getExpectedPlayers() )
 			ready &= opl.isOnline() && isPlayer(opl.getPlayer()) &&
 				getPlayer(opl.getPlayer()).isReady();
-		
+
 		// set status based on whether the players are online
 		setCurrentState(ready ? MatchStatus.READY : MatchStatus.WAITING);
 	}
-	
+
 	public void checkTeamsStart()
 	{
 		boolean teamsReady = true;
 		for ( AutoRefTeam t : teams )
 			teamsReady &= t.isReady() || t.isEmptyTeam();
-		
+
 		boolean ready = getReferees().size() == 0 ? teamsReady : isRefereeReady();
 		if (teamsReady && !ready) for (Player p : getReferees())
 			p.sendMessage(ChatColor.GRAY + "Teams are ready. Type /ready to begin the match.");
-		
+
 		// everyone is ready, let's go!
 		if (ready) this.prepareMatch();
 	}
-	
+
 	public Location blockInRange(BlockData bd, Location loc, int r)
 	{
 		Block b = getWorld().getBlockAt(loc);
@@ -1120,31 +1120,31 @@ public class AutoRefMatch
 			Block rel = b.getRelative(x, y, z);
 			if (bd.matches(rel)) return rel.getLocation();
 		}
-					
+
 		return null;
 	}
 
 	private Location blockInRange(WinCondition wc)
 	{ return blockInRange(wc.getBlockData(), wc.getLocation(), wc.getInexactRange()); }
-	
+
 	public void checkWinConditions()
 	{
 		Plugin plugin = AutoReferee.getInstance();
 		plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
 			new Runnable(){ public void run(){ delayedCheckWinConditions(); } });
 	}
-	
+
 	public void delayedCheckWinConditions()
 	{
 		// this code is only called in BlockPlaceEvent and BlockBreakEvent when
 		// we have confirmed that the state is PLAYING, so we know we are definitely
 		// in a match if this function is being called
-		
+
 		if (getCurrentState().inProgress()) for (AutoRefTeam team : this.teams)
 		{
 			// if there are no win conditions set, skip this team
 			if (team.winConditions.size() == 0) continue;
-			
+
 			// check all win condition blocks (AND together)
 			boolean win = true;
 			for (WinCondition wc : team.winConditions)
@@ -1152,11 +1152,11 @@ public class AutoRefMatch
 				Location placedLoc = blockInRange(wc);
 				win &= (placedLoc != null);
 			}
-			
+
 			// force an update of objective status
 			team.updateObjectives();
-		
-			// if the team won, mark the match as completed	
+
+			// if the team won, mark the match as completed
 			if (win) matchComplete(team);
 		}
 	}
@@ -1206,7 +1206,7 @@ public class AutoRefMatch
 		// announce the victory and set the match to completed
 		if (t != null) this.broadcast(t.getName() + " Wins!");
 		else this.broadcast("Match terminated!");
-		
+
 		// remove all mobs, animals, and items
 		this.clearEntities();
 
@@ -1216,31 +1216,31 @@ public class AutoRefMatch
 			if (pl == null) continue;
 			pl.getInventory().clear();
 		}
-		
+
 		// update the client clock to ensure it syncs with match summary
 		messageReferees("match", getWorld().getName(), "time", getTimestamp(","));
-		
+
 		// send referees the end event
 		if (t != null) messageReferees("match", getWorld().getName(), "end", t.getRawName());
 		else messageReferees("match", getWorld().getName(), "end");
-		
+
 		String winner = t == null ? "" : (" " + t.getRawName() + " wins!");
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_END,
 			"Match ended." + winner, null, null, null));
 		setCurrentState(MatchStatus.COMPLETED);
-		
+
 		setWinningTeam(t);
 		logPlayerStats();
-		
+
 		cancelClock();
-		
+
 		AutoReferee plugin = AutoReferee.getInstance();
 		int termDelay = plugin.getConfig().getInt(
 			"delay-seconds.completed", COMPLETED_SECONDS);
-		
+
 		plugin.getServer().getScheduler().scheduleSyncDelayedTask(
 			plugin, new MatchEndTask(), termDelay * 20L);
-		
+
 		// set the time to day
 		getWorld().setTime(0L);
 	}
@@ -1248,19 +1248,19 @@ public class AutoRefMatch
 	public AutoRefTeam teamNameLookup(String name)
 	{
 		AutoRefTeam mteam = null;
-		
+
 		// if there is no match on that world, forget it
 		// is this team name a word?
 		for (AutoRefTeam t : teams) if (t.matches(name))
 		{ if (mteam == null) mteam = t; else return null; }
-	
+
 		// return the matched team (or null if no match)
 		return mteam;
 	}
-	
+
 	// teamless expected players
 	Set<OfflinePlayer> expectedPlayers = Sets.newHashSet();
-	
+
 	// get all expected players
 	public Set<OfflinePlayer> getExpectedPlayers()
 	{
@@ -1272,7 +1272,7 @@ public class AutoRefMatch
 
 	public void addExpectedPlayer(OfflinePlayer opl)
 	{ expectedPlayers.add(opl); }
-	
+
 	// returns the team for the expected player
 	public AutoRefTeam expectedTeam(OfflinePlayer opl)
 	{
@@ -1280,11 +1280,11 @@ public class AutoRefMatch
 			if (team.getExpectedPlayers().contains(opl)) return team;
 		return null;
 	}
-	
+
 	// returns if the player is meant to join this match
 	public boolean isPlayerExpected(OfflinePlayer opl)
 	{ return getExpectedPlayers().contains(opl); }
-	
+
 	public void removeExpectedPlayer(OfflinePlayer opl)
 	{
 		for (AutoRefTeam t : teams)
@@ -1296,31 +1296,31 @@ public class AutoRefMatch
 	{
 		// if already here, skip this
 		if (this.isPlayer(pl)) return;
-		
+
 		// if this player needs to be placed on a team, go for it
 		AutoRefTeam team = this.expectedTeam(pl);
 		if (team != null) this.joinTeam(pl, team, false);
-		
+
 		// otherwise, get them into the world
 		else if (pl.getWorld() != this.getWorld())
 			pl.teleport(this.getPlayerSpawn(pl));
-		
+
 		// remove name from all lists
 		this.removeExpectedPlayer(pl);
 	}
-	
+
 	public boolean joinTeam(Player pl, AutoRefTeam t, boolean force)
 	{
 		AutoRefTeam pteam = getPlayerTeam(pl);
 		if (t == pteam) return true;
-		
+
 		if (pteam != null) pteam.leave(pl, force);
 		t.join(pl, force); return true;
 	}
-	
+
 	public void leaveTeam(Player pl, boolean force)
 	{ for (AutoRefTeam team : teams) team.leave(pl, force); }
-	
+
 	public AutoRefPlayer getPlayer(String name)
 	{ return getPlayer(AutoReferee.getInstance().getServer().getPlayer(name)); }
 
@@ -1333,47 +1333,47 @@ public class AutoRefMatch
 		}
 		return null;
 	}
-	
+
 	public boolean isPlayer(Player pl)
 	{ return getPlayer(pl) != null; }
-	
+
 	public AutoRefPlayer getNearestPlayer(Location loc)
 	{
 		AutoRefPlayer apl = null;
 		double distance = Double.POSITIVE_INFINITY;
-		
+
 		for (AutoRefPlayer a : getPlayers())
 		{
 			Player pl = a.getPlayer();
 			if (pl == null) continue;
-			
+
 			double d = loc.distanceSquared(pl.getLocation());
 			if (d < distance) { apl = a; distance = d; }
 		}
-		
+
 		return apl;
 	}
-	
+
 	public AutoRefTeam getPlayerTeam(Player pl)
 	{
 		for (AutoRefTeam team : teams)
 			if (team.getPlayer(pl) != null) return team;
 		return null;
 	}
-	
+
 	public String getPlayerName(Player pl)
 	{
 		AutoRefPlayer apl = getPlayer(pl);
 		return (apl == null) ? pl.getName() : apl.getName();
 	}
-	
+
 	public Location getPlayerSpawn(Player pl)
 	{
 		AutoRefTeam team = getPlayerTeam(pl);
 		if (team != null) return team.getSpawnLocation();
 		return world.getSpawnLocation();
 	}
-	
+
 	public boolean isSafeZone(Location loc)
 	{
 		if (this.inStartRegion(loc)) return true;
@@ -1386,12 +1386,12 @@ public class AutoRefMatch
 	{
 		private File localStorage = null;
 		private String webDirectory = null;
-		
+
 		public boolean serveLocally()
 		{ return webDirectory != null; }
 
 		public MatchReportSaver()
-		{ 
+		{
 			this.localStorage = new File(AutoReferee.getInstance().getConfig()
 				.getString("local-storage.match-summary.directory", null));
 			this.webDirectory = AutoReferee.getInstance().getConfig()
@@ -1405,7 +1405,7 @@ public class AutoRefMatch
 
 			String localFileID = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss").format(new Date()) + ".html";
 			File localReport = new File(this.localStorage, localFileID);
-			
+
 			try { FileUtils.writeStringToFile(localReport, report); }
 			catch (IOException e) { e.printStackTrace(); }
 
@@ -1421,13 +1421,13 @@ public class AutoRefMatch
 		Plugin plugin = AutoReferee.getInstance();
 		plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, new MatchReportSaver());
 	}
-	
+
 	private String uploadReport(String report)
 	{
 		try
 		{
 			// submit our request to pastehtml, get back a link to the report
-			return QueryServer.syncQuery("http://pastehtml.com/upload/create", 
+			return QueryServer.syncQuery("http://pastehtml.com/upload/create",
 				"input_type=html&result=address", "txt=" + URLEncoder.encode(report, "UTF-8"));
 		}
 		catch (UnsupportedEncodingException e) {  }
@@ -1453,7 +1453,7 @@ public class AutoRefMatch
 
 		Set<BlockData> rem = Sets.newHashSet(carrying);
 		rem.removeAll(newCarrying);
-		
+
 		Player player = apl.getPlayer();
 		for (BlockData bd : add) messageReferees("player", player.getName(), "obj", "+" + bd.toString());
 		for (BlockData bd : rem) messageReferees("player", player.getName(), "obj", "-" + bd.toString());
@@ -1463,43 +1463,43 @@ public class AutoRefMatch
 			int currentArmor, int newHealth, int newArmor)
 	{
 		Player player = apl.getPlayer();
-		
-		if (currentHealth != newHealth) messageReferees("player", player.getName(), 
+
+		if (currentHealth != newHealth) messageReferees("player", player.getName(),
 			"hp", Integer.toString(newHealth));
-		
-		if (currentArmor != newArmor) messageReferees("player", player.getName(), 
+
+		if (currentArmor != newArmor) messageReferees("player", player.getName(),
 			"armor", Integer.toString(newArmor));
 	}
-	
+
 	public static class TranscriptEvent
 	{
 		public enum EventVisibility
 		{ NONE, REFEREES, ALL }
-		
+
 		public enum EventType
 		{
 			// generic match start and end events
 			MATCH_START("match-start", false, EventVisibility.NONE),
 			MATCH_END("match-end", false, EventVisibility.NONE),
-			
+
 			// player messages (except kill streak) should be broadcast to players
 			PLAYER_DEATH("player-death", true, EventVisibility.ALL),
 			PLAYER_STREAK("player-killstreak", false, EventVisibility.NONE, ChatColor.DARK_GRAY),
 			PLAYER_DOMINATE("player-dominate", true, EventVisibility.ALL, ChatColor.DARK_GRAY),
 			PLAYER_REVENGE("player-revenge", true, EventVisibility.ALL, ChatColor.DARK_GRAY),
-			
+
 			// objective events should not be broadcast to players
 			OBJECTIVE_FOUND("objective-found", true, EventVisibility.REFEREES),
 			OBJECTIVE_PLACED("objective-place", true, EventVisibility.REFEREES);
-			
+
 			private String eventClass;
 			private EventVisibility visibility;
 			private ChatColor color;
 			private boolean supportsFiltering;
-			
+
 			private EventType(String eventClass, boolean hasFilter, EventVisibility visibility)
 			{ this(eventClass, hasFilter, visibility, null); }
-			
+
 			private EventType(String eventClass, boolean hasFilter,
 				EventVisibility visibility, ChatColor color)
 			{
@@ -1508,50 +1508,50 @@ public class AutoRefMatch
 				this.color = color;
 				this.supportsFiltering = hasFilter;
 			}
-			
+
 			public String getEventClass()
 			{ return eventClass; }
-			
+
 			public EventVisibility getVisibility()
 			{ return visibility; }
-			
+
 			public ChatColor getColor()
 			{ return color; }
 
 			public boolean hasFilter()
 			{ return supportsFiltering; }
 		}
-		
+
 		public Object icon1;
 		public Object icon2;
-		
+
 		private EventType type;
 
 		public EventType getType()
 		{ return type; }
-		
+
 		private String message;
-		
+
 		public String getMessage()
 		{ return message; }
-		
+
 		public Location location;
 		public long timestamp;
-		
-		public TranscriptEvent(AutoRefMatch match, EventType type, String message, 
+
+		public TranscriptEvent(AutoRefMatch match, EventType type, String message,
 			Location loc, Object icon1, Object icon2)
 		{
 			this.type = type;
 			this.message = message;
-			
+
 			// if no location is given, use the spawn location
 			this.location = (loc != null) ? loc :
 				match.getWorld().getSpawnLocation();
-			
+
 			// these represent left- and right-side icons for a transcript
 			this.icon1 = icon1;
 			this.icon2 = icon2;
-			
+
 			this.timestamp = match.getMatchTime();
 		}
 
@@ -1560,7 +1560,7 @@ public class AutoRefMatch
 			return String.format("%02d:%02d:%02d",
 				timestamp/3600L, (timestamp/60L)%60L, timestamp%60L);
 		}
-		
+
 		@Override
 		public String toString()
 		{ return String.format("[%s] %s", this.getTimestamp(), this.getMessage()); }
@@ -1570,23 +1570,23 @@ public class AutoRefMatch
 	{
 		AutoReferee plugin = AutoReferee.getInstance();
 		transcript.add(event);
-		
+
 		Collection<Player> recipients = null;
 		switch (event.getType().getVisibility())
 		{
 			case REFEREES: recipients = getReferees(false); break;
 			case ALL: recipients = getWorld().getPlayers(); break;
 		}
-		
+
 		ChatColor clr = event.getType().getColor();
 		String message = event.getMessage();
-		
+
 		if (clr == null) message = colorMessage(message);
 		else message = (clr + message + ChatColor.RESET);
-		
+
 		if (recipients != null) for (Player player : recipients)
 			player.sendMessage(message);
-		
+
 		if (plugin.consoleLog) plugin.getLogger().info(event.toString());
 	}
 
@@ -1606,25 +1606,25 @@ public class AutoRefMatch
 
 	public void sendMatchInfo(Player player)
 	{
-		player.sendMessage(ChatColor.RESET + "Map: " + ChatColor.GRAY + getMapName() + 
+		player.sendMessage(ChatColor.RESET + "Map: " + ChatColor.GRAY + getMapName() +
 			" v" + getVersion() + ChatColor.ITALIC + " by " + getMapAuthors());
-		
+
 		AutoRefPlayer apl = getPlayer(player);
 		String tmpflag = tmp ? "*" : "";
-		
+
 		if (apl != null) player.sendMessage("You are on team: " + apl.getTeam().getName());
 		else if (isReferee(player)) player.sendMessage(ChatColor.GRAY + "You are a referee! " + tmpflag);
 		else player.sendMessage("You are not on a team! Type " + ChatColor.GRAY + "/jointeam");
-		
+
 		for (AutoRefTeam team : getSortedTeams())
-			player.sendMessage(String.format("%s (%d) - %s", 
+			player.sendMessage(String.format("%s (%d) - %s",
 				team.getName(), team.getPlayers().size(), team.getPlayerList()));
-		
+
 		long timestamp = (getWorld().getFullTime() - getStartTicks()) / 20L;
 		player.sendMessage("Match status is currently " + ChatColor.GRAY + getCurrentState().name());
 		player.sendMessage("Map difficulty is set to: " + ChatColor.GRAY + getWorld().getDifficulty().name());
 		if (getCurrentState().inProgress())
-			player.sendMessage(String.format(ChatColor.GRAY + "The current match time is: %02d:%02d:%02d", 
+			player.sendMessage(String.format(ChatColor.GRAY + "The current match time is: %02d:%02d:%02d",
 				timestamp/3600L, (timestamp/60L)%60L, timestamp%60L));
 	}
 }

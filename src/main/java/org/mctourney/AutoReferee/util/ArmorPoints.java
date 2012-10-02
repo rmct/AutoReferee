@@ -40,15 +40,15 @@ public abstract class ArmorPoints
 		case DIAMOND_CHESTPLATE: return 8;
 		case DIAMOND_LEGGINGS: return 6;
 		case DIAMOND_BOOTS: return 3;
-		
+
 		// non-armor (or not listed above)
 		default: return 0;
 		}
 	}
-	
+
 	public static int fromItemStack(ItemStack item)
 	{ return fromMaterial(item.getType()); }
-	
+
 	public static int fromPlayerInventory(PlayerInventory inv)
 	{
 		int armorPoints = 0;

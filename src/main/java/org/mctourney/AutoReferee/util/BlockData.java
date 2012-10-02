@@ -17,7 +17,7 @@ public class BlockData
 	// placeholder for a few common block data values
 	public static final BlockData BEDROCK = new BlockData(Material.BEDROCK);
 	public static final BlockData AIR     = new BlockData(Material.AIR);
-	
+
 	private Material mat;
 
 	public Material getMaterial()
@@ -25,7 +25,7 @@ public class BlockData
 
 	public void setMaterial(Material mat)
 	{ this.mat = mat; }
-	
+
 	private byte data;
 
 	public byte getData()
@@ -47,7 +47,7 @@ public class BlockData
 	{
 		// if the object is a mismatched type, its not equal
 		if (o == null || !(o instanceof BlockData)) return false;
-		
+
 		// otherwise, check that the data is all equivalent
 		BlockData ob = (BlockData) o;
 		return ob.getMaterial().equals(getMaterial()) && this.dataMatches(ob);
@@ -69,10 +69,10 @@ public class BlockData
 		String s = Integer.toString(getMaterial().getId());
 		return getData() == -1 ? s : (s + "," + Integer.toString(getData()));
 	}
-	
+
 	public String getRawName()
 	{ return ChatColor.stripColor(getName()); }
-	
+
 	public String getName()
 	{
 		String bname = getMaterial().name().replaceAll("_+", " ");
@@ -82,39 +82,39 @@ public class BlockData
 			ChatColor chatColor = ColorConverter.dyeToChat(color);
 			String colorName = color.name().replaceAll("_+", " ");
 			bname = chatColor + colorName + " " + bname + ChatColor.RESET;
-			
+
 		}
 		return bname;
 	}
-	
+
 	public static BlockData fromString(String s)
 	{
 		// format: mat[,data]
 		String[] units = s.split(",", 2);
-		
-		try 
+
+		try
 		{
 			// parse out the material (and potentially meta-data)
 			Material mat = Material.getMaterial(Integer.parseInt(units[0]));
 			byte data = units.length < 2 ? -1 : Byte.parseByte(units[1]);
 			return new BlockData(mat, data);
 		}
-		
+
 		// if there is a problem with parsing a material, assume the worst
 		catch (NumberFormatException e) { return null; }
 	}
-	
+
 	// generate block data object from a CraftBlock
 	public static BlockData fromBlock(Block b)
 	{ return new BlockData(b.getType(), b.getData()); }
-	
+
 	// generate block data object from an ItemStack
 	public static BlockData fromItemStack(ItemStack item)
 	{
 		byte b = item.getData().getData();
 		return new BlockData(item.getType(), b);
 	}
-	
+
 	// get primary BlockData type from Inventory
 	@SuppressWarnings("unchecked")
 	public static BlockData fromInventory(Inventory inv)
@@ -125,11 +125,11 @@ public class BlockData
 			BlockData bd = BlockData.fromItemStack(item);
 			count.put(bd, item.getAmount() + count.get(bd));
 		}
-		
+
 		Map.Entry<BlockData, Integer> best = null;
 		for (Map.Entry<BlockData, Integer> entry : count.entrySet())
 			if (best == null || entry.getValue() > best.getValue()) best = entry;
-		
+
 		return best == null ? null : best.getKey();
 	}
 }
