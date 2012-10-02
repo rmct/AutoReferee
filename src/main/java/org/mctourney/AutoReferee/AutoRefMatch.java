@@ -1479,31 +1479,34 @@ public class AutoRefMatch
 		public enum EventType
 		{
 			// generic match start and end events
-			MATCH_START("match-start", EventVisibility.NONE),
-			MATCH_END("match-end", EventVisibility.NONE),
+			MATCH_START("match-start", false, EventVisibility.NONE),
+			MATCH_END("match-end", false, EventVisibility.NONE),
 			
 			// player messages (except kill streak) should be broadcast to players
-			PLAYER_DEATH("player-death", EventVisibility.ALL),
-			PLAYER_STREAK("player-killstreak", EventVisibility.NONE, ChatColor.DARK_GRAY),
-			PLAYER_DOMINATE("player-dominate", EventVisibility.ALL, ChatColor.DARK_GRAY),
-			PLAYER_REVENGE("player-revenge", EventVisibility.ALL, ChatColor.DARK_GRAY),
+			PLAYER_DEATH("player-death", true, EventVisibility.ALL),
+			PLAYER_STREAK("player-killstreak", false, EventVisibility.NONE, ChatColor.DARK_GRAY),
+			PLAYER_DOMINATE("player-dominate", true, EventVisibility.ALL, ChatColor.DARK_GRAY),
+			PLAYER_REVENGE("player-revenge", true, EventVisibility.ALL, ChatColor.DARK_GRAY),
 			
 			// objective events should not be broadcast to players
-			OBJECTIVE_FOUND("objective-found", EventVisibility.REFEREES),
-			OBJECTIVE_PLACED("objective-place", EventVisibility.REFEREES);
+			OBJECTIVE_FOUND("objective-found", true, EventVisibility.REFEREES),
+			OBJECTIVE_PLACED("objective-place", true, EventVisibility.REFEREES);
 			
 			private String eventClass;
 			private EventVisibility visibility;
 			private ChatColor color;
+			private boolean supportsFiltering;
 			
-			private EventType(String eventClass, EventVisibility visibility)
-			{ this(eventClass, visibility, null); }
+			private EventType(String eventClass, boolean hasFilter, EventVisibility visibility)
+			{ this(eventClass, hasFilter, visibility, null); }
 			
-			private EventType(String eventClass, EventVisibility visibility, ChatColor color)
+			private EventType(String eventClass, boolean hasFilter,
+				EventVisibility visibility, ChatColor color)
 			{
 				this.eventClass = eventClass;
 				this.visibility = visibility;
 				this.color = color;
+				this.supportsFiltering = hasFilter;
 			}
 			
 			public String getEventClass()
@@ -1514,6 +1517,9 @@ public class AutoRefMatch
 			
 			public ChatColor getColor()
 			{ return color; }
+
+			public boolean hasFilter()
+			{ return supportsFiltering; }
 		}
 		
 		public Object icon1;
