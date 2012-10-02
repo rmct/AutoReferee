@@ -16,7 +16,8 @@ delay-seconds:
 
 # all paths relative to the server-root
 local-storage:
-  match-summary: plugins/AutoReferee/summary
+  match-summary: 
+    directory: plugins/AutoReferee/summary
   local-database: plugins/AutoReferee/autoref.sdb
 
 config-mode:

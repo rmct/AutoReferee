@@ -78,8 +78,8 @@ public class AutoRefMatch
 	{
 		// determine the location of the match-summary directory
 		FileConfiguration config = AutoReferee.getInstance().getConfig();
-		if (config.isString("local-storage.match-summary"))
-			matchSummaryDirectory = new File(config.getString("local-storage.match-summary"));
+		if (config.isString("local-storage.match-summary.directory"))
+			matchSummaryDirectory = new File(config.getString("local-storage.match-summary.directory"));
 		else matchSummaryDirectory = new File(AutoReferee.getInstance().getDataFolder(), "summary");
 
 		// if the folder doesnt exist, create it...
@@ -1385,26 +1385,31 @@ public class AutoRefMatch
 	public class MatchReportSaver implements Runnable
 	{
 		private File localStorage = null;
-
-		public MatchReportSaver(File f)
-		{ this.localStorage = f; }
+		private String webDirectory = null;
+		
+		public boolean serveLocally()
+		{ return webDirectory != null; }
 
 		public MatchReportSaver()
-		{ this(new File(AutoReferee.getInstance().getConfig()
-			.getString("local-storage.match-summary", null))); }
+		{ 
+			this.localStorage = new File(AutoReferee.getInstance().getConfig()
+				.getString("local-storage.match-summary.directory", null));
+			this.webDirectory = AutoReferee.getInstance().getConfig()
+				.getString("local-storage.match-summary.web-directory", null);
+		}
 
 		public void run()
 		{
 			broadcast(ChatColor.RED + "Generating Match Summary...");
 			String report = ReportGenerator.generate(AutoRefMatch.this);
 
-			String localFileID = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss").format(new Date());
-			File localReport = new File(this.localStorage, localFileID + ".html");
+			String localFileID = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss").format(new Date()) + ".html";
+			File localReport = new File(this.localStorage, localFileID);
 			
 			try { FileUtils.writeStringToFile(localReport, report); }
 			catch (IOException e) { e.printStackTrace(); }
 
-			String webstats = uploadReport(report);
+			String webstats = serveLocally() ? (webDirectory + localFileID) : uploadReport(report);
 			if (webstats == null) broadcast(ChatColor.RED + AutoReferee.NO_WEBSTATS_MESSAGE);
 			else broadcast(ChatColor.RED + "Match Summary: " + ChatColor.RESET + webstats);
 		}
