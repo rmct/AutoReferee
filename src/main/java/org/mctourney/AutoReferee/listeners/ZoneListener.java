@@ -254,6 +254,10 @@ public class ZoneListener implements Listener
 		}
 		else // is spectator
 		{
+			Material type = event.getClickedBlock().getType();
+			if ((type == Material.WOOD_PLATE || type == Material.STONE_PLATE) &&
+				match.getCurrentState().inProgress()) { event.setCancelled(true); return; }
+
 			if (event.getClickedBlock().getState() instanceof InventoryHolder
 				&& match.getCurrentState().inProgress())
 			{
