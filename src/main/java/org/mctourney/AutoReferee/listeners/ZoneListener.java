@@ -248,9 +248,9 @@ public class ZoneListener implements Listener
 			if (!validPlayer(player))
 			{ event.setCancelled(true); return; }
 
-			AutoRefPlayer apl = match.getPlayer(player);
-			if (apl != null && !apl.getTeam().canEnter(loc, 0.0))
-			{ event.setCancelled(true); return; }
+		//	AutoRefPlayer apl = match.getPlayer(player);
+		//	if (apl != null && !apl.getTeam().canEnter(loc, 0.0))
+		//	{ event.setCancelled(true); return; }
 		}
 		else // is spectator
 		{
