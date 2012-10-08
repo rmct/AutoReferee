@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -73,6 +74,11 @@ public class PlayerVersusPlayerListener implements Listener
 				if (vdata != null) vdata.registerDeath(event);
 				if (kdata != null) kdata.registerKill(event);
 			}
+
+			// clear all active enderpearls for this player
+			for (Entity e : match.getWorld().getEntitiesByClass(EnderPearl.class))
+				if (((EnderPearl) e).getShooter() == victim) e.remove();
+
 		}
 		else for (Player pl : event.getEntity().getWorld().getPlayers())
 			pl.sendMessage(event.getDeathMessage());
