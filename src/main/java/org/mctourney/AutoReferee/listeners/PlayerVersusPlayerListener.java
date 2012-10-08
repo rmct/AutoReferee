@@ -76,9 +76,8 @@ public class PlayerVersusPlayerListener implements Listener
 			}
 
 			// clear all active enderpearls for this player
-			for (Entity e : match.getWorld().getEntitiesByClass(EnderPearl.class))
-				if (((EnderPearl) e).getShooter() == victim) e.remove();
-
+		//	for (Entity e : match.getWorld().getEntitiesByClass(EnderPearl.class))
+		//		if (((EnderPearl) e).getShooter() == victim) e.remove();
 		}
 		else for (Player pl : event.getEntity().getWorld().getPlayers())
 			pl.sendMessage(event.getDeathMessage());
