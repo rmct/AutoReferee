@@ -848,6 +848,9 @@ public class AutoRefMatch
 					// press (or depress) the pressure plate
 					((PressurePlate) mdata).setData((byte)(sm.state ? 0x1 : 0x0));
 					break;
+					
+				default:
+					break;
 			}
 
 			// save the block state and fire an update
@@ -1576,6 +1579,7 @@ public class AutoRefMatch
 		{
 			case REFEREES: recipients = getReferees(false); break;
 			case ALL: recipients = getWorld().getPlayers(); break;
+			default: break;
 		}
 
 		ChatColor clr = event.getType().getColor();

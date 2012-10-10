@@ -93,6 +93,9 @@ public class AutoRefPlayer
 					// change damage cause to ENTITY_ATTACK
 					//c = EntityDamageEvent.DamageCause.ENTITY_ATTACK;
 					break;
+					
+				default:
+					break;
 			}
 
 			if ((p instanceof Player))
@@ -145,6 +148,9 @@ public class AutoRefPlayer
 				case MAGIC:
 					weapon = cleanEnum(((EntityType) x).name());
 					return damager + (weapon == null ? "" : ("'s " + weapon));
+					
+				default:
+					break;
 			}
 
 			return damager;
