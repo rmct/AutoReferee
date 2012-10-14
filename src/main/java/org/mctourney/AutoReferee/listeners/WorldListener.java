@@ -2,7 +2,6 @@ package org.mctourney.AutoReferee.listeners;
 
 import java.util.Map;
 
-import org.apache.commons.collections.map.DefaultedMap;
 import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -13,6 +12,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.plugin.Plugin;
+
+import org.apache.commons.collections.map.DefaultedMap;
+
 import org.mctourney.AutoReferee.AutoRefMatch;
 import org.mctourney.AutoReferee.AutoReferee;
 
@@ -50,7 +52,10 @@ public class WorldListener implements Listener
 			// if we are logging in to the wrong world, teleport to the correct world
 			if (player.getWorld() != match.getWorld()) match.acceptInvitation(player);
 
-			event.setJoinMessage(match.colorMessage(event.getJoinMessage()));
+			if (!match.getCurrentState().inProgress() || match.isPlayer(player))
+				match.broadcast(match.colorMessage(event.getJoinMessage()));
+			event.setJoinMessage(null);
+
 			match.sendMatchInfo(player);
 			match.setupSpectators(player);
 
@@ -65,7 +70,9 @@ public class WorldListener implements Listener
 		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
 		if (match != null)
 		{
-			event.setQuitMessage(match.colorMessage(event.getQuitMessage()));
+			if (!match.getCurrentState().inProgress() || match.isPlayer(event.getPlayer()))
+				match.broadcast(match.colorMessage(event.getQuitMessage()));
+			event.setQuitMessage(null);
 			match.checkTeamsReady();
 		}
 	}
