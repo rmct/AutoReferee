@@ -31,7 +31,7 @@ public class TeleportationUtil
 		return res;
 	}
 
-	private static boolean isPassableBlock(Block b)
+	private static boolean isBlockPassable(Block b)
 	{ return net.minecraft.server.Block.byId[b.getTypeId()].material.isSolid(); }
 
 	private static Location checkDirection(Location loc, Vector v)
@@ -48,7 +48,7 @@ public class TeleportationUtil
 
 			// if going up above the target is impassable, stop
 			Location c = loc.add(0, h, 0);
-			if (!isPassableBlock(c.getBlock())) break;
+			if (!isBlockPassable(c.getBlock())) break;
 
 			// attempt up to M blocks away from the center
 			int k; for (k = 1; k <= m; ++k)
@@ -57,7 +57,7 @@ public class TeleportationUtil
 				Location nc = c.add(v);
 
 				// if this block is impassable, dec k before quitting
-				if (!isPassableBlock(nc.getBlock())) { --k; break; }
+				if (!isBlockPassable(nc.getBlock())) { --k; break; }
 				
 				// update c if the block is passable
 				else c = nc;
