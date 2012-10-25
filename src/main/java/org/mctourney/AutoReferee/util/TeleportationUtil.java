@@ -71,7 +71,9 @@ public class TeleportationUtil
 			if (h > 0 && k + h > d) { d = k + h; best = c; }
 		}
 
-		return best;
+		// shift down if we ever found a spot that works
+		// location should be for feet-level, not head-level
+		return d == -1 ? best : best.add(0, -1, 0);
 	}
 
 	public static Location locationTeleport(Location loc)
