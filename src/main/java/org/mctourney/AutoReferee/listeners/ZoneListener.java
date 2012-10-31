@@ -499,6 +499,7 @@ public class ZoneListener implements Listener
 		// get the player that teleported
 		AutoRefPlayer apl = match.getPlayer(pl);
 		if (apl == null) return;
+		apl.setLastTeleportLocation(to);
 
 		// generate message regarding the teleport event
 		String bedrock = match.blockInRange(BlockData.BEDROCK, to, 5) != null ? " (near bedrock)" : "";

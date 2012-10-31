@@ -21,6 +21,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -52,6 +53,7 @@ import org.mctourney.AutoReferee.util.BlockData;
 import org.mctourney.AutoReferee.util.BlockVector3;
 import org.mctourney.AutoReferee.util.CuboidRegion;
 import org.mctourney.AutoReferee.util.Vector3;
+import org.mctourney.AutoReferee.util.TeleportationUtil;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -330,6 +332,9 @@ public class AutoReferee extends JavaPlugin
 		if (player.hasPermission("autoreferee.referee")) return true;
 		return getExpectedTeam(player) != null;
 	}
+
+	// save previous location before teleport
+	private Map<String, Location> prevLocation = Maps.newHashMap();
 
 	private World consoleWorld = null;
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
@@ -975,6 +980,121 @@ public class AutoReferee extends JavaPlugin
 			}
 
 			match.checkTeamsStart();
+			return true;
+		}
+
+		if ("artp".equalsIgnoreCase(cmd.getName()) && match != null && player != null)
+		{
+			// just dump location into this for teleporting later
+			Location tplocation = null;
+
+			if (args.length > 0)
+			{
+				if (args[0].startsWith("-") && args[0].length() == 2)
+					switch (args[0].toLowerCase().charAt(1))
+				{
+					case 'b':
+					{
+						AutoRefPlayer apl = match.getPlayer(args[1]);
+						Location bedloc = apl.getBedLocation();
+
+						if (bedloc == null || bedloc.getBlock().getType() != Material.BED_BLOCK)
+							player.sendMessage(apl.getName() + ChatColor.DARK_GRAY + " does not have a bed set.");
+						else tplocation = TeleportationUtil.blockTeleport(bedloc);
+						break;
+					}
+
+					case 'd':
+						if (args.length > 1)
+						{
+							AutoRefPlayer apl = match.getPlayer(args[1]);
+							if (apl != null) tplocation = apl.getLastDeathLocation();
+						}
+						else tplocation = match.getLastDeathLocation();
+						tplocation = TeleportationUtil.locationTeleport(tplocation);
+						break;
+
+					case 'l':
+						if (args.length > 1)
+						{
+							AutoRefPlayer apl = match.getPlayer(args[1]);
+							if (apl != null) tplocation = apl.getLastLogoutLocation();
+						}
+						else tplocation = match.getLastLogoutLocation();
+						tplocation = TeleportationUtil.locationTeleport(tplocation);
+						break;
+
+					case 't':
+						if (args.length > 1)
+						{
+							AutoRefPlayer apl = match.getPlayer(args[1]);
+							if (apl != null) tplocation = apl.getLastTeleportLocation();
+						}
+						else tplocation = match.getLastTeleportLocation();
+						tplocation = TeleportationUtil.locationTeleport(tplocation);
+						break;
+
+					case 's':
+						if (args.length > 1)
+						{
+							AutoRefTeam team = match.teamNameLookup(args[1]);
+							if (team != null) tplocation = team.getSpawnLocation();
+						}
+						else tplocation = match.getWorld().getSpawnLocation();
+						tplocation = TeleportationUtil.locationTeleport(tplocation);
+						break;
+
+					case 'o':
+						if (args.length > 1)
+						{
+							AutoRefTeam team = match.teamNameLookup(args[1]);
+							if (team != null) tplocation = team.getLastObjectiveLocation();
+						}
+						else tplocation = match.getLastObjectiveLocation();
+						tplocation = TeleportationUtil.locationTeleport(tplocation);
+						break;
+
+					case 'v':
+						if (args.length > 1)
+						{
+							AutoRefTeam team = match.teamNameLookup(args[1]);
+							if (team != null) tplocation = team.getVictoryMonumentLocation();
+						}
+						tplocation = TeleportationUtil.locationTeleport(tplocation);
+						break;
+
+					case 'x':
+						try
+						{
+							String[] coords = StringUtils.split(args[1], ',');
+							tplocation = new Location(match.getWorld(), 
+								Integer.parseInt(coords[0]), Integer.parseInt(coords[1]), Integer.parseInt(coords[2]));
+							tplocation = TeleportationUtil.blockTeleport(tplocation);
+						}
+						catch (NumberFormatException e) {  }
+						break;
+
+					case 'r':
+						// get location in lookup table, or null
+						tplocation = prevLocation.get(player.getName());
+						break;
+				}
+				else
+				{
+					AutoRefPlayer apl = match.getPlayer(args[0]);
+					tplocation = TeleportationUtil.playerTeleport(apl);
+				}
+			}
+			else tplocation = TeleportationUtil.locationTeleport(match.getLastNotificationLocation());
+			
+			// if we ever found a valid teleport, take it!
+			if (tplocation != null)
+			{
+				prevLocation.put(player.getName(), player.getLocation());
+				player.setFlying(true);
+				player.teleport(tplocation);
+			}
+
 			return true;
 		}
 

@@ -208,6 +208,53 @@ public class AutoRefPlayer
 	public boolean wasDamagedRecently()
 	{ return damageCooldownLength() < DAMAGE_COOLDOWN_TICKS; }
 
+	public Location getBedLocation()
+	{
+		Player pl = getPlayer();
+		if (pl == null) return null;
+		return pl.getBedSpawnLocation();
+	}
+
+	private Location lastDeathLocation = null;
+	
+	public Location getLastDeathLocation()
+	{ return lastDeathLocation; }
+	
+	public void setLastDeathLocation(Location loc)
+	{
+		lastDeathLocation = loc;
+		this.getTeam().getMatch().setLastDeathLocation(loc);
+	}
+
+	private Location lastLogoutLocation = null;
+
+	public Location getLastLogoutLocation()
+	{ return lastLogoutLocation; }
+	
+	public void setLastLogoutLocation(Location loc)
+	{
+		lastLogoutLocation = loc;
+		this.getTeam().getMatch().setLastLogoutLocation(loc);
+	}
+
+	private Location lastTeleportLocation = null;
+
+	public Location getLastTeleportLocation()
+	{ return lastTeleportLocation; }
+	
+	public void setLastTeleportLocation(Location loc)
+	{
+		lastTeleportLocation = loc;
+		this.getTeam().getMatch().setLastTeleportLocation(loc);
+	}
+
+	public Location getLocation()
+	{
+		Player pl = getPlayer();
+		if (pl != null) return pl.getLocation();
+		return lastLogoutLocation;
+	}
+
 	// constructor for simply setting up the variables
 	@SuppressWarnings("unchecked")
 	public AutoRefPlayer(Player p, AutoRefTeam t)
@@ -346,6 +393,7 @@ public class AutoRefPlayer
 
 		match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DEATH,
 			e.getDeathMessage(), loc, this, dc.p));
+		this.setLastDeathLocation(loc);
 
 		// reset the streak after reporting (if it was good)
 		if (totalStreak >= MIN_KILLSTREAK)
@@ -480,7 +528,10 @@ public class AutoRefPlayer
 					// generate a transcript event for seeing the box
 					String m = String.format("%s is carrying %s", getPlayerName(), e.getKey().getRawName());
 					getTeam().getMatch().addEvent(new TranscriptEvent(getTeam().getMatch(),
-						TranscriptEvent.EventType.OBJECTIVE_FOUND, m, getPlayer().getLocation(), this, e.getKey()));
+						TranscriptEvent.EventType.OBJECTIVE_FOUND, m, getLocation(), this, e.getKey()));
+					
+					// store the player's location as the last objective location
+					getTeam().setLastObjectiveLocation(getLocation());
 				}
 			}
 		}

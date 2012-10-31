@@ -44,6 +44,11 @@ commands:
     description: View the inventory of the player
     permission: autoreferee.referee
     usage: /<command> <playername>
+  artp:
+    aliases: [tp]
+    description: Teleport spectators safely
+    permission: autoreferee.referee
+    usage: /<command> [<options>] <target>
 
 permissions:
   autoreferee.*:

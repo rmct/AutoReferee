@@ -12,6 +12,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.util.*;
@@ -118,6 +119,33 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 	public boolean isEmptyTeam()
 	{ return getPlayers().size() == 0 && getExpectedPlayers().size() == 0; }
+
+	private Location lastObjectiveLocation = null; 
+
+	public Location getLastObjectiveLocation()
+	{ return lastObjectiveLocation; }
+
+	public void setLastObjectiveLocation(Location loc)
+	{
+		lastObjectiveLocation = loc;
+		getMatch().setLastObjectiveLocation(loc);
+	}
+	
+	private static final Vector HALF_BLOCK_VECTOR = new Vector(0.5, 0.5, 0.5);
+	
+	public Location getVictoryMonumentLocation()
+	{
+		Vector vmin = null, vmax = null;
+		for (WinCondition wc : winConditions)
+		{
+			Vector v = wc.getLocation().toVector().add(HALF_BLOCK_VECTOR);
+			vmin = vmin == null ? v : Vector.getMinimum(vmin, v);
+			vmax = vmax == null ? v : Vector.getMaximum(vmax, v);
+		}
+		
+		World w = getMatch().getWorld();
+		return vmin.getMidpoint(vmax).toLocation(w);
+	}
 
 	// list of regions
 	private Set<AutoRefRegion> regions = null;

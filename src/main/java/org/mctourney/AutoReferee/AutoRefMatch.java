@@ -332,6 +332,58 @@ public class AutoRefMatch
 	public void setReadyDelay(int delay)
 	{ this.customReadyDelay = delay; }
 
+	private Location lastNotificationLocation = null;
+	
+	public Location getLastNotificationLocation()
+	{ return lastNotificationLocation; }
+	
+	public void setLastNotificationLocation(Location loc)
+	{ lastNotificationLocation = loc; }
+	
+	private Location lastDeathLocation = null;
+
+	public Location getLastDeathLocation()
+	{ return lastDeathLocation; }
+
+	public void setLastDeathLocation(Location loc)
+	{
+		lastDeathLocation = loc;
+		setLastNotificationLocation(loc);
+	}
+	
+	private Location lastLogoutLocation = null;
+
+	public Location getLastLogoutLocation()
+	{ return lastLogoutLocation; }
+
+	public void setLastLogoutLocation(Location loc)
+	{
+		lastLogoutLocation = loc;
+		setLastNotificationLocation(loc);
+	}
+	
+	private Location lastTeleportLocation = null;
+
+	public Location getLastTeleportLocation()
+	{ return lastTeleportLocation; }
+
+	public void setLastTeleportLocation(Location loc)
+	{
+		lastTeleportLocation = loc;
+		setLastNotificationLocation(loc);
+	}
+	
+	private Location lastObjectiveLocation = null;
+
+	public Location getLastObjectiveLocation()
+	{ return lastObjectiveLocation; }
+
+	public void setLastObjectiveLocation(Location loc)
+	{
+		lastObjectiveLocation = loc;
+		setLastNotificationLocation(loc);
+	}
+
 	public AutoRefMatch(World world, boolean tmp, MatchStatus state)
 	{ this(world, tmp); setCurrentState(state); }
 

@@ -16,6 +16,7 @@ import org.bukkit.plugin.Plugin;
 import org.apache.commons.collections.map.DefaultedMap;
 
 import org.mctourney.AutoReferee.AutoRefMatch;
+import org.mctourney.AutoReferee.AutoRefPlayer;
 import org.mctourney.AutoReferee.AutoReferee;
 
 public class WorldListener implements Listener
@@ -73,7 +74,6 @@ public class WorldListener implements Listener
 			if (!match.getCurrentState().inProgress() || match.isPlayer(event.getPlayer()))
 				match.broadcast(match.colorMessage(event.getQuitMessage()));
 			event.setQuitMessage(null);
-			match.checkTeamsReady();
 		}
 	}
 

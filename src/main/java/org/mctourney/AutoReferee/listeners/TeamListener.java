@@ -151,7 +151,7 @@ public class TeamListener implements Listener
 		if (team != null) team.join(player);
 	}
 
-	@EventHandler
+	@EventHandler(priority=EventPriority.MONITOR)
 	public void playerQuit(PlayerQuitEvent event)
 	{
 		Player player = event.getPlayer();
@@ -159,12 +159,14 @@ public class TeamListener implements Listener
 
 		// leave the team, if necessary
 		AutoRefTeam team = plugin.getTeam(player);
-		if (team != null && match != null &&
-			!match.getCurrentState().inProgress())
-				team.leave(player);
+		if (team != null && match != null && !match.getCurrentState().inProgress()) team.leave(player);
 
 		// re-check world ready
 		if (match != null) match.checkTeamsReady();
+
+		AutoRefPlayer apl = match.getPlayer(player);
+		if (apl != null && player.getLocation() != null)
+			apl.setLastLogoutLocation(player.getLocation());
 
 		// if this player was damaged recently (during the match), notify
 		if (match != null && match.getCurrentState().inProgress())
