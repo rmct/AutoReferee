@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -259,7 +260,7 @@ public class ZoneListener implements Listener
 				match.getCurrentState().inProgress()) { event.setCancelled(true); return; }
 
 			if (event.getClickedBlock().getState() instanceof InventoryHolder
-				&& match.getCurrentState().inProgress())
+				&& event.getAction() == Action.RIGHT_CLICK_BLOCK && match.getCurrentState().inProgress())
 			{
 				InventoryHolder invh = (InventoryHolder) event.getClickedBlock().getState();
 				Inventory inv = invh.getInventory();
