@@ -1116,7 +1116,7 @@ public class AutoReferee extends JavaPlugin
 
 		@Override
 		public String getPromptText(ConversationContext context)
-		{ return String.format("%s is inviting you to a match on %s. Do you accept?", from, match.getMapName()); }
+		{ return String.format(">>> %s is inviting you to %s. Do you accept?", from, match.getMapName()); }
 
 		@Override
 		protected Prompt acceptValidatedInput(ConversationContext context, boolean response)
