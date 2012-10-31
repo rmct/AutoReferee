@@ -337,18 +337,23 @@ public class AutoReferee extends JavaPlugin
 	private Map<String, Location> prevLocation = Maps.newHashMap();
 
 	private World consoleWorld = null;
+	public World getConsoleWorld()
+	{
+		List<World> worlds = getServer().getWorlds();
+		return worlds.size() == 1 ? worlds.get(0) : consoleWorld;
+	}
+	
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
 	{
 		World world = null;
 		Player player = null;
 
-		List<World> worlds = getServer().getWorlds();
 		if (sender instanceof Player)
 		{
 			player = (Player) sender;
 			world = player.getWorld();
 		}
-		else world = worlds.size() == 1 ? worlds.get(0) : consoleWorld;
+		else world = getConsoleWorld();
 		AutoRefMatch match = getMatch(world);
 
 		// reparse the args properly using the string tokenizer from org.apache.commons
