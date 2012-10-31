@@ -333,13 +333,13 @@ public class AutoRefMatch
 	{ this.customReadyDelay = delay; }
 
 	private Location lastNotificationLocation = null;
-	
+
 	public Location getLastNotificationLocation()
 	{ return lastNotificationLocation; }
-	
+
 	public void setLastNotificationLocation(Location loc)
 	{ lastNotificationLocation = loc; }
-	
+
 	private Location lastDeathLocation = null;
 
 	public Location getLastDeathLocation()
@@ -350,7 +350,7 @@ public class AutoRefMatch
 		lastDeathLocation = loc;
 		setLastNotificationLocation(loc);
 	}
-	
+
 	private Location lastLogoutLocation = null;
 
 	public Location getLastLogoutLocation()
@@ -361,7 +361,7 @@ public class AutoRefMatch
 		lastLogoutLocation = loc;
 		setLastNotificationLocation(loc);
 	}
-	
+
 	private Location lastTeleportLocation = null;
 
 	public Location getLastTeleportLocation()
@@ -372,7 +372,7 @@ public class AutoRefMatch
 		lastTeleportLocation = loc;
 		setLastNotificationLocation(loc);
 	}
-	
+
 	private Location lastObjectiveLocation = null;
 
 	public Location getLastObjectiveLocation()
@@ -900,7 +900,7 @@ public class AutoRefMatch
 					// press (or depress) the pressure plate
 					((PressurePlate) mdata).setData((byte)(sm.state ? 0x1 : 0x0));
 					break;
-					
+
 				default:
 					break;
 			}

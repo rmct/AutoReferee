@@ -38,14 +38,14 @@ public class RefereeChannelListener implements PluginMessageListener, Listener
 	{
 		Player pl = event.getPlayer();
 		AutoRefMatch match = plugin.getMatch(pl.getWorld());
-		
+
 		if (AutoReferee.REFEREE_PLUGIN_CHANNEL.equals(event.getChannel()) && match != null)
 		{
 			// if this is a player, complain and force them to quit their team!
 			if (match.isPlayer(pl))
 			{
 				AutoRefPlayer apl = match.getPlayer(pl);
-				for (Player ref : match.getReferees(true)) ref.sendMessage(apl.getName() + 
+				for (Player ref : match.getReferees(true)) ref.sendMessage(apl.getName() +
 					ChatColor.DARK_GRAY + " attempted to log in with a modified client!");
 				match.leaveTeam(pl, true);
 			}

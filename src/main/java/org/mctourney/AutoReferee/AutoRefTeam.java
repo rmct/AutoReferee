@@ -120,7 +120,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	public boolean isEmptyTeam()
 	{ return getPlayers().size() == 0 && getExpectedPlayers().size() == 0; }
 
-	private Location lastObjectiveLocation = null; 
+	private Location lastObjectiveLocation = null;
 
 	public Location getLastObjectiveLocation()
 	{ return lastObjectiveLocation; }
@@ -130,9 +130,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		lastObjectiveLocation = loc;
 		getMatch().setLastObjectiveLocation(loc);
 	}
-	
+
 	private static final Vector HALF_BLOCK_VECTOR = new Vector(0.5, 0.5, 0.5);
-	
+
 	public Location getVictoryMonumentLocation()
 	{
 		Vector vmin = null, vmax = null;
@@ -142,7 +142,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			vmin = vmin == null ? v : Vector.getMinimum(vmin, v);
 			vmax = vmax == null ? v : Vector.getMaximum(vmax, v);
 		}
-		
+
 		World w = getMatch().getWorld();
 		return vmin.getMidpoint(vmax).toLocation(w);
 	}

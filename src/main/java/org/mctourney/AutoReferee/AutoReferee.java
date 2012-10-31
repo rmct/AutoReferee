@@ -342,7 +342,7 @@ public class AutoReferee extends JavaPlugin
 		List<World> worlds = getServer().getWorlds();
 		return worlds.size() == 1 ? worlds.get(0) : consoleWorld;
 	}
-	
+
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
 	{
 		World world = null;
@@ -1072,7 +1072,7 @@ public class AutoReferee extends JavaPlugin
 						try
 						{
 							String[] coords = StringUtils.split(args[1], ',');
-							tplocation = new Location(match.getWorld(), 
+							tplocation = new Location(match.getWorld(),
 								Integer.parseInt(coords[0]), Integer.parseInt(coords[1]), Integer.parseInt(coords[2]));
 							tplocation = TeleportationUtil.blockTeleport(tplocation);
 						}
@@ -1091,7 +1091,7 @@ public class AutoReferee extends JavaPlugin
 				}
 			}
 			else tplocation = TeleportationUtil.locationTeleport(match.getLastNotificationLocation());
-			
+
 			// if we ever found a valid teleport, take it!
 			if (tplocation != null)
 			{

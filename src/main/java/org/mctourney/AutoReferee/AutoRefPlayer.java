@@ -94,7 +94,7 @@ public class AutoRefPlayer
 					// change damage cause to ENTITY_ATTACK
 					//c = EntityDamageEvent.DamageCause.ENTITY_ATTACK;
 					break;
-					
+
 				default:
 					break;
 			}
@@ -149,7 +149,7 @@ public class AutoRefPlayer
 				case MAGIC:
 					weapon = cleanEnum(((EntityType) x).name());
 					return damager + (weapon == null ? "" : ("'s " + weapon));
-					
+
 				default:
 					break;
 			}
@@ -175,7 +175,7 @@ public class AutoRefPlayer
 	{ this.pname = n; }
 
 	public int nameSearch(String name)
-	{ 
+	{
 		if (!pname.toLowerCase().startsWith(name.toLowerCase())) return Integer.MAX_VALUE;
 		return pname.length() - name.length();
 	}
@@ -226,10 +226,10 @@ public class AutoRefPlayer
 	}
 
 	private Location lastDeathLocation = null;
-	
+
 	public Location getLastDeathLocation()
 	{ return lastDeathLocation; }
-	
+
 	public void setLastDeathLocation(Location loc)
 	{
 		lastDeathLocation = loc;
@@ -240,7 +240,7 @@ public class AutoRefPlayer
 
 	public Location getLastLogoutLocation()
 	{ return lastLogoutLocation; }
-	
+
 	public void setLastLogoutLocation(Location loc)
 	{
 		lastLogoutLocation = loc;
@@ -251,7 +251,7 @@ public class AutoRefPlayer
 
 	public Location getLastTeleportLocation()
 	{ return lastTeleportLocation; }
-	
+
 	public void setLastTeleportLocation(Location loc)
 	{
 		lastTeleportLocation = loc;
@@ -292,7 +292,7 @@ public class AutoRefPlayer
 	public AutoRefPlayer(Player p, AutoRefTeam t)
 	{
 		this(p.getName(), t);
-		
+
 		// setup base health and armor level
 		this.currentHealth = p.getHealth();
 		this.currentArmor = ArmorPoints.fromPlayerInventory(p.getInventory());
@@ -379,7 +379,7 @@ public class AutoRefPlayer
 	{
 		Player pl = getPlayer();
 		if (pl == null) return;
-		
+
 		this.heal();
 		this.clearInventory();
 
@@ -561,7 +561,7 @@ public class AutoRefPlayer
 					String m = String.format("%s is carrying %s", getPlayerName(), e.getKey().getRawName());
 					getTeam().getMatch().addEvent(new TranscriptEvent(getTeam().getMatch(),
 						TranscriptEvent.EventType.OBJECTIVE_FOUND, m, getLocation(), this, e.getKey()));
-					
+
 					// store the player's location as the last objective location
 					getTeam().setLastObjectiveLocation(getLocation());
 				}

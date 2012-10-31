@@ -3,10 +3,10 @@ map:
 
   # name of the map
   name: My Competitive Map
-  
+
   # version for this map
   version: 1.0
-  
+
   # names of any creators
   creators:
   - creator1
@@ -24,20 +24,20 @@ match:
     - name: Red
       color: RED
       maxsize: 4
-    
+
     - name: Blue
       color: BLUE
       maxsize: 4
-  
+
   # this is the region around spawn where players are immune to damage
   start-region: []
-  
+
   # this is the time of day the match should start at
   start-time: 8am
-  
+
   # allow friendly fire: should players take damage from teammates
   allow-ff: true
-  
+
   # allow craft: if true, players may craft objective items (such as dyeing wool)
   allow-craft: false
-  
+

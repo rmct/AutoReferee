@@ -24,11 +24,11 @@ public class TeleportationUtil
 
 		Location x, c = loc.clone(), best = c;
 		double sqd, bsqd = -1.0;
-	
+
 		for (Vector vec : directions)
 		{
 			x = TeleportationUtil.checkDirection(c, vec);
-			sqd = x.distanceSquared(best); 
+			sqd = x.distanceSquared(best);
 			if (sqd > bsqd) { bsqd = sqd; best = x; }
 		}
 
@@ -60,7 +60,7 @@ public class TeleportationUtil
 		       dz = base.getZ() - target.getZ();
 
 		double dist = Math.sqrt(dx*dx + dz*dz);
-		
+
 		Location res = base.clone();
 		res.setPitch((float)(Math.atan2(dy, dist)*180/Math.PI));
 		res.setYaw((float)(Math.atan2(dz, dx)*180/Math.PI) + 90.0f);
@@ -108,7 +108,7 @@ public class TeleportationUtil
 	}
 
 	private static boolean isBlockPassable(Block b)
-	{ return passableBlocks.contains(b.getType()); } 
+	{ return passableBlocks.contains(b.getType()); }
 
 	private static final int teleportDistance = 4;
 	private static Location checkDirection(Location loc, Vector v)
@@ -132,7 +132,7 @@ public class TeleportationUtil
 
 				// if this block is impassable, dec k before quitting
 				if (!isBlockPassable(nc.getBlock())) { --k; break; }
-				
+
 				// update c if the block is passable
 				else c = nc;
 			}
@@ -149,7 +149,7 @@ public class TeleportationUtil
 		// location should be for feet-level, not head-level
 		return d < 0 ? best : best.subtract(0, 1, 0);
 	}
-	
+
 	private static Set<Vector> directions;
 	static
 	{
