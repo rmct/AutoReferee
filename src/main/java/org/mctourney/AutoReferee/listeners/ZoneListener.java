@@ -25,6 +25,8 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -220,6 +222,41 @@ public class ZoneListener implements Listener
 	{
 		Player player = event.getPlayer();
 		Location loc = event.getBlock().getLocation();
+
+		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+		if (match == null) return;
+
+		if (!validPlayer(player))
+		{ event.setCancelled(true); return; }
+
+		AutoRefPlayer apl = match.getPlayer(player);
+		if (apl != null && !apl.getTeam().canBuild(loc))
+		{ event.setCancelled(true); return; }
+	}
+
+	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
+	public void bucketFill(PlayerBucketFillEvent event)
+	{
+		Player player = event.getPlayer();
+		Location loc = event.getBlockClicked().getRelative(event.getBlockFace()).getLocation();
+
+		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+		if (match == null) return;
+
+		if (!validPlayer(player))
+		{ event.setCancelled(true); return; }
+
+		AutoRefPlayer apl = match.getPlayer(player);
+		if (apl != null && !apl.getTeam().canBuild(loc))
+		{ event.setCancelled(true); return; }
+	}
+
+
+	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
+	public void bucketEmpty(PlayerBucketEmptyEvent event)
+	{
+		Player player = event.getPlayer();
+		Location loc = event.getBlockClicked().getRelative(event.getBlockFace()).getLocation();
 
 		AutoRefMatch match = plugin.getMatch(loc.getWorld());
 		if (match == null) return;
