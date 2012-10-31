@@ -18,6 +18,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.potion.PotionEffect;
 
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.AutoRefTeam.GoalStatus;
@@ -372,6 +373,23 @@ public class AutoRefPlayer
 		getPlayer().setFoodLevel ( 20 ); // full food
 		getPlayer().setSaturation(  5 ); // saturation depletes hunger
 		getPlayer().setExhaustion(  0 ); // exhaustion depletes saturation
+	}
+
+	public void enterLane()
+	{
+		Player pl = getPlayer();
+		if (pl == null) return;
+		
+		this.heal();
+		this.clearInventory();
+
+		// reset the player's level
+		pl.setLevel(0);
+		pl.setExp(0.0f);
+
+		// remove all potion effects upon entering the lane
+		for (PotionEffect effect : pl.getActivePotionEffects())
+			pl.removePotionEffect(effect.getType());
 	}
 
 	// register that we just received this damage

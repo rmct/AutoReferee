@@ -136,7 +136,7 @@ public class ZoneListener implements Listener
 		{
 			// if game isn't going yet, they are leaving the start region
 			if (match.getCurrentState().inProgress() && match.inStartRegion(event.getFrom()))
-				apl.clearInventory();
+				apl.enterLane();
 
 			else if (match.getCurrentState().isBeforeMatch())
 			{
