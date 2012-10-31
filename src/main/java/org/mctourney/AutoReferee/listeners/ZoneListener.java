@@ -506,8 +506,8 @@ public class ZoneListener implements Listener
 		String message = apl.getName() + ChatColor.GRAY + " has teleported @ " +
 			BlockVector3.fromLocation(to).toCoords() + bedrock;
 
-		boolean excludeReferees = dsq <= LONG_TELE_DISTANCE * LONG_TELE_DISTANCE;
-		for (Player ref : match.getReferees(excludeReferees)) ref.sendMessage(message);
+		boolean excludeStreamers = dsq <= LONG_TELE_DISTANCE * LONG_TELE_DISTANCE;
+		for (Player ref : match.getReferees(excludeStreamers)) ref.sendMessage(message);
 		plugin.getLogger().info(ChatColor.stripColor(message));
 	}
 
