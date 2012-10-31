@@ -2,6 +2,8 @@ package org.mctourney.AutoReferee;
 
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+
 import org.mctourney.AutoReferee.util.CuboidRegion;
 import org.mctourney.AutoReferee.util.Vector3;
 
@@ -75,6 +77,15 @@ public class AutoRefRegion extends CuboidRegion
 		for (RegionFlag f : RegionFlag.values())
 			if ((f.getValue() & this.flags) != 0) fset.add(f);
 		return fset;
+	}
+
+	public String getFlagsString()
+	{
+		Set<String> fstrs = Sets.newHashSet();
+		for (RegionFlag f : getFlags())
+			fstrs.add(f.getName());
+
+		return StringUtils.join(fstrs, ",");
 	}
 
 	public String getFlagList()

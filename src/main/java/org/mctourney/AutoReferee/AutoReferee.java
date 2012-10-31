@@ -881,7 +881,7 @@ public class AutoReferee extends JavaPlugin
 					// add the region to the team, announce
 					t.getRegions().add(areg);
 					sender.sendMessage("Region now marked as " +
-						t.getName() + "'s zone!");
+						t.getName() + "'s zone! " + areg.getFlags());
 				}
 			}
 			return true;
