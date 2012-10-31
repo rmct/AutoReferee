@@ -1392,7 +1392,7 @@ public class AutoRefMatch
 	}
 
 	public AutoRefPlayer getPlayer(Player pl)
-	{ return getPlayer(pl.getName()); }
+	{ return pl == null ? null : getPlayer(pl.getName()); }
 
 	public boolean isPlayer(Player pl)
 	{ return getPlayer(pl) != null; }
