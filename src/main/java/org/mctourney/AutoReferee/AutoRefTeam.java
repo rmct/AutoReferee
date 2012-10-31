@@ -345,14 +345,27 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 	public AutoRefPlayer getPlayer(String name)
 	{
-		if (name != null) for (AutoRefPlayer apl : players)
-			if (name.equalsIgnoreCase(apl.getPlayerName()))
-				return apl;
-		return null;
+		AutoRefPlayer bapl = null;
+		if (name != null)
+		{
+			int score, b = Integer.MAX_VALUE;
+			for (AutoRefPlayer apl : players)
+			{
+				score = apl.nameSearch(name);
+				if (score < b) { b = score; bapl = apl; }
+			}
+		}
+		return bapl;
 	}
 
 	public AutoRefPlayer getPlayer(Player pl)
 	{ return pl == null ? null : getPlayer(pl.getName()); }
+
+	protected void addPlayer(AutoRefPlayer apl)
+	{ apl.setTeam(this); this.players.add(apl); }
+
+	protected boolean removePlayer(AutoRefPlayer apl)
+	{ return this.players.remove(apl); }
 
 	public void join(Player pl)
 	{ join(pl, false); }
@@ -383,7 +396,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			pl.teleport(getSpawnLocation());
 		pl.setGameMode(GameMode.SURVIVAL);
 
-		players.add(apl);
+		this.addPlayer(apl);
 		match.messageReferees("team", getRawName(), "player", "+" + apl.getPlayerName());
 
 		String colorName = getPlayerName(pl);
@@ -406,7 +419,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		// create an APL object for this player.
 		AutoRefPlayer apl = new AutoRefPlayer(pl);
-		if (!players.remove(apl)) return;
+		if (!this.removePlayer(apl)) return;
 
 		String colorName = getPlayerName(pl);
 		match.broadcast(colorName + " has left " + getName());

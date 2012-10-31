@@ -1377,17 +1377,22 @@ public class AutoRefMatch
 	{ for (AutoRefTeam team : teams) team.leave(pl, force); }
 
 	public AutoRefPlayer getPlayer(String name)
-	{ return getPlayer(AutoReferee.getInstance().getServer().getPlayer(name)); }
+	{
+		AutoRefPlayer bapl = null;
+		if (name != null)
+		{
+			int score, b = Integer.MAX_VALUE;
+			for (AutoRefPlayer apl : getPlayers())
+			{
+				score = apl.nameSearch(name);
+				if (score < b) { b = score; bapl = apl; }
+			}
+		}
+		return bapl;
+	}
 
 	public AutoRefPlayer getPlayer(Player pl)
-	{
-		for (AutoRefTeam team : teams)
-		{
-			AutoRefPlayer apl = team.getPlayer(pl);
-			if (apl != null) return apl;
-		}
-		return null;
-	}
+	{ return getPlayer(pl.getName()); }
 
 	public boolean isPlayer(Player pl)
 	{ return getPlayer(pl) != null; }

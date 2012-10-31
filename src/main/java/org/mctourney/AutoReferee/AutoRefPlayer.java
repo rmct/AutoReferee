@@ -164,11 +164,20 @@ public class AutoRefPlayer
 	public Player getPlayer()
 	{ return AutoReferee.getInstance().getServer().getPlayer(pname); }
 
+	private void setPlayer(Player p)
+	{ this.setPlayerName(p.getName()); }
+
 	public String getPlayerName()
 	{ return pname; }
 
-	private void setPlayer(Player p)
-	{ pname = p.getName(); }
+	public void setPlayerName(String n)
+	{ this.pname = n; }
+
+	public int nameSearch(String name)
+	{ 
+		if (!pname.toLowerCase().startsWith(name.toLowerCase())) return Integer.MAX_VALUE;
+		return pname.length() - name.length();
+	}
 
 	public AutoRefTeam getTeam()
 	{ return team; }
@@ -257,7 +266,7 @@ public class AutoRefPlayer
 
 	// constructor for simply setting up the variables
 	@SuppressWarnings("unchecked")
-	public AutoRefPlayer(Player p, AutoRefTeam t)
+	public AutoRefPlayer(String n, AutoRefTeam t)
 	{
 		// detailed statistics
 		kills  = new DefaultedMap(0);
@@ -268,19 +277,24 @@ public class AutoRefPlayer
 		shotsFired = shotsHit = 0;
 
 		// save the player and team as references
-		this.setPlayer(p);
+		this.setPlayerName(n);
 		this.setTeam(t);
 
 		// setup the carrying list
 		this.carrying = Sets.newHashSet();
 
-		// setup base health and armor level
-		this.currentHealth = p.getHealth();
-		this.currentArmor = ArmorPoints.fromPlayerInventory(p.getInventory());
-
 		// streak information
 		totalStreak = 0;
 		playerStreak = new DefaultedMap(0);
+	}
+
+	public AutoRefPlayer(Player p, AutoRefTeam t)
+	{
+		this(p.getName(), t);
+		
+		// setup base health and armor level
+		this.currentHealth = p.getHealth();
+		this.currentArmor = ArmorPoints.fromPlayerInventory(p.getInventory());
 	}
 
 	public AutoRefPlayer(Player p)
