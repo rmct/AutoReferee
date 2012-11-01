@@ -29,9 +29,9 @@ public class Vector3
 		{
 			String[] values = coords.split(",");
 			return new Vector3( // vector 1
-				Integer.parseInt(values[0]),
-				Integer.parseInt(values[1]),
-				Integer.parseInt(values[2]));
+				Double.parseDouble(values[0]),
+				Double.parseDouble(values[1]),
+				Double.parseDouble(values[2]));
 		}
 		catch (Exception e) { return null; }
 	}
