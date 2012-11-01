@@ -3,6 +3,7 @@ package org.mctourney.AutoReferee.listeners;
 import java.util.Map;
 import java.util.UUID;
 
+import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
@@ -22,6 +23,8 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.Location;
+import org.bukkit.Material;
 
 import org.mctourney.AutoReferee.AutoRefMatch;
 import org.mctourney.AutoReferee.AutoRefPlayer;
@@ -32,13 +35,19 @@ import com.google.common.collect.Maps;
 
 public class PlayerVersusPlayerListener implements Listener
 {
+	private static final int TNT_PRIME_RANGE = 10;
+
 	AutoReferee plugin = null;
+
 	public Map<UUID, AutoRefPlayer> tntOwner;
+	public Map<Location, AutoRefPlayer> tntPropagation;
 
 	public PlayerVersusPlayerListener(Plugin p)
 	{
 		plugin = (AutoReferee) p;
+
 		tntOwner = Maps.newHashMap();
+		tntPropagation = Maps.newHashMap();
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST)
@@ -49,10 +58,10 @@ public class PlayerVersusPlayerListener implements Listener
 		{
 			// get victim, and killer (maybe null) of this player
 			Player victim = (Player) event.getEntity();
-			AutoRefPlayer vdata = match.getPlayer(victim);
+			AutoRefPlayer vapl = match.getPlayer(victim);
 
 			Player killer = victim.getKiller();
-			AutoRefPlayer kdata = match.getPlayer(killer);
+			AutoRefPlayer kapl = match.getPlayer(killer);
 
 			String dmsg = event.getDeathMessage();
 			EntityDamageEvent lastDmg = victim.getLastDamageCause();
@@ -65,14 +74,31 @@ public class PlayerVersusPlayerListener implements Listener
 				event.getDrops().clear();
 			}
 
+			if (lastDmg instanceof EntityDamageByEntityEvent)
+			{
+				EntityDamageByEntityEvent ed = (EntityDamageByEntityEvent) lastDmg;
+				switch (ed.getDamager().getType())
+				{
+					case CREEPER: dmsg = victim.getName() + " was blown up by Creeper"; break;
+					case PRIMED_TNT:
+						dmsg = victim.getName() + " was blown up by TNT";
+						if (tntOwner.get(ed.getDamager().getUniqueId()) != vapl)
+						{
+							kapl = tntOwner.get(ed.getDamager().getUniqueId());
+							dmsg = victim.getName() + " was blown up by " + kapl.getPlayerName();
+						}
+					break;
+				}
+			}
+
 			// update the death message with the changes
 			event.setDeathMessage(dmsg);
 
 			if (match.getCurrentState().inProgress())
 			{
 				// register the death and kill
-				if (vdata != null) vdata.registerDeath(event);
-				if (kdata != null) kdata.registerKill(event);
+				if (vapl != null) vapl.registerDeath(event);
+				if (kapl != null && kapl != vapl) kapl.registerKill(event);
 			}
 
 			// clear all active enderpearls for this player
@@ -109,12 +135,12 @@ public class PlayerVersusPlayerListener implements Listener
 		if ((event instanceof EntityDamageByEntityEvent))
 		{
 			EntityDamageByEntityEvent ed = (EntityDamageByEntityEvent) event;
-			Player damager = entityToPlayer(ed.getDamager());
 			Player damaged = entityToPlayer(ed.getEntity());
 
 			// enderpearls are a special case!
 			if (ed.getDamager().getType() == EntityType.ENDER_PEARL) return;
 
+			Player damager = entityToPlayer(ed.getDamager());
 			if (null != damager && match.getCurrentState().inProgress()
 				&& ed.getDamager() instanceof Arrow)
 			{
@@ -187,19 +213,35 @@ public class PlayerVersusPlayerListener implements Listener
 	public void explosionPrime(ExplosionPrimeEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
-		if (match == null) return;
+		if (!AutoReferee.hasSportBukkitApi() || match == null) return;
 
-		// TODO: Waiting on BUKKIT-770
 		if (event.getEntityType() == EntityType.PRIMED_TNT)
 		{
-			AutoRefPlayer apl = match.getNearestPlayer(event.getEntity().getLocation());
-			if (apl == null) return;
+			Location tntLocation = event.getEntity().getLocation().getBlock().getLocation();
+			AutoRefPlayer apl = tntPropagation.remove(tntLocation);
+
+			// if there was no propagation chain
+			if (apl == null)
+			{
+				// try to determine if this was the first tnt in a chain
+				if ((apl = match.getNearestPlayer(tntLocation)) == null) return;
+
+				Location plLocation = apl.getPlayer().getLocation();
+				if (plLocation.distanceSquared(tntLocation) > TNT_PRIME_RANGE * TNT_PRIME_RANGE) return;
+			}
+
+			// add an owner for this tnt object
+			if (apl != null) tntOwner.put(event.getEntity().getUniqueId(), apl);
 		}
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void entityExplode(EntityExplodeEvent event)
 	{
+		// remove this entity from the table if present
+		AutoRefPlayer apl = tntOwner.remove(event.getEntity().getUniqueId());
 
+		if (apl != null) for (Block b : event.blockList())
+			if (b.getType() == Material.TNT) tntPropagation.put(b.getLocation(), apl);
 	}
 }
