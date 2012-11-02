@@ -1100,8 +1100,8 @@ public class AutoReferee extends JavaPlugin
 				}
 				else
 				{
-					AutoRefPlayer apl = match.getPlayer(args[0]);
-					tplocation = TeleportationUtil.playerTeleport(apl);
+					Player pl = getServer().getPlayer(args[0]);
+					tplocation = match.isPlayer(pl) ? TeleportationUtil.entityTeleport(pl) : pl.getLocation();
 				}
 			}
 			else tplocation = TeleportationUtil.locationTeleport(match.getLastNotificationLocation());
