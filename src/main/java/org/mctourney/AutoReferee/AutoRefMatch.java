@@ -1452,8 +1452,15 @@ public class AutoRefMatch
 
 		public MatchReportSaver()
 		{
-			this.localStorage = new File(AutoReferee.getInstance().getConfig()
-				.getString("local-storage.match-summary.directory", null));
+			String localDirectory = AutoReferee.getInstance().getConfig()
+				.getString("local-storage.match-summary.directory", null);
+			this.localStorage = localDirectory != null ? new File(localDirectory) :
+				new File(AutoReferee.getInstance().getDataFolder(), "summary");
+
+			if (!this.localStorage.exists())
+				try { FileUtils.forceMkdir(this.localStorage); }
+				catch (IOException e) { this.localStorage = null; }
+
 			this.webDirectory = AutoReferee.getInstance().getConfig()
 				.getString("local-storage.match-summary.web-directory", null);
 		}
@@ -1463,13 +1470,18 @@ public class AutoRefMatch
 			broadcast(ChatColor.RED + "Generating Match Summary...");
 			String report = ReportGenerator.generate(AutoRefMatch.this);
 
-			String localFileID = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss").format(new Date()) + ".html";
-			File localReport = new File(this.localStorage, localFileID);
+			String webstats = null;
+			if (this.localStorage == null) webstats = uploadReport(report);
+			{
+				String localFileID = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss").format(new Date()) + ".html";
+				File localReport = new File(this.localStorage, localFileID);
 
-			try { FileUtils.writeStringToFile(localReport, report); }
-			catch (IOException e) { e.printStackTrace(); }
+				try { FileUtils.writeStringToFile(localReport, report); }
+				catch (IOException e) { e.printStackTrace(); }
 
-			String webstats = serveLocally() ? (webDirectory + localFileID) : uploadReport(report);
+				webstats = serveLocally() ? (webDirectory + localFileID) : uploadReport(report);
+			}
+
 			if (webstats == null) broadcast(ChatColor.RED + AutoReferee.NO_WEBSTATS_MESSAGE);
 			else broadcast(ChatColor.RED + "Match Summary: " + ChatColor.RESET + webstats);
 		}
