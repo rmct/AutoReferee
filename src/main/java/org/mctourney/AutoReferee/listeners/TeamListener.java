@@ -142,13 +142,19 @@ public class TeamListener implements Listener
 		{
 			// if they should be whitelisted, let them in, otherwise, block them
 			if (plugin.playerWhitelisted(player)) event.allow();
-			else event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST,
-				AutoReferee.NO_LOGIN_MESSAGE);
+			else
+			{
+				event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, AutoReferee.NO_LOGIN_MESSAGE);
+				return;
+			}
 		}
 
 		// if this player needs to be in a specific world, put them there
 		AutoRefTeam team = plugin.getExpectedTeam(player);
-		if (team != null) team.join(player);
+		AutoRefMatch match = plugin.getMatch(player.getWorld());
+
+		if (team != null) { team.join(player); match = team.getMatch(); }
+		match.messageReferees("player", player.getName(), "login");
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
@@ -156,21 +162,20 @@ public class TeamListener implements Listener
 	{
 		Player player = event.getPlayer();
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
+		if (match == null) return;
 
 		// leave the team, if necessary
 		AutoRefTeam team = plugin.getTeam(player);
-		if (team != null && match != null && !match.getCurrentState().inProgress()) team.leave(player);
+		if (team != null && !match.getCurrentState().inProgress()) team.leave(player);
 
-		// re-check world ready
-		if (match != null) match.checkTeamsReady();
+		match.messageReferees("player", player.getName(), "logout");
 
 		AutoRefPlayer apl = match.getPlayer(player);
 		if (apl != null && player.getLocation() != null)
 			apl.setLastLogoutLocation(player.getLocation());
 
 		// if this player was damaged recently (during the match), notify
-		if (match != null && match.getCurrentState().inProgress()
-			&& apl != null && apl.wasDamagedRecently())
+		if (match.getCurrentState().inProgress() && apl != null && apl.wasDamagedRecently())
 		{
 			String message = apl.getName() + ChatColor.GRAY + " logged out during combat " +
 				String.format("with %2.1f hearts remaining", apl.getPlayer().getHealth() / 2.0);
