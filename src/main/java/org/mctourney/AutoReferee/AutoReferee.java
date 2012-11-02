@@ -44,7 +44,7 @@ import com.sk89q.worldedit.bukkit.selections.Selection;
 
 import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
 import org.mctourney.AutoReferee.listeners.ObjectiveTracker;
-import org.mctourney.AutoReferee.listeners.PlayerVersusPlayerListener;
+import org.mctourney.AutoReferee.listeners.CombatListener;
 import org.mctourney.AutoReferee.listeners.RefereeChannelListener;
 import org.mctourney.AutoReferee.listeners.TeamListener;
 import org.mctourney.AutoReferee.listeners.WorldListener;
@@ -193,7 +193,7 @@ public class AutoReferee extends JavaPlugin
 		pm.registerEvents(new TeamListener(this), this);
 
 		// events related to PvP, damage, death, mobs
-		pm.registerEvents(new PlayerVersusPlayerListener(this), this);
+		pm.registerEvents(new CombatListener(this), this);
 
 		// events related to safe zones, creating zones, map conditions
 		pm.registerEvents(new ZoneListener(this), this);

@@ -33,7 +33,7 @@ import org.mctourney.AutoReferee.AutoReferee;
 
 import com.google.common.collect.Maps;
 
-public class PlayerVersusPlayerListener implements Listener
+public class CombatListener implements Listener
 {
 	private static final int TNT_PRIME_RANGE = 10;
 
@@ -42,7 +42,7 @@ public class PlayerVersusPlayerListener implements Listener
 	public Map<UUID, AutoRefPlayer> tntOwner;
 	public Map<Location, AutoRefPlayer> tntPropagation;
 
-	public PlayerVersusPlayerListener(Plugin p)
+	public CombatListener(Plugin p)
 	{
 		plugin = (AutoReferee) p;
 
