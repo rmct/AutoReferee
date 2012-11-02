@@ -546,6 +546,20 @@ public class AutoReferee extends JavaPlugin
 			}
 			catch (Exception e) { e.printStackTrace(); return true; }
 
+			// CMD: /autoref loadurl <url> [<custom>]
+			if (args.length >= 2 && "loadurl".equalsIgnoreCase(args[0])) try
+			{
+				// may specify a custom world name as the 3rd argument
+				String customName = args.length >= 3 ? args[2] : null;
+
+				// get world setup for match
+				sender.sendMessage(ChatColor.GREEN + "Please wait...");
+				AutoRefMap.loadMapFromURL(sender, args[1], customName);
+
+				return true;
+			}
+			catch (Exception e) { e.printStackTrace(); return true; }
+
 			// CMD: /autoref unload
 			if (args.length == 1 && "unload".equalsIgnoreCase(args[0]) && match != null)
 			{

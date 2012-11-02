@@ -222,6 +222,18 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		return bmap;
 	}
 
+	public static AutoRefMap getMapFromURL(String url) throws IOException
+	{
+		String filename = url.substring(url.lastIndexOf('/') + 1, url.length());
+		File zip = new File(AutoRefMap.getMapLibrary(), filename);
+
+		FileUtils.copyURLToFile(new URL(url), zip);
+		File folder = AutoRefMap.unzipMapFolder(zip);
+
+		return AutoRefMap.getMapInfo(folder);
+	}
+
+
 	public static File getMapFolder(String name) throws IOException
 	{
 		AutoRefMap bmap = AutoRefMap.getMap(name);
@@ -346,13 +358,32 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		return basedir;
 	}
 
-	private static class MapDownloader implements Runnable
+	private static abstract class MapDownloader implements Runnable
 	{
-		private CommandSender sender;
-		private String mapName, custom;
+		protected CommandSender sender;
+		private String custom;
 
-		public MapDownloader(CommandSender sender, String map, String custom)
-		{ this.sender = sender; this.mapName = map; this.custom = custom; }
+		public MapDownloader(CommandSender sender, String custom)
+		{ this.sender = sender; this.custom = custom; }
+
+		public void loadMap(AutoRefMap map)
+		{
+			try
+			{
+				if (!map.isInstalled()) map.download();
+				AutoReferee.getInstance().getServer().getScheduler().scheduleSyncDelayedTask(
+					AutoReferee.getInstance(), new MapLoader(sender, map, custom));
+			}
+			catch (IOException e) {  }
+		}
+	}
+
+	private static class MapRepoDownloader extends MapDownloader
+	{
+		private String mapName;
+
+		public MapRepoDownloader(CommandSender sender, String mapName, String custom)
+		{ super(sender, custom); this.mapName = mapName; }
 
 		@Override
 		public void run()
@@ -361,13 +392,25 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 			try { map = AutoRefMap.getMap(this.mapName); } catch (IOException e) {  }
 
 			if (map == null) sender.sendMessage("No such map: " + this.mapName);
-			else try
-			{
-				if (!map.isInstalled()) map.download();
-				AutoReferee.getInstance().getServer().getScheduler().scheduleSyncDelayedTask(
-					AutoReferee.getInstance(), new MapLoader(sender, map, custom));
-			}
-			catch (IOException e) {  }
+			else this.loadMap(map);
+		}
+	}
+
+	private static class MapURLDownloader extends MapDownloader
+	{
+		private String url;
+
+		public MapURLDownloader(CommandSender sender, String url, String custom)
+		{ super(sender, custom); this.url = url; }
+
+		@Override
+		public void run()
+		{
+			AutoRefMap map = null;
+			try { map = AutoRefMap.getMapFromURL(this.url); } catch (IOException e) {  }
+
+			if (map == null) sender.sendMessage("Could not load map from URL: " + this.url);
+			else this.loadMap(map);
 		}
 	}
 
@@ -396,6 +439,13 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	{
 		AutoReferee instance = AutoReferee.getInstance();
 		instance.getServer().getScheduler().scheduleAsyncDelayedTask(
-			instance, new MapDownloader(sender, mapName, customName));
+			instance, new MapRepoDownloader(sender, mapName, customName));
+	}
+
+	public static void loadMapFromURL(CommandSender sender, String url, String customName)
+	{
+		AutoReferee instance = AutoReferee.getInstance();
+		instance.getServer().getScheduler().scheduleAsyncDelayedTask(
+			instance, new MapURLDownloader(sender, url, customName));
 	}
 }
