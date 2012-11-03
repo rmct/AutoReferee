@@ -617,6 +617,8 @@ public class AutoRefMatch
 
 		for (AutoRefPlayer en : getPlayers()) if (apl.isDominating(en))
 			messageReferee(ref, "player", apl.getPlayerName(), "dominate", en.getPlayerName());
+
+		messageReferee(ref, "player", apl.getPlayerName(), apl.isOnline() ? "login" : "logout");
 	}
 
 	public void broadcast(String msg)

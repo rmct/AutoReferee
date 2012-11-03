@@ -165,6 +165,9 @@ public class AutoRefPlayer
 	public Player getPlayer()
 	{ return AutoReferee.getInstance().getServer().getPlayer(pname); }
 
+	public boolean isOnline()
+	{ return AutoReferee.getInstance().getServer().getOfflinePlayer(pname).isOnline(); }
+
 	private void setPlayer(Player p)
 	{ this.setPlayerName(p.getName()); }
 
