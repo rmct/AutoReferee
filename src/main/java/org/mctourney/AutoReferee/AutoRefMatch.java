@@ -1590,6 +1590,9 @@ public class AutoRefMatch
 			public String getEventClass()
 			{ return eventClass; }
 
+			public String getEventName()
+			{ return StringUtils.capitalize(name().toLowerCase().replaceAll("_", " ")); }
+
 			public EventVisibility getVisibility()
 			{ return visibility; }
 

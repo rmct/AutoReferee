@@ -6,4 +6,9 @@ $(document).ready(function(){
         $('tr.transcript-event.type-player-event.player-' + $(e).data('player')).show();
     });
   });
+
+  $("#event-filter").change(function(e){
+	$(".transcript-event").toggle(this.value == "");
+    $(".transcript-event.type-" + this.value).show();
+  });
 });

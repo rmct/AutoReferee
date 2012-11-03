@@ -86,10 +86,22 @@ public class ReportGenerator
 			.replaceAll("#winners#", winningTeam)
 			.replaceAll("#referees#", StringUtils.join(refList, ", "))
 
+			// filter settings
+			.replaceAll("#filter-options", getFilterOptions())
+
 			// and last, throw in the transcript and stats
 			.replaceAll("#transcript#", transcript.toString())
 			.replaceAll("#plyr-stats#", getPlayerStats(match))
 		);
+	}
+
+	private static String getFilterOptions()
+	{
+		List<String> options = Lists.newLinkedList();
+		for (AutoRefMatch.TranscriptEvent.EventType etype : AutoRefMatch.TranscriptEvent.EventType.values())
+			if (etype.hasFilter())
+				options.add("<option value='" + etype.getEventClass() + "'>" + etype.getEventName() + "</option>");
+		return StringUtils.join(options, "");
 	}
 
 	// helper method
