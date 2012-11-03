@@ -221,6 +221,15 @@ public class AutoRefPlayer
 	public boolean wasDamagedRecently()
 	{ return damageCooldownLength() < DAMAGE_COOLDOWN_TICKS; }
 
+	// amount of time the saved inventory is valid
+	private long SAVED_INVENTORY_LIFESPAN = 20L * 60 * 3;
+
+	private Inventory lastInventoryView = null;
+	private long lastInventoryViewSavedTick = -1L;
+
+	private boolean savedInventoryStale()
+	{ return getPlayer().getWorld().getFullTime() > lastInventoryViewSavedTick + SAVED_INVENTORY_LIFESPAN; }
+
 	public Location getBedLocation()
 	{
 		Player pl = getPlayer();
@@ -414,6 +423,7 @@ public class AutoRefPlayer
 	{
 		// sanity check...
 		if (e.getEntity() != getPlayer()) return;
+		this.saveInventoryView();
 
 		// get the last damage cause, and mark that as the cause of one death
 		AutoRefPlayer.DamageCause dc = AutoRefPlayer.DamageCause.fromDamageEvent(e.getEntity().getLastDamageCause());
@@ -587,6 +597,15 @@ public class AutoRefPlayer
 		currentArmor = newArmor;
 	}
 
+	public void saveInventoryView()
+	{
+		this.lastInventoryView = getInventoryView();
+		this.lastInventoryViewSavedTick = getPlayer().getWorld().getFullTime();
+	}
+
+	public Inventory getLastInventoryView()
+	{ return savedInventoryStale() ? null : this.lastInventoryView; }
+
 	public Inventory getInventoryView()
 	{
 		Player player = this.getPlayer();
@@ -617,12 +636,19 @@ public class AutoRefPlayer
 		return inventoryView;
 	}
 
-	public void showInventory(Player pl)
+	private boolean showInventory(Player pl, Inventory v)
 	{
 		AutoRefMatch match = AutoReferee.getInstance().getMatch(pl.getWorld());
-		if (match == null || !match.isReferee(pl)) return;
+		if (match == null || !match.isReferee(pl)) return false;
 
-		Inventory v = this.getInventoryView();
+		// show the requested inventory view
 		if (v != null) pl.openInventory(v);
+		return v == null;
 	}
+
+	public boolean showInventory(Player pl)
+	{ return this.showInventory(pl, this.getInventoryView()); }
+
+	public boolean showSavedInventory(Player pl)
+	{ return this.showInventory(pl, this.getLastInventoryView()); }
 }

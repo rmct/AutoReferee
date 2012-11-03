@@ -350,6 +350,7 @@ public class AutoReferee extends JavaPlugin
 	}
 
 	public static Options teleportOptions = new Options();
+	public static Options viewInventoryOptions = new Options();
 	static
 	{
 		OptionBuilder.withLongOpt("bed");
@@ -1017,17 +1018,28 @@ public class AutoReferee extends JavaPlugin
 		}
 
 		if ("viewinventory".equalsIgnoreCase(cmd.getName()) && args.length >= 0
-			&& match != null && player != null)
+			&& match != null && player != null) try
 		{
+			CommandLineParser parser = new GnuParser();
+			CommandLine cli = parser.parse(viewInventoryOptions, args);
+
+			args = cli.getArgs();
+			if (args.length > 1) return false;
+
 			if (!match.isReferee(player))
 			{ sender.sendMessage("You do not have permission."); return true; }
 
 			AutoRefPlayer target = args.length > 0 ? match.getPlayer(args[0])
 				: match.getNearestPlayer(player.getLocation());
-			if (target != null) target.showInventory(player);
+			if (target != null)
+			{
+				if (cli.hasOption('p')) target.showSavedInventory(player);
+				else target.showInventory(player);
+			}
 
 			return true;
 		}
+		catch (ParseException e) { return false; }
 
 		if ("ready".equalsIgnoreCase(cmd.getName()) &&
 			match != null && match.getCurrentState().isBeforeMatch())
