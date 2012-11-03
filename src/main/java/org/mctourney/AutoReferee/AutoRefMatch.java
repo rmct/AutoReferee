@@ -619,6 +619,7 @@ public class AutoRefMatch
 			messageReferee(ref, "player", apl.getPlayerName(), "dominate", en.getPlayerName());
 
 		messageReferee(ref, "player", apl.getPlayerName(), apl.isOnline() ? "login" : "logout");
+		messageReferee(ref, "player", apl.getPlayerName(), "cape", apl.getCape());
 	}
 
 	public void broadcast(String msg)
