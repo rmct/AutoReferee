@@ -12,6 +12,12 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrMatcher;
 import org.apache.commons.lang.text.StrTokenizer;
@@ -341,6 +347,55 @@ public class AutoReferee extends JavaPlugin
 	{
 		List<World> worlds = getServer().getWorlds();
 		return worlds.size() == 1 ? worlds.get(0) : consoleWorld;
+	}
+
+	public static Options teleportOptions = new Options();
+	static
+	{
+		OptionBuilder.withLongOpt("bed");
+		OptionBuilder.withDescription("teleport to player's bed");
+		teleportOptions.addOption(OptionBuilder.create('b'));
+
+		OptionBuilder.withLongOpt("death");
+		OptionBuilder.withDescription("teleport to last death location");
+		teleportOptions.addOption(OptionBuilder.create('d'));
+
+		OptionBuilder.withLongOpt("logout");
+		OptionBuilder.withDescription("teleport to last logout location");
+		teleportOptions.addOption(OptionBuilder.create('l'));
+
+		OptionBuilder.withLongOpt("objective");
+		OptionBuilder.withDescription("teleport to last objective location");
+		teleportOptions.addOption(OptionBuilder.create('o'));
+
+		OptionBuilder.withLongOpt("spawn");
+		OptionBuilder.withDescription("teleport to spawn");
+		teleportOptions.addOption(OptionBuilder.create('s'));
+
+		OptionBuilder.withLongOpt("teleport");
+		OptionBuilder.withDescription("teleport to last teleport event");
+		teleportOptions.addOption(OptionBuilder.create('t'));
+
+		OptionBuilder.withLongOpt("return");
+		OptionBuilder.withDescription("teleport to previous location");
+		teleportOptions.addOption(OptionBuilder.create('r'));
+
+		OptionBuilder.withLongOpt("vm");
+		OptionBuilder.withDescription("teleport to victory monument");
+		teleportOptions.addOption(OptionBuilder.create('v'));
+
+		OptionBuilder.withLongOpt("help");
+		OptionBuilder.withDescription("show the list of teleportation options");
+		teleportOptions.addOption(OptionBuilder.create('h'));
+
+		OptionBuilder.withLongOpt("exact");
+		OptionBuilder.withDescription("teleport to exact location");
+		OptionBuilder.hasArgs(3).withValueSeparator(',');
+		teleportOptions.addOption(OptionBuilder.create('x'));
+
+		OptionBuilder.withLongOpt("previous");
+		OptionBuilder.withDescription("show inventory from previous life");
+		viewInventoryOptions.addOption(OptionBuilder.create('p'));
 	}
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
@@ -1007,96 +1062,96 @@ public class AutoReferee extends JavaPlugin
 			// just dump location into this for teleporting later
 			Location tplocation = null;
 
-			if (args.length > 0)
+			if (args.length > 0) try
 			{
-				if (args[0].startsWith("-") && args[0].length() == 2)
-					switch (args[0].toLowerCase().charAt(1))
+				CommandLineParser parser = new GnuParser();
+				CommandLine cli = parser.parse(teleportOptions, args);
+
+				args = cli.getArgs();
+
+				if (cli.hasOption('b'))
 				{
-					case 'b':
+					AutoRefPlayer apl = match.getPlayer(args[0]);
+					Location bedloc = apl.getBedLocation();
+
+					if (bedloc == null || bedloc.getBlock().getType() != Material.BED_BLOCK)
+						player.sendMessage(apl.getName() + ChatColor.DARK_GRAY + " does not have a bed set.");
+					else tplocation = TeleportationUtil.blockTeleport(bedloc);
+				}
+				else if (cli.hasOption('d'))
+				{
+					if (args.length > 0)
 					{
-						AutoRefPlayer apl = match.getPlayer(args[1]);
-						Location bedloc = apl.getBedLocation();
-
-						if (bedloc == null || bedloc.getBlock().getType() != Material.BED_BLOCK)
-							player.sendMessage(apl.getName() + ChatColor.DARK_GRAY + " does not have a bed set.");
-						else tplocation = TeleportationUtil.blockTeleport(bedloc);
-						break;
+						AutoRefPlayer apl = match.getPlayer(args[0]);
+						if (apl != null) tplocation = apl.getLastDeathLocation();
 					}
-
-					case 'd':
-						if (args.length > 1)
-						{
-							AutoRefPlayer apl = match.getPlayer(args[1]);
-							if (apl != null) tplocation = apl.getLastDeathLocation();
-						}
-						else tplocation = match.getLastDeathLocation();
-						tplocation = TeleportationUtil.locationTeleport(tplocation);
-						break;
-
-					case 'l':
-						if (args.length > 1)
-						{
-							AutoRefPlayer apl = match.getPlayer(args[1]);
-							if (apl != null) tplocation = apl.getLastLogoutLocation();
-						}
-						else tplocation = match.getLastLogoutLocation();
-						tplocation = TeleportationUtil.locationTeleport(tplocation);
-						break;
-
-					case 't':
-						if (args.length > 1)
-						{
-							AutoRefPlayer apl = match.getPlayer(args[1]);
-							if (apl != null) tplocation = apl.getLastTeleportLocation();
-						}
-						else tplocation = match.getLastTeleportLocation();
-						tplocation = TeleportationUtil.locationTeleport(tplocation);
-						break;
-
-					case 's':
-						if (args.length > 1)
-						{
-							AutoRefTeam team = match.teamNameLookup(args[1]);
-							if (team != null) tplocation = team.getSpawnLocation();
-						}
-						else tplocation = match.getWorld().getSpawnLocation();
-						tplocation = TeleportationUtil.locationTeleport(tplocation);
-						break;
-
-					case 'o':
-						if (args.length > 1)
-						{
-							AutoRefTeam team = match.teamNameLookup(args[1]);
-							if (team != null) tplocation = team.getLastObjectiveLocation();
-						}
-						else tplocation = match.getLastObjectiveLocation();
-						tplocation = TeleportationUtil.locationTeleport(tplocation);
-						break;
-
-					case 'v':
-						if (args.length > 1)
-						{
-							AutoRefTeam team = match.teamNameLookup(args[1]);
-							if (team != null) tplocation = team.getVictoryMonumentLocation();
-						}
-						tplocation = TeleportationUtil.locationTeleport(tplocation);
-						break;
-
-					case 'x':
-						try
-						{
-							String[] coords = StringUtils.split(args[1], ',');
-							tplocation = new Location(match.getWorld(),
-								Integer.parseInt(coords[0]), Integer.parseInt(coords[1]), Integer.parseInt(coords[2]));
-							tplocation = TeleportationUtil.blockTeleport(tplocation);
-						}
-						catch (NumberFormatException e) {  }
-						break;
-
-					case 'r':
-						// get location in lookup table, or null
-						tplocation = prevLocation.get(player.getName());
-						break;
+					else tplocation = match.getLastDeathLocation();
+					tplocation = TeleportationUtil.locationTeleport(tplocation);
+				}
+				else if (cli.hasOption('l'))
+				{
+					if (args.length > 0)
+					{
+						AutoRefPlayer apl = match.getPlayer(args[0]);
+						if (apl != null) tplocation = apl.getLastLogoutLocation();
+					}
+					else tplocation = match.getLastLogoutLocation();
+					tplocation = TeleportationUtil.locationTeleport(tplocation);
+				}
+				else if (cli.hasOption('t'))
+				{
+					if (args.length > 0)
+					{
+						AutoRefPlayer apl = match.getPlayer(args[0]);
+						if (apl != null) tplocation = apl.getLastTeleportLocation();
+					}
+					else tplocation = match.getLastTeleportLocation();
+					tplocation = TeleportationUtil.locationTeleport(tplocation);
+				}
+				else if (cli.hasOption('s'))
+				{
+					if (args.length > 0)
+					{
+						AutoRefTeam team = match.teamNameLookup(args[0]);
+						if (team != null) tplocation = team.getSpawnLocation();
+					}
+					else tplocation = match.getWorld().getSpawnLocation();
+					tplocation = TeleportationUtil.locationTeleport(tplocation);
+				}
+				else if (cli.hasOption('o'))
+				{
+					if (args.length > 0)
+					{
+						AutoRefTeam team = match.teamNameLookup(args[0]);
+						if (team != null) tplocation = team.getLastObjectiveLocation();
+					}
+					else tplocation = match.getLastObjectiveLocation();
+					tplocation = TeleportationUtil.locationTeleport(tplocation);
+				}
+				else if (cli.hasOption('v'))
+				{
+					if (args.length > 0)
+					{
+						AutoRefTeam team = match.teamNameLookup(args[0]);
+						if (team != null) tplocation = team.getVictoryMonumentLocation();
+					}
+					tplocation = TeleportationUtil.locationTeleport(tplocation);
+				}
+				else if (cli.hasOption('x'))
+				{
+					try
+					{
+						String[] coords = cli.getOptionValues('x');
+						tplocation = new Location(match.getWorld(),
+							Integer.parseInt(coords[0]), Integer.parseInt(coords[1]), Integer.parseInt(coords[2]));
+						tplocation = TeleportationUtil.blockTeleport(tplocation);
+					}
+					catch (NumberFormatException e) {  }
+				}
+				else if (cli.hasOption('r'))
+				{
+					// get location in lookup table, or null
+					tplocation = prevLocation.get(player.getName());
 				}
 				else
 				{
@@ -1104,6 +1159,7 @@ public class AutoReferee extends JavaPlugin
 					tplocation = match.isPlayer(pl) ? TeleportationUtil.entityTeleport(pl) : pl.getLocation();
 				}
 			}
+			catch (ParseException e) {  }
 			else tplocation = TeleportationUtil.locationTeleport(match.getLastNotificationLocation());
 
 			// if we ever found a valid teleport, take it!
