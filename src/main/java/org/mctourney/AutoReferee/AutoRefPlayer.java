@@ -451,14 +451,23 @@ public class AutoRefPlayer
 			e.getDeathMessage(), loc, this, dc.p));
 		this.setLastDeathLocation(loc);
 
-		// reset the streak after reporting (if it was good)
-		if (totalStreak >= MIN_KILLSTREAK)
-			match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_STREAK,
-				String.format("%s had a %d-kill streak!", this.getPlayerName(), totalStreak), loc, this, null));
-
-		// reset total killstreak
-		totalStreak = 0;
+		// reset total kill streak
+		this.resetKillStreak();
 		match.messageReferees("player", getPlayerName(), "streak", Integer.toString(totalStreak));
+	}
+
+	public void resetKillStreak()
+	{
+		// if it meets the requirements, report it
+		if (totalStreak >= MIN_KILLSTREAK)
+		{
+			AutoRefMatch match = getTeam().getMatch();
+			match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_STREAK,
+				String.format("%s had a %d-kill streak!", this.getPlayerName(), totalStreak), null, this, null));
+		}
+
+		// reset to zero
+		this.totalStreak = 0;
 	}
 
 	// register that we killed the Player who fired this event

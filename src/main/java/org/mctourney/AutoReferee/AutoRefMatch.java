@@ -1282,6 +1282,9 @@ public class AutoRefMatch
 		if (t != null) messageReferees("match", getWorld().getName(), "end", t.getRawName());
 		else messageReferees("match", getWorld().getName(), "end");
 
+		// reset and report kill streaks
+		for (AutoRefPlayer apl : getPlayers()) apl.resetKillStreak();
+
 		String winner = t == null ? "" : (" " + t.getRawName() + " wins!");
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_END,
 			"Match ended." + winner, null, null, null));
