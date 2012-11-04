@@ -154,7 +154,7 @@ public class TeamListener implements Listener
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
 
 		if (team != null) { team.join(player); match = team.getMatch(); }
-		match.messageReferees("player", player.getName(), "login");
+		if (match.isPlayer(player)) match.messageReferees("player", player.getName(), "login");
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
@@ -166,9 +166,8 @@ public class TeamListener implements Listener
 
 		// leave the team, if necessary
 		AutoRefTeam team = plugin.getTeam(player);
+		if (team != null) match.messageReferees("player", player.getName(), "logout");
 		if (team != null && !match.getCurrentState().inProgress()) team.leave(player);
-
-		match.messageReferees("player", player.getName(), "logout");
 
 		AutoRefPlayer apl = match.getPlayer(player);
 		if (apl != null && player.getLocation() != null)

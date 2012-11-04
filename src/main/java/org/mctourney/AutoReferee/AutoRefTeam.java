@@ -398,6 +398,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		this.addPlayer(apl);
 		match.messageReferees("team", getRawName(), "player", "+" + apl.getPlayerName());
+		match.messageReferees("player", apl.getPlayerName(), "login");
 
 		String colorName = getPlayerName(pl);
 		match.broadcast(colorName + " has joined " + getName());
