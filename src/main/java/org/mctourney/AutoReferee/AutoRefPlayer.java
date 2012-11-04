@@ -192,13 +192,13 @@ public class AutoRefPlayer
 	private String capeURL = null;
 
 	public void setCape(String url)
-	{
-		capeURL = url == null ? "" : url;
-		getTeam().getMatch().messageReferees("player", this.getPlayerName(), "cape", getCape());
-	}
+	{ getTeam().getMatch().messageReferees("player", this.getPlayerName(), "cape", getCape()); }
 
 	public String getCape()
-	{ return capeURL.replaceFirst("^https?://", ""); }
+	{
+		if (capeURL == null) return "";
+		return capeURL.replaceFirst("^https?://", "");
+	}
 
 	// number of times this player has killed other players
 	public Map<AutoRefPlayer, Integer> kills;
