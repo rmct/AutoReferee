@@ -70,6 +70,11 @@ public class AutoReferee extends JavaPlugin
 	// singleton instance
 	private static AutoReferee instance = null;
 
+	/**
+	 * Gets the singleton instance of AutoReferee
+	 *
+	 * @return AutoReferee instance
+	 */
 	public static AutoReferee getInstance()
 	{ return instance; }
 
@@ -98,42 +103,81 @@ public class AutoReferee extends JavaPlugin
 	public static final String NO_WEBSTATS_MESSAGE = "An error has occured; no webstats will be generated.";
 
 	// query server object
-	public QueryServer qserv = null;
+	private QueryServer qserv = null;
 
 	private World lobby = null;
 
+	/**
+	 * Gets the world designated as the lobby world. When the server is in automated mode, this world
+	 * is where users will be teleported to when the a match is unloaded and cleaned up.
+	 *
+	 * @return lobby world
+	 */
 	public World getLobbyWorld()
 	{ return lobby; }
 
-	public void setLobbyWorld(World w)
+	protected void setLobbyWorld(World w)
 	{ this.lobby = w; }
 
 	// is this plugin in online mode?
 	private boolean autoMode = true;
 
+	/**
+	 * Checks if the server is in fully-automated mode.
+	 *
+	 * @return true if in automated mode, otherwise false
+	 */
 	public boolean isAutoMode()
 	{ return autoMode; }
 
-	public boolean setAutoMode(boolean m)
+	protected boolean setAutoMode(boolean m)
 	{ return this.autoMode = m; }
 
-	public boolean consoleLog = false;
+	protected boolean consoleLog = false;
 
 	// get the match associated with the world
 	private Map<UUID, AutoRefMatch> matches = Maps.newHashMap();
 
+	/**
+	 * Gets match object associated with the given world.
+	 *
+	 * @param w World
+	 * @return match object if one exists, otherwise null
+	 */
 	public AutoRefMatch getMatch(World w)
 	{ return w != null ? matches.get(w.getUID()) : null; }
 
+	/**
+	 * Gets all existing match objects for this server.
+	 *
+	 * @return a collection of match objects
+	 */
 	public Collection<AutoRefMatch> getMatches()
 	{ return matches.values(); }
 
+	/**
+	 * Adds a given match to be tracked by the server.
+	 *
+	 * @param match
+	 */
 	public void addMatch(AutoRefMatch match)
 	{ matches.put(match.getWorld().getUID(), match); }
 
+	/**
+	 * Removes a match from the server.
+	 *
+	 * @param match
+	 */
 	public void clearMatch(AutoRefMatch match)
 	{ matches.remove(match.getWorld().getUID()); }
 
+	/**
+	 * Gets team object associated with a player. Searches all matches for this player,
+	 * returns team object for the team containing this player.
+	 *
+	 * @param pl
+	 * @return team object if player is on team, otherwise null
+	 */
 	public AutoRefTeam getTeam(Player pl)
 	{
 		// go through all the matches
@@ -148,6 +192,13 @@ public class AutoReferee extends JavaPlugin
 		return null;
 	}
 
+	/**
+	 * Gets the team the player is expected to join. Matches setup by automated match
+	 * configurations may designate certain players for certain teams.
+	 *
+	 * @param pl
+	 * @return player's team, null if no such team
+	 */
 	public AutoRefTeam getExpectedTeam(Player pl)
 	{
 		AutoRefTeam actualTeam = getTeam(pl);
@@ -271,7 +322,7 @@ public class AutoReferee extends JavaPlugin
 			AutoRefMap.getUpdates(Bukkit.getConsoleSender(), false);
 	}
 
-	public boolean makeServerConnection(String qurl)
+	private boolean makeServerConnection(String qurl)
 	{
 		// if we are not in online mode, stop right here
 		if (!isAutoMode()) return false;
@@ -308,7 +359,7 @@ public class AutoReferee extends JavaPlugin
 		m.registerIncomingPluginChannel(this, REFEREE_PLUGIN_CHANNEL, refChannelListener);
 	}
 
-	public void playerDone(Player p)
+	protected void playerDone(Player p)
 	{
 		// take them back to the lobby, one way or another
 		if (p.getWorld() != getLobbyWorld())
@@ -332,6 +383,12 @@ public class AutoReferee extends JavaPlugin
 		return (WorldEditPlugin) plugin;
 	}
 
+	/**
+	 * Checks if the player should be white-listed on this server. Only used in auto-mode.
+	 *
+	 * @param player
+	 * @return true if player should be whitelisted, otherwise false
+	 */
 	public boolean playerWhitelisted(Player player)
 	{
 		if (player.hasPermission("autoreferee.admin")) return true;
@@ -343,14 +400,20 @@ public class AutoReferee extends JavaPlugin
 	private Map<String, Location> prevLocation = Maps.newHashMap();
 
 	private World consoleWorld = null;
+
+	/**
+	 * Gets the world that the console user has selected.
+	 *
+	 * @return The world selected by the console user
+	 */
 	public World getConsoleWorld()
 	{
 		List<World> worlds = getServer().getWorlds();
 		return worlds.size() == 1 ? worlds.get(0) : consoleWorld;
 	}
 
-	public static Options teleportOptions = new Options();
-	public static Options viewInventoryOptions = new Options();
+	static Options teleportOptions = new Options();
+	static Options viewInventoryOptions = new Options();
 	static
 	{
 		OptionBuilder.withLongOpt("bed");
@@ -1188,7 +1251,7 @@ public class AutoReferee extends JavaPlugin
 		return false;
 	}
 
-	public class InvitationPrompt extends BooleanPrompt
+	private class InvitationPrompt extends BooleanPrompt
 	{
 		public InvitationPrompt(AutoRefMatch match, String from)
 		{ this.match = match; this.from = from; }
@@ -1229,6 +1292,12 @@ public class AutoReferee extends JavaPlugin
 		{ return title; }
 	}
 
+	/**
+	 * Gets the role of a given user.
+	 *
+	 * @param pname Player name
+	 * @return role of player, NONE if no such player exists
+	 */
 	public AutoRefRole getRole(String pname)
 	{
 		OfflinePlayer opl = getServer().getOfflinePlayer(pname);
@@ -1268,6 +1337,13 @@ public class AutoReferee extends JavaPlugin
 	}
 
 	// ABANDON HOPE, ALL YE WHO ENTER HERE!
+	/**
+	 * Converts a human-readable time to a clock tick in Minecraft. Converts times such as "8am",
+	 * "1600", or "3:45p" to a valid clock tick setting that can be used to change the world time.
+	 *
+	 * @param t A string representing a human-readable time.
+	 * @return Equivalent clock tick
+	 */
 	public static long parseTimeString(String t)
 	{
 		// "Some people, when confronted with a problem, think 'I know, I'll use
@@ -1314,20 +1390,42 @@ public class AutoReferee extends JavaPlugin
 		catch (Exception e) {  }
 	}
 
+	/**
+	 * Checks if AutoReferee is installed on a system supporting the SportBukkit API
+	 *
+	 * @return true if SportBukkit is installed, false otherwise
+	 * @see http://www.github.com/rmct/SportBukkit
+	 */
 	public static boolean hasSportBukkitApi()
 	{ return mAffectsSpawning != null && mCollidesWithEntities != null; }
 
-	public static void setAffectsSpawning(Player p, boolean yes)
+	/**
+	 * Sets whether player affects spawning via natural spawn and mob spawners.
+	 * Uses last_username's affects-spawning API from SportBukkit
+	 *
+	 * @param p
+	 * @param affectsSpawning Set whether player affects spawning
+	 * @see http://www.github.com/rmct/SportBukkit
+	 */
+	public static void setAffectsSpawning(Player p, boolean affectsSpawning)
 	{
 		if (mAffectsSpawning != null) try
-		{ mAffectsSpawning.invoke(p, yes); }
+		{ mAffectsSpawning.invoke(p, affectsSpawning); }
 		catch (Exception e) {  }
 	}
 
-	public static void setCollidesWithEntities(Player p, boolean yes)
+	/**
+	 * Sets whether player collides with entities, including items and arrows.
+	 * Uses last_username's collides-with-entities API from SportBukkit
+	 *
+	 * @param p
+	 * @param affectsSpawning Set whether player collides with entities
+	 * @see http://www.github.com/rmct/SportBukkit
+	 */
+	public static void setCollidesWithEntities(Player p, boolean collidesWithEntities)
 	{
 		if (mCollidesWithEntities != null) try
-		{ mCollidesWithEntities.invoke(p, yes); }
+		{ mCollidesWithEntities.invoke(p, collidesWithEntities); }
 		catch (Exception e) {  }
 	}
 }

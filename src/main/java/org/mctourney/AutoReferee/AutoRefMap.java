@@ -33,20 +33,25 @@ import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+/**
+ * A map object, available to be loaded by AutoReferee
+ *
+ * @author authorblues
+ */
 public class AutoRefMap implements Comparable<AutoRefMap>
 {
-	public String name;
-	public String version;
+	private String name;
+	private String version;
 
-	public File folder = null;
+	private File folder = null;
 
-	public String filename;
-	public String md5sum;
+	private String filename;
+	private String md5sum;
 
-	public AutoRefMap(String name, String version, File folder)
+	protected AutoRefMap(String name, String version, File folder)
 	{ this.name = name; this.version = version; this.folder = folder; }
 
-	public AutoRefMap(String csv)
+	protected AutoRefMap(String csv)
 	{
 		String[] parts = csv.split(";", 5);
 
@@ -59,19 +64,35 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		this.md5sum = parts[3];
 	}
 
+	/**
+	 * Gets human-readable name of map, including version number.
+	 *
+	 * @return map version string
+	 */
 	public String getVersionString()
 	{ return name + " v" + version; }
 
+	/**
+	 * Gets whether the map has been installed.
+	 *
+	 * @return true if map is installed, otherwise false
+	 */
 	public boolean isInstalled()
 	{ return folder != null; }
 
+	/**
+	 * Gets root folder for this map, downloading if necessary.
+	 *
+	 * @return root folder for map
+	 * @throws IOException if map download fails
+	 */
 	public File getFolder() throws IOException
 	{
 		if (!isInstalled()) download();
 		return folder;
 	}
 
-	public void download() throws IOException
+	private void download() throws IOException
 	{
 		URL url = new URL(AutoRefMatch.getMapRepo() + filename);
 		File zip = new File(AutoRefMap.getMapLibrary(), filename);
@@ -105,6 +126,15 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	public int compareTo(AutoRefMap other)
 	{ return name.compareTo(other.name); }
 
+	/**
+	 * Creates match object given map name and an optional custom world name.
+	 *
+	 * @param map name of map, to be downloaded if necessary
+	 * @param world custom name for world folder, or null
+	 *
+	 * @return match object for the loaded world
+	 * @throws IOException if map download fails
+	 */
 	public static AutoRefMatch createMatch(String map, String world) throws IOException
 	{
 		// add a match object now marked as temporary
@@ -118,6 +148,15 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		plugin.addMatch(match); return match;
 	}
 
+	/**
+	 * Creates match object given map name and an optional custom world name.
+	 *
+	 * @param map map object, to be downloaded if necessary
+	 * @param world custom name for world folder, or null
+	 *
+	 * @return match object for the loaded world
+	 * @throws IOException if map download fails
+	 */
 	public static AutoRefMatch createMatch(AutoRefMap map, String world) throws IOException
 	{
 		// add a match object now marked as temporary
@@ -131,7 +170,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		plugin.addMatch(match); return match;
 	}
 
-	public static World createMatchWorld(AutoRefMap map, String world) throws IOException
+	private static World createMatchWorld(AutoRefMap map, String world) throws IOException
 	{
 		if (world == null)
 			world = AutoReferee.WORLD_PREFIX + Long.toHexString(new Date().getTime());
@@ -151,9 +190,16 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 				.generator(new NullChunkGenerator()));
 	}
 
-	public static World createMatchWorld(String map, String world) throws IOException
+	private static World createMatchWorld(String map, String world) throws IOException
 	{ return createMatchWorld(AutoRefMap.getMap(map), world); }
 
+	/**
+	 * Handles JSON object to initialize matches.
+	 * @param json match parameters to be loaded
+	 *
+	 * @return true if matches were loaded, otherwise false
+	 * @see AutoRefMatch.MatchParams
+	 */
 	public static boolean parseMatchInitialization(String json) // TODO
 	{
 		Type type = new TypeToken<List<AutoRefMatch.MatchParams>>() {}.getType();
@@ -168,6 +214,13 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		return true;
 	}
 
+	/**
+	 * Generates a match from the given match parameters.
+	 *
+	 * @param params match parameters object
+	 * @return generated match object
+	 * @throws IOException if map download fails
+	 */
 	public static AutoRefMatch createMatch(AutoRefMatch.MatchParams params) throws IOException
 	{
 		AutoRefMatch m = AutoRefMap.createMatch(params.getMap(), null);
@@ -185,6 +238,11 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	   	return m;
 	}
 
+	/**
+	 * Gets root folder of map library, generating folder if necessary.
+	 *
+	 * @return root folder of map library
+	 */
 	public static File getMapLibrary()
 	{
 		// maps library is a folder called `maps/`
@@ -200,7 +258,13 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 
 	private static final int MAX_NAME_DISTANCE = 5;
 
-	public static AutoRefMap getMap(String name) throws IOException
+	/**
+	 * Gets map object associated with given map name.
+	 *
+	 * @param name name of map
+	 * @return map object associated with the name
+	 */
+	public static AutoRefMap getMap(String name)
 	{
 		// assume worldName exists
 		if (name == null) return null;
@@ -222,6 +286,13 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		return bmap;
 	}
 
+	/**
+	 * Gets map object associated with the zip file at the provided URL.
+	 *
+	 * @param url URL of map zip to be downloaded.
+	 * @return generated map object
+	 * @throws IOException if map cannot be unpackaged
+	 */
 	public static AutoRefMap getMapFromURL(String url) throws IOException
 	{
 		String filename = url.substring(url.lastIndexOf('/') + 1, url.length());
@@ -233,13 +304,24 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		return AutoRefMap.getMapInfo(folder);
 	}
 
-
+	/**
+	 * Gets root folder of map with the given name, downloading if necessary.
+	 *
+	 * @param name name of map to load
+	 * @return root folder of map
+	 * @throws IOException if map download fails
+	 */
 	public static File getMapFolder(String name) throws IOException
 	{
 		AutoRefMap bmap = AutoRefMap.getMap(name);
 		return bmap == null ? null : bmap.getFolder();
 	}
 
+	/**
+	 * Gets all maps available to be loaded.
+	 *
+	 * @return Set of all maps available to be loaded
+	 */
 	public static Set<AutoRefMap> getAvailableMaps()
 	{
 		Set<AutoRefMap> maps = Sets.newHashSet();
@@ -284,6 +366,12 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		}
 	}
 
+	/**
+	 * Downloads updates to all maps installed on the server.
+	 *
+	 * @param sender user receiving progress updates
+	 * @param force force re-download of maps, irrespective of version
+	 */
 	public static void getUpdates(CommandSender sender, boolean force)
 	{
 		AutoReferee instance = AutoReferee.getInstance();
@@ -291,6 +379,11 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 			instance, new MapUpdateTask(sender, force));
 	}
 
+	/**
+	 * Gets maps that are not installed, but may be downloaded.
+	 *
+	 * @return set of all maps available for download
+	 */
 	public static Set<AutoRefMap> getRemoteMaps()
 	{
 		Set<AutoRefMap> maps = Sets.newHashSet();
@@ -301,6 +394,11 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		return maps;
 	}
 
+	/**
+	 * Gets maps installed locally on server.
+	 *
+	 * @return set of all maps available to load immediately
+	 */
 	public static Set<AutoRefMap> getInstalledMaps()
 	{
 		Set<AutoRefMap> maps = Sets.newHashSet();
@@ -319,6 +417,12 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		return maps;
 	}
 
+	/**
+	 * Get map info object associated with a folder
+	 *
+	 * @param folder folder containing an autoreferee.yml file
+	 * @return map info object if folder contains a map, otherwise null
+	 */
 	public static AutoRefMap getMapInfo(File folder)
 	{
 		// skip non-directories
@@ -334,7 +438,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 			cfg.getString("map.version", "1.0"), folder);
 	}
 
-	public static File unzipMapFolder(File zip) throws IOException
+	private static File unzipMapFolder(File zip) throws IOException
 	{
 		ZipFile zfile = new ZipFile(zip);
 		Enumeration<? extends ZipEntry> entries = zfile.entries();
@@ -388,9 +492,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		@Override
 		public void run()
 		{
-			AutoRefMap map = null;
-			try { map = AutoRefMap.getMap(this.mapName); } catch (IOException e) {  }
-
+			AutoRefMap map = AutoRefMap.getMap(this.mapName);
 			if (map == null) sender.sendMessage("No such map: " + this.mapName);
 			else this.loadMap(map);
 		}
@@ -435,6 +537,13 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		}
 	}
 
+	/**
+	 * Loads a map by name.
+	 *
+	 * @param sender user receiving progress updates
+	 * @param mapName name of map to be loaded
+	 * @param customName name of custom world folder, possibly null
+	 */
 	public static void loadMap(CommandSender sender, String mapName, String customName)
 	{
 		AutoReferee instance = AutoReferee.getInstance();
@@ -442,6 +551,13 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 			instance, new MapRepoDownloader(sender, mapName, customName));
 	}
 
+	/**
+	 * Loads a map by URL.
+	 *
+	 * @param sender user receiving progress updates
+	 * @param url URL of map zip to be downloaded
+	 * @param customName name of custom world folder, possibly null
+	 */
 	public static void loadMapFromURL(CommandSender sender, String url, String customName)
 	{
 		AutoReferee instance = AutoReferee.getInstance();

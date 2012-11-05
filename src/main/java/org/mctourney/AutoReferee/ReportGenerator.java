@@ -356,7 +356,7 @@ public class ReportGenerator
 					mat, data, bd.getRawName()));
 		}
 
-		String coords = BlockVector3.fromLocation(e.location).toCoords();
+		String coords = BlockVector3.fromLocation(e.getLocation()).toCoords();
 		String fmt = "<tr class='transcript-event %s' data-location='%s'>" +
 			"<td class='message'>%s</td><td class='timestamp'>%s</td></tr>\n";
 		return String.format(fmt, StringUtils.join(rowClasses, " "), coords, m, e.getTimestamp());

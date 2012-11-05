@@ -367,10 +367,10 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	protected boolean removePlayer(AutoRefPlayer apl)
 	{ return this.players.remove(apl); }
 
-	public void join(Player pl)
-	{ join(pl, false); }
+	public boolean join(Player pl)
+	{ return join(pl, false); }
 
-	public void join(Player pl, boolean force)
+	public boolean join(Player pl, boolean force)
 	{
 		// if this player is using the client mod, they may not join
 		if (pl.getListeningPluginChannels().contains(AutoReferee.REFEREE_PLUGIN_CHANNEL))
@@ -379,17 +379,17 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			String warning = ChatColor.DARK_GRAY + pl.getName() + " attempted to join " + this.getName() +
 				ChatColor.DARK_GRAY + " with a modified client";
 			for (Player ref : getMatch().getReferees(true)) ref.sendMessage(warning);
-			return;
+			return false;
 		}
 
 		// create an APL object for this player.
 		AutoRefPlayer apl = new AutoRefPlayer(pl, this);
 
 		// quit if they are already on this team
-		if (players.contains(apl)) return;
+		if (players.contains(apl)) return true;
 
 		// if the match is in progress, no one may join
-		if (!match.getCurrentState().isBeforeMatch() && !force) return;
+		if (!match.getCurrentState().isBeforeMatch() && !force) return false;
 
 		// prepare the player
 		if (match != null && !match.getCurrentState().inProgress())
@@ -408,19 +408,20 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		match.setupSpectators();
 		match.checkTeamsReady();
+		return true;
 	}
 
-	public void leave(Player pl)
-	{ leave(pl, false); }
+	public boolean leave(Player pl)
+	{ return leave(pl, false); }
 
-	public void leave(Player pl, boolean force)
+	public boolean leave(Player pl, boolean force)
 	{
 		// if the match is in progress, no one may leave their team
-		if (!match.getCurrentState().isBeforeMatch() && !force) return;
+		if (!match.getCurrentState().isBeforeMatch() && !force) return false;
 
 		// create an APL object for this player.
 		AutoRefPlayer apl = new AutoRefPlayer(pl);
-		if (!this.removePlayer(apl)) return;
+		if (!this.removePlayer(apl)) return false;
 
 		String colorName = getPlayerName(pl);
 		match.broadcast(colorName + " has left " + getName());
@@ -433,6 +434,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		match.setupSpectators();
 		match.checkTeamsReady();
+		return true;
 	}
 
 	public String getPlayerName(Player pl)

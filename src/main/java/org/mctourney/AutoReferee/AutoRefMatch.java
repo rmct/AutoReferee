@@ -65,12 +65,19 @@ public class AutoRefMatch
 	// online map list
 	private static String MAPREPO = "http://s3.amazonaws.com/autoreferee/maps/";
 
+	/**
+	 * Get the base url for the map repository
+	 * @return url of map repository
+	 */
 	public static String getMapRepo()
 	{ return MAPREPO; }
 
-	// set new map repo
-	public static void changeMapRepo(String s)
-	{ MAPREPO = s + "/"; }
+	/**
+	 * Sets a new map repository for the plugin to download maps
+	 * @param url url of new map repository to use
+	 */
+	public static void changeMapRepo(String url)
+	{ MAPREPO = url + "/"; }
 
 	// local storage locations
 	private static File matchSummaryDirectory = null;
@@ -110,12 +117,21 @@ public class AutoRefMatch
 	private boolean isTemporaryWorld()
 	{ return tmp; }
 
-	// time to set the world to at the start of the match
 	private long startTime = 8000L;
 
+	/**
+	 * Gets the time to set the world to at the start of the match.
+	 *
+	 * @return world time in ticks to be set at start of the match
+	 */
 	public long getStartTime()
 	{ return startTime; }
 
+	/**
+	 * Sets the time that will be set at the start of the match.
+	 *
+	 * @param startTime world time in ticks to set at start of the match
+	 */
 	public void setStartTime(long startTime)
 	{ this.startTime = startTime; }
 
@@ -155,6 +171,11 @@ public class AutoRefMatch
 		return sortedTeams;
 	}
 
+	/**
+	 * Gets a comma-separated list of teams for this match.
+	 *
+	 * @return list of teams
+	 */
 	public String getTeamList()
 	{
 		Set<String> tlist = Sets.newHashSet();
@@ -165,15 +186,30 @@ public class AutoRefMatch
 
 	private AutoRefTeam winningTeam = null;
 
+	/**
+	 * Gets the team that won this match.
+	 *
+	 * @return team that won the match if it is over, otherwise null
+	 */
 	public AutoRefTeam getWinningTeam()
 	{ return winningTeam; }
 
-	public void setWinningTeam(AutoRefTeam t)
-	{ winningTeam = t; }
+	/**
+	 * Sets the team that won this match.
+	 */
+	public void setWinningTeam(AutoRefTeam team)
+	{ winningTeam = team; }
 
 	// region defined as the "start" region (safe zone)
 	private CuboidRegion startRegion = null;
 
+	/**
+	 * Gets the region designated as the start platform. This region should contain the
+	 * world spawn location. Players in this region are immune to damage from other players,
+	 * and mobs will not spawn in this region.
+	 *
+	 * @return start region
+	 */
 	public CuboidRegion getStartRegion()
 	{ return startRegion; }
 
@@ -214,8 +250,11 @@ public class AutoRefMatch
 
 	private String versionString = "1.0";
 
-	public String getVersion()
+	public String getMapVersion()
 	{ return versionString; }
+
+	public String getVersionString()
+	{ return String.format("%s-v%s", normalizeMapName(this.getMapName()), this.getMapVersion()); }
 
 	public String getMapAuthors()
 	{
@@ -226,12 +265,17 @@ public class AutoRefMatch
 
 	private long startTicks = 0;
 
-	public long getStartTicks()
+	private long getStartTicks()
 	{ return startTicks; }
 
-	public void setStartTicks(long startTicks)
+	private void setStartTicks(long startTicks)
 	{ this.startTicks = startTicks; }
 
+	/**
+	 * Gets the number of seconds elapsed in this match.
+	 *
+	 * @return current elapsed seconds if match in progress, otherwise 0L
+	 */
 	public long getMatchTime()
 	{
 		if (!getCurrentState().inProgress()) return 0L;
@@ -240,21 +284,47 @@ public class AutoRefMatch
 
 	private long timeLimit = -1L;
 
+	/**
+	 * Gets the match time limit in seconds.
+	 *
+	 * @return time limit in seconds
+	 */
 	public long getTimeLimit()
 	{ return timeLimit; }
 
 	public boolean hasTimeLimit()
 	{ return timeLimit != -1L; }
 
+	/**
+	 * Gets the number of seconds remaining in this match.
+	 *
+	 * @return time remaining in seconds
+	 */
 	public long getTimeRemaining()
 	{ return timeLimit - getMatchTime(); }
 
+	/**
+	 * Sets match time limit in seconds.
+	 *
+	 * @param limit new time limit in seconds
+	 */
 	public void setTimeLimit(long limit)
 	{ this.timeLimit = limit; }
 
+	/**
+	 * Gets current match time, default value separator (colon).
+	 *
+	 * @return current match timestamp
+	 */
 	public String getTimestamp()
 	{ return getTimestamp(":"); }
 
+	/**
+	 * Gets current match time, with value separator.
+	 *
+	 * @param sep time value separator
+	 * @return current match timestamp
+	 */
 	public String getTimestamp(String sep)
 	{
 		long timestamp = this.getMatchTime();
@@ -283,6 +353,11 @@ public class AutoRefMatch
 	// range of inexact placement
 	private int inexactRange = 2;
 
+	/**
+	 * Gets the distance an objective may be placed from its target location.
+	 *
+	 * @return range of inexact objective placement
+	 */
 	public int getInexactRange()
 	{ return inexactRange; }
 
@@ -291,20 +366,43 @@ public class AutoRefMatch
 
 	private boolean refereeReady = false;
 
+	/**
+	 * Checks if the referees are ready for the match to start.
+	 *
+	 * @return true if referees are ready or there are no referees, otherwise false
+	 */
 	public boolean isRefereeReady()
 	{ return getReferees().size() == 0 || refereeReady; }
 
+	/**
+	 * Sets whether the referees are ready for the match to start.
+	 */
 	public void setRefereeReady(boolean r)
 	{ refereeReady = r; }
 
 	private CommandSender debugRecipient = null;
 
+	/**
+	 * Checks if the match is in debug mode.
+	 *
+	 * @return true if match is in debug mode, otherwise false
+	 */
 	public boolean isDebugMode()
 	{ return debugRecipient != null; }
 
+	/**
+	 * Sends a debug message to the debug recipient.
+	 *
+	 * @param msg debug message
+	 */
 	public void debug(String msg)
 	{ if (debugRecipient != null) debugRecipient.sendMessage(msg); }
 
+	/**
+	 * Sets the recipient of debug messages for this match.
+	 *
+	 * @param recp a recipient for debug messages, or null to disable debug
+	 */
 	public void setDebug(CommandSender recp)
 	{
 		if (recp != null && recp.hasPermission("autoreferee.streamer"))
@@ -322,6 +420,11 @@ public class AutoRefMatch
 
 	private int customReadyDelay = -1;
 
+	/**
+	 * Gets number of seconds between start of countdown and match starting.
+	 *
+	 * @return number of seconds for match countdown
+	 */
 	public int getReadyDelay()
 	{
 		if (customReadyDelay >= 0) return customReadyDelay;
@@ -329,6 +432,9 @@ public class AutoRefMatch
 			"delay-seconds.ready", AutoRefMatch.READY_SECONDS);
 	}
 
+	/**
+	 * Sets number of seconds between start of countdown and match starting.
+	 */
 	public void setReadyDelay(int delay)
 	{ this.customReadyDelay = delay; }
 
@@ -384,10 +490,10 @@ public class AutoRefMatch
 		setLastNotificationLocation(loc);
 	}
 
-	public AutoRefMatch(World world, boolean tmp, MatchStatus state)
+	protected AutoRefMatch(World world, boolean tmp, MatchStatus state)
 	{ this(world, tmp); setCurrentState(state); }
 
-	public AutoRefMatch(World world, boolean tmp)
+	protected AutoRefMatch(World world, boolean tmp)
 	{
 		setWorld(world);
 		loadWorldConfiguration();
@@ -410,9 +516,20 @@ public class AutoRefMatch
 		return players;
 	}
 
+	/**
+	 * Gets all non-streamer referees present in this match.
+	 *
+	 * @return collection of referees
+	 */
 	public Set<Player> getReferees()
 	{ return getReferees(true); }
 
+	/**
+	 * Gets referees present in this match, possibly excluding streamers.
+	 *
+	 * @param excludeStreamers whether streamers should be included
+	 * @return collection of referees
+	 */
 	public Set<Player> getReferees(boolean excludeStreamers)
 	{
 		Set<Player> refs = Sets.newHashSet();
@@ -422,20 +539,33 @@ public class AutoRefMatch
 		return refs;
 	}
 
-	public boolean isReferee(Player p)
+	/**
+	 * Checks if the specified player is a referee for this match.
+	 *
+	 * @return true if player is a referee and not on a team, otherwise false
+	 */
+	public boolean isReferee(Player player)
 	{
 		// pretty much the only reason we would send a null player
 		// is if we are checking the ConsoleCommandSender
-		if (p == null) return true;
+		if (player == null) return true;
 
 		for (AutoRefPlayer apl : getPlayers())
-			if (apl.getPlayerName() == p.getName()) return false;
-		return p.hasPermission("autoreferee.referee");
+			if (apl.getPlayerName() == player.getName()) return false;
+		return player.hasPermission("autoreferee.referee");
 	}
 
+	/**
+	 * Checks if the given world is compatible with AutoReferee
+	 * @param w world to check
+	 * @return true if the world contains an autoreferee.yml, otherwise false
+	 */
 	public static boolean isCompatible(World w)
 	{ return new File(w.getWorldFolder(), "autoreferee.yml").exists(); }
 
+	/**
+	 * Reloads world configuration from autoreferee.yml.
+	 */
 	public void reload()
 	{ this.loadWorldConfiguration(); }
 
@@ -521,6 +651,9 @@ public class AutoRefMatch
 		return diff;
 	}
 
+	/**
+	 * Saves copy of autoreferee.yml back to the world folder.
+	 */
 	public void saveWorldConfiguration()
 	{
 		// if there is no configuration object or file, nothin' doin'...
@@ -558,9 +691,17 @@ public class AutoRefMatch
 		{ AutoReferee.getInstance().getLogger().info("Could not save world config: " + world.getName()); }
 	}
 
+	/**
+	 * Sends a referee plugin channel message to all referees, properly delimited.
+	 */
 	public void messageReferees(String ...parts)
 	{ for (Player ref : getReferees(false)) messageReferee(ref, parts); }
 
+	/**
+	 * Sends a referee plugin channel message to a specific referee, properly delimited.
+	 *
+	 * @param ref referee to recieve the plugin channel message
+	 */
 	public void messageReferee(Player ref, String ...parts)
 	{
 		try
@@ -573,6 +714,11 @@ public class AutoRefMatch
 		{ AutoReferee.getInstance().getLogger().info("Unsupported encoding: " + AutoReferee.PLUGIN_CHANNEL_ENC); }
 	}
 
+	/**
+	 * Sends all information to a single referee necessary to sync a match's current status.
+	 *
+	 * @param ref referee to recieve the plugin channel messages
+	 */
 	public void updateReferee(Player ref)
 	{
 		messageReferee(ref, "match", getWorld().getName(), "init");
@@ -622,6 +768,11 @@ public class AutoRefMatch
 		messageReferee(ref, "player", apl.getPlayerName(), "cape", apl.getCape());
 	}
 
+	/**
+	 * Sends a message to all players in this match, including referees and streamers.
+	 *
+	 * @param msg message to be sent
+	 */
 	public void broadcast(String msg)
 	{
 		if (AutoReferee.getInstance().consoleLog)
@@ -629,19 +780,37 @@ public class AutoRefMatch
 		for (Player p : world.getPlayers()) p.sendMessage(msg);
 	}
 
-	public static String normalizeMapName(String m)
-	{ return m == null ? null : m.replaceAll("[^0-9a-zA-Z]+", ""); }
+	/**
+	 * Removes any non-alphanumeric characters from a map name. Prepares a map name
+	 * to be used as a file name or a target in a chat command.
+	 *
+	 * @param name original map name
+	 * @return normalized version of map name
+	 */
+	public static String normalizeMapName(String name)
+	{ return name == null ? null : name.replaceAll("[^0-9a-zA-Z]+", ""); }
 
-	public String getVersionString()
-	{ return String.format("%s-v%s", this.getMapName().replaceAll("[^0-9a-zA-Z]+", ""), this.getVersion()); }
-
-	public static void setupWorld(World w, boolean b)
+	/**
+	 * Assigns a world a match object. Best suited for retro-fitting worlds that
+	 * have already been loaded.
+	 *
+	 * @param world loaded AutoReferee-compatible world
+	 * @param tmp whether this world should be unloaded when the match completes
+	 */
+	public static void setupWorld(World world, boolean tmp)
 	{
 		// if this map isn't compatible with AutoReferee, quit...
-		if (AutoReferee.getInstance().getMatch(w) != null || !isCompatible(w)) return;
-		AutoReferee.getInstance().addMatch(new AutoRefMatch(w, b, MatchStatus.WAITING));
+		if (AutoReferee.getInstance().getMatch(world) != null || !isCompatible(world)) return;
+		AutoReferee.getInstance().addMatch(new AutoRefMatch(world, tmp, MatchStatus.WAITING));
 	}
 
+	/**
+	 * Archives this map and stores a clean copy in the map library. Clears unnecessary
+	 * files and attempts to generate a minimal copy of the map, ready for distribution.
+	 *
+	 * @return root folder of the archived map
+	 * @throws IOException if archive cannot be created
+	 */
 	public File archiveMapData() throws IOException
 	{
 		// make sure the folder exists first
@@ -672,6 +841,12 @@ public class AutoRefMatch
 		else IOUtils.copy(new FileInputStream(f), zip);
 	}
 
+	/**
+	 * Packages and compresses (zip) map folder for easy distribution.
+	 *
+	 * @return generated zip file
+	 * @throws IOException if map cannot be archived
+	 */
 	public File distributeMap() throws IOException
 	{
 		File archiveFolder = this.archiveMapData();
@@ -686,7 +861,7 @@ public class AutoRefMatch
 		return archiveFolder;
 	}
 
-	public class WorldFolderDeleter implements Runnable
+	private class WorldFolderDeleter implements Runnable
 	{
 		private File worldFolder;
 		public int task = -1;
@@ -712,6 +887,10 @@ public class AutoRefMatch
 		}
 	}
 
+	/**
+	 * Unloads and cleans up this match. Players will be teleported out or kicked,
+	 * the map will be unloaded, and the map folder may be deleted.
+	 */
 	public void destroy()
 	{
 		AutoReferee autoref = AutoReferee.getInstance();
@@ -740,6 +919,12 @@ public class AutoRefMatch
 		}
 	}
 
+	/**
+	 * Checks if a item is prohibited from crafting.
+	 *
+	 * @param bd block data object for the item being queried
+	 * @return true if item may be crafted, otherwise false
+	 */
 	public boolean canCraft(BlockData bd)
 	{
 		for (BlockData nc : prohibitCraft)
@@ -747,12 +932,22 @@ public class AutoRefMatch
 		return true;
 	}
 
+	/**
+	 * Prohibits an item from being crafted during a match.
+	 *
+	 * @param bd block data object for the prohibited item
+	 */
 	public void addIllegalCraft(BlockData bd)
 	{
 		this.prohibitCraft.add(bd);
 		this.broadcast("Crafting " + bd.getName() + " is now prohibited");
 	}
 
+	/**
+	 * Gets an arbitrary team, attempting to maintain balanced teams if possible.
+	 *
+	 * @return an arbitrary team
+	 */
 	public AutoRefTeam getArbitraryTeam()
 	{
 		// minimum size of any one team, and an array to hold valid teams
@@ -772,30 +967,35 @@ public class AutoRefMatch
 		return vteams.get(new Random().nextInt(vteams.size()));
 	}
 
+	/**
+	 * A redstone mechanism necessary to start a match.
+	 *
+	 * @author authorblues
+	 */
 	public static class StartMechanism
 	{
-		public Location loc = null;
-		public BlockState blockState = null;
-		public boolean state = true;
+		private Location loc = null;
+		private BlockState state = null;
+		private boolean flip = true;
 
-		public StartMechanism(Block block, boolean state)
+		public StartMechanism(Block block, boolean flip)
 		{
-			this.state = state;
-			this.loc = block.getLocation();
-			this.blockState = block.getState();
+			this.flip = flip;
+			loc = block.getLocation();
+			state = block.getState();
 		}
 
 		public StartMechanism(Block block)
 		{ this(block, true); }
 
 		@Override public int hashCode()
-		{ return loc.hashCode() ^ blockState.hashCode(); }
+		{ return loc.hashCode() ^ state.hashCode(); }
 
 		@Override public boolean equals(Object o)
 		{ return (o instanceof StartMechanism) && hashCode() == o.hashCode(); }
 
 		public String serialize()
-		{ return Vector3.fromLocation(loc).toCoords() + ":" + Boolean.toString(state); }
+		{ return Vector3.fromLocation(loc).toCoords() + ":" + Boolean.toString(flip); }
 
 		public static StartMechanism unserialize(World w, String sm)
 		{
@@ -808,10 +1008,29 @@ public class AutoRefMatch
 		}
 
 		@Override public String toString()
-		{ return blockState.getType().name() + "(" + Vector3.fromLocation(loc).toCoords() +
-			"):" + Boolean.toString(state); }
+		{ return state.getType().name() + "(" + Vector3.fromLocation(loc).toCoords() +
+			"):" + Boolean.toString(flip); }
+
+		public Location getLocation()
+		{ return loc; }
+
+		public BlockState getBlockState()
+		{ return state; }
+
+		public boolean getFlippedPosition()
+		{ return flip; }
 	}
 
+	/**
+	 * Adds a new start mechanism for this map. These mechanisms are activated automatically
+	 * at the start of a match when using SportBukkit, and players may interact with them
+	 * normally in the start region when using vanilla CraftBukkit.
+	 *
+	 * @param block block containing the start mechanism
+	 * @param state whether this mechanism should be set powered or unpowered
+	 * @return generated start mechanism object
+	 * @see http://www.github.com/rmct/SportBukkit
+	 */
 	public StartMechanism addStartMech(Block block, boolean state)
 	{
 		if (block.getType() != Material.LEVER) state = true;
@@ -823,16 +1042,24 @@ public class AutoRefMatch
 		return sm;
 	}
 
+	/**
+	 * Checks if a specified block location is a start mechanism for this match.
+	 *
+	 * @return true if a start mechanism is located at that position, otherwise false
+	 */
 	public boolean isStartMechanism(Location loc)
 	{
 		if (loc == null) return false;
 		for (StartMechanism sm : startMechanisms)
-			if (loc.equals(sm.loc)) return true;
+			if (loc.equals(sm.getLocation())) return true;
 		return false;
 	}
 
-	// unserialized match initialization parameters
-	static class MatchParams
+	/**
+	 * Parameters necessary to configure a match.
+	 * @author authorblues
+	 */
+	public static class MatchParams
 	{
 		public static class TeamInfo
 		{
@@ -866,11 +1093,14 @@ public class AutoRefMatch
 		{ return map; }
 	}
 
+	/**
+	 * Starts the match.
+	 */
 	public void start()
 	{
 		// set up the world time one last time
 		world.setTime(startTime);
-		startTicks = world.getFullTime();
+		this.setStartTicks(world.getFullTime());
 
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_START,
 			"Match began.", null, null, null));
@@ -885,23 +1115,23 @@ public class AutoRefMatch
 		if (AutoReferee.getInstance().isAutoMode() || AutoReferee.hasSportBukkitApi())
 			for (StartMechanism sm : startMechanisms)
 		{
-			MaterialData mdata = sm.blockState.getData();
-			switch (sm.blockState.getType())
+			MaterialData mdata = sm.getBlockState().getData();
+			switch (sm.getBlockState().getType())
 			{
 				case LEVER:
 					// flip the lever to the correct state
-					((Lever) mdata).setPowered(sm.state);
+					((Lever) mdata).setPowered(sm.getFlippedPosition());
 					break;
 
 				case STONE_BUTTON:
 					// press (or depress) the button
-					((Button) mdata).setPowered(sm.state);
+					((Button) mdata).setPowered(sm.getFlippedPosition());
 					break;
 
 				case WOOD_PLATE:
 				case STONE_PLATE:
 					// press (or depress) the pressure plate
-					((PressurePlate) mdata).setData((byte)(sm.state ? 0x1 : 0x0));
+					((PressurePlate) mdata).setData((byte)(sm.getFlippedPosition() ? 0x1 : 0x0));
 					break;
 
 				default:
@@ -909,8 +1139,8 @@ public class AutoRefMatch
 			}
 
 			// save the block state and fire an update
-			sm.blockState.setData(mdata);
-			sm.blockState.update(true);
+			sm.getBlockState().setData(mdata);
+			sm.getBlockState().update(true);
 		}
 
 		// set teams as started
@@ -934,14 +1164,14 @@ public class AutoRefMatch
 	// handle to the clock task
 	private MatchClockTask clockTask = null;
 
-	public void cancelClock()
+	private void cancelClock()
 	{
 		if (clockTask != null && clockTask.task != -1) AutoReferee.getInstance()
 			.getServer().getScheduler().cancelTask(clockTask.task);
 		clockTask = null;
 	}
 
-	public class MatchClockTask implements Runnable
+	private class MatchClockTask implements Runnable
 	{
 		public int task;
 
@@ -989,6 +1219,18 @@ public class AutoRefMatch
 		else view.hidePlayer(subj);
 	}
 
+	/**
+	 * Reconfigures spectator mode for all connected players.
+	 */
+	public void setupSpectators()
+	{ for ( Player pl : getWorld().getPlayers() ) setupSpectators(pl); }
+
+	/**
+	 * Reconfigures spectator mode for a single player. Useful for updating all
+	 * players when one player logs in.
+	 *
+	 * @param focus player to configure spectator mode for
+	 */
 	public void setupSpectators(Player focus)
 	{
 		if (getCurrentState().isBeforeMatch()) setSpectatorMode(focus, isReferee(focus));
@@ -1002,21 +1244,37 @@ public class AutoRefMatch
 		}
 	}
 
-	public void setSpectatorMode(Player p, boolean b)
-	{ setSpectatorMode(p, b, b ? GameMode.CREATIVE : GameMode.SURVIVAL); }
-
-	public void setSpectatorMode(Player p, boolean b, GameMode gm)
+	/**
+	 * Sets whether a specified player is in spectator mode.
+	 *
+	 * @param player player to set spectator mode for
+	 * @param b true to set spectator mode on, false to set spectator mode off
+	 */
+	public void setSpectatorMode(Player player, boolean b)
 	{
-		p.setGameMode(gm);
-		AutoReferee.setAffectsSpawning(p, !b);
-
-		boolean noEntityCollide = b && getCurrentState().inProgress();
-		AutoReferee.setCollidesWithEntities(p, !noEntityCollide);
+		GameMode gm = b ? GameMode.CREATIVE : GameMode.SURVIVAL;
+		this.setSpectatorMode(player, b, gm);
 	}
 
-	public void setupSpectators()
-	{ for ( Player pl : getWorld().getPlayers() ) setupSpectators(pl); }
+	/**
+	 * Sets whether a specified player is in spectator mode, explicitly setting gamemode.
+	 *
+	 * @param player player to set spectator mode for
+	 * @param b true to set spectator mode on, false to set spectator mode off
+	 * @param gamemode player's new gamemode
+	 */
+	public void setSpectatorMode(Player player, boolean b, GameMode gamemode)
+	{
+		player.setGameMode(gamemode);
+		AutoReferee.setAffectsSpawning(player, !b);
 
+		boolean noEntityCollide = b && getCurrentState().inProgress();
+		AutoReferee.setCollidesWithEntities(player, !noEntityCollide);
+	}
+
+	/**
+	 * Removes unprotected entities from the world.
+	 */
 	public void clearEntities()
 	{
 		for (Entity e : world.getEntitiesByClasses(Monster.class,
@@ -1024,9 +1282,17 @@ public class AutoRefMatch
 			if (!protectedEntities.contains(e.getUniqueId())) e.remove();
 	}
 
+	/**
+	 * Checks if the match start countdown is running.
+	 *
+	 * @return true if the countdown is in progress, otherwise false
+	 */
 	public boolean isCountdownRunning()
 	{ return matchStarter != null && matchStarter.task != -1; }
 
+	/**
+	 * Cancels the match countdown in progress.
+	 */
 	public void cancelCountdown()
 	{
 		if (isCountdownRunning())
@@ -1035,7 +1301,7 @@ public class AutoRefMatch
 	}
 
 	// helper class for starting match, synchronous task
-	static class CountdownTask implements Runnable
+	private static class CountdownTask implements Runnable
 	{
 		public static final ChatColor COLOR = ChatColor.GREEN;
 
@@ -1112,6 +1378,12 @@ public class AutoRefMatch
 		startCountdown(readyDelay, true);
 	}
 
+	/**
+	 * Starts a countdown.
+	 *
+	 * @param readyDelay number of seconds before end of countdown
+	 * @param startMatch true if countdown should start match, otherwise false
+	 */
 	public void startCountdown(int readyDelay, boolean startMatch)
 	{
 		// get a copy of the bukkit scheduling daemon
@@ -1127,6 +1399,9 @@ public class AutoRefMatch
 				AutoReferee.getInstance(), this.matchStarter, 0L, 20L);
 	}
 
+	/**
+	 * Checks if teams have any players missing and are ready to play.
+	 */
 	public void checkTeamsReady()
 	{
 		// this function is only useful if called prior to the match
@@ -1154,6 +1429,9 @@ public class AutoRefMatch
 		setCurrentState(ready ? MatchStatus.READY : MatchStatus.WAITING);
 	}
 
+	/**
+	 * Checks if teams and referees are ready for the match to start.
+	 */
 	public void checkTeamsStart()
 	{
 		boolean teamsReady = true;
@@ -1168,12 +1446,20 @@ public class AutoRefMatch
 		if (ready) this.prepareMatch();
 	}
 
-	public Location blockInRange(BlockData bd, Location loc, int r)
+	/**
+	 * Checks if a given block type exists within a cube centered around a location.
+	 *
+	 * @param bd block type being searched for
+	 * @param loc center point of searchable cube
+	 * @param radius radius of searchable cube
+	 * @return location of a matching block within the region if one exists, otherwise null
+	 */
+	public Location blockInRange(BlockData bd, Location loc, int radius)
 	{
 		Block b = getWorld().getBlockAt(loc);
-		for (int x = -r; x <= r; ++x)
-		for (int y = -r; y <= r; ++y)
-		for (int z = -r; z <= r; ++z)
+		for (int x = -radius; x <= radius; ++x)
+		for (int y = -radius; y <= radius; ++y)
+		for (int z = -radius; z <= radius; ++z)
 		{
 			Block rel = b.getRelative(x, y, z);
 			if (bd.matches(rel)) return rel.getLocation();
@@ -1185,6 +1471,9 @@ public class AutoRefMatch
 	private Location blockInRange(WinCondition wc)
 	{ return blockInRange(wc.getBlockData(), wc.getLocation(), wc.getInexactRange()); }
 
+	/**
+	 * Checks if any team has satisfied the win conditions.
+	 */
 	public void checkWinConditions()
 	{
 		Plugin plugin = AutoReferee.getInstance();
@@ -1192,7 +1481,7 @@ public class AutoRefMatch
 			new Runnable(){ public void run(){ delayedCheckWinConditions(); } });
 	}
 
-	public void delayedCheckWinConditions()
+	private void delayedCheckWinConditions()
 	{
 		// this code is only called in BlockPlaceEvent and BlockBreakEvent when
 		// we have confirmed that the state is PLAYING, so we know we are definitely
@@ -1220,13 +1509,13 @@ public class AutoRefMatch
 	}
 
 	// helper class for terminating world, synchronous task
-	class MatchEndTask implements Runnable
+	private class MatchEndTask implements Runnable
 	{
 		public void run()
 		{ destroy(); }
 	}
 
-	public static class TiebreakerComparator implements Comparator<AutoRefTeam>
+	private static class TiebreakerComparator implements Comparator<AutoRefTeam>
 	{
 		public int compare(AutoRefTeam a, AutoRefTeam b)
 		{
@@ -1236,6 +1525,9 @@ public class AutoRefMatch
 		}
 	}
 
+	/**
+	 * Ends match, allowing AutoReferee to break ties according to its own policies.
+	 */
 	public void matchComplete()
 	{
 		TiebreakerComparator cmp = new TiebreakerComparator();
@@ -1259,10 +1551,15 @@ public class AutoRefMatch
 		cancelClock();
 	}
 
-	public void matchComplete(AutoRefTeam t)
+	/**
+	 * Ends match in favor of a specified team.
+	 *
+	 * @param team winning team, or null for no winner
+	 */
+	public void matchComplete(AutoRefTeam team)
 	{
 		// announce the victory and set the match to completed
-		if (t != null) this.broadcast(t.getName() + " Wins!");
+		if (team != null) this.broadcast(team.getName() + " Wins!");
 		else this.broadcast("Match terminated!");
 
 		// remove all mobs, animals, and items
@@ -1279,18 +1576,18 @@ public class AutoRefMatch
 		messageReferees("match", getWorld().getName(), "time", getTimestamp(","));
 
 		// send referees the end event
-		if (t != null) messageReferees("match", getWorld().getName(), "end", t.getRawName());
+		if (team != null) messageReferees("match", getWorld().getName(), "end", team.getRawName());
 		else messageReferees("match", getWorld().getName(), "end");
 
 		// reset and report kill streaks
 		for (AutoRefPlayer apl : getPlayers()) apl.resetKillStreak();
 
-		String winner = t == null ? "" : (" " + t.getRawName() + " wins!");
+		String winner = team == null ? "" : (" " + team.getRawName() + " wins!");
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_END,
 			"Match ended." + winner, null, null, null));
 		setCurrentState(MatchStatus.COMPLETED);
 
-		setWinningTeam(t);
+		setWinningTeam(team);
 		logPlayerStats();
 
 		cancelClock();
@@ -1306,6 +1603,12 @@ public class AutoRefMatch
 		getWorld().setTime(0L);
 	}
 
+	/**
+	 * Finds a team whose name matches the given string.
+	 *
+	 * @param name team name to look up, either custom team name or base team name
+	 * @return team object matching the name if one exists, otherwise null
+	 */
 	public AutoRefTeam teamNameLookup(String name)
 	{
 		AutoRefTeam mteam = null;
@@ -1319,10 +1622,8 @@ public class AutoRefMatch
 		return mteam;
 	}
 
-	// teamless expected players
 	Set<OfflinePlayer> expectedPlayers = Sets.newHashSet();
 
-	// get all expected players
 	public Set<OfflinePlayer> getExpectedPlayers()
 	{
 		Set<OfflinePlayer> eps = Sets.newHashSet(expectedPlayers);
@@ -1331,10 +1632,17 @@ public class AutoRefMatch
 		return eps;
 	}
 
+	/**
+	 * Adds a player to the list of expected players, without a team affiliation.
+	 */
 	public void addExpectedPlayer(OfflinePlayer opl)
 	{ expectedPlayers.add(opl); }
 
-	// returns the team for the expected player
+	/**
+	 * Gets the team the specified player is expected to join.
+	 *
+	 * @return team player is expected to join, otherwise null
+	 */
 	public AutoRefTeam expectedTeam(OfflinePlayer opl)
 	{
 		for (AutoRefTeam team : teams)
@@ -1342,10 +1650,17 @@ public class AutoRefMatch
 		return null;
 	}
 
-	// returns if the player is meant to join this match
+	/**
+	 * Checks if the specified player is expected to join this match.
+	 *
+	 * @return true if player is expected, otherwise false
+	 */
 	public boolean isPlayerExpected(OfflinePlayer opl)
 	{ return getExpectedPlayers().contains(opl); }
 
+	/**
+	 * Removes a specified player from any expected player lists for this match.
+	 */
 	public void removeExpectedPlayer(OfflinePlayer opl)
 	{
 		for (AutoRefTeam t : teams)
@@ -1353,35 +1668,59 @@ public class AutoRefMatch
 		expectedPlayers.remove(opl);
 	}
 
-	public void acceptInvitation(Player pl)
+	/**
+	 * Teleports a player to a match they have been added to, joining the team inviting them.
+	 */
+	public void acceptInvitation(Player player)
 	{
 		// if already here, skip this
-		if (this.isPlayer(pl)) return;
+		if (this.isPlayer(player)) return;
 
 		// if this player needs to be placed on a team, go for it
-		AutoRefTeam team = this.expectedTeam(pl);
-		if (team != null) this.joinTeam(pl, team, false);
+		AutoRefTeam team = this.expectedTeam(player);
+		if (team != null) this.joinTeam(player, team, false);
 
 		// otherwise, get them into the world
-		else if (pl.getWorld() != this.getWorld())
-			pl.teleport(this.getPlayerSpawn(pl));
+		else if (player.getWorld() != this.getWorld())
+			player.teleport(this.getPlayerSpawn(player));
 
 		// remove name from all lists
-		this.removeExpectedPlayer(pl);
+		this.removeExpectedPlayer(player);
 	}
 
-	public boolean joinTeam(Player pl, AutoRefTeam t, boolean force)
+	/**
+	 * Adds a player to the specified team. Removes the player from any other teams first,
+	 * if necessary. Roster changes are restricted while a match is in progress, unless forced.
+	 *
+	 * @param player player to be added to team
+	 * @param team team to add player to
+	 * @param force should player be added to team, even if match is in progress
+	 * @return true if player was added to team, otherwise false
+	 */
+	public boolean joinTeam(Player player, AutoRefTeam team, boolean force)
 	{
-		AutoRefTeam pteam = getPlayerTeam(pl);
-		if (t == pteam) return true;
+		AutoRefTeam pteam = getPlayerTeam(player);
+		if (team == pteam) return true;
 
-		if (pteam != null) pteam.leave(pl, force);
-		t.join(pl, force); return true;
+		if (pteam != null) pteam.leave(player, force);
+		return team.join(player, force);
 	}
 
-	public void leaveTeam(Player pl, boolean force)
-	{ for (AutoRefTeam team : teams) team.leave(pl, force); }
+	/**
+	 * Removes player from all teams.
+	 *
+	 * @param player player to be removed
+	 * @param force should player be removed, even if match is in progress
+	 */
+	public void leaveTeam(Player player, boolean force)
+	{ for (AutoRefTeam team : teams) team.leave(player, force); }
 
+	/**
+	 * Gets AutoRefPlayer object associated with a given player.
+	 *
+	 * @param name player name
+	 * @return matching AutoRefPlayer object, or null if no match
+	 */
 	public AutoRefPlayer getPlayer(String name)
 	{
 		AutoRefPlayer bapl = null;
@@ -1397,12 +1736,27 @@ public class AutoRefMatch
 		return bapl;
 	}
 
-	public AutoRefPlayer getPlayer(Player pl)
-	{ return pl == null ? null : getPlayer(pl.getName()); }
+	/**
+	 * Gets AutoRefPlayer object associated with a given player.
+	 *
+	 * @return matching AutoRefPlayer object, or null if no match
+	 */
+	public AutoRefPlayer getPlayer(Player player)
+	{ return player == null ? null : getPlayer(player.getName()); }
 
+	/**
+	 * Checks if the specified player is on a team
+	 *
+	 * @return true if player is on a team, otherwise false
+	 */
 	public boolean isPlayer(Player pl)
 	{ return getPlayer(pl) != null; }
 
+	/**
+	 * Gets the player nearest to a specified location.
+	 *
+	 * @return player object for closest player, or null if no players
+	 */
 	public AutoRefPlayer getNearestPlayer(Location loc)
 	{
 		AutoRefPlayer apl = null;
@@ -1420,26 +1774,47 @@ public class AutoRefMatch
 		return apl;
 	}
 
-	public AutoRefTeam getPlayerTeam(Player pl)
+	/**
+	 * Gets the team for a specified player.
+	 *
+	 * @return associated team object if one exists, otherwise null
+	 */
+	public AutoRefTeam getPlayerTeam(Player player)
 	{
 		for (AutoRefTeam team : teams)
-			if (team.getPlayer(pl) != null) return team;
+			if (team.getPlayer(player) != null) return team;
 		return null;
 	}
 
-	public String getPlayerName(Player pl)
+	/**
+	 * Gets colored player name for a specified player.
+	 *
+	 * @return colored player name
+	 */
+	public String getPlayerName(Player player)
 	{
-		AutoRefPlayer apl = getPlayer(pl);
-		return (apl == null) ? pl.getName() : apl.getName();
+		AutoRefPlayer apl = getPlayer(player);
+		return (apl == null) ? player.getName() : apl.getName();
 	}
 
-	public Location getPlayerSpawn(Player pl)
+	/**
+	 * Gets spawn location for the specified player, based on team.
+	 *
+	 * @return team-specific spawn location, or world spawn if not set
+	 */
+	public Location getPlayerSpawn(Player player)
 	{
-		AutoRefTeam team = getPlayerTeam(pl);
+		AutoRefTeam team = getPlayerTeam(player);
 		if (team != null) return team.getSpawnLocation();
 		return world.getSpawnLocation();
 	}
 
+	/**
+	 * Checks if the specified location is inside a "safe" region. While inside a safe region,
+	 * players will not attract mobs. Also, new mobs will never spawn within the safe zone.
+	 *
+	 * @return true if the location is within a safe zone, otherwise false
+	 */
 	public boolean isSafeZone(Location loc)
 	{
 		if (this.inStartRegion(loc)) return true;
@@ -1448,7 +1823,7 @@ public class AutoRefMatch
 		return false;
 	}
 
-	public class MatchReportSaver implements Runnable
+	private class MatchReportSaver implements Runnable
 	{
 		private File localStorage = null;
 		private String webDirectory = null;
@@ -1493,7 +1868,7 @@ public class AutoRefMatch
 		}
 	}
 
-	public void logPlayerStats()
+	private void logPlayerStats()
 	{
 		// upload WEBSTATS (do via an async query in case uploading the stats lags the main thread)
 		Plugin plugin = AutoReferee.getInstance();
@@ -1512,24 +1887,40 @@ public class AutoRefMatch
 		return null;
 	}
 
-	// distance from the closest owned region
-	public double distanceToClosestRegion(Player p)
+	/**
+	 * Gets distance player is from their team's nearest region.
+	 *
+	 * @return distance to team's nearest region
+	 */
+	public double distanceToClosestRegion(Player player)
 	{
-		AutoRefTeam team = getPlayerTeam(p);
-		if (team != null) return team.distanceToClosestRegion(p.getLocation());
+		AutoRefTeam team = getPlayerTeam(player);
+		if (team != null) return team.distanceToClosestRegion(player.getLocation());
 		return Double.MAX_VALUE;
 	}
 
-	// is location in start region?
+	/**
+	 * Checks if a specified location is within the start region.
+	 *
+	 * @return true if location is inside start region, otherwise false
+	 */
 	public boolean inStartRegion(Location loc)
 	{ return startRegion != null && startRegion.distanceToRegion(loc) < ZoneListener.SNEAK_DISTANCE; }
 
-	public void updateCarrying(AutoRefPlayer apl, Set<BlockData> carrying, Set<BlockData> newCarrying)
+	/**
+	 * Updates inventory information for a single player.
+	 * Sends updates to the referee client to be displayed on screen.
+	 *
+	 * @param apl player object to be updated
+	 * @param oldCarrying previous contents of inventory
+	 * @param newCarrying new contents of inventory
+	 */
+	public void updateCarrying(AutoRefPlayer apl, Set<BlockData> oldCarrying, Set<BlockData> newCarrying)
 	{
 		Set<BlockData> add = Sets.newHashSet(newCarrying);
-		add.removeAll(carrying);
+		add.removeAll(oldCarrying);
 
-		Set<BlockData> rem = Sets.newHashSet(carrying);
+		Set<BlockData> rem = Sets.newHashSet(oldCarrying);
 		rem.removeAll(newCarrying);
 
 		Player player = apl.getPlayer();
@@ -1537,18 +1928,34 @@ public class AutoRefMatch
 		for (BlockData bd : rem) messageReferees("player", player.getName(), "obj", "-" + bd.toString());
 	}
 
-	public void updateHealthArmor(AutoRefPlayer apl, int currentHealth,
-			int currentArmor, int newHealth, int newArmor)
+	/**
+	 * Updates health and armor information for a single player.
+	 * Sends updates to the referee client to be displayed on screen.
+	 *
+	 * @param apl player object to be updated
+	 * @param oldHealth previous health, in half hearts
+	 * @param oldArmor previous armor points
+	 * @param newHealth new health, in half hearts
+	 * @param newArmor new armor points
+	 */
+	public void updateHealthArmor(AutoRefPlayer apl, int oldHealth,
+			int oldArmor, int newHealth, int newArmor)
 	{
 		Player player = apl.getPlayer();
 
-		if (currentHealth != newHealth) messageReferees("player", player.getName(),
+		if (oldHealth != newHealth) messageReferees("player", player.getName(),
 			"hp", Integer.toString(newHealth));
 
-		if (currentArmor != newArmor) messageReferees("player", player.getName(),
+		if (oldArmor != newArmor) messageReferees("player", player.getName(),
 			"armor", Integer.toString(newArmor));
 	}
 
+	/**
+	 * An event to be later reported in match statistics. Events are announced when they happen,
+	 * and each type has its own visibility level to denote who will see the even happen live.
+	 *
+	 * @author authorblues
+	 */
 	public static class TranscriptEvent
 	{
 		public enum EventVisibility
@@ -1616,8 +2023,8 @@ public class AutoRefMatch
 		public String getMessage()
 		{ return message; }
 
-		public Location location;
-		public long timestamp;
+		private Location location;
+		private long timestamp;
 
 		public TranscriptEvent(AutoRefMatch match, EventType type, String message,
 			Location loc, Object icon1, Object icon2)
@@ -1629,7 +2036,6 @@ public class AutoRefMatch
 			this.location = (loc != null) ? loc :
 				match.getWorld().getSpawnLocation();
 
-			// these represent left- and right-side icons for a transcript
 			this.icon1 = icon1;
 			this.icon2 = icon2;
 
@@ -1638,15 +2044,27 @@ public class AutoRefMatch
 
 		public String getTimestamp()
 		{
+			long t = getTimestampTick();
 			return String.format("%02d:%02d:%02d",
-				timestamp/3600L, (timestamp/60L)%60L, timestamp%60L);
+				t/3600L, (t/60L)%60L, t%60L);
 		}
 
 		@Override
 		public String toString()
 		{ return String.format("[%s] %s", this.getTimestamp(), this.getMessage()); }
+
+		public Location getLocation()
+		{ return location; }
+
+		public long getTimestampTick()
+		{ return timestamp; }
 	}
 
+	/**
+	 * Adds an event to the match transcript. Announces the event to the appropriate recipients.
+	 *
+	 * @param event event to be added to the transcript
+	 */
 	public void addEvent(TranscriptEvent event)
 	{
 		AutoReferee plugin = AutoReferee.getInstance();
@@ -1672,9 +2090,22 @@ public class AutoRefMatch
 		if (plugin.consoleLog) plugin.getLogger().info(event.toString());
 	}
 
+	/**
+	 * Gets the current match transcript up to this point in time.
+	 *
+	 * @return immutable copy of the match transcript
+	 */
 	public List<TranscriptEvent> getTranscript()
 	{ return Collections.unmodifiableList(transcript); }
 
+	/**
+	 * Colors a message with team and objective colors. Prepares a message for broadcasting
+	 * to the chat, and should be used as a pre-processing step whenever a message needs to
+	 * be pretty-printed.
+	 *
+	 * @param message plain message
+	 * @return colored message
+	 */
 	public String colorMessage(String message)
 	{
 		message = ChatColor.stripColor(message);
@@ -1686,10 +2117,13 @@ public class AutoRefMatch
 		return ChatColor.RESET + message;
 	}
 
+	/**
+	 * Send updated match information to a player.
+	 */
 	public void sendMatchInfo(Player player)
 	{
 		player.sendMessage(ChatColor.RESET + "Map: " + ChatColor.GRAY + getMapName() +
-			" v" + getVersion() + ChatColor.ITALIC + " by " + getMapAuthors());
+			" v" + getMapVersion() + ChatColor.ITALIC + " by " + getMapAuthors());
 
 		AutoRefPlayer apl = getPlayer(player);
 		String tmpflag = tmp ? "*" : "";
