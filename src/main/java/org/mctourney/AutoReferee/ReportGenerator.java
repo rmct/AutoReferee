@@ -42,6 +42,7 @@ public class ReportGenerator
 			js  = getResourceString("webstats/report.js" );
 
 			images += getResourceString("webstats/image-block.css");
+			images += getResourceString("webstats/image-header.css");
 		//	images += getResourceString("webstats/image-items.css");
 		}
 		catch (IOException e) { return null; }
