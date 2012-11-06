@@ -383,9 +383,6 @@ public class AutoRefPlayer
 		return getTeam().getColor() + getPlayerName() + ChatColor.RESET;
 	}
 
-	public String getTag()
-	{ return getPlayerName().toLowerCase().replaceAll("[^a-z0-9]+", ""); }
-
 	public void die(EntityDamageEvent deathCause, boolean clearDrops)
 	{
 		Player player = getPlayer();

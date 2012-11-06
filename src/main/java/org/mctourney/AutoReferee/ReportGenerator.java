@@ -58,7 +58,7 @@ public class ReportGenerator
 		AutoRefTeam win = match.getWinningTeam();
 		String winningTeam = (win == null) ? "??" :
 			String.format("<span class='team team-%s'>%s</span>",
-				win.getTag(), ChatColor.stripColor(win.getName()));
+				getTag(win), ChatColor.stripColor(win.getName()));
 
 		Set<String> refList = Sets.newHashSet();
 		for (Player pl : match.getReferees())
@@ -119,7 +119,7 @@ public class ReportGenerator
 		StringWriter css = new StringWriter();
 		for (AutoRefPlayer apl : match.getPlayers())
 			css.write(String.format(".player-%s:before { background-image: url(http://minotar.net/avatar/%s/16.png); }\n",
-				apl.getTag(), apl.getPlayerName()));
+				getTag(apl), apl.getPlayerName()));
 		return css.toString();
 	}
 
@@ -129,7 +129,7 @@ public class ReportGenerator
 		StringWriter css = new StringWriter();
 		for (AutoRefTeam team : match.getTeams())
 			css.write(String.format(".team-%s { color: %s; }\n",
-				team.getTag(), ColorConverter.chatToHex(team.getColor())));
+				getTag(team), ColorConverter.chatToHex(team.getColor())));
 		return css.toString();
 	}
 
@@ -252,14 +252,14 @@ public class ReportGenerator
 			Set<String> members = Sets.newHashSet();
 			for (AutoRefPlayer apl : team.getPlayers())
 				members.add("<li><input type='checkbox' class='player-toggle' data-player='" +
-					apl.getTag() + "'>" + playerHTML(apl) + "</li>\n");
+					getTag(apl) + "'>" + playerHTML(apl) + "</li>\n");
 
 			String memberlist = members.size() == 0
 				? "<li>{none}</li>" : StringUtils.join(members, "");
 
 			teamlist.write("<div class='span3'>");
 			teamlist.write(String.format("<h4 class='team team-%s'>%s</h4>",
-				team.getTag(), ChatColor.stripColor(team.getName())));
+				getTag(team), ChatColor.stripColor(team.getName())));
 			teamlist.write(String.format("<ul class='teammembers unstyled'>%s</ul></div>\n", memberlist));
 		}
 
@@ -317,10 +317,19 @@ public class ReportGenerator
 		return playerstats.toString();
 	}
 
+	private static String getTag(String s)
+	{ return s.toLowerCase().replaceAll("[^a-z0-9]+", ""); }
+
+	private static String getTag(AutoRefPlayer apl)
+	{ return getTag(apl.getPlayerName()); }
+
+	private static String getTag(AutoRefTeam team)
+	{ return getTag(team.getRawName()); }
+
 	private static String playerHTML(AutoRefPlayer apl)
 	{
 		return String.format("<span class='player player-%s team-%s'>%s</span>",
-			apl.getTag(), apl.getTeam().getTag(), apl.getPlayerName());
+			getTag(apl), getTag(apl.getTeam()), apl.getPlayerName());
 	}
 
 	private static String transcriptEventHTML(TranscriptEvent e)
@@ -336,7 +345,7 @@ public class ReportGenerator
 		{
 			m = m.replaceAll(apl.getPlayerName(), playerHTML(apl));
 			rowClasses.add("type-player-event");
-			rowClasses.add("player-" + apl.getTag());
+			rowClasses.add("player-" + getTag(apl));
 		}
 
 		if (e.icon2 instanceof BlockData)

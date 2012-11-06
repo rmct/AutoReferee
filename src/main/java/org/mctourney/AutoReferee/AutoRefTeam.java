@@ -71,9 +71,6 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		return name;
 	}
 
-	public String getTag()
-	{ return getRawName().toLowerCase().replaceAll("[^a-z0-9]+", ""); }
-
 	public void setName(String name)
 	{
 		// send name change event before we actually change the name
