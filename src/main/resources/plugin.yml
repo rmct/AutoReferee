@@ -2,6 +2,7 @@ name: AutoReferee
 main: org.mctourney.AutoReferee.AutoReferee
 version: 1.0
 author: authorblues
+load: startup
 
 softdepend:
   - WorldEdit

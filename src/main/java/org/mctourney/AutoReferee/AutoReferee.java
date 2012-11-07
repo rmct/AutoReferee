@@ -37,6 +37,7 @@ import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.Prompt;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
@@ -58,6 +59,7 @@ import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.util.BlockData;
 import org.mctourney.AutoReferee.util.BlockVector3;
 import org.mctourney.AutoReferee.util.CuboidRegion;
+import org.mctourney.AutoReferee.util.NullChunkGenerator;
 import org.mctourney.AutoReferee.util.Vector3;
 import org.mctourney.AutoReferee.util.TeleportationUtil;
 
@@ -114,7 +116,12 @@ public class AutoReferee extends JavaPlugin
 	 * @return lobby world
 	 */
 	public World getLobbyWorld()
-	{ return lobby; }
+	{
+		if (lobby == null)
+			setLobbyWorld(!getConfig().isString("lobby-world") ? getServer().getWorlds().get(0) :
+				getServer().getWorld(getConfig().getString("lobby-world", null)));
+		return lobby;
+	}
 
 	protected void setLobbyWorld(World w)
 	{ this.lobby = w; }
@@ -285,11 +292,6 @@ public class AutoReferee extends JavaPlugin
 		getLogger().info(this.getName() + " loaded successfully" +
 			(hasSportBukkitApi() ? " with SportBukkit API" : "") + ".");
 
-		// save the "lobby" world as a sort of drop-zone for discharged players
-		String lobbyname = getConfig().getString("lobby-world", null);
-		World lobbyworld = lobbyname == null ? null : getServer().getWorld(lobbyname);
-		setLobbyWorld(lobbyworld == null ? getServer().getWorlds().get(0) : lobbyworld);
-
 		// connect to server, or let the server operator know to set up the match manually
 		if (!makeServerConnection(qurl))
 			getLogger().info(this.getName() + " is running in OFFLINE mode. All setup must be done manually.");
@@ -453,6 +455,10 @@ public class AutoReferee extends JavaPlugin
 		OptionBuilder.withDescription("show inventory from previous life");
 		viewInventoryOptions.addOption(OptionBuilder.create('p'));
 	}
+
+	@Override
+	public ChunkGenerator getDefaultWorldGenerator(String worldname, String id)
+	{ return new NullChunkGenerator(); }
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
 	{
