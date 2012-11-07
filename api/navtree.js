@@ -1,13 +1,12 @@
 var NAVTREE =
 [
-  [ "AutoReferee", "index.htm", [
+  [ "AutoReferee", "index.html", [
     [ "Classes", null, [
-      [ "Class List", "annotated.htm", "annotated" ],
-      [ "Class Index", "classes.htm", null ],
-      [ "Class Hierarchy", "hierarchy.htm", "hierarchy" ],
-      [ "Class Members", "functions.htm", [
-        [ "All", "functions.htm", null ],
-        [ "Functions", "functions_func.htm", null ]
+      [ "Class List", "annotated.html", "annotated" ],
+      [ "Class Index", "classes.html", null ],
+      [ "Class Members", "functions.html", [
+        [ "All", "functions.html", "functions_dup" ],
+        [ "Functions", "functions_func.html", "functions_func" ]
       ] ]
     ] ]
   ] ]
@@ -15,9 +14,8 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-".htm",
-"classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.htm#a5e4662314165678c05931cd2ab0492ee",
-"enumorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team_1_1_goal_status.htm"
+".html",
+"classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#aa39ed31dae4003101eeca13755b2ba40"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

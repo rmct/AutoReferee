@@ -1,6 +1,7 @@
 var searchData=
 [
-  ['leaveteam',['leaveTeam',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.htm#a7c3bb8f1b7d454473b9cc15dfc493d75',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
-  ['loadmap',['loadMap',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.htm#a827bc01c3a2e0b46bb86f6af615de309',1,'org::mctourney::AutoReferee::AutoRefMap']]],
-  ['loadmapfromurl',['loadMapFromURL',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.htm#a58e37fb4bc0c5d4c432f60021b89aa5b',1,'org::mctourney::AutoReferee::AutoRefMap']]]
+  ['leave',['leave',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#aa22c06cfee17fcfd759b4263c6973523',1,'org.mctourney.AutoReferee.AutoRefTeam.leave(Player player)'],['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#a8adfd4e8830f5f7a605b04d679038d93',1,'org.mctourney.AutoReferee.AutoRefTeam.leave(Player player, boolean force)']]],
+  ['leaveteam',['leaveTeam',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a7c3bb8f1b7d454473b9cc15dfc493d75',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
+  ['loadmap',['loadMap',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a5a72395c195d92fc8ff47a643019fc4f',1,'org::mctourney::AutoReferee::AutoRefMap']]],
+  ['loadmapfromurl',['loadMapFromURL',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a3ec519f49fe60b2dd605b127ff50838b',1,'org::mctourney::AutoReferee::AutoRefMap']]]
 ];

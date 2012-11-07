@@ -67,7 +67,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
       <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
-      <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
       <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
@@ -102,86 +101,87 @@ $(document).ready(function(){initNavTree('classorg_1_1mctourney_1_1_auto_referee
 
 <div class="header">
   <div class="summary">
-<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
-<a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">org.mctourney.AutoReferee.AutoRefMap Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="dynheader">
-Inheritance diagram for org.mctourney.AutoReferee.AutoRefMap:</div>
-<div class="dyncontent">
- <div class="center">
-  <img src="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.png" usemap="#org.mctourney.AutoReferee.AutoRefMap_map" alt=""/>
-  <map id="org.mctourney.AutoReferee.AutoRefMap_map" name="org.mctourney.AutoReferee.AutoRefMap_map">
-</map>
- </div></div>
+
+<p>Represents a map object, available to be loaded by <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html" title="Base plugin class.">AutoReferee</a>.  
+ <a href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#details">More...</a></p>
+
+<p>Inherits Comparable&lt; AutoRefMap &gt;.</p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:a10d3559153dbd8cf3742282341993ba7"><td class="memItemLeft" align="right" valign="top">File&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a10d3559153dbd8cf3742282341993ba7">getFolder</a> ()  throws IOException 	</td></tr>
+<tr class="memdesc:a10d3559153dbd8cf3742282341993ba7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets root folder for this map, downloading if necessary.  <a href="#a10d3559153dbd8cf3742282341993ba7"></a><br/></td></tr>
+<tr class="separator:a10d3559153dbd8cf3742282341993ba7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef42350b6a0557066c67b4cc55be7559"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#aef42350b6a0557066c67b4cc55be7559">getName</a> ()</td></tr>
+<tr class="memdesc:aef42350b6a0557066c67b4cc55be7559"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the name of the map.  <a href="#aef42350b6a0557066c67b4cc55be7559"></a><br/></td></tr>
+<tr class="separator:aef42350b6a0557066c67b4cc55be7559"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c7ca49ce72826fbec3a14e3d13a9051"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a5c7ca49ce72826fbec3a14e3d13a9051">getVersion</a> ()</td></tr>
+<tr class="memdesc:a5c7ca49ce72826fbec3a14e3d13a9051"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the version of the map.  <a href="#a5c7ca49ce72826fbec3a14e3d13a9051"></a><br/></td></tr>
+<tr class="separator:a5c7ca49ce72826fbec3a14e3d13a9051"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abf73cf4499001091636986eaf8f0a306"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#abf73cf4499001091636986eaf8f0a306">getVersionString</a> ()</td></tr>
+<tr class="memdesc:abf73cf4499001091636986eaf8f0a306"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets human-readable name of map, including version number.  <a href="#abf73cf4499001091636986eaf8f0a306"></a><br/></td></tr>
 <tr class="separator:abf73cf4499001091636986eaf8f0a306"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d4ff100aa76848ef60f11ecfc6888ac"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a7d4ff100aa76848ef60f11ecfc6888ac">isInstalled</a> ()</td></tr>
+<tr class="memdesc:a7d4ff100aa76848ef60f11ecfc6888ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets whether the map has been installed.  <a href="#a7d4ff100aa76848ef60f11ecfc6888ac"></a><br/></td></tr>
 <tr class="separator:a7d4ff100aa76848ef60f11ecfc6888ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a10d3559153dbd8cf3742282341993ba7"><td class="memItemLeft" align="right" valign="top">File&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a10d3559153dbd8cf3742282341993ba7">getFolder</a> ()  throws IOException 	</td></tr>
-<tr class="separator:a10d3559153dbd8cf3742282341993ba7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2e1be580a2bcb78a41ec1ebc07851117"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2e1be580a2bcb78a41ec1ebc07851117"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>hashCode</b> ()</td></tr>
-<tr class="separator:a2e1be580a2bcb78a41ec1ebc07851117"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9056190791c27ebf65120239b4904674"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9056190791c27ebf65120239b4904674"></a>
-boolean&#160;</td><td class="memItemRight" valign="bottom"><b>equals</b> (Object o)</td></tr>
-<tr class="separator:a9056190791c27ebf65120239b4904674"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9f6e16a2f99406c6dc7cba8162046be1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9f6e16a2f99406c6dc7cba8162046be1"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>compareTo</b> (<a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html">AutoRefMap</a> other)</td></tr>
-<tr class="separator:a9f6e16a2f99406c6dc7cba8162046be1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a91fa1ba15522c52cfa34b4312ecefed0"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html">AutoRefMatch</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a91fa1ba15522c52cfa34b4312ecefed0">createMatch</a> (String map, String world)  throws IOException 	</td></tr>
+<tr class="memdesc:a91fa1ba15522c52cfa34b4312ecefed0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates match object given map name and an optional custom world name.  <a href="#a91fa1ba15522c52cfa34b4312ecefed0"></a><br/></td></tr>
 <tr class="separator:a91fa1ba15522c52cfa34b4312ecefed0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9f23c99f73da3b1c60e8e8647c206414"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html">AutoRefMatch</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a9f23c99f73da3b1c60e8e8647c206414">createMatch</a> (<a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html">AutoRefMap</a> map, String world)  throws IOException 	</td></tr>
+<tr class="memdesc:a9f23c99f73da3b1c60e8e8647c206414"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates match object given map name and an optional custom world name.  <a href="#a9f23c99f73da3b1c60e8e8647c206414"></a><br/></td></tr>
 <tr class="separator:a9f23c99f73da3b1c60e8e8647c206414"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab8b952bfd2510f087e1a4cc3601ef71b"><td class="memItemLeft" align="right" valign="top">static boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#ab8b952bfd2510f087e1a4cc3601ef71b">parseMatchInitialization</a> (String json)</td></tr>
-<tr class="separator:ab8b952bfd2510f087e1a4cc3601ef71b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a03db0f80153ab0bbe70d80451fc14743"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html">AutoRefMatch</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a03db0f80153ab0bbe70d80451fc14743">createMatch</a> (AutoRefMatch.MatchParams params)  throws IOException 	</td></tr>
+<tr class="memdesc:a03db0f80153ab0bbe70d80451fc14743"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a match from the given match parameters.  <a href="#a03db0f80153ab0bbe70d80451fc14743"></a><br/></td></tr>
 <tr class="separator:a03db0f80153ab0bbe70d80451fc14743"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad741957a634801c9d36331e09dfb5753"><td class="memItemLeft" align="right" valign="top">static File&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#ad741957a634801c9d36331e09dfb5753">getMapLibrary</a> ()</td></tr>
-<tr class="separator:ad741957a634801c9d36331e09dfb5753"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9426623c216a06714618ca7332879484"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html">AutoRefMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a9426623c216a06714618ca7332879484">getMap</a> (String name)</td></tr>
-<tr class="separator:a9426623c216a06714618ca7332879484"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a160c68abed918a8a27878b6c3fb9fb43"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html">AutoRefMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a160c68abed918a8a27878b6c3fb9fb43">getMapFromURL</a> (String url)  throws IOException 	</td></tr>
-<tr class="separator:a160c68abed918a8a27878b6c3fb9fb43"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af00ad98a9bcedfefa5eee8812e9d4a1f"><td class="memItemLeft" align="right" valign="top">static File&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#af00ad98a9bcedfefa5eee8812e9d4a1f">getMapFolder</a> (String name)  throws IOException 	</td></tr>
-<tr class="separator:af00ad98a9bcedfefa5eee8812e9d4a1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a82effe8d0a9f8b2bfd6ed526a8006f14"><td class="memItemLeft" align="right" valign="top">static Set&lt; <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html">AutoRefMap</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a82effe8d0a9f8b2bfd6ed526a8006f14">getAvailableMaps</a> ()</td></tr>
+<tr class="memdesc:a82effe8d0a9f8b2bfd6ed526a8006f14"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets all maps available to be loaded.  <a href="#a82effe8d0a9f8b2bfd6ed526a8006f14"></a><br/></td></tr>
 <tr class="separator:a82effe8d0a9f8b2bfd6ed526a8006f14"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a79b6b536306665dd947c424aca1219b8"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a79b6b536306665dd947c424aca1219b8">getUpdates</a> (CommandSender sender, boolean force)</td></tr>
-<tr class="separator:a79b6b536306665dd947c424aca1219b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab7befa7a0a042aa96220c572dde0753b"><td class="memItemLeft" align="right" valign="top">static Set&lt; <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html">AutoRefMap</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#ab7befa7a0a042aa96220c572dde0753b">getRemoteMaps</a> ()</td></tr>
-<tr class="separator:ab7befa7a0a042aa96220c572dde0753b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aefb1107ce13b57cc1e09117d3c5ac761"><td class="memItemLeft" align="right" valign="top">static Set&lt; <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html">AutoRefMap</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#aefb1107ce13b57cc1e09117d3c5ac761">getInstalledMaps</a> ()</td></tr>
+<tr class="memdesc:aefb1107ce13b57cc1e09117d3c5ac761"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets maps installed locally on server.  <a href="#aefb1107ce13b57cc1e09117d3c5ac761"></a><br/></td></tr>
 <tr class="separator:aefb1107ce13b57cc1e09117d3c5ac761"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9426623c216a06714618ca7332879484"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html">AutoRefMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a9426623c216a06714618ca7332879484">getMap</a> (String name)</td></tr>
+<tr class="memdesc:a9426623c216a06714618ca7332879484"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets map object associated with given map name.  <a href="#a9426623c216a06714618ca7332879484"></a><br/></td></tr>
+<tr class="separator:a9426623c216a06714618ca7332879484"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af00ad98a9bcedfefa5eee8812e9d4a1f"><td class="memItemLeft" align="right" valign="top">static File&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#af00ad98a9bcedfefa5eee8812e9d4a1f">getMapFolder</a> (String name)  throws IOException 	</td></tr>
+<tr class="memdesc:af00ad98a9bcedfefa5eee8812e9d4a1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets root folder of map with the given name, downloading if necessary.  <a href="#af00ad98a9bcedfefa5eee8812e9d4a1f"></a><br/></td></tr>
+<tr class="separator:af00ad98a9bcedfefa5eee8812e9d4a1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a160c68abed918a8a27878b6c3fb9fb43"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html">AutoRefMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a160c68abed918a8a27878b6c3fb9fb43">getMapFromURL</a> (String url)  throws IOException 	</td></tr>
+<tr class="memdesc:a160c68abed918a8a27878b6c3fb9fb43"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets map object associated with the zip file at the provided URL.  <a href="#a160c68abed918a8a27878b6c3fb9fb43"></a><br/></td></tr>
+<tr class="separator:a160c68abed918a8a27878b6c3fb9fb43"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f84e2a73230e4731f4237827fd8d516"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html">AutoRefMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a7f84e2a73230e4731f4237827fd8d516">getMapInfo</a> (File folder)</td></tr>
+<tr class="memdesc:a7f84e2a73230e4731f4237827fd8d516"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get map info object associated with a folder.  <a href="#a7f84e2a73230e4731f4237827fd8d516"></a><br/></td></tr>
 <tr class="separator:a7f84e2a73230e4731f4237827fd8d516"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a827bc01c3a2e0b46bb86f6af615de309"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a827bc01c3a2e0b46bb86f6af615de309">loadMap</a> (CommandSender sender, String mapName, String customName)</td></tr>
-<tr class="separator:a827bc01c3a2e0b46bb86f6af615de309"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a58e37fb4bc0c5d4c432f60021b89aa5b"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a58e37fb4bc0c5d4c432f60021b89aa5b">loadMapFromURL</a> (CommandSender sender, String url, String customName)</td></tr>
-<tr class="separator:a58e37fb4bc0c5d4c432f60021b89aa5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
-Protected Member Functions</h2></td></tr>
-<tr class="memitem:a0354c6f9f1e01e52aad3837e268b7587"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0354c6f9f1e01e52aad3837e268b7587"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>AutoRefMap</b> (String name, String version, File folder)</td></tr>
-<tr class="separator:a0354c6f9f1e01e52aad3837e268b7587"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ade7c0aff3e7dc5b5c4c857d3fe2943a4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ade7c0aff3e7dc5b5c4c857d3fe2943a4"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>AutoRefMap</b> (String csv)</td></tr>
-<tr class="separator:ade7c0aff3e7dc5b5c4c857d3fe2943a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad741957a634801c9d36331e09dfb5753"><td class="memItemLeft" align="right" valign="top">static File&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#ad741957a634801c9d36331e09dfb5753">getMapLibrary</a> ()</td></tr>
+<tr class="memdesc:ad741957a634801c9d36331e09dfb5753"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets root folder of map library, generating folder if necessary.  <a href="#ad741957a634801c9d36331e09dfb5753"></a><br/></td></tr>
+<tr class="separator:ad741957a634801c9d36331e09dfb5753"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab7befa7a0a042aa96220c572dde0753b"><td class="memItemLeft" align="right" valign="top">static Set&lt; <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html">AutoRefMap</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#ab7befa7a0a042aa96220c572dde0753b">getRemoteMaps</a> ()</td></tr>
+<tr class="memdesc:ab7befa7a0a042aa96220c572dde0753b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets maps that are not installed, but may be downloaded.  <a href="#ab7befa7a0a042aa96220c572dde0753b"></a><br/></td></tr>
+<tr class="separator:ab7befa7a0a042aa96220c572dde0753b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79b6b536306665dd947c424aca1219b8"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a79b6b536306665dd947c424aca1219b8">getUpdates</a> (CommandSender sender, boolean force)</td></tr>
+<tr class="memdesc:a79b6b536306665dd947c424aca1219b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Downloads updates to all maps installed on the server.  <a href="#a79b6b536306665dd947c424aca1219b8"></a><br/></td></tr>
+<tr class="separator:a79b6b536306665dd947c424aca1219b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a72395c195d92fc8ff47a643019fc4f"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a5a72395c195d92fc8ff47a643019fc4f">loadMap</a> (CommandSender sender, String name, String worldname)</td></tr>
+<tr class="memdesc:a5a72395c195d92fc8ff47a643019fc4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a map by name.  <a href="#a5a72395c195d92fc8ff47a643019fc4f"></a><br/></td></tr>
+<tr class="separator:a5a72395c195d92fc8ff47a643019fc4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ec519f49fe60b2dd605b127ff50838b"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a3ec519f49fe60b2dd605b127ff50838b">loadMapFromURL</a> (CommandSender sender, String url, String worldname)</td></tr>
+<tr class="memdesc:a3ec519f49fe60b2dd605b127ff50838b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a map by URL.  <a href="#a3ec519f49fe60b2dd605b127ff50838b"></a><br/></td></tr>
+<tr class="separator:a3ec519f49fe60b2dd605b127ff50838b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab8b952bfd2510f087e1a4cc3601ef71b"><td class="memItemLeft" align="right" valign="top">static boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#ab8b952bfd2510f087e1a4cc3601ef71b">parseMatchInitialization</a> (String json)</td></tr>
+<tr class="memdesc:ab8b952bfd2510f087e1a4cc3601ef71b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handles JSON object to initialize matches.  <a href="#ab8b952bfd2510f087e1a4cc3601ef71b"></a><br/></td></tr>
+<tr class="separator:ab8b952bfd2510f087e1a4cc3601ef71b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>A map object, available to be loaded by <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html">AutoReferee</a></p>
+<div class="textblock"><p>Represents a map object, available to be loaded by <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html" title="Base plugin class.">AutoReferee</a>. </p>
 <dl class="section author"><dt>Author</dt><dd>authorblues </dd></dl>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="a91fa1ba15522c52cfa34b4312ecefed0"></a>
@@ -215,7 +215,8 @@ Protected Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Creates match object given map name and an optional custom world name.</p>
+
+<p>Creates match object given map name and an optional custom world name. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">map</td><td>name of map, to be downloaded if necessary </td></tr>
@@ -264,7 +265,8 @@ Protected Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Creates match object given map name and an optional custom world name.</p>
+
+<p>Creates match object given map name and an optional custom world name. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">map</td><td>map object, to be downloaded if necessary </td></tr>
@@ -303,7 +305,8 @@ Protected Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Generates a match from the given match parameters.</p>
+
+<p>Generates a match from the given match parameters. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">params</td><td>match parameters object </td></tr>
@@ -340,7 +343,8 @@ Protected Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Gets all maps available to be loaded.</p>
+
+<p>Gets all maps available to be loaded. </p>
 <dl class="section return"><dt>Returns</dt><dd>Set of all maps available to be loaded </dd></dl>
 
 </div>
@@ -357,7 +361,8 @@ Protected Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Gets root folder for this map, downloading if necessary.</p>
+
+<p>Gets root folder for this map, downloading if necessary. </p>
 <dl class="section return"><dt>Returns</dt><dd>root folder for map </dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
@@ -388,7 +393,8 @@ Protected Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Gets maps installed locally on server.</p>
+
+<p>Gets maps installed locally on server. </p>
 <dl class="section return"><dt>Returns</dt><dd>set of all maps available to load immediately </dd></dl>
 
 </div>
@@ -414,7 +420,8 @@ Protected Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Gets map object associated with given map name.</p>
+
+<p>Gets map object associated with given map name. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">name</td><td>name of map </td></tr>
@@ -446,7 +453,8 @@ Protected Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Gets root folder of map with the given name, downloading if necessary.</p>
+
+<p>Gets root folder of map with the given name, downloading if necessary. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">name</td><td>name of map to load </td></tr>
@@ -484,7 +492,8 @@ Protected Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Gets map object associated with the zip file at the provided URL.</p>
+
+<p>Gets map object associated with the zip file at the provided URL. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">url</td><td>URL of map zip to be downloaded. </td></tr>
@@ -522,7 +531,8 @@ Protected Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Get map info object associated with a folder</p>
+
+<p>Get map info object associated with a folder. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">folder</td><td>folder containing an autoreferee.yml file </td></tr>
@@ -553,8 +563,27 @@ Protected Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Gets root folder of map library, generating folder if necessary.</p>
+
+<p>Gets root folder of map library, generating folder if necessary. </p>
 <dl class="section return"><dt>Returns</dt><dd>root folder of map library </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="aef42350b6a0557066c67b4cc55be7559"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">String org.mctourney.AutoReferee.AutoRefMap.getName </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the name of the map. </p>
+<dl class="section return"><dt>Returns</dt><dd>map name </dd></dl>
 
 </div>
 </div>
@@ -578,7 +607,8 @@ Protected Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Gets maps that are not installed, but may be downloaded.</p>
+
+<p>Gets maps that are not installed, but may be downloaded. </p>
 <dl class="section return"><dt>Returns</dt><dd>set of all maps available for download </dd></dl>
 
 </div>
@@ -614,7 +644,8 @@ Protected Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Downloads updates to all maps installed on the server.</p>
+
+<p>Downloads updates to all maps installed on the server. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">sender</td><td>user receiving progress updates </td></tr>
@@ -622,6 +653,24 @@ Protected Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a class="anchor" id="a5c7ca49ce72826fbec3a14e3d13a9051"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">String org.mctourney.AutoReferee.AutoRefMap.getVersion </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the version of the map. </p>
+<dl class="section return"><dt>Returns</dt><dd>map version </dd></dl>
 
 </div>
 </div>
@@ -637,7 +686,8 @@ Protected Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Gets human-readable name of map, including version number.</p>
+
+<p>Gets human-readable name of map, including version number. </p>
 <dl class="section return"><dt>Returns</dt><dd>map version string </dd></dl>
 
 </div>
@@ -654,12 +704,13 @@ Protected Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Gets whether the map has been installed.</p>
+
+<p>Gets whether the map has been installed. </p>
 <dl class="section return"><dt>Returns</dt><dd>true if map is installed, otherwise false </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="a827bc01c3a2e0b46bb86f6af615de309"></a>
+<a class="anchor" id="a5a72395c195d92fc8ff47a643019fc4f"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -676,13 +727,13 @@ Protected Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">String&#160;</td>
-          <td class="paramname"><em>mapName</em>, </td>
+          <td class="paramname"><em>name</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">String&#160;</td>
-          <td class="paramname"><em>customName</em>&#160;</td>
+          <td class="paramname"><em>worldname</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -696,19 +747,20 @@ Protected Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Loads a map by name.</p>
+
+<p>Loads a map by name. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">sender</td><td>user receiving progress updates </td></tr>
-    <tr><td class="paramname">mapName</td><td>name of map to be loaded </td></tr>
-    <tr><td class="paramname">customName</td><td>name of custom world folder, possibly null </td></tr>
+    <tr><td class="paramname">name</td><td>name of map to be loaded </td></tr>
+    <tr><td class="paramname">worldname</td><td>name of custom world folder, possibly null </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a class="anchor" id="a58e37fb4bc0c5d4c432f60021b89aa5b"></a>
+<a class="anchor" id="a3ec519f49fe60b2dd605b127ff50838b"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -731,7 +783,7 @@ Protected Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">String&#160;</td>
-          <td class="paramname"><em>customName</em>&#160;</td>
+          <td class="paramname"><em>worldname</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -745,12 +797,13 @@ Protected Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Loads a map by URL.</p>
+
+<p>Loads a map by URL. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">sender</td><td>user receiving progress updates </td></tr>
     <tr><td class="paramname">url</td><td>URL of map zip to be downloaded </td></tr>
-    <tr><td class="paramname">customName</td><td>name of custom world folder, possibly null </td></tr>
+    <tr><td class="paramname">worldname</td><td>name of custom world folder, possibly null </td></tr>
   </table>
   </dd>
 </dl>
@@ -778,6 +831,7 @@ Protected Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
 <p>Handles JSON object to initialize matches. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -791,7 +845,7 @@ Protected Member Functions</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/authorblues/Projects/AutoReferee/src/main/java/org/mctourney/AutoReferee/AutoRefMap.java</li>
+<li>AutoRefMap.java</li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -799,7 +853,7 @@ Protected Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>org</b></li><li class="navelem"><b>mctourney</b></li><li class="navelem"><b>AutoReferee</b></li><li class="navelem"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html">AutoRefMap</a></li>
-    <li class="footer">Generated on Mon Nov 5 2012 09:09:22 for AutoReferee by
+    <li class="footer">Generated by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.2 </li>
   </ul>
