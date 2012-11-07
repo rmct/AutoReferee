@@ -12,6 +12,11 @@ import org.bukkit.material.Colorable;
 
 import org.apache.commons.collections.map.DefaultedMap;
 
+/**
+ * Represents a type of block, combined with any identifiable metadata.
+ *
+ * @author authorblues
+ */
 public class BlockData
 {
 	// placeholder for a few common block data values
@@ -20,25 +25,46 @@ public class BlockData
 
 	private Material mat;
 
+	/**
+	 * Gets the material type.
+	 */
 	public Material getMaterial()
 	{ return mat; }
 
+	/**
+	 * Sets the material type.
+	 */
 	public void setMaterial(Material mat)
 	{ this.mat = mat; }
 
 	private byte data;
 
+	/**
+	 * Gets the metadata value.
+	 */
 	public byte getData()
 	{ return data; }
 
+	/**
+	 * Sets the metadata value.
+	 */
 	public void setData(byte data)
 	{ this.data = data; }
 
-	// material value and metadata (-1 = no metadata)
-	public BlockData(Material m, byte d) { setMaterial(m); setData(d); }
+	/**
+	 * Constructs a block data object with a material and metadata.
+	 *
+	 * @param material material type
+	 * @param data metadata value, or -1 if any metadata
+	 */
+	public BlockData(Material material, byte data) { setMaterial(material); setData(data); }
 
-	// material value and no metadata
-	public BlockData(Material m) { this(m, (byte)-1); }
+	/**
+	 * Constructs a block data object with a material and any metadata.
+	 *
+	 * @param material material type
+	 */
+	public BlockData(Material material) { this(material, (byte)-1); }
 
 	@Override public int hashCode()
 	{ return getMaterial().hashCode() ^ new Byte(getData()).hashCode(); }
@@ -53,27 +79,37 @@ public class BlockData
 		return ob.getMaterial().equals(getMaterial()) && this.dataMatches(ob);
 	}
 
-	// does this block data match the given block?
-	public boolean matches(Block b)
-	{
-		// matches if materials and metadata are same
-		return (b != null && b.getType().equals(getMaterial())
-			&& (getData() == -1 || getData() == b.getData()));
-	}
-
 	private boolean dataMatches(BlockData ob)
 	{ return ob.getData() == getData() || ob.getData() == -1 || getData() == -1; }
 
-	@Override public String toString()
+	/**
+	 * Checks if the specified block matches this block data, taking metadata into account.
+	 *
+	 * @return true if block matches, otherwise false
+	 */
+	public boolean matchesBlock(Block block)
+	{ return block != null && this.equals(BlockData.fromBlock(block)); }
+
+	public String serialize()
 	{
 		String s = Integer.toString(getMaterial().getId());
 		return getData() == -1 ? s : (s + "," + Integer.toString(getData()));
 	}
 
-	public String getRawName()
-	{ return ChatColor.stripColor(getName()); }
-
+	/**
+	 * Gets a human-readable name for this block data, without color.
+	 *
+	 * @return block data name
+	 */
 	public String getName()
+	{ return ChatColor.stripColor(getDisplayName()); }
+
+	/**
+	 * Gets a human-readable name for this block data.
+	 *
+	 * @return colored block data name
+	 */
+	public String getDisplayName()
 	{
 		String bname = getMaterial().name().replaceAll("_+", " ");
 		if ((getMaterial().getNewData((byte) 0) instanceof Colorable))
@@ -87,10 +123,16 @@ public class BlockData
 		return bname;
 	}
 
-	public static BlockData fromString(String s)
+	/**
+	 * Unserializes a block data object from a comma-seperated string.
+	 *
+	 * @param string serialized block data object
+	 * @return block data object
+	 */
+	public static BlockData unserialize(String string)
 	{
 		// format: mat[,data]
-		String[] units = s.split(",", 2);
+		String[] units = string.split(",", 2);
 
 		try
 		{
@@ -104,18 +146,34 @@ public class BlockData
 		catch (NumberFormatException e) { return null; }
 	}
 
-	// generate block data object from a CraftBlock
-	public static BlockData fromBlock(Block b)
-	{ return new BlockData(b.getType(), b.getData()); }
+	/**
+	 * Generates a block data object from a block.
+	 *
+	 * @param block block object
+	 * @return block data object
+	 */
+	public static BlockData fromBlock(Block block)
+	{ return new BlockData(block.getType(), block.getData()); }
 
-	// generate block data object from an ItemStack
+	/**
+	 * Generates a block data object from an item stack.
+	 *
+	 * @param item item stack object
+	 * @return block data object
+	 */
 	public static BlockData fromItemStack(ItemStack item)
 	{
 		byte b = item.getData().getData();
 		return new BlockData(item.getType(), b);
 	}
 
-	// get primary BlockData type from Inventory
+	/**
+	 * Generates a block data object from an inventory. If an inventory contains more than
+	 * one type of block, the block of the most quantity is returned.
+	 *
+	 * @param inv inventory object
+	 * @return block data object
+	 */
 	@SuppressWarnings("unchecked")
 	public static BlockData fromInventory(Inventory inv)
 	{

@@ -45,7 +45,7 @@ public class RefereeChannelListener implements PluginMessageListener, Listener
 			if (match.isPlayer(pl))
 			{
 				AutoRefPlayer apl = match.getPlayer(pl);
-				for (Player ref : match.getReferees(true)) ref.sendMessage(apl.getName() +
+				for (Player ref : match.getReferees(true)) ref.sendMessage(apl.getDisplayName() +
 					ChatColor.DARK_GRAY + " attempted to log in with a modified client!");
 				match.leaveTeam(pl, true);
 			}

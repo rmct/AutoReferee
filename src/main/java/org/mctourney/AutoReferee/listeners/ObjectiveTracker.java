@@ -27,7 +27,6 @@ import org.mctourney.AutoReferee.AutoRefTeam;
 import org.mctourney.AutoReferee.AutoRefTeam.WinCondition;
 import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
-import org.mctourney.AutoReferee.AutoRefTeam.GoalStatus;
 import org.mctourney.AutoReferee.util.BlockData;
 
 public class ObjectiveTracker implements Listener
@@ -52,13 +51,12 @@ public class ObjectiveTracker implements Listener
 
 		if (match != null && apl != null)
 		{
-			for (WinCondition wc : apl.getTeam().winConditions)
+			for (WinCondition wc : apl.getTeam().getWinConditions())
 			{
-				Location loc = wc.getLocation(); BlockData bd = wc.getBlockData();
-				if (match.blockInRange(bd, loc, match.getInexactRange()) != null &&
-					apl.getTeam().getObjectiveStatus(bd) != GoalStatus.PLACED && bd.matches(block))
+				BlockData b = wc.getBlockData();
+				if (match.blockInRange(wc) != null && b.matchesBlock(block) && wc.getStatus() != WinCondition.GoalStatus.PLACED)
 						match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.OBJECTIVE_PLACED,
-							String.format("%s has placed %s", apl.getPlayerName(), bd.getRawName()), loc, apl, bd));
+							String.format("%s has placed %s", apl.getName(), b.getName()), wc.getLocation(), apl, b));
 			}
 			match.checkWinConditions();
 		}
@@ -254,7 +252,7 @@ public class ObjectiveTracker implements Listener
 		AutoRefTeam team = plugin.getTeam((Player) event.getWhoClicked());
 
 		BlockData recipeTarget = BlockData.fromItemStack(event.getRecipe().getResult());
-		if (team != null && team.getObjectives().contains(recipeTarget) && !match.allowCraft)
+		if (team != null && team.getObjectives().contains(recipeTarget) && !match.allowObjectiveCraft())
 			event.setCancelled(true);
 
 		// if this is on the blacklist, cancel

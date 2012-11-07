@@ -100,7 +100,7 @@ public class AutoRefMatch
 
 	// world this match is taking place on
 	private World world;
-	public Location worldSpawn = null;
+	private Location worldSpawn = null;
 
 	private void setWorld(World w)
 	{
@@ -169,23 +169,18 @@ public class AutoRefMatch
 	public Set<AutoRefTeam> getTeams()
 	{ return teams; }
 
-	public List<AutoRefTeam> getSortedTeams()
+	protected List<AutoRefTeam> getSortedTeams()
 	{
 		List<AutoRefTeam> sortedTeams = Lists.newArrayList(getTeams());
 		Collections.sort(sortedTeams);
 		return sortedTeams;
 	}
 
-	/**
-	 * Gets a comma-separated list of teams for this match.
-	 *
-	 * @return list of teams
-	 */
-	public String getTeamList()
+	protected String getTeamList()
 	{
 		Set<String> tlist = Sets.newHashSet();
 		for (AutoRefTeam team : getSortedTeams())
-			tlist.add(team.getName());
+			tlist.add(team.getDisplayName());
 		return StringUtils.join(tlist, ", ");
 	}
 
@@ -243,8 +238,8 @@ public class AutoRefMatch
 	}
 
 	// configuration information for the world
-	public File worldConfigFile;
-	public FileConfiguration worldConfig;
+	private File worldConfigFile;
+	private FileConfiguration worldConfig;
 
 	// basic variables loaded from file
 	private String mapName = null;
@@ -338,19 +333,74 @@ public class AutoRefMatch
 	}
 
 	// task that starts the match
-	public AutoRefMatch.CountdownTask matchStarter = null;
+	private AutoRefMatch.CountdownTask matchStarter = null;
 
 	// mechanisms to open the starting gates
-	public Set<StartMechanism> startMechanisms = null;
+	private Set<StartMechanism> startMechanisms = null;
 
 	// protected entities - only protected from "butchering"
-	public Set<UUID> protectedEntities = null;
+	private Set<UUID> protectedEntities = Sets.newHashSet();
 
-	public boolean allowFriendlyFire = false;
-	public boolean allowCraft = false;
+	public boolean isProtected(UUID uuid)
+	{ return protectedEntities.contains(uuid); }
+
+	public void protect(UUID uuid)
+	{ protectedEntities.add(uuid); }
+
+	public void unprotect(UUID uuid)
+	{ protectedEntities.remove(uuid); }
+
+	public void toggleProtection(UUID uuid)
+	{ if (isProtected(uuid)) unprotect(uuid); else protect(uuid); }
+
+	private boolean allowFriendlyFire = false;
+
+	/**
+	 * Checks if friendly fire is allowed in this match.
+	 *
+	 * @return true if friendly fire is allowed, otherwise false
+	 */
+	public boolean allowFriendlyFire()
+	{ return allowFriendlyFire; }
+
+	/**
+	 * Sets whether friendly fire is allowed in this match.
+	 */
+	public void setFriendlyFire(boolean b)
+	{ this.allowFriendlyFire = b; }
+
+	private boolean allowObjectiveCraft = false;
+
+	/**
+	 * Checks if players are allowed to craft objectives in this match.
+	 *
+	 * @return true if players may craft objectives, otherwise false
+	 */
+	public boolean allowObjectiveCraft()
+	{ return allowObjectiveCraft; }
+
+	/**
+	 * Sets whether players are allowed to craft objectives in this match.
+	 */
+	public void setObjectiveCraft(boolean b)
+	{ this.allowObjectiveCraft = b; }
 
 	// provided by configuration file
-	public static boolean allowTies = false;
+	private static boolean allowTies = false;
+
+	/**
+	 * Checks if ties are allowed on this server.
+	 *
+	 * @return true if ties are allowed, otherwise false
+	 */
+	public static boolean areTiesAllowed()
+	{ return allowTies; }
+
+	/**
+	 * Sets whether ties are allowed on this server.
+	 */
+	public static void setAllowTies(boolean b)
+	{ AutoRefMatch.allowTies = b; }
 
 	// list of items players may not craft
 	private Set<BlockData> prohibitCraft = Sets.newHashSet();
@@ -556,7 +606,7 @@ public class AutoRefMatch
 		if (player == null) return true;
 
 		for (AutoRefPlayer apl : getPlayers())
-			if (apl.getPlayerName() == player.getName()) return false;
+			if (apl.getName() == player.getName()) return false;
 		return player.hasPermission("autoreferee.referee");
 	}
 
@@ -608,7 +658,7 @@ public class AutoRefMatch
 
 		prohibitCraft = Sets.newHashSet();
 		for (String b : worldConfig.getStringList("match.no-craft"))
-			prohibitCraft.add(BlockData.fromString(b));
+			prohibitCraft.add(BlockData.unserialize(b));
 
 		// HELPER: ensure all protected entities are still present in world
 		Set<UUID> uuidSearch = Sets.newHashSet(protectedEntities);
@@ -629,8 +679,8 @@ public class AutoRefMatch
 		versionString = worldConfig.getString("map.version", "1.0");
 		mapAuthors = worldConfig.getStringList("map.creators");
 
-		allowFriendlyFire = worldConfig.getBoolean("match.allow-ff", false);
-		allowCraft = worldConfig.getBoolean("match.allow-craft", false);
+		setFriendlyFire(worldConfig.getBoolean("match.allow-ff", false));
+		setObjectiveCraft(worldConfig.getBoolean("match.allow-craft", false));
 
 		// attempt to set world difficulty as best as possible
 		String diff = worldConfig.getString("match.difficulty", "HARD");
@@ -681,7 +731,7 @@ public class AutoRefMatch
 
 		// save the craft blacklist
 		List<String> ncList = Lists.newArrayList();
-		for ( BlockData bd : prohibitCraft ) ncList.add(bd.toString());
+		for ( BlockData bd : prohibitCraft ) ncList.add(bd.serialize());
 		worldConfig.set("match.no-craft", ncList);
 
 		// save the start region
@@ -734,19 +784,19 @@ public class AutoRefMatch
 
 		for (AutoRefTeam team : getTeams())
 		{
-			messageReferee(ref, "team", team.getRawName(), "init");
-			messageReferee(ref, "team", team.getRawName(), "color", team.getColor().toString());
+			messageReferee(ref, "team", team.getName(), "init");
+			messageReferee(ref, "team", team.getName(), "color", team.getColor().toString());
 
-			for (BlockData bd : team.getObjectives())
+			for (WinCondition wc : team.getWinConditions())
 			{
-				messageReferee(ref, "team", team.getRawName(), "obj", "+" + bd.toString());
-				messageReferee(ref, "team", team.getRawName(), "state", bd.toString(),
-					team.getObjectiveStatus(bd).toString());
+				messageReferee(ref, "team", team.getName(), "obj", "+" + wc.getBlockData().toString());
+				messageReferee(ref, "team", team.getName(), "state", wc.getBlockData().toString(),
+						wc.getStatus().toString());
 			}
 
 			for (AutoRefPlayer apl : team.getPlayers())
 			{
-				messageReferee(ref, "team", team.getRawName(), "player", "+" + apl.getPlayerName());
+				messageReferee(ref, "team", team.getName(), "player", "+" + apl.getName());
 				updateRefereePlayerInfo(ref, apl);
 			}
 		}
@@ -754,23 +804,23 @@ public class AutoRefMatch
 
 	private void updateRefereePlayerInfo(Player ref, AutoRefPlayer apl)
 	{
-		messageReferee(ref, "player", apl.getPlayerName(), "kills", Integer.toString(apl.getKills()));
-		messageReferee(ref, "player", apl.getPlayerName(), "deaths", Integer.toString(apl.getDeaths()));
-		messageReferee(ref, "player", apl.getPlayerName(), "streak", Integer.toString(apl.getStreak()));
+		messageReferee(ref, "player", apl.getName(), "kills", Integer.toString(apl.getKills()));
+		messageReferee(ref, "player", apl.getName(), "deaths", Integer.toString(apl.getDeaths()));
+		messageReferee(ref, "player", apl.getName(), "streak", Integer.toString(apl.getStreak()));
 		apl.sendAccuracyUpdate(ref);
 
 		Player pl = apl.getPlayer();
 		if (pl != null)
 		{
-			messageReferee(ref, "player", apl.getPlayerName(), "hp", Integer.toString(pl.getHealth()));
-			messageReferee(ref, "player", apl.getPlayerName(), "armor", Integer.toString(ArmorPoints.fromPlayer(pl)));
+			messageReferee(ref, "player", apl.getName(), "hp", Integer.toString(pl.getHealth()));
+			messageReferee(ref, "player", apl.getName(), "armor", Integer.toString(ArmorPoints.fromPlayer(pl)));
 		}
 
 		for (AutoRefPlayer en : getPlayers()) if (apl.isDominating(en))
-			messageReferee(ref, "player", apl.getPlayerName(), "dominate", en.getPlayerName());
+			messageReferee(ref, "player", apl.getName(), "dominate", en.getName());
 
-		messageReferee(ref, "player", apl.getPlayerName(), apl.isOnline() ? "login" : "logout");
-		messageReferee(ref, "player", apl.getPlayerName(), "cape", apl.getCape());
+		messageReferee(ref, "player", apl.getName(), apl.isOnline() ? "login" : "logout");
+		messageReferee(ref, "player", apl.getName(), "cape", apl.getCape());
 	}
 
 	/**
@@ -780,7 +830,7 @@ public class AutoRefMatch
 	 */
 	public void broadcast(String msg)
 	{
-		if (AutoReferee.getInstance().consoleLog)
+		if (AutoReferee.getInstance().isConsoleLoggingEnabled())
 			AutoReferee.getInstance().getLogger().info(ChatColor.stripColor(msg));
 		for (Player p : world.getPlayers()) p.sendMessage(msg);
 	}
@@ -945,7 +995,7 @@ public class AutoRefMatch
 	public void addIllegalCraft(BlockData blockdata)
 	{
 		this.prohibitCraft.add(blockdata);
-		this.broadcast("Crafting " + blockdata.getName() + " is now prohibited");
+		this.broadcast("Crafting " + blockdata.getDisplayName() + " is now prohibited");
 	}
 
 	/**
@@ -1428,7 +1478,7 @@ public class AutoRefMatch
 		boolean ready = true;
 		for ( OfflinePlayer opl : getExpectedPlayers() )
 			ready &= opl.isOnline() && isPlayer(opl.getPlayer()) &&
-				getPlayer(opl.getPlayer()).isReady();
+				getPlayer(opl.getPlayer()).isPresent();
 
 		// set status based on whether the players are online
 		setCurrentState(ready ? MatchStatus.READY : MatchStatus.WAITING);
@@ -1467,13 +1517,19 @@ public class AutoRefMatch
 		for (int z = -radius; z <= radius; ++z)
 		{
 			Block rel = b.getRelative(x, y, z);
-			if (blockdata.matches(rel)) return rel.getLocation();
+			if (blockdata.matchesBlock(rel)) return rel.getLocation();
 		}
 
 		return null;
 	}
 
-	private Location blockInRange(WinCondition wc)
+	/**
+	 * Checks if a given block type exists within a cube centered around a location.
+	 *
+	 * @param wc win condition object
+	 * @return location of a matching block within the region if one exists, otherwise null
+	 */
+	public Location blockInRange(WinCondition wc)
 	{ return blockInRange(wc.getBlockData(), wc.getLocation(), wc.getInexactRange()); }
 
 	/**
@@ -1495,11 +1551,11 @@ public class AutoRefMatch
 		if (getCurrentState().inProgress()) for (AutoRefTeam team : this.teams)
 		{
 			// if there are no win conditions set, skip this team
-			if (team.winConditions.size() == 0) continue;
+			if (team.getWinConditions().size() == 0) continue;
 
 			// check all win condition blocks (AND together)
 			boolean win = true;
-			for (WinCondition wc : team.winConditions)
+			for (WinCondition wc : team.getWinConditions())
 			{
 				Location placedLoc = blockInRange(wc);
 				win &= (placedLoc != null);
@@ -1525,8 +1581,8 @@ public class AutoRefMatch
 		public int compare(AutoRefTeam a, AutoRefTeam b)
 		{
 			// break ties first on the number of objectives placed, then number found
-			int vmd = a.getObjectivesPlaced() - b.getObjectivesPlaced();
-			return vmd == 0 ? a.getObjectivesFound() - b.getObjectivesFound() : vmd;
+			int vmd = b.getObjectivesPlaced() - a.getObjectivesPlaced();
+			return vmd == 0 ? b.getObjectivesFound() - a.getObjectivesFound() : vmd;
 		}
 	}
 
@@ -1544,7 +1600,7 @@ public class AutoRefMatch
 		if (0 != cmp.compare(sortedTeams.get(0), sortedTeams.get(1)))
 		{ matchComplete(sortedTeams.get(0)); return; }
 
-		if (AutoRefMatch.allowTies) { matchComplete(null); return; }
+		if (AutoRefMatch.areTiesAllowed()) { matchComplete(null); return; }
 		for (Player ref : getReferees())
 		{
 			ref.sendMessage(ChatColor.DARK_GRAY + "This match is currently tied.");
@@ -1564,7 +1620,7 @@ public class AutoRefMatch
 	public void matchComplete(AutoRefTeam team)
 	{
 		// announce the victory and set the match to completed
-		if (team != null) this.broadcast(team.getName() + " Wins!");
+		if (team != null) this.broadcast(team.getDisplayName() + " Wins!");
 		else this.broadcast("Match terminated!");
 
 		// remove all mobs, animals, and items
@@ -1581,13 +1637,13 @@ public class AutoRefMatch
 		messageReferees("match", getWorld().getName(), "time", getTimestamp(","));
 
 		// send referees the end event
-		if (team != null) messageReferees("match", getWorld().getName(), "end", team.getRawName());
+		if (team != null) messageReferees("match", getWorld().getName(), "end", team.getName());
 		else messageReferees("match", getWorld().getName(), "end");
 
 		// reset and report kill streaks
 		for (AutoRefPlayer apl : getPlayers()) apl.resetKillStreak();
 
-		String winner = team == null ? "" : (" " + team.getRawName() + " wins!");
+		String winner = team == null ? "" : (" " + team.getName() + " wins!");
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_END,
 			"Match ended." + winner, null, null, null));
 		setCurrentState(MatchStatus.COMPLETED);
@@ -1799,7 +1855,7 @@ public class AutoRefMatch
 	public String getPlayerName(Player player)
 	{
 		AutoRefPlayer apl = getPlayer(player);
-		return (apl == null) ? player.getName() : apl.getName();
+		return (apl == null) ? player.getName() : apl.getDisplayName();
 	}
 
 	/**
@@ -1912,14 +1968,6 @@ public class AutoRefMatch
 	public boolean inStartRegion(Location loc)
 	{ return startRegion != null && startRegion.distanceToRegion(loc) < ZoneListener.SNEAK_DISTANCE; }
 
-	/**
-	 * Updates inventory information for a single player.
-	 * Sends updates to the referee client to be displayed on screen.
-	 *
-	 * @param apl player object to be updated
-	 * @param oldCarrying previous contents of inventory
-	 * @param newCarrying new contents of inventory
-	 */
 	public void updateCarrying(AutoRefPlayer apl, Set<BlockData> oldCarrying, Set<BlockData> newCarrying)
 	{
 		Set<BlockData> add = Sets.newHashSet(newCarrying);
@@ -1933,12 +1981,6 @@ public class AutoRefMatch
 		for (BlockData bd : rem) messageReferees("player", player.getName(), "obj", "-" + bd.toString());
 	}
 
-	/**
-	 * Updates health and armor information for a single player.
-	 * Sends updates to the referee client to be displayed on screen.
-	 *
-	 * @param apl player object to be updated
-	 */
 	public void updateHealthArmor(AutoRefPlayer apl, int oldHealth,
 			int oldArmor, int newHealth, int newArmor)
 	{
@@ -2088,7 +2130,8 @@ public class AutoRefMatch
 		if (recipients != null) for (Player player : recipients)
 			player.sendMessage(message);
 
-		if (plugin.consoleLog) plugin.getLogger().info(event.toString());
+		if (plugin.isConsoleLoggingEnabled())
+			plugin.getLogger().info(event.toString());
 	}
 
 	/**
@@ -2111,10 +2154,10 @@ public class AutoRefMatch
 	{
 		message = ChatColor.stripColor(message);
 		for (AutoRefPlayer apl : getPlayers()) if (apl != null)
-			message = message.replaceAll(apl.getPlayerName(), apl.getName());
-		for (AutoRefTeam team : getTeams()) if (team.winConditions != null)
-			for (WinCondition wc : team.winConditions) message = message.replaceAll(
-				wc.getBlockData().getRawName(), wc.getBlockData().getName());
+			message = message.replaceAll(apl.getName(), apl.getDisplayName());
+		for (AutoRefTeam team : getTeams()) if (team.getWinConditions() != null)
+			for (WinCondition wc : team.getWinConditions()) message = message.replaceAll(
+				wc.getBlockData().getName(), wc.getBlockData().getDisplayName());
 		return ChatColor.RESET + message;
 	}
 
@@ -2129,13 +2172,13 @@ public class AutoRefMatch
 		AutoRefPlayer apl = getPlayer(player);
 		String tmpflag = tmp ? "*" : "";
 
-		if (apl != null) player.sendMessage("You are on team: " + apl.getTeam().getName());
+		if (apl != null) player.sendMessage("You are on team: " + apl.getTeam().getDisplayName());
 		else if (isReferee(player)) player.sendMessage(ChatColor.GRAY + "You are a referee! " + tmpflag);
 		else player.sendMessage("You are not on a team! Type " + ChatColor.GRAY + "/jointeam");
 
 		for (AutoRefTeam team : getSortedTeams())
 			player.sendMessage(String.format("%s (%d) - %s",
-				team.getName(), team.getPlayers().size(), team.getPlayerList()));
+				team.getDisplayName(), team.getPlayers().size(), team.getPlayerList()));
 
 		long timestamp = (getWorld().getFullTime() - getStartTicks()) / 20L;
 		player.sendMessage("Match status is currently " + ChatColor.GRAY + getCurrentState().name());

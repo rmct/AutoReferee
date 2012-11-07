@@ -67,6 +67,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+/**
+ * Base plugin class
+ *
+ * @author authorblues
+ */
 public class AutoReferee extends JavaPlugin
 {
 	// singleton instance
@@ -79,6 +84,9 @@ public class AutoReferee extends JavaPlugin
 	 */
 	public static AutoReferee getInstance()
 	{ return instance; }
+
+	protected void log(String msg)
+	{ getInstance().getLogger().info(msg); }
 
 	// expected configuration version number
 	private static final int PLUGIN_CFG_VERSION = 2;
@@ -123,8 +131,13 @@ public class AutoReferee extends JavaPlugin
 		return lobby;
 	}
 
-	protected void setLobbyWorld(World w)
-	{ this.lobby = w; }
+	/**
+	 * Sets the world designated as the lobby world.
+	 *
+	 * @param world lobby world
+	 */
+	public void setLobbyWorld(World world)
+	{ this.lobby = world; }
 
 	// is this plugin in online mode?
 	private boolean autoMode = true;
@@ -140,7 +153,10 @@ public class AutoReferee extends JavaPlugin
 	protected boolean setAutoMode(boolean auto)
 	{ return this.autoMode = auto; }
 
-	protected boolean consoleLog = false;
+	private boolean consoleLog = false;
+
+	protected boolean isConsoleLoggingEnabled()
+	{ return consoleLog; }
 
 	// get the match associated with the world
 	private Map<UUID, AutoRefMatch> matches = Maps.newHashMap();
@@ -300,7 +316,7 @@ public class AutoReferee extends JavaPlugin
 		if (isAutoMode()) setAutoMode(checkPlugins(pm));
 
 		// are ties allowed? (auto-mode always allows for ties)
-		AutoRefMatch.allowTies = isAutoMode() || getConfig().getBoolean("allow-ties", false);
+		AutoRefMatch.setAllowTies(isAutoMode() || getConfig().getBoolean("allow-ties", false));
 
 		// log messages to console?
 		consoleLog = getConfig().getBoolean("console-log", false);
@@ -502,7 +518,7 @@ public class AutoReferee extends JavaPlugin
 						sender.sendMessage(ChatColor.GREEN + CFG_FILENAME + " generated.");
 					}
 					else sender.sendMessage(this.getName() + " already initialized for " +
-						match.worldConfig.getString("map.name", "this map") + ".");
+						match.getMapName() + ".");
 				}
 
 				// CMD: /autoref cfg reload
@@ -630,7 +646,7 @@ public class AutoReferee extends JavaPlugin
 					team.setSpawnLocation(player.getLocation());
 					String coords = BlockVector3.fromLocation(player.getLocation()).toCoords();
 					sender.sendMessage(ChatColor.GRAY + "Spawn set to " +
-						coords + " for " + team.getName());
+						coords + " for " + team.getDisplayName());
 				}
 				return true;
 			}
@@ -938,7 +954,7 @@ public class AutoReferee extends JavaPlugin
 			for (AutoRefTeam team : lookupTeams)
 			{
 				// print team-name header
-				sender.sendMessage(team.getName() + "'s Regions:");
+				sender.sendMessage(team.getDisplayName() + "'s Regions:");
 
 				// print all the regions owned by this team
 				if (team.getRegions().size() > 0) for (CuboidRegion reg : team.getRegions())
@@ -1009,7 +1025,7 @@ public class AutoReferee extends JavaPlugin
 					// add the region to the team, announce
 					t.getRegions().add(areg);
 					sender.sendMessage("Region now marked as " +
-						t.getName() + "'s zone! " + areg.getFlags());
+						t.getDisplayName() + "'s zone! " + areg.getFlags());
 				}
 			}
 			return true;
@@ -1140,7 +1156,7 @@ public class AutoReferee extends JavaPlugin
 					Location bedloc = apl.getBedLocation();
 
 					if (bedloc == null || bedloc.getBlock().getType() != Material.BED_BLOCK)
-						player.sendMessage(apl.getName() + ChatColor.DARK_GRAY + " does not have a bed set.");
+						player.sendMessage(apl.getDisplayName() + ChatColor.DARK_GRAY + " does not have a bed set.");
 					else tplocation = TeleportationUtil.blockTeleport(bedloc);
 				}
 				else if (cli.hasOption('d'))

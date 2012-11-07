@@ -459,19 +459,9 @@ public class ZoneListener implements Listener
 					BlockVector3.fromLocation(event.getRightClicked().getLocation()).toCoords());
 
 				// save the entity's unique id
-				UUID uid = event.getRightClicked().getUniqueId();
-				if (match.protectedEntities.contains(uid))
-				{
-					match.protectedEntities.remove(uid);
-					match.broadcast(ChatColor.RED + ename + ChatColor.RESET +
-						" is no longer a protected entity");
-				}
-				else
-				{
-					match.protectedEntities.add(uid);
-					match.broadcast(ChatColor.RED + ename + ChatColor.RESET +
-						" is a protected entity");
-				}
+				UUID uid; match.toggleProtection(uid = event.getRightClicked().getUniqueId());
+				match.broadcast(ChatColor.RED + ename + ChatColor.RESET + " is " +
+					(match.isProtected(uid) ? "" : "not ") + "a protected entity");
 
 
 				break;
@@ -541,7 +531,7 @@ public class ZoneListener implements Listener
 
 		// generate message regarding the teleport event
 		String bedrock = match.blockInRange(BlockData.BEDROCK, to, 5) != null ? " (near bedrock)" : "";
-		String message = apl.getName() + ChatColor.GRAY + " has teleported @ " +
+		String message = apl.getDisplayName() + ChatColor.GRAY + " has teleported @ " +
 			BlockVector3.fromLocation(to).toCoords() + bedrock;
 
 		boolean excludeStreamers = dsq <= LONG_TELE_DISTANCE * LONG_TELE_DISTANCE;

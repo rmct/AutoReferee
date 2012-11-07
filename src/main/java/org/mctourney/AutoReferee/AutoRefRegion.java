@@ -59,7 +59,7 @@ public class AutoRefRegion extends CuboidRegion
 	public String toCoords()
 	{ return super.toCoords() + "=" + getFlagList(); }
 
-	public boolean is(RegionFlag flag)
+	private boolean is(RegionFlag flag)
 	{ return 0 != (flag.getValue() & this.flags); }
 
 	public boolean canBuild()
@@ -99,14 +99,14 @@ public class AutoRefRegion extends CuboidRegion
 	public AutoRefRegion toggle(RegionFlag flag)
 	{ flags ^= flag.getValue(); return this; }
 
-	public AutoRefRegion toggle(String nm)
+	protected AutoRefRegion toggle(String nm)
 	{
 		for (RegionFlag f : RegionFlag.values())
 			if (f.getName().equalsIgnoreCase(nm)) return toggle(f);
 		return this;
 	}
 
-	public AutoRefRegion toggle(char c)
+	protected AutoRefRegion toggle(char c)
 	{
 		for (RegionFlag f : RegionFlag.values())
 			if (f.getMark() == c) return toggle(f);

@@ -65,6 +65,22 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	}
 
 	/**
+	 * Gets the name of the map
+	 *
+	 * @return map name
+	 */
+	public String getName()
+	{ return name; }
+
+	/**
+	 * Gets the version of the map
+	 *
+	 * @return map version
+	 */
+	public String getVersion()
+	{ return version; }
+
+	/**
 	 * Gets human-readable name of map, including version number.
 	 *
 	 * @return map version string

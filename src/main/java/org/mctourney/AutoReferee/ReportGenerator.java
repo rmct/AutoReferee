@@ -30,8 +30,19 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+/**
+ * Formats HTML match reports.
+ *
+ * @author authorblues
+ */
 public class ReportGenerator
 {
+	/**
+	 * Generates a match report web page from a match object.
+	 *
+	 * @param match match object
+	 * @return HTML for a match report web page, or null if an error occurred
+	 */
 	public static String generate(AutoRefMatch match)
 	{
 		String htm, css, js, images = "";
@@ -58,7 +69,7 @@ public class ReportGenerator
 		AutoRefTeam win = match.getWinningTeam();
 		String winningTeam = (win == null) ? "??" :
 			String.format("<span class='team team-%s'>%s</span>",
-				getTag(win), ChatColor.stripColor(win.getName()));
+				getTag(win), ChatColor.stripColor(win.getDisplayName()));
 
 		Set<String> refList = Sets.newHashSet();
 		for (Player pl : match.getReferees())
@@ -119,7 +130,7 @@ public class ReportGenerator
 		StringWriter css = new StringWriter();
 		for (AutoRefPlayer apl : match.getPlayers())
 			css.write(String.format(".player-%s:before { background-image: url(http://minotar.net/avatar/%s/16.png); }\n",
-				getTag(apl), apl.getPlayerName()));
+				getTag(apl), apl.getName()));
 		return css.toString();
 	}
 
@@ -217,7 +228,7 @@ public class ReportGenerator
 	{
 		Set<BlockData> blocks = Sets.newHashSet();
 		for (AutoRefTeam team : match.getTeams())
-			for (WinCondition wc : team.winConditions)
+			for (WinCondition wc : team.getWinConditions())
 				blocks.add(wc.getBlockData());
 
 		StringWriter css = new StringWriter();
@@ -259,7 +270,7 @@ public class ReportGenerator
 
 			teamlist.write("<div class='span3'>");
 			teamlist.write(String.format("<h4 class='team team-%s'>%s</h4>",
-				getTag(team), ChatColor.stripColor(team.getName())));
+				getTag(team), ChatColor.stripColor(team.getDisplayName())));
 			teamlist.write(String.format("<ul class='teammembers unstyled'>%s</ul></div>\n", memberlist));
 		}
 
@@ -295,7 +306,7 @@ public class ReportGenerator
 		Collections.sort(players, new Comparator<AutoRefPlayer>()
 		{
 			public int compare(AutoRefPlayer apl1, AutoRefPlayer apl2)
-			{ return apl2.getScore() - apl1.getScore(); }
+			{ return apl2.getKDD() - apl1.getKDD(); }
 		});
 
 		int rank = 0;
@@ -321,15 +332,15 @@ public class ReportGenerator
 	{ return s.toLowerCase().replaceAll("[^a-z0-9]+", ""); }
 
 	private static String getTag(AutoRefPlayer apl)
-	{ return getTag(apl.getPlayerName()); }
+	{ return getTag(apl.getName()); }
 
 	private static String getTag(AutoRefTeam team)
-	{ return getTag(team.getRawName()); }
+	{ return getTag(team.getName()); }
 
 	private static String playerHTML(AutoRefPlayer apl)
 	{
 		return String.format("<span class='player player-%s team-%s'>%s</span>",
-			getTag(apl), getTag(apl.getTeam()), apl.getPlayerName());
+			getTag(apl), getTag(apl.getTeam()), apl.getName());
 	}
 
 	private static String transcriptEventHTML(TranscriptEvent e)
@@ -343,7 +354,7 @@ public class ReportGenerator
 
 		for (AutoRefPlayer apl : players)
 		{
-			m = m.replaceAll(apl.getPlayerName(), playerHTML(apl));
+			m = m.replaceAll(apl.getName(), playerHTML(apl));
 			rowClasses.add("type-player-event");
 			rowClasses.add("player-" + getTag(apl));
 		}
@@ -354,9 +365,9 @@ public class ReportGenerator
 			int mat = bd.getMaterial().getId();
 			int data = bd.getData();
 
-			m = m.replaceAll(bd.getRawName(), String.format(
+			m = m.replaceAll(bd.getName(), String.format(
 				"<span class='block mat-%d data-%d'>%s</span>",
-					mat, data, bd.getRawName()));
+					mat, data, bd.getName()));
 		}
 
 		String coords = BlockVector3.fromLocation(e.getLocation()).toCoords();

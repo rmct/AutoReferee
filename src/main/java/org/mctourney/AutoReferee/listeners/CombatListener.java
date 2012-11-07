@@ -85,7 +85,7 @@ public class CombatListener implements Listener
 						if (tntOwner.get(ed.getDamager().getUniqueId()) != vapl)
 						{
 							kapl = tntOwner.get(ed.getDamager().getUniqueId());
-							dmsg = victim.getName() + " was blown up by " + kapl.getPlayerName();
+							dmsg = victim.getName() + " was blown up by " + kapl.getName();
 						}
 					break;
 				}
@@ -167,7 +167,7 @@ public class CombatListener implements Listener
 			if (d1team == null && d2team == null) return;
 
 			// if the attacked isn't on a team, or same team (w/ no FF), cancel
-			if (d2team == null || (d1team == d2team && !match.allowFriendlyFire))
+			if (d2team == null || (d1team == d2team && !match.allowFriendlyFire()))
 			{ event.setCancelled(true); return; }
 		}
 	}

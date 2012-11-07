@@ -177,7 +177,7 @@ public class TeamListener implements Listener
 		// if this player was damaged recently (during the match), notify
 		if (match.getCurrentState().inProgress() && apl != null && apl.wasDamagedRecently())
 		{
-			String message = apl.getName() + ChatColor.GRAY + " logged out during combat " +
+			String message = apl.getDisplayName() + ChatColor.GRAY + " logged out during combat " +
 				String.format("with %2.1f hearts remaining", apl.getPlayer().getHealth() / 2.0);
 			for (Player ref : match.getReferees(true)) ref.sendMessage(message);
 		}
