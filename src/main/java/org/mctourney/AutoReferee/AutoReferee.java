@@ -130,8 +130,8 @@ public class AutoReferee extends JavaPlugin
 	public boolean isAutoMode()
 	{ return autoMode; }
 
-	protected boolean setAutoMode(boolean m)
-	{ return this.autoMode = m; }
+	protected boolean setAutoMode(boolean auto)
+	{ return this.autoMode = auto; }
 
 	protected boolean consoleLog = false;
 
@@ -141,11 +141,10 @@ public class AutoReferee extends JavaPlugin
 	/**
 	 * Gets match object associated with the given world.
 	 *
-	 * @param w World
 	 * @return match object if one exists, otherwise null
 	 */
-	public AutoRefMatch getMatch(World w)
-	{ return w != null ? matches.get(w.getUID()) : null; }
+	public AutoRefMatch getMatch(World world)
+	{ return world != null ? matches.get(world.getUID()) : null; }
 
 	/**
 	 * Gets all existing match objects for this server.
@@ -157,16 +156,12 @@ public class AutoReferee extends JavaPlugin
 
 	/**
 	 * Adds a given match to be tracked by the server.
-	 *
-	 * @param match
 	 */
 	public void addMatch(AutoRefMatch match)
 	{ matches.put(match.getWorld().getUID(), match); }
 
 	/**
 	 * Removes a match from the server.
-	 *
-	 * @param match
 	 */
 	public void clearMatch(AutoRefMatch match)
 	{ matches.remove(match.getWorld().getUID()); }
@@ -175,16 +170,15 @@ public class AutoReferee extends JavaPlugin
 	 * Gets team object associated with a player. Searches all matches for this player,
 	 * returns team object for the team containing this player.
 	 *
-	 * @param pl
 	 * @return team object if player is on team, otherwise null
 	 */
-	public AutoRefTeam getTeam(Player pl)
+	public AutoRefTeam getTeam(Player player)
 	{
 		// go through all the matches
 		for (AutoRefMatch match : matches.values())
 		{
 			// if the player is on a team for this match...
-			AutoRefTeam team = match.getPlayerTeam(pl);
+			AutoRefTeam team = match.getPlayerTeam(player);
 			if (team != null) return team;
 		}
 
@@ -196,12 +190,11 @@ public class AutoReferee extends JavaPlugin
 	 * Gets the team the player is expected to join. Matches setup by automated match
 	 * configurations may designate certain players for certain teams.
 	 *
-	 * @param pl
 	 * @return player's team, null if no such team
 	 */
-	public AutoRefTeam getExpectedTeam(Player pl)
+	public AutoRefTeam getExpectedTeam(Player player)
 	{
-		AutoRefTeam actualTeam = getTeam(pl);
+		AutoRefTeam actualTeam = getTeam(player);
 		if (actualTeam != null) return actualTeam;
 
 		// go through all the matches
@@ -209,7 +202,7 @@ public class AutoReferee extends JavaPlugin
 		{
 			// if the player is expected for any of these teams
 			for (AutoRefTeam team : match.getTeams())
-				if (team.getExpectedPlayers().contains(pl))
+				if (team.getExpectedPlayers().contains(player))
 					return team;
 		}
 
@@ -386,7 +379,6 @@ public class AutoReferee extends JavaPlugin
 	/**
 	 * Checks if the player should be white-listed on this server. Only used in auto-mode.
 	 *
-	 * @param player
 	 * @return true if player should be whitelisted, otherwise false
 	 */
 	public boolean playerWhitelisted(Player player)
@@ -1341,15 +1333,15 @@ public class AutoReferee extends JavaPlugin
 	 * Converts a human-readable time to a clock tick in Minecraft. Converts times such as "8am",
 	 * "1600", or "3:45p" to a valid clock tick setting that can be used to change the world time.
 	 *
-	 * @param t A string representing a human-readable time.
+	 * @param time A string representing a human-readable time.
 	 * @return Equivalent clock tick
 	 */
-	public static long parseTimeString(String t)
+	public static long parseTimeString(String time)
 	{
 		// "Some people, when confronted with a problem, think 'I know, I'll use
 		// regular expressions.' Now they have two problems." -- Jamie Zawinski
 		Pattern pattern = Pattern.compile("(\\d{1,5})(:(\\d{2}))?((a|p)m?)?", Pattern.CASE_INSENSITIVE);
-		Matcher match = pattern.matcher(t);
+		Matcher match = pattern.matcher(time);
 
 		// if the time matches something sensible
 		if (match.matches()) try
@@ -1403,14 +1395,13 @@ public class AutoReferee extends JavaPlugin
 	 * Sets whether player affects spawning via natural spawn and mob spawners.
 	 * Uses last_username's affects-spawning API from SportBukkit
 	 *
-	 * @param p
 	 * @param affectsSpawning Set whether player affects spawning
 	 * @see http://www.github.com/rmct/SportBukkit
 	 */
-	public static void setAffectsSpawning(Player p, boolean affectsSpawning)
+	public static void setAffectsSpawning(Player player, boolean affectsSpawning)
 	{
 		if (mAffectsSpawning != null) try
-		{ mAffectsSpawning.invoke(p, affectsSpawning); }
+		{ mAffectsSpawning.invoke(player, affectsSpawning); }
 		catch (Exception e) {  }
 	}
 
@@ -1418,14 +1409,13 @@ public class AutoReferee extends JavaPlugin
 	 * Sets whether player collides with entities, including items and arrows.
 	 * Uses last_username's collides-with-entities API from SportBukkit
 	 *
-	 * @param p
 	 * @param affectsSpawning Set whether player collides with entities
 	 * @see http://www.github.com/rmct/SportBukkit
 	 */
-	public static void setCollidesWithEntities(Player p, boolean collidesWithEntities)
+	public static void setCollidesWithEntities(Player player, boolean collidesWithEntities)
 	{
 		if (mCollidesWithEntities != null) try
-		{ mCollidesWithEntities.invoke(p, collidesWithEntities); }
+		{ mCollidesWithEntities.invoke(player, collidesWithEntities); }
 		catch (Exception e) {  }
 	}
 }

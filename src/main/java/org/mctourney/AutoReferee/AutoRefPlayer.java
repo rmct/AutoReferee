@@ -30,6 +30,11 @@ import org.apache.commons.collections.map.DefaultedMap;
 
 import com.google.common.collect.Sets;
 
+/**
+ * Represents a player participating in a match.
+ *
+ * @author authorblues
+ */
 public class AutoRefPlayer
 {
 	public static final EntityDamageEvent VOID_DEATH =

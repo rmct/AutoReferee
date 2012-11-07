@@ -34,7 +34,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 /**
- * A map object, available to be loaded by AutoReferee
+ * Represents a map object, available to be loaded by AutoReferee.
  *
  * @author authorblues
  */
@@ -541,14 +541,14 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	 * Loads a map by name.
 	 *
 	 * @param sender user receiving progress updates
-	 * @param mapName name of map to be loaded
-	 * @param customName name of custom world folder, possibly null
+	 * @param name name of map to be loaded
+	 * @param worldname name of custom world folder, possibly null
 	 */
-	public static void loadMap(CommandSender sender, String mapName, String customName)
+	public static void loadMap(CommandSender sender, String name, String worldname)
 	{
 		AutoReferee instance = AutoReferee.getInstance();
 		instance.getServer().getScheduler().scheduleAsyncDelayedTask(
-			instance, new MapRepoDownloader(sender, mapName, customName));
+			instance, new MapRepoDownloader(sender, name, worldname));
 	}
 
 	/**
@@ -556,12 +556,12 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	 *
 	 * @param sender user receiving progress updates
 	 * @param url URL of map zip to be downloaded
-	 * @param customName name of custom world folder, possibly null
+	 * @param worldname name of custom world folder, possibly null
 	 */
-	public static void loadMapFromURL(CommandSender sender, String url, String customName)
+	public static void loadMapFromURL(CommandSender sender, String url, String worldname)
 	{
 		AutoReferee instance = AutoReferee.getInstance();
 		instance.getServer().getScheduler().scheduleAsyncDelayedTask(
-			instance, new MapURLDownloader(sender, url, customName));
+			instance, new MapURLDownloader(sender, url, worldname));
 	}
 }

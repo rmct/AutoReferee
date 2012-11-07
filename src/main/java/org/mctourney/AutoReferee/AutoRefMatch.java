@@ -60,6 +60,11 @@ import org.mctourney.AutoReferee.util.Vector3;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+/**
+ * Represents a game world controlled by AutoReferee.
+ *
+ * @author authorblues
+ */
 public class AutoRefMatch
 {
 	// online map list
@@ -130,10 +135,10 @@ public class AutoRefMatch
 	/**
 	 * Sets the time that will be set at the start of the match.
 	 *
-	 * @param startTime world time in ticks to set at start of the match
+	 * @param time world time in ticks to set at start of the match
 	 */
-	public void setStartTime(long startTime)
-	{ this.startTime = startTime; }
+	public void setStartTime(long time)
+	{ this.startTime = time; }
 
 	public enum MatchStatus
 	{
@@ -401,15 +406,15 @@ public class AutoRefMatch
 	/**
 	 * Sets the recipient of debug messages for this match.
 	 *
-	 * @param recp a recipient for debug messages, or null to disable debug
+	 * @param recipient a recipient for debug messages, or null to disable debug
 	 */
-	public void setDebug(CommandSender recp)
+	public void setDebug(CommandSender recipient)
 	{
-		if (recp != null && recp.hasPermission("autoreferee.streamer"))
+		if (recipient != null && recipient.hasPermission("autoreferee.streamer"))
 			AutoReferee.getInstance().getLogger().info(
 				"You may not direct debug message to a streamer!");
 
-		debugRecipient = recp;
+		debugRecipient = recipient;
 		debug(ChatColor.GREEN + "Debug mode is now " +
 			(isDebugMode() ? "on" : "off"));
 	}
@@ -557,11 +562,11 @@ public class AutoRefMatch
 
 	/**
 	 * Checks if the given world is compatible with AutoReferee
-	 * @param w world to check
+	 * @param world world to check
 	 * @return true if the world contains an autoreferee.yml, otherwise false
 	 */
-	public static boolean isCompatible(World w)
-	{ return new File(w.getWorldFolder(), "autoreferee.yml").exists(); }
+	public static boolean isCompatible(World world)
+	{ return new File(world.getWorldFolder(), "autoreferee.yml").exists(); }
 
 	/**
 	 * Reloads world configuration from autoreferee.yml.
@@ -922,25 +927,25 @@ public class AutoRefMatch
 	/**
 	 * Checks if a item is prohibited from crafting.
 	 *
-	 * @param bd block data object for the item being queried
+	 * @param blockdata block data object for the item being queried
 	 * @return true if item may be crafted, otherwise false
 	 */
-	public boolean canCraft(BlockData bd)
+	public boolean canCraft(BlockData blockdata)
 	{
 		for (BlockData nc : prohibitCraft)
-			if (nc.equals(bd)) return false;
+			if (nc.equals(blockdata)) return false;
 		return true;
 	}
 
 	/**
 	 * Prohibits an item from being crafted during a match.
 	 *
-	 * @param bd block data object for the prohibited item
+	 * @param blockdata block data object for the prohibited item
 	 */
-	public void addIllegalCraft(BlockData bd)
+	public void addIllegalCraft(BlockData blockdata)
 	{
-		this.prohibitCraft.add(bd);
-		this.broadcast("Crafting " + bd.getName() + " is now prohibited");
+		this.prohibitCraft.add(blockdata);
+		this.broadcast("Crafting " + blockdata.getName() + " is now prohibited");
 	}
 
 	/**
@@ -1229,18 +1234,18 @@ public class AutoRefMatch
 	 * Reconfigures spectator mode for a single player. Useful for updating all
 	 * players when one player logs in.
 	 *
-	 * @param focus player to configure spectator mode for
+	 * @param player player to configure spectator mode for
 	 */
-	public void setupSpectators(Player focus)
+	public void setupSpectators(Player player)
 	{
-		if (getCurrentState().isBeforeMatch()) setSpectatorMode(focus, isReferee(focus));
-		else setSpectatorMode(focus, !isPlayer(focus) || getCurrentState().isAfterMatch());
+		if (getCurrentState().isBeforeMatch()) setSpectatorMode(player, isReferee(player));
+		else setSpectatorMode(player, !isPlayer(player) || getCurrentState().isAfterMatch());
 
-		for ( Player pl : getWorld().getPlayers() )
+		for ( Player x : getWorld().getPlayers() )
 		{
 			// setup vanish in both directions
-			setupVanish(focus, pl);
-			setupVanish(pl, focus);
+			setupVanish(player, x);
+			setupVanish(x, player);
 		}
 	}
 
@@ -1381,10 +1386,10 @@ public class AutoRefMatch
 	/**
 	 * Starts a countdown.
 	 *
-	 * @param readyDelay number of seconds before end of countdown
-	 * @param startMatch true if countdown should start match, otherwise false
+	 * @param delay number of seconds before end of countdown
+	 * @param start true if countdown should start match, otherwise false
 	 */
-	public void startCountdown(int readyDelay, boolean startMatch)
+	public void startCountdown(int delay, boolean start)
 	{
 		// get a copy of the bukkit scheduling daemon
 		BukkitScheduler scheduler = AutoReferee.getInstance().getServer().getScheduler();
@@ -1394,7 +1399,7 @@ public class AutoRefMatch
 			scheduler.cancelTask(this.matchStarter.task);
 
 		// schedule the task to announce and prepare the match
-		this.matchStarter = new CountdownTask(this, readyDelay, startMatch);
+		this.matchStarter = new CountdownTask(this, delay, start);
 		this.matchStarter.task = scheduler.scheduleSyncRepeatingTask(
 				AutoReferee.getInstance(), this.matchStarter, 0L, 20L);
 	}
@@ -1449,12 +1454,12 @@ public class AutoRefMatch
 	/**
 	 * Checks if a given block type exists within a cube centered around a location.
 	 *
-	 * @param bd block type being searched for
+	 * @param blockdata block type being searched for
 	 * @param loc center point of searchable cube
 	 * @param radius radius of searchable cube
 	 * @return location of a matching block within the region if one exists, otherwise null
 	 */
-	public Location blockInRange(BlockData bd, Location loc, int radius)
+	public Location blockInRange(BlockData blockdata, Location loc, int radius)
 	{
 		Block b = getWorld().getBlockAt(loc);
 		for (int x = -radius; x <= radius; ++x)
@@ -1462,7 +1467,7 @@ public class AutoRefMatch
 		for (int z = -radius; z <= radius; ++z)
 		{
 			Block rel = b.getRelative(x, y, z);
-			if (bd.matches(rel)) return rel.getLocation();
+			if (blockdata.matches(rel)) return rel.getLocation();
 		}
 
 		return null;
@@ -1933,10 +1938,6 @@ public class AutoRefMatch
 	 * Sends updates to the referee client to be displayed on screen.
 	 *
 	 * @param apl player object to be updated
-	 * @param oldHealth previous health, in half hearts
-	 * @param oldArmor previous armor points
-	 * @param newHealth new health, in half hearts
-	 * @param newArmor new armor points
 	 */
 	public void updateHealthArmor(AutoRefPlayer apl, int oldHealth,
 			int oldArmor, int newHealth, int newArmor)
