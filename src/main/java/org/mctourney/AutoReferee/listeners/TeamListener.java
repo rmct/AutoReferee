@@ -154,7 +154,8 @@ public class TeamListener implements Listener
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
 
 		if (team != null) { team.join(player); match = team.getMatch(); }
-		if (match.isPlayer(player)) match.messageReferees("player", player.getName(), "login");
+		if (match != null && match.isPlayer(player))
+			match.messageReferees("player", player.getName(), "login");
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
