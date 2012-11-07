@@ -279,12 +279,12 @@ public class ReportGenerator
 			if (apl2.getTeam() == target.getTeam()) return +1;
 
 			// get the number of kills on this player total
-			int k = apl1.kills.get(target) - apl2.kills.get(target);
+			int k = apl1.getKills(target) - apl2.getKills(target);
 			if (k != 0) return k;
 
 			// get the relative difference in "focus"
-			return apl1.kills.get(target)*apl2.totalKills -
-				apl2.kills.get(target)*apl1.totalKills;
+			return apl1.getKills(target)*apl2.getKills() -
+				apl2.getKills(target)*apl1.getKills();
 		}
 	};
 
@@ -298,12 +298,6 @@ public class ReportGenerator
 			{ return apl2.getScore() - apl1.getScore(); }
 		});
 
-		Map<AutoRefPlayer, Integer> dd = new DefaultedMap(0);
-		for (AutoRefPlayer apl : players)
-			for (Map.Entry<AutoRefPlayer.DamageCause, Integer> dc : apl.damage.entrySet())
-				if (dc.getKey().p instanceof AutoRefPlayer)
-					dd.put((AutoRefPlayer) dc.getKey().p, dd.get(dc.getKey().p) + dc.getValue());
-
 		int rank = 0;
 		StringWriter playerstats = new StringWriter();
 		for (AutoRefPlayer apl : players)
@@ -315,9 +309,9 @@ public class ReportGenerator
 			playerstats.write(String.format("<tr><td>%d</td><td>%s</td>",
 					++rank, playerHTML(apl)));
 			playerstats.write(String.format("<td>%d</td><td>%d</td><td>%s</td>",
-					apl.totalKills, apl.totalDeaths, apl.getExtendedAccuracyInfo()));
-			playerstats.write(String.format("<td>%d</td><td>%d</td><td>%s</td></tr>\n",
-					999, dd.get(apl), nms == null ? "none" : playerHTML(nms)));
+					apl.getKills(), apl.getDeaths(), apl.getExtendedAccuracyInfo()));
+			playerstats.write(String.format("<td>%s</td></tr>\n",
+					nms == null ? "none" : playerHTML(nms)));
 		}
 
 		return playerstats.toString();

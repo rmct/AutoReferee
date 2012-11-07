@@ -208,15 +208,43 @@ public class AutoRefPlayer
 		return capeURL.replaceFirst("^https?://", "");
 	}
 
+	private int shotsFired = 0, shotsHit = 0;
+
+	public void resetArrowFire()
+	{ this.shotsFired = this.shotsHit = 0; }
+
+	public void incrementShotsFired()
+	{ ++this.shotsFired; this.sendAccuracyUpdate(); }
+
+	public void incrementShotsHit()
+	{ ++this.shotsHit; this.sendAccuracyUpdate(); }
+
+	public int getShotsFired()
+	{ return this.shotsFired; }
+
+	public int getShotsHit()
+	{ return this.shotsHit; }
+
 	// number of times this player has killed other players
-	public Map<AutoRefPlayer, Integer> kills;
-	public int totalKills = 0;
-	public int shotsFired, shotsHit;
+	private Map<AutoRefPlayer, Integer> kills;
+	private int totalKills = 0;
+
+	public int getKills(AutoRefPlayer apl)
+	{ return this.kills.get(apl); }
+
+	public int getKills()
+	{ return totalKills; }
 
 	// number of times player has died and damage taken
-	public Map<AutoRefPlayer.DamageCause, Integer> deaths;
-	public Map<AutoRefPlayer.DamageCause, Integer> damage;
-	public int totalDeaths = 0;
+	private Map<AutoRefPlayer.DamageCause, Integer> deaths;
+	private Map<AutoRefPlayer.DamageCause, Integer> damage;
+	private int totalDeaths = 0;
+
+	public int getDeaths(AutoRefPlayer apl)
+	{ return this.deaths.get(apl); }
+
+	public int getDeaths()
+	{ return totalDeaths; }
 
 	// tracking objective items
 	private Set<BlockData> carrying;
@@ -306,7 +334,7 @@ public class AutoRefPlayer
 		damage = new DefaultedMap(0);
 
 		// accuracy information
-		shotsFired = shotsHit = 0;
+		this.resetArrowFire();
 
 		// save the player and team as references
 		this.setPlayerName(n);
@@ -316,8 +344,8 @@ public class AutoRefPlayer
 		this.carrying = Sets.newHashSet();
 
 		// streak information
-		totalStreak = 0;
 		playerStreak = new DefaultedMap(0);
+		totalStreak = 0;
 	}
 
 	public AutoRefPlayer(Player p, AutoRefTeam t)
