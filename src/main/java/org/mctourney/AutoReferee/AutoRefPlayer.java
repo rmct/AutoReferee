@@ -256,8 +256,14 @@ public class AutoRefPlayer
 	{ return carrying; }
 
 	// streak information - kill streak, domination, revenge
-	public int totalStreak = 0;
+	private int totalStreak = 0;
 	private Map<AutoRefPlayer, Integer> playerStreak;
+
+	public int getStreak(AutoRefPlayer apl)
+	{ return this.playerStreak.get(apl); }
+
+	public int getStreak()
+	{ return totalStreak; }
 
 	// last damage tick
 	private long lastDamageTick;

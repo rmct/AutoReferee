@@ -756,7 +756,7 @@ public class AutoRefMatch
 	{
 		messageReferee(ref, "player", apl.getPlayerName(), "kills", Integer.toString(apl.getKills()));
 		messageReferee(ref, "player", apl.getPlayerName(), "deaths", Integer.toString(apl.getDeaths()));
-		messageReferee(ref, "player", apl.getPlayerName(), "streak", Integer.toString(apl.totalStreak));
+		messageReferee(ref, "player", apl.getPlayerName(), "streak", Integer.toString(apl.getStreak()));
 		apl.sendAccuracyUpdate(ref);
 
 		Player pl = apl.getPlayer();
