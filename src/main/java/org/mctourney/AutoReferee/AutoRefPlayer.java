@@ -197,7 +197,10 @@ public class AutoRefPlayer
 	private String capeURL = null;
 
 	public void setCape(String url)
-	{ getTeam().getMatch().messageReferees("player", this.getPlayerName(), "cape", getCape()); }
+	{
+		capeURL = url;
+		getTeam().getMatch().messageReferees("player", this.getPlayerName(), "cape", getCape());
+	}
 
 	public String getCape()
 	{
