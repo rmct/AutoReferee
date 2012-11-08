@@ -241,7 +241,7 @@ public class CombatListener implements Listener
 				// try to determine if this was the first tnt in a chain
 				if ((apl = match.getNearestPlayer(tntLocation)) == null) return;
 
-				Location plLocation = apl.getPlayer().getLocation();
+				Location plLocation = apl.getLocation();
 				if (plLocation.distanceSquared(tntLocation) > TNT_PRIME_RANGE * TNT_PRIME_RANGE) return;
 			}
 
