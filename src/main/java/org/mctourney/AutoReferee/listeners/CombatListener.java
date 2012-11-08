@@ -132,7 +132,7 @@ public class CombatListener implements Listener
 	public void damageDealt(EntityDamageEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
-		if (match == null) return;
+		if (match == null || !match.getCurrentState().inProgress()) return;
 
 		if ((event instanceof EntityDamageByEntityEvent))
 		{
@@ -143,8 +143,7 @@ public class CombatListener implements Listener
 			if (ed.getDamager().getType() == EntityType.ENDER_PEARL) return;
 
 			Player damager = entityToPlayer(ed.getDamager());
-			if (null != damager && match.getCurrentState().inProgress()
-				&& ed.getDamager() instanceof Arrow)
+			if (null != damager && ed.getDamager() instanceof Arrow)
 			{
 				AutoRefPlayer apl = match.getPlayer(damager);
 				if (apl != null) apl.incrementShotsHit();
@@ -178,11 +177,10 @@ public class CombatListener implements Listener
 	public void damageDealtMonitor(EntityDamageEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
-		if (match == null) return;
+		if (match == null || !match.getCurrentState().inProgress()) return;
 
 		// save player data if the damaged entity was a player
-		if (event.getEntityType() == EntityType.PLAYER &&
-			match.getCurrentState().inProgress())
+		if (event.getEntityType() == EntityType.PLAYER)
 		{
 			AutoRefPlayer pdata = match.getPlayer((Player) event.getEntity());
 			if (pdata != null) pdata.registerDamage(event);
