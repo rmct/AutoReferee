@@ -17,6 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
@@ -30,6 +31,7 @@ import org.mctourney.AutoReferee.AutoRefMatch;
 import org.mctourney.AutoReferee.AutoRefPlayer;
 import org.mctourney.AutoReferee.AutoRefTeam;
 import org.mctourney.AutoReferee.AutoReferee;
+import org.mctourney.AutoReferee.util.AchievementPoints;
 
 import com.google.common.collect.Maps;
 
@@ -184,6 +186,21 @@ public class CombatListener implements Listener
 		{
 			AutoRefPlayer pdata = match.getPlayer((Player) event.getEntity());
 			if (pdata != null) pdata.registerDamage(event);
+		}
+	}
+
+	@EventHandler(priority=EventPriority.MONITOR)
+	public void entityDeath(EntityDeathEvent event)
+	{
+		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
+		if (match == null || !match.getCurrentState().inProgress()) return;
+
+		EntityDamageEvent cause = event.getEntity().getLastDamageCause();
+		if (cause instanceof EntityDamageByEntityEvent)
+		{
+			Player dmgr = entityToPlayer(((EntityDamageByEntityEvent) cause).getDamager());
+			AchievementPoints ach = AchievementPoints.getMonsterKill(event.getEntityType());
+			if (match.isPlayer(dmgr)) match.getPlayer(dmgr).addPoints(ach);
 		}
 	}
 

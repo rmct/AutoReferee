@@ -22,6 +22,7 @@ import org.bukkit.potion.PotionEffect;
 
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.AutoRefTeam.WinCondition;
+import org.mctourney.AutoReferee.util.AchievementPoints;
 import org.mctourney.AutoReferee.util.ArmorPoints;
 import org.mctourney.AutoReferee.util.BlockData;
 import org.mctourney.AutoReferee.util.BlockVector3;
@@ -389,6 +390,41 @@ public class AutoRefPlayer
 
 	private boolean savedInventoryStale()
 	{ return getPlayer().getWorld().getFullTime() > lastInventoryViewSavedTick + SAVED_INVENTORY_LIFESPAN; }
+
+	private int points = 0;
+
+	/**
+	 * Adds achievement points for this player.
+	 */
+	public void addPoints(AchievementPoints ach)
+	{
+		if (ach == null) return;
+		this.addPoints(ach.getValue());
+	}
+
+	/**
+	 * Adds achievement points for this player.
+	 */
+	public void addPoints(int points)
+	{
+		this.points += points;
+	}
+
+	/**
+	 * Gets the number of achievement points this player has earned.
+	 *
+	 * @return achievement points
+	 */
+	public int getPoints()
+	{ return points; }
+
+	/**
+	 * Gets the normalized number of achievement points this player has earned.
+	 *
+	 * @return normalized achievement points
+	 */
+	public int getDisplayPoints()
+	{ return AchievementPoints.ticksToPoints(points); }
 
 	/**
 	 * Gets location of this player's bed.
