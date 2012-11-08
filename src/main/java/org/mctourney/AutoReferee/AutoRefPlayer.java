@@ -522,7 +522,7 @@ public class AutoRefPlayer
 	/**
 	 * Creates a player object for the given player.
 	 *
-	 * @param name player
+	 * @param player player
 	 * @param team player team, or null if no team
 	 */
 	public AutoRefPlayer(Player player, AutoRefTeam team)
@@ -537,10 +537,10 @@ public class AutoRefPlayer
 	/**
 	 * Creates a player object for the given player.
 	 *
-	 * @param name player
+	 * @param player player
 	 */
-	public AutoRefPlayer(Player p)
-	{ this(p, AutoReferee.getInstance().getTeam(p)); }
+	public AutoRefPlayer(Player player)
+	{ this(player, AutoReferee.getInstance().getTeam(player)); }
 
 	@Override
 	public int hashCode()
@@ -568,8 +568,8 @@ public class AutoRefPlayer
 	 * Kills the player. If the match has not yet started, the player
 	 * will be teleported back to spawn.
 	 *
-	 * @params cause reported cause of death, or null if no cause
-	 * @params cleardrops clear contents of inventory on death
+	 * @param cause reported cause of death, or null if no cause
+	 * @param cleardrops clear contents of inventory on death
 	 */
 	public void die(EntityDamageEvent cause, boolean cleardrops)
 	{

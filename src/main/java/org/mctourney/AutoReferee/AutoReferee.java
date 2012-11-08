@@ -1370,7 +1370,7 @@ public class AutoReferee extends JavaPlugin
 	 * Sets whether player collides with entities, including items and arrows.
 	 * Uses last_username's collides-with-entities API from SportBukkit
 	 *
-	 * @param affectsSpawning Set whether player collides with entities
+	 * @param collidesWithEntities Set whether player collides with entities
 	 * @see http://www.github.com/rmct/SportBukkit
 	 */
 	public static void setCollidesWithEntities(Player player, boolean collidesWithEntities)
