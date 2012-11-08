@@ -515,9 +515,10 @@ public class ZoneListener implements Listener
 
 	public void teleportEvent(Player pl, Location fm, Location to)
 	{
-		// if distance is too small to matter, forget about it
+		// cannot compare locations in different worlds
 		if (fm.getWorld() != to.getWorld()) return;
 
+		// if distance is too small to matter, forget about it
 		double dsq = fm.distanceSquared(to);
 		if (dsq <= SAFE_TRAVEL_DISTANCE * SAFE_TRAVEL_DISTANCE) return;
 
