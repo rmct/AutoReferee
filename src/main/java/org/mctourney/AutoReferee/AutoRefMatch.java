@@ -750,7 +750,10 @@ public class AutoRefMatch
 	 * Sends a referee plugin channel message to all referees, properly delimited.
 	 */
 	public void messageReferees(String ...parts)
-	{ for (Player ref : getReferees(false)) messageReferee(ref, parts); }
+	{
+		if (this.isDebugMode()) this.debug(StringUtils.join(parts, RefereeChannelListener.DELIMITER));
+		for (Player ref : getReferees(false)) messageReferee(ref, parts);
+	}
 
 	/**
 	 * Sends a referee plugin channel message to a specific referee, properly delimited.
