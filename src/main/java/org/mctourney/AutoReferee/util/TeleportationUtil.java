@@ -51,7 +51,7 @@ public class TeleportationUtil
 		if (apl == null) return null;
 
 		Location loc = apl.getLocation().clone();
-		return locationTeleport(loc.add(0.0, 1.7, 0.0));
+		return locationTeleport(loc);
 	}
 
 	private static Location locationLookingAt(Location base, Location target)
