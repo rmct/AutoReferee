@@ -792,8 +792,8 @@ public class AutoRefMatch
 
 			for (WinCondition wc : team.getWinConditions())
 			{
-				messageReferee(ref, "team", team.getName(), "obj", "+" + wc.getBlockData().toString());
-				messageReferee(ref, "team", team.getName(), "state", wc.getBlockData().toString(),
+				messageReferee(ref, "team", team.getName(), "obj", "+" + wc.getBlockData().serialize());
+				messageReferee(ref, "team", team.getName(), "state", wc.getBlockData().serialize(),
 						wc.getStatus().toString());
 			}
 
@@ -1980,8 +1980,8 @@ public class AutoRefMatch
 		rem.removeAll(newCarrying);
 
 		Player player = apl.getPlayer();
-		for (BlockData bd : add) messageReferees("player", player.getName(), "obj", "+" + bd.toString());
-		for (BlockData bd : rem) messageReferees("player", player.getName(), "obj", "-" + bd.toString());
+		for (BlockData bd : add) messageReferees("player", player.getName(), "obj", "+" + bd.serialize());
+		for (BlockData bd : rem) messageReferees("player", player.getName(), "obj", "-" + bd.serialize());
 	}
 
 	public void updateHealthArmor(AutoRefPlayer apl, int oldHealth,

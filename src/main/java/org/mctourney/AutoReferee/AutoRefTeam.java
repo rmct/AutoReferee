@@ -444,7 +444,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 				range = ":" + wc.getInexactRange();
 
 			wcond.add(BlockVector3.fromLocation(wc.getLocation()).toCoords()
-				+ ":" + wc.getBlockData().toString() + range);
+				+ ":" + wc.getBlockData().serialize() + range);
 		}
 
 		// add the win condition list
@@ -679,7 +679,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		newObj.removeAll(prevObj);
 		for (BlockData nbd : newObj) match.messageReferees(
-			"team", this.getName(), "obj", "+" + nbd.toString());
+			"team", this.getName(), "obj", "+" + nbd.serialize());
 
 		// broadcast the update
 		for (Player cfg : loc.getWorld().getPlayers()) if (cfg.hasPermission("autoreferee.configure"))
