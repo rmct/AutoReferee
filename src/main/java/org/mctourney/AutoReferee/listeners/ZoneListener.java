@@ -281,20 +281,20 @@ public class ZoneListener implements Listener
 		if (match.isPlayer(player))
 		{
 			// if this is a start mechanism, this should always be allowed
-			if (!plugin.isAutoMode() && match.isStartMechanism(loc)) return;
+			if (!plugin.isAutoMode() && match.isStartMechanism(loc)
+				&& match.getCurrentState().isBeforeMatch()) return;
+
+			if (match.isStartMechanism(loc) && !match.getCurrentState().isBeforeMatch())
+			{ event.setCancelled(true); return; }
 
 			if (!validPlayer(player))
 			{ event.setCancelled(true); return; }
-
-		//	AutoRefPlayer apl = match.getPlayer(player);
-		//	if (apl != null && !apl.getTeam().canEnter(loc, 0.0))
-		//	{ event.setCancelled(true); return; }
 		}
 		else // is spectator
 		{
 			Material type = event.getClickedBlock().getType();
-			if ((type == Material.WOOD_PLATE || type == Material.STONE_PLATE) &&
-				match.getCurrentState().inProgress()) { event.setCancelled(true); return; }
+			if ((type == Material.WOOD_PLATE || type == Material.STONE_PLATE)
+				&& match.getCurrentState().inProgress()) { event.setCancelled(true); return; }
 
 			if (event.getClickedBlock().getState() instanceof InventoryHolder
 				&& event.getAction() == Action.RIGHT_CLICK_BLOCK && match.getCurrentState().inProgress())
