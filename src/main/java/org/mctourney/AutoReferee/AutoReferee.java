@@ -1237,7 +1237,8 @@ public class AutoReferee extends JavaPlugin
 				else
 				{
 					Player pl = getServer().getPlayer(args[0]);
-					tplocation = match.isPlayer(pl) ? TeleportationUtil.entityTeleport(pl) : pl.getLocation();
+					if (pl != null) tplocation = match.isPlayer(pl)
+						? TeleportationUtil.entityTeleport(pl) : pl.getLocation();
 				}
 			}
 			catch (ParseException e) {  }
