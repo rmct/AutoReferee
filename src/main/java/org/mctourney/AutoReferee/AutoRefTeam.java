@@ -701,21 +701,29 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		return objectives;
 	}
 
+	private void changeObjectiveStatus(WinCondition wc, WinCondition.GoalStatus status)
+	{
+		if (wc.getStatus() == status) return;
+		getMatch().messageReferees("team", this.getName(), "state",
+			wc.getBlockData().serialize(), status.toString());
+		wc.setStatus(status);
+	}
+
 	protected void updateObjectives()
 	{
 		objloop: for (WinCondition wc : winConditions)
 		{
 			if (getMatch().blockInRange(wc) != null)
-			{ wc.setStatus(WinCondition.GoalStatus.PLACED); continue objloop; }
+			{ changeObjectiveStatus(wc, WinCondition.GoalStatus.PLACED); continue objloop; }
 
 			for (AutoRefPlayer apl : getPlayers())
 			{
 				if (!apl.getCarrying().contains(wc.getBlockData())) continue;
-				wc.setStatus(WinCondition.GoalStatus.CARRYING); continue objloop;
+				changeObjectiveStatus(wc, WinCondition.GoalStatus.CARRYING); continue objloop;
 			}
 
 			if (wc.getStatus() != WinCondition.GoalStatus.NONE)
-			{ wc.setStatus(WinCondition.GoalStatus.SEEN); continue; }
+			{ changeObjectiveStatus(wc, WinCondition.GoalStatus.SEEN); continue; }
 		}
 	}
 
