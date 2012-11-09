@@ -15,7 +15,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 ".html",
-"classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#aa39ed31dae4003101eeca13755b2ba40"
+"classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#a8adfd4e8830f5f7a605b04d679038d93"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
