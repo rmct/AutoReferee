@@ -1156,7 +1156,10 @@ public class AutoReferee extends JavaPlugin
 					Location bedloc = apl.getBedLocation();
 
 					if (bedloc == null || bedloc.getBlock().getType() != Material.BED_BLOCK)
+					{
 						player.sendMessage(apl.getDisplayName() + ChatColor.DARK_GRAY + " does not have a bed set.");
+						return true;
+					}
 					else tplocation = TeleportationUtil.blockTeleport(bedloc);
 				}
 				else if (cli.hasOption('d'))
@@ -1248,10 +1251,9 @@ public class AutoReferee extends JavaPlugin
 			if (tplocation != null)
 			{
 				prevLocation.put(player.getName(), player.getLocation());
-				player.setFlying(true);
-				player.teleport(tplocation);
+				player.setFlying(true); player.teleport(tplocation);
 			}
-
+			else player.sendMessage(ChatColor.DARK_GRAY + "You cannot teleport to this location: invalid or unsafe.");
 			return true;
 		}
 

@@ -33,7 +33,8 @@ public class TeleportationUtil
 		}
 
 		// return a location that is looking at the target
-		return locationLookingAt(best, loc).subtract(0, 1, 0);
+		Location dest = locationLookingAt(best, loc);
+		return dest.distance(loc) < 1.0 ? null : dest;
 	}
 
 	public static Location blockTeleport(Block b)
@@ -48,7 +49,9 @@ public class TeleportationUtil
 	public static Location playerTeleport(AutoRefPlayer apl)
 	{
 		if (apl == null) return null;
-		return locationTeleport(apl.getLocation());
+
+		Location loc = apl.getLocation().clone();
+		return locationTeleport(loc.add(0.0, 1.7, 0.0));
 	}
 
 	private static Location locationLookingAt(Location base, Location target)
