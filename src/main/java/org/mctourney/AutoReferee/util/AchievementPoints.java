@@ -14,8 +14,8 @@ public enum AchievementPoints
 	REVENGE(100),
 	ARROW_HIT(3),
 
-	RETRIEVE_OBJECTIVE(300),
-	PLACED_OBJECTIVE(300),
+	OBJECTIVE_FOUND(300),
+	OBJECTIVE_PLACE(100),
 
 	PICKUP_BLOCK(1),
 	MINE_COAL(2),
@@ -57,6 +57,10 @@ public enum AchievementPoints
 	private static Map<EntityType, AchievementPoints> monsterKill = Maps.newEnumMap(EntityType.class);
 	static
 	{
+		// the most dangerous game...
+		monsterKill.put(EntityType.PLAYER, KILL_PLAYER);
+
+		// all mobs for which we award points
 		monsterKill.put(EntityType.ZOMBIE, KILL_ZOMBIE);
 		monsterKill.put(EntityType.SKELETON, KILL_SKELETON);
 		monsterKill.put(EntityType.CREEPER, KILL_CREEPER);

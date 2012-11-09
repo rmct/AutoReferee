@@ -266,7 +266,10 @@ public class AutoRefPlayer
 	 * Increments the recorded number of this player's arrows that hit a target.
 	 */
 	public void incrementShotsHit()
-	{ ++this.shotsHit; this.sendAccuracyUpdate(); }
+	{
+		++this.shotsHit; this.sendAccuracyUpdate();
+		this.addPoints(AchievementPoints.ARROW_HIT);
+	}
 
 	/**
 	 * Gets the number of arrows fired by this player.
@@ -403,7 +406,8 @@ public class AutoRefPlayer
 	}
 
 	/**
-	 * Adds achievement points for this player.
+	 * Adds achievement points for this player. This method can be used to add
+	 * custom point values, if necessary.
 	 */
 	public void addPoints(int points)
 	{
@@ -833,6 +837,7 @@ public class AutoRefPlayer
 					String m = String.format("%s is carrying %s", getName(), wc.getBlockData().getName());
 					getTeam().getMatch().addEvent(new TranscriptEvent(getTeam().getMatch(),
 						TranscriptEvent.EventType.OBJECTIVE_FOUND, m, getLocation(), this, wc.getBlockData()));
+					this.addPoints(AchievementPoints.OBJECTIVE_FOUND);
 
 					// store the player's location as the last objective location
 					getTeam().setLastObjectiveLocation(getLocation());

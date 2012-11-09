@@ -27,6 +27,7 @@ import org.mctourney.AutoReferee.AutoRefTeam;
 import org.mctourney.AutoReferee.AutoRefTeam.WinCondition;
 import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
+import org.mctourney.AutoReferee.util.AchievementPoints;
 import org.mctourney.AutoReferee.util.BlockData;
 
 public class ObjectiveTracker implements Listener
@@ -55,8 +56,11 @@ public class ObjectiveTracker implements Listener
 			{
 				BlockData b = wc.getBlockData();
 				if (match.blockInRange(wc) != null && b.matchesBlock(block) && wc.getStatus() != WinCondition.GoalStatus.PLACED)
-						match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.OBJECTIVE_PLACED,
-							String.format("%s has placed %s", apl.getName(), b.getName()), wc.getLocation(), apl, b));
+				{
+					match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.OBJECTIVE_PLACED,
+						String.format("%s has placed %s", apl.getName(), b.getName()), wc.getLocation(), apl, b));
+					apl.addPoints(AchievementPoints.OBJECTIVE_PLACE);
+				}
 			}
 			match.checkWinConditions();
 		}
