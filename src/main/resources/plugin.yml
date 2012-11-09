@@ -46,7 +46,7 @@ commands:
     permission: autoreferee.referee
     usage: /<command> <playername>
   artp:
-    aliases: [tp]
+    aliases: [atp]
     description: Teleport spectators safely
     permission: autoreferee.referee
     usage: /<command> [<options>] <target>
