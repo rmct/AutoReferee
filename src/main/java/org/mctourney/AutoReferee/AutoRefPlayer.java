@@ -563,6 +563,7 @@ public class AutoRefPlayer
 		match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DEATH,
 			e.getDeathMessage(), loc, this, apl));
 		this.setLastDeathLocation(loc);
+		this.addPoints(AchievementPoints.DEATH);
 
 		// reset total kill streak
 		this.resetKillStreak();
@@ -618,6 +619,7 @@ public class AutoRefPlayer
 			match.messageReferees("player", getName(), "revenge", apl.getName());
 			match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_REVENGE,
 				String.format("%s got revenge on %s", this.getName(), apl.getName()), loc, this, apl));
+			this.addPoints(AchievementPoints.REVENGE);
 		}
 
 		// reset player streaks
