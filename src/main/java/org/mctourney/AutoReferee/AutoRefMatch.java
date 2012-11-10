@@ -469,6 +469,16 @@ public class AutoRefMatch
 			(isDebugMode() ? "on" : "off"));
 	}
 
+	private ReportGenerator matchReportGenerator = new ReportGenerator();
+
+	/**
+	 * Gets the mutable report generator object.
+	 *
+	 * @return report generator object
+	 */
+	public ReportGenerator getReportGenerator()
+	{ return matchReportGenerator; }
+
 	// number of seconds for each phase
 	public static final int READY_SECONDS = 15;
 	public static final int COMPLETED_SECONDS = 180;
@@ -592,6 +602,19 @@ public class AutoRefMatch
 			if (p.hasPermission("autoreferee.referee") && !isPlayer(p))
 				if (!excludeStreamers || !p.hasPermission("autoreferee.streamer")) refs.add(p);
 		return refs;
+	}
+
+	/**
+	 * Gets streamers present in this match.
+	 *
+	 * @return collection of streamers
+	 */
+	public Set<Player> getStreamers()
+	{
+		Set<Player> streamers = Sets.newHashSet();
+		for (Player p : world.getPlayers())
+			if (p.hasPermission("autoreferee.streamer") && !isPlayer(p)) streamers.add(p);
+		return streamers;
 	}
 
 	/**
@@ -836,6 +859,28 @@ public class AutoRefMatch
 		if (AutoReferee.getInstance().isConsoleLoggingEnabled())
 			AutoReferee.getInstance().getLogger().info(ChatColor.stripColor(msg));
 		for (Player p : world.getPlayers()) p.sendMessage(msg);
+	}
+
+	/**
+	 * Force a broadcast to be sent synchronously. Safe to use from an asynchronous task.
+	 *
+	 * @param msg message to be sent
+	 */
+	public void broadcastSync(String msg)
+	{
+		Plugin plugin = AutoReferee.getInstance();
+		plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new SyncBroadcastTask(msg));
+	}
+
+	private class SyncBroadcastTask implements Runnable
+	{
+		private String message = null;
+
+		public SyncBroadcastTask(String message)
+		{ this.message = message; }
+
+		@Override public void run()
+		{ if (this.message != null) broadcast(this.message); }
 	}
 
 	/**
@@ -1912,8 +1957,8 @@ public class AutoRefMatch
 
 		public void run()
 		{
-			broadcast(ChatColor.RED + "Generating Match Summary...");
-			String report = ReportGenerator.generate(AutoRefMatch.this);
+			broadcastSync(ChatColor.RED + "Generating Match Summary...");
+			String report = matchReportGenerator.generate(AutoRefMatch.this);
 
 			String webstats = null;
 			if (this.localStorage == null) webstats = uploadReport(report);
@@ -1927,8 +1972,8 @@ public class AutoRefMatch
 				webstats = serveLocally() ? (webDirectory + localFileID) : uploadReport(report);
 			}
 
-			if (webstats == null) broadcast(ChatColor.RED + AutoReferee.NO_WEBSTATS_MESSAGE);
-			else broadcast(ChatColor.RED + "Match Summary: " + ChatColor.RESET + webstats);
+			if (webstats == null) broadcastSync(ChatColor.RED + AutoReferee.NO_WEBSTATS_MESSAGE);
+			else broadcastSync(ChatColor.RED + "Match Summary: " + ChatColor.RESET + webstats);
 		}
 	}
 

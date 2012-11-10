@@ -37,13 +37,28 @@ import com.google.common.collect.Sets;
  */
 public class ReportGenerator
 {
+	public ReportGenerator()
+	{  }
+
+	private Map<String, String> customDetails = Maps.newLinkedHashMap();
+
+	/**
+	 * Adds (or modifies) a custom detail for this match report generator. Custom details will
+	 * appear in the order that they are defined.
+	 *
+	 * @param key text for left column (descriptor)
+	 * @param value text for right column (content)
+	 */
+	public void setCustomDetail(String key, String value)
+	{ customDetails.put(key, value); }
+
 	/**
 	 * Generates a match report web page from a match object.
 	 *
 	 * @param match match object
 	 * @return HTML for a match report web page, or null if an error occurred
 	 */
-	public static String generate(AutoRefMatch match)
+	public String generate(AutoRefMatch match)
 	{
 		String htm, css, js, images = "";
 		try
@@ -75,6 +90,14 @@ public class ReportGenerator
 		for (Player pl : match.getReferees())
 			refList.add(String.format("<span class='referee'>%s</span>", pl.getName()));
 
+		Set<String> streamerList = Sets.newHashSet();
+		for (Player pl : match.getStreamers())
+			streamerList.add(String.format("<span class='streamer'>%s</span>", pl.getName()));
+
+		List<String> extraRows = Lists.newLinkedList();
+		for (Map.Entry<String, String> e : this.customDetails.entrySet())
+			extraRows.add(String.format("<tr><th>%s</th><td>%s</td></tr>", e.getKey(), e.getValue()));
+
 		return (htm
 			// base files get replaced first
 			.replaceAll("#base-css#", css.replaceAll("\\s+", " ") + images)
@@ -96,10 +119,16 @@ public class ReportGenerator
 			// team information (all teams, and winning team)
 			.replaceAll("#teams#", getTeamList(match))
 			.replaceAll("#winners#", winningTeam)
+
+			// staff information
 			.replaceAll("#referees#", StringUtils.join(refList, ", "))
+			.replaceAll("#streamers#", StringUtils.join(streamerList, ", "))
 
 			// filter settings
 			.replaceAll("#filter-options", getFilterOptions())
+
+			// addition details (custom?)
+			.replaceAll("#xtra-details#", StringUtils.join(extraRows, "\n"))
 
 			// and last, throw in the transcript and stats
 			.replaceAll("#transcript#", transcript.toString())
