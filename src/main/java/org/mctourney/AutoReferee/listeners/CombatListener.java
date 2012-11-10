@@ -183,7 +183,12 @@ public class CombatListener implements Listener
 		if (event.getEntityType() == EntityType.PLAYER)
 		{
 			AutoRefPlayer pdata = match.getPlayer((Player) event.getEntity());
-			if (pdata != null) pdata.registerDamage(event);
+			if (pdata != null)
+			{
+				Player damager = (event instanceof EntityDamageByEntityEvent) ?
+					entityToPlayer(((EntityDamageByEntityEvent) event).getDamager()) : null;
+				pdata.registerDamage(event, damager);
+			}
 		}
 	}
 
