@@ -118,8 +118,20 @@ public class ZoneListener implements Listener
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
 		if (match == null) return;
 
+		int blockUnder = match.getWorld().getBlockTypeIdAt(event.getTo().add(0.0, -0.1, 0.0));
+		boolean onGround = (blockUnder != Material.AIR.getId());
+
 		AutoRefPlayer apl = match.getPlayer(player);
-		if (apl == null) return;
+		if (apl == null)
+		{
+			// if the player is not on a team and has left the start area, teleport back
+			if (!match.isSpectator(player) && !match.inStartRegion(event.getTo()) && onGround)
+			{
+				player.teleport(match.getWorldSpawn());
+				player.setFallDistance(0.0f);
+			}
+			return;
+		}
 
 		AutoRefTeam team = apl.getTeam();
 		if (team == null) return;
@@ -131,9 +143,6 @@ public class ZoneListener implements Listener
 		if (player.getGameMode() != GameMode.SURVIVAL
 			|| match.inStartRegion(event.getTo())) return;
 
-		int blockUnder = match.getWorld().getBlockTypeIdAt(event.getTo().add(0.0, -0.1, 0.0));
-		boolean onGround = (blockUnder != Material.AIR.getId());
-
 		// if a player leaves the start region...
 		if (!match.inStartRegion(event.getTo()))
 		{
@@ -142,10 +151,7 @@ public class ZoneListener implements Listener
 				apl.enterLane();
 
 			else if (match.getCurrentState().isBeforeMatch())
-			{
-				if (onGround) apl.die(null, false);
-				return;
-			}
+			{ if (onGround) apl.die(null, false); return; }
 		}
 
 		// if they have left their region, mark their exit location

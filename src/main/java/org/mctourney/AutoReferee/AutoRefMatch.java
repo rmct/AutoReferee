@@ -634,6 +634,17 @@ public class AutoRefMatch
 	}
 
 	/**
+	 * Checks if the specified player is a spectator for this match.
+	 *
+	 * @return true if player is a spectator, otherwise false
+	 */
+	public boolean isSpectator(Player player)
+	{
+		if (isReferee(player)) return true;
+		return !getCurrentState().isBeforeMatch() && !isPlayer(player);
+	}
+
+	/**
 	 * Checks if the given world is compatible with AutoReferee
 	 * @param world world to check
 	 * @return true if the world contains an autoreferee.yml, otherwise false
