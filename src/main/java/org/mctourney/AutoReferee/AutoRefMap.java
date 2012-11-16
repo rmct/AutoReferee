@@ -368,13 +368,14 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 				AutoRefMap rmap = remote.get(map.name);
 				if (rmap != null && (force || !map.version.equalsIgnoreCase(rmap.version)))
 				{
-					sender.sendMessage(String.format("UPDATING %s (%s -> %s)...",
-						rmap.name, map.version, rmap.version));
+					AutoReferee.getInstance().sendMessageSync(sender, String.format(
+						"UPDATING %s (%s -> %s)...", rmap.name, map.version, rmap.version));
 					if (rmap.getFolder() == null) sender.sendMessage("Update FAILED");
 					else
 					{
 						if (map.isInstalled()) FileUtils.deleteDirectory(map.folder);
-						sender.sendMessage("Update SUCCESS: " + rmap.getVersionString());
+						AutoReferee.getInstance().sendMessageSync(sender,
+							"Update SUCCESS: " + rmap.getVersionString());
 					}
 				}
 			}

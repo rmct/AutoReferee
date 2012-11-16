@@ -1,6 +1,5 @@
 package org.mctourney.AutoReferee;
 
-import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Set;
 

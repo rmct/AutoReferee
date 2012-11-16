@@ -1282,6 +1282,31 @@ public class AutoReferee extends JavaPlugin
 
 	}
 
+	/**
+	 * Force a message to be sent synchronously. Safe to use from an asynchronous task.
+	 *
+	 * @param msg message to be sent
+	 */
+	public void sendMessageSync(CommandSender sender, String msg)
+	{
+		getServer().getScheduler().scheduleSyncDelayedTask(this, new SyncMessageTask(sender, msg));
+	}
+
+	private class SyncMessageTask implements Runnable
+	{
+		private String message = null;
+		private CommandSender sender = null;
+
+		public SyncMessageTask(CommandSender sender, String message)
+		{ this.sender = sender; this.message = message; }
+
+		@Override public void run()
+		{
+			if (this.message != null && this.sender != null)
+				this.sender.sendMessage(this.message);
+		}
+	}
+
 	File getLogDirectory()
 	{
 		// create the log directory if it doesn't exist
