@@ -5,13 +5,10 @@ import org.bukkit.World;
 
 public class Vector3
 {
-	public double x, y, z;
+	protected double x, y, z;
 
 	public Vector3(double x, double y, double z)
 	{ this.x = x; this.y = y; this.z = z; }
-
-	public Vector3(BlockVector3 v)
-	{ this.x = v.x; this.y = v.y; this.z = v.z; }
 
 	public Vector3(com.sk89q.worldedit.Vector v)
 	{
@@ -20,8 +17,19 @@ public class Vector3
 		this.z = v.getZ();
 	}
 
+	public double getX() { return x; }
+	public double getY() { return y; }
+	public double getZ() { return z; }
+
+	public int getBlockX() { return (int)x; }
+	public int getBlockY() { return (int)y; }
+	public int getBlockZ() { return (int)z; }
+
 	public String toCoords()
-	{ return new BlockVector3(this).toCoords(); }
+	{ return String.format("%f,%f,%f", x, y, z); }
+
+	public String toBlockCoords()
+	{ return String.format("%d,%d,%d", getBlockX(), getBlockY(), getBlockZ()); }
 
 	public static Vector3 fromCoords(String coords)
 	{

@@ -24,7 +24,7 @@ import org.mctourney.AutoReferee.AutoRefTeam.WinCondition;
 import org.mctourney.AutoReferee.util.AchievementPoints;
 import org.mctourney.AutoReferee.util.ArmorPoints;
 import org.mctourney.AutoReferee.util.BlockData;
-import org.mctourney.AutoReferee.util.BlockVector3;
+import org.mctourney.AutoReferee.util.Vector3;
 
 import org.apache.commons.collections.map.DefaultedMap;
 
@@ -556,7 +556,7 @@ public class AutoRefPlayer
 		Location loc = e.getEntity().getLocation();
 		if (getExitLocation() != null) loc = getExitLocation();
 
-		match.messageReferees("player", getName(), "deathpos", BlockVector3.fromLocation(loc).toCoords());
+		match.messageReferees("player", getName(), "deathpos", Vector3.fromLocation(loc).toBlockCoords());
 		match.messageReferees("player", getName(), "deaths", Integer.toString(totalDeaths));
 
 		match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DEATH,

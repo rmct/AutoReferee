@@ -23,7 +23,7 @@ import org.bukkit.material.Colorable;
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.AutoRefTeam.WinCondition;
 import org.mctourney.AutoReferee.util.BlockData;
-import org.mctourney.AutoReferee.util.BlockVector3;
+import org.mctourney.AutoReferee.util.Vector3;
 import org.mctourney.AutoReferee.util.ColorConverter;
 
 import com.google.common.collect.Lists;
@@ -399,7 +399,7 @@ public class ReportGenerator
 					mat, data, bd.getName()));
 		}
 
-		String coords = BlockVector3.fromLocation(e.getLocation()).toCoords();
+		String coords = Vector3.fromLocation(e.getLocation()).toBlockCoords();
 		String fmt = "<tr class='transcript-event %s' data-location='%s'>" +
 			"<td class='message'>%s</td><td class='timestamp'>%s</td></tr>\n";
 		return String.format(fmt, StringUtils.join(rowClasses, " "), coords, m, e.getTimestamp());

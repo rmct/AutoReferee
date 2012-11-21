@@ -17,7 +17,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import org.mctourney.AutoReferee.listeners.ZoneListener;
-import org.mctourney.AutoReferee.util.*;
+import org.mctourney.AutoReferee.util.BlockData;
+import org.mctourney.AutoReferee.util.Vector3;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -228,7 +229,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	public void setSpawnLocation(Location loc)
 	{
 		getMatch().broadcast("Set " + getDisplayName() + "'s spawn to " +
-			BlockVector3.fromLocation(loc).toCoords());
+			Vector3.fromLocation(loc).toBlockCoords());
 		this.spawn = loc;
 	}
 
@@ -397,7 +398,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		}
 
 		newTeam.spawn = !conf.containsKey("spawn") ? null :
-			BlockVector3.fromCoords((String) conf.get("spawn")).toLocation(w);
+			Vector3.fromCoords((String) conf.get("spawn")).toLocation(w);
 
 		// setup both objective-based data-structures together
 		// -- avoids an NPE with getObjectives()
@@ -410,7 +411,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 				String[] sp = s.split(":");
 
 				int range = sp.length > 2 ? Integer.parseInt(sp[2]) : match.getInexactRange();
-				newTeam.addWinCondition(BlockVector3.fromCoords(sp[0]).toLocation(w),
+				newTeam.addWinCondition(Vector3.fromCoords(sp[0]).toLocation(w),
 					BlockData.unserialize(sp[1]), range);
 			}
 		}
@@ -433,7 +434,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		map.put("maxsize", new Integer(maxSize));
 
 		// set the team spawn (if there is a custom spawn)
-		if (spawn != null) map.put("spawn", BlockVector3.fromLocation(spawn).toCoords());
+		if (spawn != null) map.put("spawn", Vector3.fromLocation(spawn).toCoords());
 
 		// convert the win conditions to strings
 		List<String> wcond = Lists.newArrayList();
@@ -443,7 +444,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			if (wc.getInexactRange() != match.getInexactRange())
 				range = ":" + wc.getInexactRange();
 
-			wcond.add(BlockVector3.fromLocation(wc.getLocation()).toCoords()
+			wcond.add(Vector3.fromLocation(wc.getLocation()).toCoords()
 				+ ":" + wc.getBlockData().serialize() + range);
 		}
 
@@ -640,7 +641,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		boolean build = false;
 		if (regions != null) for ( AutoRefRegion reg : regions )
-			if (reg.contains(BlockVector3.fromLocation(loc)))
+			if (reg.contains(Vector3.fromLocation(loc)))
 			{ build = true; if (!reg.canBuild()) return false; }
 		return build;
 	}
@@ -684,7 +685,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		// broadcast the update
 		for (Player cfg : loc.getWorld().getPlayers()) if (cfg.hasPermission("autoreferee.configure"))
 			cfg.sendMessage(blockdata.getDisplayName() + " is now a win condition for " + getDisplayName() +
-				" @ " + BlockVector3.fromLocation(loc).toCoords());
+				" @ " + Vector3.fromLocation(loc).toBlockCoords());
 	}
 
 	/**

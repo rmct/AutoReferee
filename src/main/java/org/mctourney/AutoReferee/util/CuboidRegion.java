@@ -14,6 +14,13 @@ public class CuboidRegion
 		z1 = Math.min(v1.z, v2.z); z2 = Math.max(v1.z, v2.z);
 	}
 
+	public CuboidRegion(double x1, double x2, double y1, double y2, double z1, double z2)
+	{
+		this.x1 = x1; this.x2 = x2;
+		this.y1 = y1; this.y2 = y2;
+		this.z1 = z1; this.z2 = z2;
+	}
+
 	public Vector3 getMinimumPoint()
 	{ return new Vector3(x1, y1, z1); }
 
