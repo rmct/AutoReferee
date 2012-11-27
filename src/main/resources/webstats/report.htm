@@ -2,141 +2,141 @@
 <html lang='en'>
 <head>
 
-    <title>#title# | AutoReferee Match Report</title>
+	<title>#title# | AutoReferee Match Report</title>
 
-    <!-- Meta Data -->
-    <meta charset='utf-8' />
+	<!-- Meta Data -->
+	<meta charset='utf-8' />
 
-    <!-- External Resources -->
-    <link rel='stylesheet' href='http://twitter.github.com/bootstrap/assets/css/bootstrap.css' />
-    <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js'></script>
-    <script src='http://twitter.github.com/bootstrap/assets/js/bootstrap.min.js'></script>
+	<!-- External Resources -->
+	<link rel='stylesheet' href='http://twitter.github.com/bootstrap/assets/css/bootstrap.css' />
+	<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js'></script>
+	<script src='http://twitter.github.com/bootstrap/assets/js/bootstrap.min.js'></script>
 
-    <!-- Remote Resources -->
-    <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,700italic,400,600,700' />
+	<!-- Remote Resources -->
+	<link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,700italic,400,600,700' />
 
-    <!-- Dynamic Resources -->
-    <style>#base-css# #plyr-css# #team-css# #blok-css#</style>
+	<!-- Dynamic Resources -->
+	<style>#base-css# #plyr-css# #team-css# #blok-css#</style>
 
 </head>
 <body>
 
-    <div class='container'>
-        <div class='row'>
+	<div class='container'>
+		<div class='row'>
 
-            <!-- Header -->
-            <div id='ar_header' class='span12'>
-                <h1>AutoReferee Match Report</h1>
-                <h2>#title#</h2>
-            </div>
+			<!-- Header -->
+			<div id='ar_header' class='span12'>
+				<h1>AutoReferee Match Report</h1>
+				<h2>#title#</h2>
+			</div>
 
-            <!-- Content -->
-            <div id='ar_content' class='span12'>
+			<!-- Content -->
+			<div id='ar_content' class='span12'>
 
-                <div id='match-details' class='row'>
+				<div id='match-details' class='row'>
 
-                    <div class='span6'>
-                        <h3>Match Summary</h3>
-                        <table class='table table-striped'>
-                            <tbody>
-                                <tr>
-                                    <th>Match Name:</th>
-                                    <td>#title#</td>
-                                </tr>
-                                <tr>
-                                    <th>Map Name:</th>
-                                    <td>#map#</td>
-                                </tr>
-                                <tr>
-                                    <th>Date:</th>
-                                    <td>#date#</td>
-                                </tr>
-                                <tr>
-                                    <th>Match Length:</th>
-                                    <td>#length#</td>
-                                </tr>
-                                <tr>
-                                    <th>Winners:</th>
-                                    <td>#winners#</td>
-                                </tr>
-                                <tr>
-                                    <th>Referees:</th>
-                                    <td>#referees#</td>
-                                </tr>
-                                <tr>
-                                    <th>Streamers:</th>
-                                    <td>#referees#</td>
-                                </tr>
-                                #xtra-details#
-                            </tbody>
-                        </table>
-                    </div>
+					<div class='span6'>
+						<h3>Match Summary</h3>
+						<table class='table table-striped'>
+							<tbody>
+								<tr>
+									<th>Match Name:</th>
+									<td>#title#</td>
+								</tr>
+								<tr>
+									<th>Map Name:</th>
+									<td>#map#</td>
+								</tr>
+								<tr>
+									<th>Date:</th>
+									<td>#date#</td>
+								</tr>
+								<tr>
+									<th>Match Length:</th>
+									<td>#length#</td>
+								</tr>
+								<tr>
+									<th>Winners:</th>
+									<td>#winners#</td>
+								</tr>
+								<tr>
+									<th>Referees:</th>
+									<td>#referees#</td>
+								</tr>
+								<tr>
+									<th>Streamers:</th>
+									<td>#referees#</td>
+								</tr>
+								#xtra-details#
+							</tbody>
+						</table>
+					</div>
 
-                    <div class='span6'>
-                        <h3>Teams</h3>
-                        <div class='row'>
-                            #teams#
-                        </div>
-                    </div>
+					<div class='span6'>
+						<h3>Teams</h3>
+						<div class='row'>
+							#teams#
+						</div>
+					</div>
 
-                </div>
+				</div>
 
-                <h3>Match Log</h3>
+				<h3>Match Log</h3>
 
-                <span>
-                    <select id="event-filter">
-                        <option value="">(Show all)</option>
-                        #filter-options#
-                    </select>
-                </span>
+				<span>
+					<select id="event-filter">
+						<option value="">(Show all)</option>
+						#filter-options#
+					</select>
+				</span>
 
-                <table class='table table-bordered table-striped'>
-                    <thead>
-                        <tr>
-                            <th>Event</th>
-                            <th>Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        #transcript#
-                    </tbody>
-                </table>
+				<table class='table table-bordered table-striped'>
+					<thead>
+						<tr>
+							<th>Event</th>
+							<th>Time</th>
+						</tr>
+					</thead>
+					<tbody>
+						#transcript#
+					</tbody>
+				</table>
 
-                <h3>Player Stats</h3>
-                <p>Hover over headers for details.</p>
-                <table class='table table-bordered table-striped'>
-                    <thead>
-                        <tr>
-                            <th class='ar_rank'><abbr title='Rank'>R</abbr></th>
-                            <th>Name</th>
-                            <th><abbr title='Kills'>K</abbr></th>
-                            <th><abbr title='Deaths'>D</abbr></th>
-                            <th><abbr title='Accuracy'>ACC</abbr></th>
-                            <th>Nemesis</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        #plyr-stats#
-                    </tbody>
-                </table>
-            </div>
+				<h3>Player Stats</h3>
+				<p>Hover over headers for details.</p>
+				<table class='table table-bordered table-striped'>
+					<thead>
+						<tr>
+							<th class='ar_rank'><abbr title='Rank'>R</abbr></th>
+							<th>Name</th>
+							<th><abbr title='Kills'>K</abbr></th>
+							<th><abbr title='Deaths'>D</abbr></th>
+							<th><abbr title='Accuracy'>ACC</abbr></th>
+							<th>Nemesis</th>
+						</tr>
+					</thead>
+					<tbody>
+						#plyr-stats#
+					</tbody>
+				</table>
+			</div>
 
-            <!-- Footer -->
-            <div id='ar_footer' class='span12'>
-                <p><a href="http://github.com/rmct/AutoReferee" target="_top">github</a>
-                | <a href="http://dev.bukkit.org/server-mods/autoreferee/" target="_top">dev.bukkit</a></p>
-            </div>
+			<!-- Footer -->
+			<div id='ar_footer' class='span12'>
+				<p><a href="http://github.com/rmct/AutoReferee" target="_top">github</a>
+				| <a href="http://dev.bukkit.org/server-mods/autoreferee/" target="_top">dev.bukkit</a></p>
+			</div>
 
-        </div>
-    </div>
+		</div>
+	</div>
 
-    <!-- Map Image Tooltip -->
-    <canvas width="300" height="200" id="maptip"></canvas>
+	<!-- Map Image Tooltip -->
+	<canvas width="300" height="200" id="maptip"></canvas>
 
-    <script>
-	var map = #map-data#;
-    	#base-js#
-    </script>
+	<script>
+		var map = #map-data#;
+		#base-js#
+	</script>
 
 </body>
 </html>
