@@ -610,7 +610,7 @@ public class AutoRefPlayer
 		{
 			match.messageReferees("player", getName(), "dominate", apl.getName());
 			match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DOMINATE,
-				String.format("%s is dominating %s", this.getName(), apl.getName()), loc, this, apl));
+				String.format("%s is dominating %s", this.getName(), apl.getName()), apl.getLocation(), apl, this));
 		}
 
 		if (apl.isDominating(this))

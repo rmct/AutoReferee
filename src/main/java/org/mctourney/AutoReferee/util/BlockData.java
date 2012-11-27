@@ -67,7 +67,7 @@ public class BlockData
 	public BlockData(Material material) { this(material, (byte)-1); }
 
 	@Override public int hashCode()
-	{ return getMaterial().hashCode() ^ new Byte(getData()).hashCode(); }
+	{ return getMaterial().hashCode(); }
 
 	@Override public boolean equals(Object o)
 	{

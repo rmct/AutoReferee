@@ -1,5 +1,6 @@
 package org.mctourney.AutoReferee;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.DateFormat;
@@ -11,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 
-import org.apache.commons.collections.map.DefaultedMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -20,9 +20,11 @@ import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.material.Colorable;
+
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.AutoRefTeam.WinCondition;
 import org.mctourney.AutoReferee.util.BlockData;
+import org.mctourney.AutoReferee.util.MapImageGenerator;
 import org.mctourney.AutoReferee.util.Vector3;
 import org.mctourney.AutoReferee.util.ColorConverter;
 
@@ -98,6 +100,10 @@ public class ReportGenerator
 		for (Map.Entry<String, String> e : this.customDetails.entrySet())
 			extraRows.add(String.format("<tr><th>%s</th><td>%s</td></tr>", e.getKey(), e.getValue()));
 
+		File mapImage = new File(match.getWorld().getWorldFolder(), "map.png");
+		if (!mapImage.exists()) match.saveMapImage();
+		Vector3 ptMin = match.getMapCuboid().getMinimumPoint();
+
 		return (htm
 			// base files get replaced first
 			.replaceAll("#base-css#", css.replaceAll("\\s+", " ") + images)
@@ -107,6 +113,8 @@ public class ReportGenerator
 			.replaceAll("#team-css#", getTeamStyles(match).replaceAll("\\s+", " "))
 			.replaceAll("#plyr-css#", getPlayerStyles(match).replaceAll("\\s+", " "))
 			.replaceAll("#blok-css#", getBlockStyles(match).replaceAll("\\s+", " "))
+			.replaceAll("#map-data#", String.format("{image:'%s', x:%d, z:%d}",
+				MapImageGenerator.imageToDataURI(mapImage, "image/png"), ptMin.getBlockX(), ptMin.getBlockZ()))
 
 			// then match and map names
 			.replaceAll("#title#", match.getMatchName())
@@ -374,12 +382,17 @@ public class ReportGenerator
 
 	private static String transcriptEventHTML(TranscriptEvent e)
 	{
-		String m = e.getMessage();
+		String m = e.getMessage(), xtra = "";
 		Set<String> rowClasses = Sets.newHashSet("type-" + e.getType().getEventClass());
 
 		Set<AutoRefPlayer> players = Sets.newHashSet();
-		if (e.icon1 instanceof AutoRefPlayer) players.add((AutoRefPlayer) e.icon1);
-		if (e.icon2 instanceof AutoRefPlayer) players.add((AutoRefPlayer) e.icon2);
+		if (e.icon1 instanceof AutoRefPlayer)
+		{
+			players.add((AutoRefPlayer) e.icon1);
+			xtra += String.format(" data-player='%s'", ((AutoRefPlayer) e.icon1).getName());
+		}
+		if (e.icon2 instanceof AutoRefPlayer)
+			players.add((AutoRefPlayer) e.icon2);
 
 		for (AutoRefPlayer apl : players)
 		{
@@ -400,8 +413,8 @@ public class ReportGenerator
 		}
 
 		String coords = Vector3.fromLocation(e.getLocation()).toBlockCoords();
-		String fmt = "<tr class='transcript-event %s' data-location='%s'>" +
+		String fmt = "<tr class='transcript-event %s' data-location='%s'%s>" +
 			"<td class='message'>%s</td><td class='timestamp'>%s</td></tr>\n";
-		return String.format(fmt, StringUtils.join(rowClasses, " "), coords, m, e.getTimestamp());
+		return String.format(fmt, StringUtils.join(rowClasses, " "), coords, xtra, m, e.getTimestamp());
 	}
 }

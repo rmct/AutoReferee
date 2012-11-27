@@ -53,7 +53,7 @@ input[type=checkbox].player-toggle {
 .item:before {
 	display: inline-block;
 	content: "";
-	vertical-align: text-bottom;
+	vertical-align: middle;
 	width: 16px;
 	height: 16px;
 	margin-right: 3px;
@@ -74,4 +74,16 @@ input[type=checkbox].player-toggle {
 
 #event-filter {
 	float: right;
+}
+
+canvas#maptip {
+	display: none;
+	position: absolute;
+
+	border: 1px solid black;
+	background-color: #333;
+	z-index: 999;
+
+	-moz-border-radius: 10px;
+	border-radius: 10px;
 }

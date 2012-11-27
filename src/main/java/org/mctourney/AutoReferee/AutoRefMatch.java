@@ -1,5 +1,7 @@
 package org.mctourney.AutoReferee;
 
+import java.awt.Image;
+import java.awt.image.RenderedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,6 +22,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -55,6 +59,7 @@ import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.util.ArmorPoints;
 import org.mctourney.AutoReferee.util.BlockData;
 import org.mctourney.AutoReferee.util.CuboidRegion;
+import org.mctourney.AutoReferee.util.MapImageGenerator;
 import org.mctourney.AutoReferee.util.Vector3;
 
 import com.google.common.collect.Lists;
@@ -215,6 +220,14 @@ public class AutoRefMatch
 
 	public void setStartRegion(CuboidRegion startRegion)
 	{ this.startRegion = startRegion; }
+
+	public CuboidRegion getMapCuboid()
+	{
+		CuboidRegion cube = getStartRegion();
+		for (AutoRefTeam team : getTeams()) for (CuboidRegion reg : team.getRegions())
+			cube = CuboidRegion.combine(cube, reg);
+		return cube;
+	}
 
 	// name of the match
 	private String matchName = null;
@@ -478,6 +491,25 @@ public class AutoRefMatch
 	 */
 	public ReportGenerator getReportGenerator()
 	{ return matchReportGenerator; }
+
+	public void saveMapImage()
+	{
+		try
+		{
+			RenderedImage mapImage = getMapImage();
+			ImageIO.write(mapImage, "png", new File(getWorld().getWorldFolder(), "map.png"));
+		}
+		catch (IOException e) { e.printStackTrace(); }
+	}
+
+	public RenderedImage getMapImage()
+	{
+		CuboidRegion cube = getMapCuboid();
+		Vector3 min = cube.getMinimumPoint(), max = cube.getMaximumPoint();
+
+		return MapImageGenerator.generateFromWorld(getWorld(),
+			min.getBlockX(), max.getBlockX(), min.getBlockZ(), max.getBlockZ());
+	}
 
 	// number of seconds for each phase
 	public static final int READY_SECONDS = 15;
@@ -1478,12 +1510,14 @@ public class AutoRefMatch
 		world.setStorm(false);
 		world.setWeatherDuration(Integer.MAX_VALUE);
 
+		// save a copy of the map image quickly before the match starts...
+		saveMapImage();
+
 		// prepare all players for the match
 		for (AutoRefPlayer apl : getPlayers()) apl.heal();
 
-		int readyDelay = this.getReadyDelay();
-
 		// announce the match starting in X seconds
+		int readyDelay = this.getReadyDelay();
 		this.broadcast(CountdownTask.COLOR + "Match will begin in "
 			+ ChatColor.WHITE + Integer.toString(readyDelay) + CountdownTask.COLOR + " seconds.");
 

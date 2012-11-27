@@ -18,6 +18,7 @@ import org.bukkit.util.Vector;
 
 import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.util.BlockData;
+import org.mctourney.AutoReferee.util.CuboidRegion;
 import org.mctourney.AutoReferee.util.Vector3;
 
 import org.apache.commons.collections.CollectionUtils;

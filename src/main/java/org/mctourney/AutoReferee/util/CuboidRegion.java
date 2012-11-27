@@ -50,6 +50,14 @@ public class CuboidRegion
 			getMaximumPoint().toCoords();
 	}
 
+	public static CuboidRegion combine(CuboidRegion a, CuboidRegion b)
+	{
+		return new CuboidRegion(
+			Math.min(a.x1, b.x1), Math.max(a.x2, b.x2),
+			Math.min(a.y1, b.y1), Math.max(a.y2, b.y2),
+			Math.min(a.z1, b.z1), Math.max(a.z2, b.z2));
+	}
+
 	// wrote this dumb helper function because `distanceToRegion` was looking ugly...
 	public static double multimax( double base, double ... more )
 	{ for ( double x : more ) base = Math.max(base, x); return base; }
