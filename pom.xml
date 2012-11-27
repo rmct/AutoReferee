@@ -119,6 +119,7 @@
         <directory>${basedir}/src/main/resources/</directory>
         <includes>
           <include>plugin.yml</include>
+          <include>colors.csv</include>
         </includes>
       </resource>
       <resource>
