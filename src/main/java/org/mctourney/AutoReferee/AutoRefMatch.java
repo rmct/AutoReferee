@@ -116,9 +116,22 @@ public class AutoRefMatch
 			worldSpawn = worldSpawn.add(0, 1, 0);
 	}
 
+	/**
+	 * Gets the world associated with this match.
+	 *
+	 * @return world
+	 */
 	public World getWorld()
 	{ return world; }
 
+	@Override public int hashCode()
+	{ return getWorld().hashCode(); }
+
+	/**
+	 * Gets the global spawn location for this match.
+	 *
+	 * @return global spawn location
+	 */
 	public Location getWorldSpawn()
 	{ return worldSpawn; }
 
@@ -145,16 +158,59 @@ public class AutoRefMatch
 	public void setStartTime(long time)
 	{ this.startTime = time; }
 
+	/**
+	 * Represents the status of a match.
+	 *
+	 * @author authorblues
+	 */
 	public enum MatchStatus
 	{
-		NONE, WAITING, READY, PLAYING, COMPLETED;
+		/**
+		 * No match for this world.
+		 */
+		NONE,
 
+		/**
+		 * Waiting for players to join.
+		 */
+		WAITING,
+
+		/**
+		 * Players joined, waiting for match start.
+		 */
+		READY,
+
+		/**
+		 * Match in progress.
+		 */
+		PLAYING,
+
+		/**
+		 * Match completed.
+		 */
+		COMPLETED;
+
+		/**
+		 * Checks if the match has not yet started.
+		 *
+		 * @return true if match has not started, otherwise false
+		 */
 		public boolean isBeforeMatch()
 		{ return this.ordinal() < PLAYING.ordinal() && this != NONE; }
 
+		/**
+		 * Checks if the match has completed.
+		 *
+		 * @return true if match is completed, otherwise false
+		 */
 		public boolean isAfterMatch()
 		{ return this.ordinal() > PLAYING.ordinal() && this != NONE; }
 
+		/**
+		 * Checks if match is in progress.
+		 *
+		 * @return true if match is in progress, otherwise false
+		 */
 		public boolean inProgress()
 		{ return this == PLAYING; }
 	}
@@ -162,15 +218,30 @@ public class AutoRefMatch
 	// status of the match
 	private MatchStatus currentState = MatchStatus.NONE;
 
+	/**
+	 * Gets the current status of this match.
+	 *
+	 * @return match status
+	 */
 	public MatchStatus getCurrentState()
 	{ return currentState; }
 
-	public void setCurrentState(MatchStatus s)
-	{ this.currentState = s; this.setupSpectators(); }
+	/**
+	 * Sets the current status of this match.
+	 *
+	 * @param status new match status
+	 */
+	public void setCurrentState(MatchStatus status)
+	{ this.currentState = status; this.setupSpectators(); }
 
 	// teams participating in the match
 	private Set<AutoRefTeam> teams = null;
 
+	/**
+	 * Gets the teams participating in this match.
+	 *
+	 * @return set of teams
+	 */
 	public Set<AutoRefTeam> getTeams()
 	{ return teams; }
 
@@ -232,9 +303,19 @@ public class AutoRefMatch
 	// name of the match
 	private String matchName = null;
 
-	public void setMatchName(String nm)
-	{ matchName = nm; }
+	/**
+	 * Sets the custom name for this match.
+	 *
+	 * @param name custom match name
+	 */
+	public void setMatchName(String name)
+	{ matchName = name; }
 
+	/**
+	 * Gets the name of this match.
+	 *
+	 * @return match name
+	 */
 	public String getMatchName()
 	{
 		// if we have a specific match name...
@@ -258,17 +339,38 @@ public class AutoRefMatch
 	private String mapName = null;
 	private Collection<String> mapAuthors = null;
 
+	/**
+	 * Gets the name of the map for this match.
+	 *
+	 * @return map name
+	 */
 	public String getMapName()
 	{ return mapName; }
 
 	private String versionString = "1.0";
 
+	/**
+	 * Gets the version number of the map for this match.
+	 *
+	 * @return version number
+	 */
 	public String getMapVersion()
 	{ return versionString; }
 
+	/**
+	 * Gets the shorthand version string of the map for this match. This string will have the format
+	 * of "MapName-vX.Y"
+	 *
+	 * @return version string
+	 */
 	public String getVersionString()
 	{ return String.format("%s-v%s", normalizeMapName(this.getMapName()), this.getMapVersion()); }
 
+	/**
+	 * Gets the creators of the map for this match.
+	 *
+	 * @return string list of names
+	 */
 	public String getMapAuthors()
 	{
 		if (mapAuthors != null && mapAuthors.size() != 0)
@@ -305,6 +407,11 @@ public class AutoRefMatch
 	public long getTimeLimit()
 	{ return timeLimit; }
 
+	/**
+	 * Checks if this match has a set time limit.
+	 *
+	 * @return true if a time limit is set, otherwise false
+	 */
 	public boolean hasTimeLimit()
 	{ return timeLimit != -1L; }
 
@@ -540,6 +647,13 @@ public class AutoRefMatch
 	public Location getLastNotificationLocation()
 	{ return lastNotificationLocation; }
 
+	/**
+	 * Sets a notification location for referees and streamers. This location should be the
+	 * exact location of the event. The teleportation suite will find a suitable vantage point
+	 * to observe the event.
+	 *
+	 * @param loc notification location
+	 */
 	public void setLastNotificationLocation(Location loc)
 	{ lastNotificationLocation = loc; }
 
