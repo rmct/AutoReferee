@@ -745,8 +745,7 @@ public class AutoRefMatch
 	{
 		Set<Player> refs = Sets.newHashSet();
 		for (Player p : world.getPlayers())
-			if (p.hasPermission("autoreferee.referee") && !isPlayer(p))
-				if (!excludeStreamers || !p.hasPermission("autoreferee.streamer")) refs.add(p);
+			if (isReferee(p) && !(excludeStreamers && isStreamer(p))) refs.add(p);
 		return refs;
 	}
 
@@ -759,7 +758,7 @@ public class AutoRefMatch
 	{
 		Set<Player> streamers = Sets.newHashSet();
 		for (Player p : world.getPlayers())
-			if (p.hasPermission("autoreferee.streamer") && !isPlayer(p)) streamers.add(p);
+			if (isStreamer(p)) streamers.add(p);
 		return streamers;
 	}
 
@@ -770,13 +769,19 @@ public class AutoRefMatch
 	 */
 	public boolean isReferee(Player player)
 	{
-		// pretty much the only reason we would send a null player
-		// is if we are checking the ConsoleCommandSender
-		if (player == null) return true;
-
-		for (AutoRefPlayer apl : getPlayers())
-			if (apl.getName() == player.getName()) return false;
+		if (isPlayer(player)) return false;
 		return player.hasPermission("autoreferee.referee");
+	}
+
+	/**
+	 * Checks if the specified player is a streamer for this match.
+	 *
+	 * @return true if player is a referee and not on a team, otherwise false
+	 */
+	public boolean isStreamer(Player player)
+	{
+		if (isPlayer(player)) return false;
+		return player.hasPermission("autoreferee.streamer");
 	}
 
 	/**
@@ -1462,10 +1467,10 @@ public class AutoRefMatch
 		if (isPlayer(p)) return 0;
 
 		// streamers are ONLY able to see streamers and players
-		if (p.hasPermission("autoreferee.streamer")) return 1;
+		if (isStreamer(p)) return 1;
 
 		// referees have the highest vanish level (see everything)
-		if (p.hasPermission("autoreferee.referee")) return 200;
+		if (isReferee(p)) return 200;
 
 		// spectators can only be seen by referees
 		return 100;
@@ -2376,12 +2381,15 @@ public class AutoRefMatch
 		player.sendMessage(ChatColor.RESET + "Map: " + ChatColor.GRAY + getMapName() +
 			" v" + getMapVersion() + ChatColor.ITALIC + " by " + getMapAuthors());
 
-		AutoRefPlayer apl = getPlayer(player);
-		String tmpflag = tmp ? "*" : "";
+		if (player != null)
+		{
+			AutoRefPlayer apl = getPlayer(player);
+			String tmpflag = tmp ? "*" : "";
 
-		if (apl != null) player.sendMessage("You are on team: " + apl.getTeam().getDisplayName());
-		else if (isReferee(player)) player.sendMessage(ChatColor.GRAY + "You are a referee! " + tmpflag);
-		else player.sendMessage("You are not on a team! Type " + ChatColor.GRAY + "/jointeam");
+			if (apl != null) player.sendMessage("You are on team: " + apl.getTeam().getDisplayName());
+			else if (isReferee(player)) player.sendMessage(ChatColor.GRAY + "You are a referee! " + tmpflag);
+			else player.sendMessage("You are not on a team! Type " + ChatColor.GRAY + "/jointeam");
+		}
 
 		for (AutoRefTeam team : getSortedTeams())
 			player.sendMessage(String.format("%s (%d) - %s",
