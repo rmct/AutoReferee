@@ -7,11 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.Inventory;
@@ -59,6 +55,9 @@ public class AutoRefPlayer
 	public Player getPlayer()
 	{ return AutoReferee.getInstance().getServer().getPlayer(pname); }
 
+	private void setPlayer(Player player)
+	{ this.setName(player.getName()); }
+
 	/**
 	 * Checks if the player is online.
 	 *
@@ -67,9 +66,6 @@ public class AutoRefPlayer
 	public boolean isOnline()
 	{ return AutoReferee.getInstance().getServer().getOfflinePlayer(pname).isOnline(); }
 
-	private void setPlayer(Player player)
-	{ this.setName(player.getName()); }
-
 	/**
 	 * Gets raw player name.
 	 *
@@ -77,6 +73,9 @@ public class AutoRefPlayer
 	 */
 	public String getName()
 	{ return pname; }
+
+	@Override public String toString()
+	{ return getName(); }
 
 	/**
 	 * Sets raw player name.
