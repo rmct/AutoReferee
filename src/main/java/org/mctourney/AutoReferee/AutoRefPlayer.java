@@ -1,5 +1,6 @@
 package org.mctourney.AutoReferee;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,6 +25,7 @@ import org.mctourney.AutoReferee.util.Vector3;
 
 import org.apache.commons.collections.map.DefaultedMap;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 /**
@@ -187,6 +189,48 @@ public class AutoRefPlayer
 	 */
 	public int getKills()
 	{ return totalKills; }
+
+	private Map<AutoRefPlayer, Long> lastPlayerDamageTick = null;
+	private static final long KILLER_TICKS = 20L * 3;
+	private static final long ASSIST_TICKS = 20L * 5;
+
+	/**
+	 * Gets the player responsible for killing this player.
+	 *
+	 * @return killer
+	 */
+	public AutoRefPlayer getKiller()
+	{
+		// if the player is not dead, no killer
+		if (this.isOnline() && !getPlayer().isDead()) return null;
+
+		// the cutoff before which the player will not be credited with the kill
+		long threshold = getTeam().getMatch().getWorld().getFullTime() - KILLER_TICKS;
+
+		AutoRefPlayer killer = null;
+		for (Map.Entry<AutoRefPlayer, Long> e : lastPlayerDamageTick.entrySet())
+			if (e.getValue() > threshold) { threshold = e.getValue(); killer = e.getKey(); }
+		return killer;
+	}
+
+	/**
+	 * Gets the players responsible for killing this player.
+	 *
+	 * @return killers
+	 */
+	public Set<AutoRefPlayer> getKillAssists()
+	{
+		// if the player is not dead, no killer
+		if (this.isOnline() && !getPlayer().isDead()) return Sets.newHashSet();
+
+		// the cutoff before which the player will not be credited with the kill
+		long threshold = getTeam().getMatch().getWorld().getFullTime() - ASSIST_TICKS;
+
+		Set<AutoRefPlayer> killers = Sets.newHashSet();
+		for (Map.Entry<AutoRefPlayer, Long> e : lastPlayerDamageTick.entrySet())
+			if (e.getValue() > threshold) killers.add(e.getKey());
+		return killers;
+	}
 
 	// number of times player has died and damage taken
 	private Map<AutoRefPlayer, Integer> deaths;
@@ -386,6 +430,9 @@ public class AutoRefPlayer
 		kills  = new DefaultedMap(0);
 		deaths = new DefaultedMap(0);
 
+		// damage information
+		lastPlayerDamageTick = new DefaultedMap(0L);
+
 		// accuracy information
 		this.resetArrowFire();
 
@@ -534,11 +581,12 @@ public class AutoRefPlayer
 		// sanity check...
 		if (e.getEntity() != getPlayer()) return;
 
-	//	AutoRefPlayer apl = getTeam().getMatch().getPlayer(damager);
-	//	if (apl != null);
-
 		// reset the damage tick
 		lastDamageTick = this.getTeam().getMatch().getWorld().getFullTime();
+
+		// if the damage was caused by a player, set their last damage tick
+		AutoRefPlayer apl = getTeam().getMatch().getPlayer(damager);
+		if (apl != null) lastPlayerDamageTick.put(apl, lastDamageTick);
 	}
 
 	// register that we just died
