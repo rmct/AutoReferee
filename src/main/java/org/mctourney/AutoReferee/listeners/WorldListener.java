@@ -10,7 +10,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.world.WorldEvent;
 import org.bukkit.event.world.WorldLoadEvent;
+import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.plugin.Plugin;
 
 import org.apache.commons.collections.map.DefaultedMap;
@@ -29,7 +31,14 @@ public class WorldListener implements Listener
 	}
 
 	@EventHandler
+	public void worldInit(WorldInitEvent event)
+	{ checkLoadedWorld(event); }
+
+	@EventHandler
 	public void worldLoad(WorldLoadEvent event)
+	{ checkLoadedWorld(event); }
+
+	private void checkLoadedWorld(WorldEvent event)
 	{
 		AutoRefMatch.setupWorld(event.getWorld(), false);
 	}
