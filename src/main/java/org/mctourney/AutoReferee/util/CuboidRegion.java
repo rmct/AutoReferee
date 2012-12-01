@@ -45,9 +45,16 @@ public class CuboidRegion
 
 	public String toCoords()
 	{
-		// save region as "minX minY minZ maxX maxY maxZ"
+		// save region as "minX,minY,minZ:maxX,maxY,maxZ"
 		return getMinimumPoint().toCoords() + ":" +
 			getMaximumPoint().toCoords();
+	}
+
+	public String toBlockCoords()
+	{
+		// save region as "minX,minY,minZ:maxX,maxY,maxZ"
+		return getMinimumPoint().toBlockCoords() + ":" +
+			getMaximumPoint().toBlockCoords();
 	}
 
 	public static CuboidRegion combine(CuboidRegion a, CuboidRegion b)

@@ -921,7 +921,7 @@ public class AutoRefMatch
 
 		// save the start region
 		if (startRegion != null)
-			worldConfig.set("match.start-region", startRegion.toCoords());
+			worldConfig.set("match.start-region", startRegion.toBlockCoords());
 
 		// save the configuration file back to the original filename
 		try { worldConfig.save(worldConfigFile); }
@@ -1260,7 +1260,7 @@ public class AutoRefMatch
 		{ return (o instanceof StartMechanism) && hashCode() == o.hashCode(); }
 
 		public String serialize()
-		{ return Vector3.fromLocation(loc).toCoords() + ":" + Boolean.toString(flip); }
+		{ return Vector3.fromLocation(loc).toBlockCoords() + ":" + Boolean.toString(flip); }
 
 		public static StartMechanism unserialize(World w, String sm)
 		{

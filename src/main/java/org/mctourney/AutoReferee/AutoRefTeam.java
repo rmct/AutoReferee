@@ -435,7 +435,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		map.put("maxsize", new Integer(maxSize));
 
 		// set the team spawn (if there is a custom spawn)
-		if (spawn != null) map.put("spawn", Vector3.fromLocation(spawn).toCoords());
+		if (spawn != null) map.put("spawn", Vector3.fromLocation(spawn).toBlockCoords());
 
 		// convert the win conditions to strings
 		List<String> wcond = Lists.newArrayList();
@@ -445,7 +445,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			if (wc.getInexactRange() != match.getInexactRange())
 				range = ":" + wc.getInexactRange();
 
-			wcond.add(Vector3.fromLocation(wc.getLocation()).toCoords()
+			wcond.add(Vector3.fromLocation(wc.getLocation()).toBlockCoords()
 				+ ":" + wc.getBlockData().serialize() + range);
 		}
 
@@ -454,7 +454,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		// convert regions to strings
 		List<String> regstr = Lists.newArrayList();
-		for (AutoRefRegion reg : regions) regstr.add(reg.toCoords());
+		for (AutoRefRegion reg : regions) regstr.add(reg.toBlockCoords());
 
 		// add the region list
 		map.put("regions", regstr);
