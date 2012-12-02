@@ -68,12 +68,13 @@ ul#features li:first-child {
 }
 
 #download {
-    width: 250px;
+    width: 275px;
     background: #666 url('/static/img/navigation-tab.png?f70a4f410b13') repeat-x top;
     padding: 10px 0 10px 50px;
     font-style: normal;
     border-radius: 5px;
     position: relative;
+
     box-shadow: 3px 3px 10px 1px rgba(0, 0, 0, 0.3);
     -webkit-box-shadow: 3px 3px 10px 1px rgba(0, 0, 0, 0.3);
     -moz-box-shadow: 3px 3px 10px 1px rgba(0, 0, 0, 0.3);
@@ -115,15 +116,18 @@ ul#features li:first-child {
 }
 
 #other-downloads {
-    width: 205px;
-    background: url('/static/img/navigation-tab.png?f70a4f410b13') repeat-x #F1B700 bottom;
-    background: rgba(241,183,0, 0.4) url('/static/img/navigation-tab.png?f70a4f410b13') repeat-x bottom;
+    width: 250px;
+    background: rgba(250, 50, 50, 0.5);
     padding: 0px 0px 10px 0px;
     font-style: normal;
     border-radius: 0px 0px 5px 5px;
     position: relative;
     height: 20px;
     left: 2.5%;
+
+    box-shadow: 3px 3px 10px 1px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 3px 3px 10px 1px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 3px 3px 10px 1px rgba(0, 0, 0, 0.3);
 }
 
 #other-downloads:hover {
@@ -131,10 +135,9 @@ ul#features li:first-child {
 
 #other-downloads span {
     margin-top: 8px;
-    color: #346012;
-    color: rgba(52,96,18,0.6);
+    color: #ccc;
     position: absolute;
-    left: 4%;
+    left: 10px;
     font-weight: bold;
     font-size: smaller;
 }
@@ -143,6 +146,7 @@ ul#features li:first-child {
     width: 250px;
     text-align: center;
 }
+
 ul#other-links {
     list-style: none;
     margin: 10px 0 0;
@@ -150,9 +154,9 @@ ul#other-links {
 }
 #other-links li {
     display: inline;
-    padding: 0 0 0 4px;
+    padding: 0 8px;
     color: #ffcf72;
-    border-left: 1px solid #ffcf72;
+    border-left: 1px solid #725926;
     text-align: center;
     font-size: smaller;
     font-style: normal;
@@ -168,145 +172,45 @@ ul#other-links {
     text-decoration: underline;
 }
 
-
-footer {
-    font-size: 11px;
+#footer {
+    position: relative;
     text-align: center;
+    padding: 0 auto;
 }
 
-footer ul {
-    list-style: none;
-    margin: 20px 0;
-    padding: 0;
-}
-
-footer ul li {
-    display: inline;
-    padding: 0 6px 0 9px;
-    border-left: 1px solid #ddd;
-    text-align: center;
-}
-
-footer ul li:first-child {
-    border-left: none;
-}
-
-footer ul li, footer ul li a,footer ul li a:link, footer ul li a:visited, footer ul li a:hover {
+#footer a {
     color: inherit;
     text-decoration: none;
 }
-footer ul li a:hover {
+#footer a:hover {
     text-decoration: underline;
 }
 
-footer ul#primaryLinksList li {
-    color: #555;
-    font-size: 16px;
+#footer ul {
+    margin: 0;
+    padding: 0;
 }
 
-.mapBitWrap {
-    width: 269px;
-    height: 269px;
-    position: absolute;
-    top: 140px;
-    right: 28px;
-}
-
-.mapBit {
-    position: relative;
-}
-
-.mapBit * {
-    position: absolute;
-    background-repeat: no-repeat;
-}
-
-.mapBit .topImg {
-    background-image: url('/static/img/landing/overlay/landingoff_01.png?929b0138921a');
-    width: 269px;
-    height: 175px;
-    background-position: -989px -140px;
-    top: 0;
-    left: 0;
-}
-
-.mapBit .leftImg {
-    background-image: url('/static/img/landing/overlay/landingoff_02.png?4aa408d0630e');
-    width: 269px;
-    height: 275px;
-    background-position: -989px 0;
-    top: 35px;
-    left: 0;
-}
-
-.mapBit .botImg {
-    background-image: url('/static/img/landing/overlay/landingoff_08.png?a3c2eccb52cb');
-    width: 212px;
-    height: 30px;
-    background-position: 0 0;
-    top: 229px;
-    left: 36px;
-}
-
-.mapBit .rightImg {
-    background-image: url('/static/img/landing/overlay/landingoff_04.png?062703e55a60');
-    width: 212px;
-    height: 175px;
-    background-position: 0 0;
-    top: 35px;
-    left: 245px;
-}
-
-.mapBit .point {
-    left: 35px;
-    width: 212px;
-    height: 50px;
-    background-position: 0 0;
-}
-
-.mapBit .pointOne {
-    background-image: url('/static/img/landing/overlay/point-one.png?a76bc4bffef2');
-    top: 35px;
-    z-index: 900;
-}
-
-.mapBit .pointOne:hover {
-    background-position: 0 -50px;
-}
-
-.mapBit .pointTwo {
-    background-image: url('/static/img/landing/overlay/point-two.png?52196df97421');
-    top: 85px;
-    z-index: 700;
-}
-
-.mapBit .pointTwo:hover {
-    background-position: 0 -50px;
-}
-
-.mapBit .pointThree {
-    background-image: url('/static/img/landing/overlay/point-three.png?c56a6ca159b5');
-    top: 135px;
-    height: 44px;
-    z-index: 500;
-}
-
-.mapBit .pointThree:hover {
-    background-position: 0 -44px;
-}
-
-.mapBit .pointFour {
-    background-image: url('/static/img/landing/overlay/point-four.png?21f576eb3275');
-    top: 179px;
-    z-index: 300;
-}
-
-.mapBit .pointFour:hover {
-    background-position: 0 -54px;
-}
-
-.mapBit a {
+#footer ul li.column {
+    border-left: 2px dotted #444;
     display: inline-block;
-    width: 100%;
-    height: 100%;
+    list-style: none;
+    padding: 0 25px;
+    vertical-align: top;
+    height: 125px;
+}
+
+#footer ul li.column:first-child {
+    border: none;
+}
+
+#footer ul li.column h2 {
+    font-size: medium;
+}
+
+#footer ul li.column ul li {
+    text-align: left;
+    font-size: smaller;
+    margin-bottom: 3px;
+    list-style: none;
 }
