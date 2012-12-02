@@ -2,8 +2,11 @@ var searchData=
 [
   ['incrementshotsfired',['incrementShotsFired',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#aec405dc6f2251f28737e888b30c7f7e9',1,'org::mctourney::AutoReferee::AutoRefPlayer']]],
   ['incrementshotshit',['incrementShotsHit',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#ac3be898f68fd791113ff4e07ee5091e7',1,'org::mctourney::AutoReferee::AutoRefPlayer']]],
+  ['inprogress',['inProgress',['../enumorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match_1_1_match_status.html#a89609fba2d8f1a08013c0aa2978afca6',1,'org::mctourney::AutoReferee::AutoRefMatch::MatchStatus']]],
   ['instartregion',['inStartRegion',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a58a37123070780cd9c61b0c92aea697b',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
+  ['isaftermatch',['isAfterMatch',['../enumorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match_1_1_match_status.html#a9513e438f8e25d24f5559ff41ad9d9ce',1,'org::mctourney::AutoReferee::AutoRefMatch::MatchStatus']]],
   ['isautomode',['isAutoMode',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#a951ed362782835bb5e91afd908259c12',1,'org::mctourney::AutoReferee::AutoReferee']]],
+  ['isbeforematch',['isBeforeMatch',['../enumorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match_1_1_match_status.html#ad5710a26fecedae8d227a32697e5affb',1,'org::mctourney::AutoReferee::AutoRefMatch::MatchStatus']]],
   ['iscompatible',['isCompatible',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a20fe60ff7bc7839b4e68417d6f5c3c82',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
   ['iscountdownrunning',['isCountdownRunning',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#ab7e79a5a791a52fd88a29d9e392b522a',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
   ['isdebugmode',['isDebugMode',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a533399c144480f064495cc1c87b2f6fe',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
@@ -18,5 +21,7 @@ var searchData=
   ['isreferee',['isReferee',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a6354a47b3ae274d74375f0a5fd2982da',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
   ['isrefereeready',['isRefereeReady',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#af4a4b8c24a02fdc020a8b351f9ae87e2',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
   ['issafezone',['isSafeZone',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a58dab111620f686b057ef09e2c7f07ba',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
-  ['isstartmechanism',['isStartMechanism',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#ae90c70e638052f65892f822f78ae04df',1,'org::mctourney::AutoReferee::AutoRefMatch']]]
+  ['isspectator',['isSpectator',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a5b8b9cc08c9886985829531b6f609b96',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
+  ['isstartmechanism',['isStartMechanism',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#ae90c70e638052f65892f822f78ae04df',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
+  ['isstreamer',['isStreamer',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#aa875dae56d85e1b055bff1aeb4e225be',1,'org::mctourney::AutoReferee::AutoRefMatch']]]
 ];

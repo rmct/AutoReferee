@@ -90,7 +90,7 @@ $(document).ready(function(){initNavTree('classorg_1_1mctourney_1_1_auto_referee
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerator</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -101,7 +101,7 @@ $(document).ready(function(){initNavTree('classorg_1_1mctourney_1_1_auto_referee
 
 <div class="header">
   <div class="summary">
-<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classorg_1_1mctourney_1_1_auto_referee_1_1_report_generator-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">org.mctourney.AutoReferee.ReportGenerator Class Reference</div>  </div>
@@ -111,36 +111,31 @@ $(document).ready(function(){initNavTree('classorg_1_1mctourney_1_1_auto_referee
 <p>Formats HTML match reports.  
  <a href="classorg_1_1mctourney_1_1_auto_referee_1_1_report_generator.html#details">More...</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
-Static Public Member Functions</h2></td></tr>
-<tr class="memitem:aeb4cb422da804c4321387e302578399f"><td class="memItemLeft" align="right" valign="top">static String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_report_generator.html#aeb4cb422da804c4321387e302578399f">generate</a> (<a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html">AutoRefMatch</a> match)</td></tr>
-<tr class="memdesc:aeb4cb422da804c4321387e302578399f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a match report web page from a match object.  <a href="#aeb4cb422da804c4321387e302578399f"></a><br/></td></tr>
-<tr class="separator:aeb4cb422da804c4321387e302578399f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a0f254f84016bc748a5f9eec518c0dfbf"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_report_generator.html#a0f254f84016bc748a5f9eec518c0dfbf">generate</a> (<a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html">AutoRefMatch</a> match)</td></tr>
+<tr class="memdesc:a0f254f84016bc748a5f9eec518c0dfbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a match report web page from a match object.  <a href="#a0f254f84016bc748a5f9eec518c0dfbf"></a><br/></td></tr>
+<tr class="separator:a0f254f84016bc748a5f9eec518c0dfbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49e5a3c148596fb13320b914fbfb6e6c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_report_generator.html#a49e5a3c148596fb13320b914fbfb6e6c">setCustomDetail</a> (String key, String value)</td></tr>
+<tr class="memdesc:a49e5a3c148596fb13320b914fbfb6e6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds (or modifies) a custom detail for this match report generator.  <a href="#a49e5a3c148596fb13320b914fbfb6e6c"></a><br/></td></tr>
+<tr class="separator:a49e5a3c148596fb13320b914fbfb6e6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Formats HTML match reports. </p>
 <dl class="section author"><dt>Author</dt><dd>authorblues </dd></dl>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="aeb4cb422da804c4321387e302578399f"></a>
+<a class="anchor" id="a0f254f84016bc748a5f9eec518c0dfbf"></a>
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static String org.mctourney.AutoReferee.ReportGenerator.generate </td>
+          <td class="memname">String org.mctourney.AutoReferee.ReportGenerator.generate </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html">AutoRefMatch</a>&#160;</td>
           <td class="paramname"><em>match</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 <p>Generates a match report web page from a match object. </p>
@@ -151,6 +146,42 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>HTML for a match report web page, or null if an error occurred </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a49e5a3c148596fb13320b914fbfb6e6c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void org.mctourney.AutoReferee.ReportGenerator.setCustomDetail </td>
+          <td>(</td>
+          <td class="paramtype">String&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">String&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Adds (or modifies) a custom detail for this match report generator. </p>
+<p>Custom details will appear in the order that they are defined.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>text for left column (descriptor) </td></tr>
+    <tr><td class="paramname">value</td><td>text for right column (content) </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

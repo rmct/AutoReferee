@@ -90,7 +90,7 @@ $(document).ready(function(){initNavTree('classorg_1_1mctourney_1_1_auto_referee
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerator</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -101,6 +101,7 @@ $(document).ready(function(){initNavTree('classorg_1_1mctourney_1_1_auto_referee
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match-members.html">List of all members</a>  </div>
@@ -112,6 +113,12 @@ $(document).ready(function(){initNavTree('classorg_1_1mctourney_1_1_auto_referee
 <p>Represents a game world controlled by <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html" title="Base plugin class.">AutoReferee</a>.  
  <a href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#details">More...</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="enumorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match_1_1_match_status.html">MatchStatus</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Represents the status of a match.  <a href="enumorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match_1_1_match_status.html#details">More...</a><br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a2980114d46f091ceb7630828b3c5a5dd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2980114d46f091ceb7630828b3c5a5dd"></a>
@@ -149,6 +156,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a02e4429bb63e8747a3be6201bcfa2522"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a02e4429bb63e8747a3be6201bcfa2522">broadcast</a> (String msg)</td></tr>
 <tr class="memdesc:a02e4429bb63e8747a3be6201bcfa2522"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sends a message to all players in this match, including referees and streamers.  <a href="#a02e4429bb63e8747a3be6201bcfa2522"></a><br/></td></tr>
 <tr class="separator:a02e4429bb63e8747a3be6201bcfa2522"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5214d6fd2fafb145d13ad9e459940570"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a5214d6fd2fafb145d13ad9e459940570">broadcastSync</a> (String msg)</td></tr>
+<tr class="memdesc:a5214d6fd2fafb145d13ad9e459940570"><td class="mdescLeft">&#160;</td><td class="mdescRight">Force a broadcast to be sent synchronously.  <a href="#a5214d6fd2fafb145d13ad9e459940570"></a><br/></td></tr>
+<tr class="separator:a5214d6fd2fafb145d13ad9e459940570"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad728eefc1e77a98f3edbfabda83148dc"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad728eefc1e77a98f3edbfabda83148dc"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#ad728eefc1e77a98f3edbfabda83148dc">cancelCountdown</a> ()</td></tr>
 <tr class="memdesc:ad728eefc1e77a98f3edbfabda83148dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cancels the match countdown in progress. <br/></td></tr>
@@ -193,9 +203,24 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:aa3f0042fd81905363f9b43676e24852b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html">AutoRefTeam</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#aa3f0042fd81905363f9b43676e24852b">getArbitraryTeam</a> ()</td></tr>
 <tr class="memdesc:aa3f0042fd81905363f9b43676e24852b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets an arbitrary team, attempting to maintain balanced teams if possible.  <a href="#aa3f0042fd81905363f9b43676e24852b"></a><br/></td></tr>
 <tr class="separator:aa3f0042fd81905363f9b43676e24852b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71d749ed049ff07b01bb4797f4d8299a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="enumorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match_1_1_match_status.html">MatchStatus</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a71d749ed049ff07b01bb4797f4d8299a">getCurrentState</a> ()</td></tr>
+<tr class="memdesc:a71d749ed049ff07b01bb4797f4d8299a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the current status of this match.  <a href="#a71d749ed049ff07b01bb4797f4d8299a"></a><br/></td></tr>
+<tr class="separator:a71d749ed049ff07b01bb4797f4d8299a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad6838e39fc20d6d1bbf7b69d942cebf2"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#ad6838e39fc20d6d1bbf7b69d942cebf2">getInexactRange</a> ()</td></tr>
 <tr class="memdesc:ad6838e39fc20d6d1bbf7b69d942cebf2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the distance an objective may be placed from its target location.  <a href="#ad6838e39fc20d6d1bbf7b69d942cebf2"></a><br/></td></tr>
 <tr class="separator:ad6838e39fc20d6d1bbf7b69d942cebf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37483ecfff2996dbbd3659b60711170d"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a37483ecfff2996dbbd3659b60711170d">getMapAuthors</a> ()</td></tr>
+<tr class="memdesc:a37483ecfff2996dbbd3659b60711170d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the creators of the map for this match.  <a href="#a37483ecfff2996dbbd3659b60711170d"></a><br/></td></tr>
+<tr class="separator:a37483ecfff2996dbbd3659b60711170d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4005465544e98b4822d19580a184633b"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a4005465544e98b4822d19580a184633b">getMapName</a> ()</td></tr>
+<tr class="memdesc:a4005465544e98b4822d19580a184633b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the name of the map for this match.  <a href="#a4005465544e98b4822d19580a184633b"></a><br/></td></tr>
+<tr class="separator:a4005465544e98b4822d19580a184633b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a644407ef68eb507c099a0de92c1cc21c"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a644407ef68eb507c099a0de92c1cc21c">getMapVersion</a> ()</td></tr>
+<tr class="memdesc:a644407ef68eb507c099a0de92c1cc21c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the version number of the map for this match.  <a href="#a644407ef68eb507c099a0de92c1cc21c"></a><br/></td></tr>
+<tr class="separator:a644407ef68eb507c099a0de92c1cc21c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c7a65b89a7d23227dc14017a356effe"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a0c7a65b89a7d23227dc14017a356effe">getMatchName</a> ()</td></tr>
+<tr class="memdesc:a0c7a65b89a7d23227dc14017a356effe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the name of this match.  <a href="#a0c7a65b89a7d23227dc14017a356effe"></a><br/></td></tr>
+<tr class="separator:a0c7a65b89a7d23227dc14017a356effe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a91bf1297c5c97cb6862b4857e9866885"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a91bf1297c5c97cb6862b4857e9866885">getMatchTime</a> ()</td></tr>
 <tr class="memdesc:a91bf1297c5c97cb6862b4857e9866885"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the number of seconds elapsed in this match.  <a href="#a91bf1297c5c97cb6862b4857e9866885"></a><br/></td></tr>
 <tr class="separator:a91bf1297c5c97cb6862b4857e9866885"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -226,12 +251,21 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a7bf005861e53da5e67d18e83d26929f8"><td class="memItemLeft" align="right" valign="top">Set&lt; Player &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a7bf005861e53da5e67d18e83d26929f8">getReferees</a> (boolean excludeStreamers)</td></tr>
 <tr class="memdesc:a7bf005861e53da5e67d18e83d26929f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets referees present in this match, possibly excluding streamers.  <a href="#a7bf005861e53da5e67d18e83d26929f8"></a><br/></td></tr>
 <tr class="separator:a7bf005861e53da5e67d18e83d26929f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd4e9337798f21fccd13d8e57311a732"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_report_generator.html">ReportGenerator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#acd4e9337798f21fccd13d8e57311a732">getReportGenerator</a> ()</td></tr>
+<tr class="memdesc:acd4e9337798f21fccd13d8e57311a732"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the mutable report generator object.  <a href="#acd4e9337798f21fccd13d8e57311a732"></a><br/></td></tr>
+<tr class="separator:acd4e9337798f21fccd13d8e57311a732"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6a8b342a29441bf6ad2254105b3fd7cf"><td class="memItemLeft" align="right" valign="top">CuboidRegion&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a6a8b342a29441bf6ad2254105b3fd7cf">getStartRegion</a> ()</td></tr>
 <tr class="memdesc:a6a8b342a29441bf6ad2254105b3fd7cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the region designated as the start platform.  <a href="#a6a8b342a29441bf6ad2254105b3fd7cf"></a><br/></td></tr>
 <tr class="separator:a6a8b342a29441bf6ad2254105b3fd7cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3120d19d21d2ceab853e558038275c02"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a3120d19d21d2ceab853e558038275c02">getStartTime</a> ()</td></tr>
 <tr class="memdesc:a3120d19d21d2ceab853e558038275c02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the time to set the world to at the start of the match.  <a href="#a3120d19d21d2ceab853e558038275c02"></a><br/></td></tr>
 <tr class="separator:a3120d19d21d2ceab853e558038275c02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd99996514609c10b14f5a6ab843a3a9"><td class="memItemLeft" align="right" valign="top">Set&lt; Player &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#acd99996514609c10b14f5a6ab843a3a9">getStreamers</a> ()</td></tr>
+<tr class="memdesc:acd99996514609c10b14f5a6ab843a3a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets streamers present in this match.  <a href="#acd99996514609c10b14f5a6ab843a3a9"></a><br/></td></tr>
+<tr class="separator:acd99996514609c10b14f5a6ab843a3a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a145bc0a7972950128cb7e971696efecb"><td class="memItemLeft" align="right" valign="top">Set&lt; <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html">AutoRefTeam</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a145bc0a7972950128cb7e971696efecb">getTeams</a> ()</td></tr>
+<tr class="memdesc:a145bc0a7972950128cb7e971696efecb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the teams participating in this match.  <a href="#a145bc0a7972950128cb7e971696efecb"></a><br/></td></tr>
+<tr class="separator:a145bc0a7972950128cb7e971696efecb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55cc4ca3ff8c4cda05b704287ece84fe"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a55cc4ca3ff8c4cda05b704287ece84fe">getTimeLimit</a> ()</td></tr>
 <tr class="memdesc:a55cc4ca3ff8c4cda05b704287ece84fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the match time limit in seconds.  <a href="#a55cc4ca3ff8c4cda05b704287ece84fe"></a><br/></td></tr>
 <tr class="separator:a55cc4ca3ff8c4cda05b704287ece84fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -247,9 +281,21 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:ad32dfe51de10c433f7ae600a55c602fb"><td class="memItemLeft" align="right" valign="top">List&lt; TranscriptEvent &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#ad32dfe51de10c433f7ae600a55c602fb">getTranscript</a> ()</td></tr>
 <tr class="memdesc:ad32dfe51de10c433f7ae600a55c602fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the current match transcript up to this point in time.  <a href="#ad32dfe51de10c433f7ae600a55c602fb"></a><br/></td></tr>
 <tr class="separator:ad32dfe51de10c433f7ae600a55c602fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78a07c8fa444b2d25f5c70d0357c88eb"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a78a07c8fa444b2d25f5c70d0357c88eb">getVersionString</a> ()</td></tr>
+<tr class="memdesc:a78a07c8fa444b2d25f5c70d0357c88eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the shorthand version string of the map for this match.  <a href="#a78a07c8fa444b2d25f5c70d0357c88eb"></a><br/></td></tr>
+<tr class="separator:a78a07c8fa444b2d25f5c70d0357c88eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4fc75f0fd289710a3f6a542d9db5b4c5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html">AutoRefTeam</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a4fc75f0fd289710a3f6a542d9db5b4c5">getWinningTeam</a> ()</td></tr>
 <tr class="memdesc:a4fc75f0fd289710a3f6a542d9db5b4c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the team that won this match.  <a href="#a4fc75f0fd289710a3f6a542d9db5b4c5"></a><br/></td></tr>
 <tr class="separator:a4fc75f0fd289710a3f6a542d9db5b4c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53e0cb61f8f6da0c8256498eb117e8a4"><td class="memItemLeft" align="right" valign="top">World&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a53e0cb61f8f6da0c8256498eb117e8a4">getWorld</a> ()</td></tr>
+<tr class="memdesc:a53e0cb61f8f6da0c8256498eb117e8a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the world associated with this match.  <a href="#a53e0cb61f8f6da0c8256498eb117e8a4"></a><br/></td></tr>
+<tr class="separator:a53e0cb61f8f6da0c8256498eb117e8a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc303e3acef3cf55eeba9d797dc23959"><td class="memItemLeft" align="right" valign="top">Location&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#acc303e3acef3cf55eeba9d797dc23959">getWorldSpawn</a> ()</td></tr>
+<tr class="memdesc:acc303e3acef3cf55eeba9d797dc23959"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the global spawn location for this match.  <a href="#acc303e3acef3cf55eeba9d797dc23959"></a><br/></td></tr>
+<tr class="separator:acc303e3acef3cf55eeba9d797dc23959"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae23f7358d5d3d987bee6e3c39c9ccd6a"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#ae23f7358d5d3d987bee6e3c39c9ccd6a">hasTimeLimit</a> ()</td></tr>
+<tr class="memdesc:ae23f7358d5d3d987bee6e3c39c9ccd6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if this match has a set time limit.  <a href="#ae23f7358d5d3d987bee6e3c39c9ccd6a"></a><br/></td></tr>
+<tr class="separator:ae23f7358d5d3d987bee6e3c39c9ccd6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a58a37123070780cd9c61b0c92aea697b"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a58a37123070780cd9c61b0c92aea697b">inStartRegion</a> (Location loc)</td></tr>
 <tr class="memdesc:a58a37123070780cd9c61b0c92aea697b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if a specified location is within the start region.  <a href="#a58a37123070780cd9c61b0c92aea697b"></a><br/></td></tr>
 <tr class="separator:a58a37123070780cd9c61b0c92aea697b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -274,9 +320,15 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a58dab111620f686b057ef09e2c7f07ba"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a58dab111620f686b057ef09e2c7f07ba">isSafeZone</a> (Location loc)</td></tr>
 <tr class="memdesc:a58dab111620f686b057ef09e2c7f07ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if the specified location is inside a "safe" region.  <a href="#a58dab111620f686b057ef09e2c7f07ba"></a><br/></td></tr>
 <tr class="separator:a58dab111620f686b057ef09e2c7f07ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b8b9cc08c9886985829531b6f609b96"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a5b8b9cc08c9886985829531b6f609b96">isSpectator</a> (Player player)</td></tr>
+<tr class="memdesc:a5b8b9cc08c9886985829531b6f609b96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if the specified player is a spectator for this match.  <a href="#a5b8b9cc08c9886985829531b6f609b96"></a><br/></td></tr>
+<tr class="separator:a5b8b9cc08c9886985829531b6f609b96"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae90c70e638052f65892f822f78ae04df"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#ae90c70e638052f65892f822f78ae04df">isStartMechanism</a> (Location loc)</td></tr>
 <tr class="memdesc:ae90c70e638052f65892f822f78ae04df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if a specified block location is a start mechanism for this match.  <a href="#ae90c70e638052f65892f822f78ae04df"></a><br/></td></tr>
 <tr class="separator:ae90c70e638052f65892f822f78ae04df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa875dae56d85e1b055bff1aeb4e225be"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#aa875dae56d85e1b055bff1aeb4e225be">isStreamer</a> (Player player)</td></tr>
+<tr class="memdesc:aa875dae56d85e1b055bff1aeb4e225be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if the specified player is a streamer for this match.  <a href="#aa875dae56d85e1b055bff1aeb4e225be"></a><br/></td></tr>
+<tr class="separator:aa875dae56d85e1b055bff1aeb4e225be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a12c45c3df873463fe35000c1873a7462"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a12c45c3df873463fe35000c1873a7462">joinTeam</a> (Player player, <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html">AutoRefTeam</a> team, boolean force)</td></tr>
 <tr class="memdesc:a12c45c3df873463fe35000c1873a7462"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a player to the specified team.  <a href="#a12c45c3df873463fe35000c1873a7462"></a><br/></td></tr>
 <tr class="separator:a12c45c3df873463fe35000c1873a7462"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -313,6 +365,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#aed4c94a3aac540bc5a8f619efd1117b4">sendMatchInfo</a> (Player player)</td></tr>
 <tr class="memdesc:aed4c94a3aac540bc5a8f619efd1117b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send updated match information to a player. <br/></td></tr>
 <tr class="separator:aed4c94a3aac540bc5a8f619efd1117b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a33166490dca405c3dff025507c695ddf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a33166490dca405c3dff025507c695ddf">setCurrentState</a> (<a class="el" href="enumorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match_1_1_match_status.html">MatchStatus</a> status)</td></tr>
+<tr class="memdesc:a33166490dca405c3dff025507c695ddf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the current status of this match.  <a href="#a33166490dca405c3dff025507c695ddf"></a><br/></td></tr>
+<tr class="separator:a33166490dca405c3dff025507c695ddf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:affcf39bf9d0d4b1496cd256e74e47030"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#affcf39bf9d0d4b1496cd256e74e47030">setDebug</a> (CommandSender recipient)</td></tr>
 <tr class="memdesc:affcf39bf9d0d4b1496cd256e74e47030"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the recipient of debug messages for this match.  <a href="#affcf39bf9d0d4b1496cd256e74e47030"></a><br/></td></tr>
 <tr class="separator:affcf39bf9d0d4b1496cd256e74e47030"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -320,6 +375,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#ae9d61c0206acf47215183fff48bcf414">setFriendlyFire</a> (boolean b)</td></tr>
 <tr class="memdesc:ae9d61c0206acf47215183fff48bcf414"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets whether friendly fire is allowed in this match. <br/></td></tr>
 <tr class="separator:ae9d61c0206acf47215183fff48bcf414"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a93f3ee7a20ef54e52b675c01fa29db92"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a93f3ee7a20ef54e52b675c01fa29db92">setLastNotificationLocation</a> (Location loc)</td></tr>
+<tr class="memdesc:a93f3ee7a20ef54e52b675c01fa29db92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets a notification location for referees and streamers.  <a href="#a93f3ee7a20ef54e52b675c01fa29db92"></a><br/></td></tr>
+<tr class="separator:a93f3ee7a20ef54e52b675c01fa29db92"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab953327a47c5a4c321159828e7e5bbd6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#ab953327a47c5a4c321159828e7e5bbd6">setMatchName</a> (String name)</td></tr>
+<tr class="memdesc:ab953327a47c5a4c321159828e7e5bbd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the custom name for this match.  <a href="#ab953327a47c5a4c321159828e7e5bbd6"></a><br/></td></tr>
+<tr class="separator:ab953327a47c5a4c321159828e7e5bbd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a51207345c494b6fc404a94327875b6ef"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a51207345c494b6fc404a94327875b6ef"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a51207345c494b6fc404a94327875b6ef">setObjectiveCraft</a> (boolean b)</td></tr>
 <tr class="memdesc:a51207345c494b6fc404a94327875b6ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets whether players are allowed to craft objectives in this match. <br/></td></tr>
@@ -664,6 +725,31 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 
 </div>
 </div>
+<a class="anchor" id="a5214d6fd2fafb145d13ad9e459940570"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void org.mctourney.AutoReferee.AutoRefMatch.broadcastSync </td>
+          <td>(</td>
+          <td class="paramtype">String&#160;</td>
+          <td class="paramname"><em>msg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Force a broadcast to be sent synchronously. </p>
+<p>Safe to use from an asynchronous task.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">msg</td><td>message to be sent </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a2db3c27d62be2526ba6307582ed05392"></a>
 <div class="memitem">
 <div class="memproto">
@@ -869,6 +955,24 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 
 </div>
 </div>
+<a class="anchor" id="a71d749ed049ff07b01bb4797f4d8299a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="enumorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match_1_1_match_status.html">MatchStatus</a> org.mctourney.AutoReferee.AutoRefMatch.getCurrentState </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the current status of this match. </p>
+<dl class="section return"><dt>Returns</dt><dd>match status </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="ad6838e39fc20d6d1bbf7b69d942cebf2"></a>
 <div class="memitem">
 <div class="memproto">
@@ -884,6 +988,42 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 
 <p>Gets the distance an objective may be placed from its target location. </p>
 <dl class="section return"><dt>Returns</dt><dd>range of inexact objective placement </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a37483ecfff2996dbbd3659b60711170d"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">String org.mctourney.AutoReferee.AutoRefMatch.getMapAuthors </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the creators of the map for this match. </p>
+<dl class="section return"><dt>Returns</dt><dd>string list of names </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a4005465544e98b4822d19580a184633b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">String org.mctourney.AutoReferee.AutoRefMatch.getMapName </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the name of the map for this match. </p>
+<dl class="section return"><dt>Returns</dt><dd>map name </dd></dl>
 
 </div>
 </div>
@@ -910,6 +1050,42 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 
 <p>Get the base url for the map repository. </p>
 <dl class="section return"><dt>Returns</dt><dd>url of map repository </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a644407ef68eb507c099a0de92c1cc21c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">String org.mctourney.AutoReferee.AutoRefMatch.getMapVersion </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the version number of the map for this match. </p>
+<dl class="section return"><dt>Returns</dt><dd>version number </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a0c7a65b89a7d23227dc14017a356effe"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">String org.mctourney.AutoReferee.AutoRefMatch.getMatchName </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the name of this match. </p>
+<dl class="section return"><dt>Returns</dt><dd>match name </dd></dl>
 
 </div>
 </div>
@@ -1112,6 +1288,24 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 
 </div>
 </div>
+<a class="anchor" id="acd4e9337798f21fccd13d8e57311a732"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_report_generator.html">ReportGenerator</a> org.mctourney.AutoReferee.AutoRefMatch.getReportGenerator </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the mutable report generator object. </p>
+<dl class="section return"><dt>Returns</dt><dd>report generator object </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a6a8b342a29441bf6ad2254105b3fd7cf"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1146,6 +1340,42 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 
 <p>Gets the time to set the world to at the start of the match. </p>
 <dl class="section return"><dt>Returns</dt><dd>world time in ticks to be set at start of the match </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="acd99996514609c10b14f5a6ab843a3a9"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Set&lt;Player&gt; org.mctourney.AutoReferee.AutoRefMatch.getStreamers </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets streamers present in this match. </p>
+<dl class="section return"><dt>Returns</dt><dd>collection of streamers </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a145bc0a7972950128cb7e971696efecb"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Set&lt;<a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html">AutoRefTeam</a>&gt; org.mctourney.AutoReferee.AutoRefMatch.getTeams </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the teams participating in this match. </p>
+<dl class="section return"><dt>Returns</dt><dd>set of teams </dd></dl>
 
 </div>
 </div>
@@ -1246,6 +1476,25 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 
 </div>
 </div>
+<a class="anchor" id="a78a07c8fa444b2d25f5c70d0357c88eb"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">String org.mctourney.AutoReferee.AutoRefMatch.getVersionString </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the shorthand version string of the map for this match. </p>
+<p>This string will have the format of "MapName-vX.Y"</p>
+<dl class="section return"><dt>Returns</dt><dd>version string </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a4fc75f0fd289710a3f6a542d9db5b4c5"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1261,6 +1510,60 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 
 <p>Gets the team that won this match. </p>
 <dl class="section return"><dt>Returns</dt><dd>team that won the match if it is over, otherwise null </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a53e0cb61f8f6da0c8256498eb117e8a4"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">World org.mctourney.AutoReferee.AutoRefMatch.getWorld </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the world associated with this match. </p>
+<dl class="section return"><dt>Returns</dt><dd>world </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="acc303e3acef3cf55eeba9d797dc23959"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Location org.mctourney.AutoReferee.AutoRefMatch.getWorldSpawn </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the global spawn location for this match. </p>
+<dl class="section return"><dt>Returns</dt><dd>global spawn location </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="ae23f7358d5d3d987bee6e3c39c9ccd6a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">boolean org.mctourney.AutoReferee.AutoRefMatch.hasTimeLimit </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Checks if this match has a set time limit. </p>
+<dl class="section return"><dt>Returns</dt><dd>true if a time limit is set, otherwise false </dd></dl>
 
 </div>
 </div>
@@ -1447,6 +1750,25 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 
 </div>
 </div>
+<a class="anchor" id="a5b8b9cc08c9886985829531b6f609b96"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">boolean org.mctourney.AutoReferee.AutoRefMatch.isSpectator </td>
+          <td>(</td>
+          <td class="paramtype">Player&#160;</td>
+          <td class="paramname"><em>player</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Checks if the specified player is a spectator for this match. </p>
+<dl class="section return"><dt>Returns</dt><dd>true if player is a spectator, otherwise false </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="ae90c70e638052f65892f822f78ae04df"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1463,6 +1785,25 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 
 <p>Checks if a specified block location is a start mechanism for this match. </p>
 <dl class="section return"><dt>Returns</dt><dd>true if a start mechanism is located at that position, otherwise false </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="aa875dae56d85e1b055bff1aeb4e225be"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">boolean org.mctourney.AutoReferee.AutoRefMatch.isStreamer </td>
+          <td>(</td>
+          <td class="paramtype">Player&#160;</td>
+          <td class="paramname"><em>player</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Checks if the specified player is a streamer for this match. </p>
+<dl class="section return"><dt>Returns</dt><dd>true if player is a referee and not on a team, otherwise false </dd></dl>
 
 </div>
 </div>
@@ -1637,6 +1978,30 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 
 </div>
 </div>
+<a class="anchor" id="a33166490dca405c3dff025507c695ddf"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void org.mctourney.AutoReferee.AutoRefMatch.setCurrentState </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="enumorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match_1_1_match_status.html">MatchStatus</a>&#160;</td>
+          <td class="paramname"><em>status</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets the current status of this match. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">status</td><td>new match status </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="affcf39bf9d0d4b1496cd256e74e47030"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1655,6 +2020,55 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">recipient</td><td>a recipient for debug messages, or null to disable debug </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a93f3ee7a20ef54e52b675c01fa29db92"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void org.mctourney.AutoReferee.AutoRefMatch.setLastNotificationLocation </td>
+          <td>(</td>
+          <td class="paramtype">Location&#160;</td>
+          <td class="paramname"><em>loc</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets a notification location for referees and streamers. </p>
+<p>This location should be the exact location of the event. The teleportation suite will find a suitable vantage point to observe the event.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">loc</td><td>notification location </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="ab953327a47c5a4c321159828e7e5bbd6"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void org.mctourney.AutoReferee.AutoRefMatch.setMatchName </td>
+          <td>(</td>
+          <td class="paramtype">String&#160;</td>
+          <td class="paramname"><em>name</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets the custom name for this match. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>custom match name </td></tr>
   </table>
   </dd>
 </dl>

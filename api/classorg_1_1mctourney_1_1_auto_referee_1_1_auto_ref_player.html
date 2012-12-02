@@ -90,7 +90,7 @@ $(document).ready(function(){initNavTree('classorg_1_1mctourney_1_1_auto_referee
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerator</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -177,6 +177,12 @@ Location&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <tr class="memitem:a11458588b344edc57bba0a3091988c28"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a11458588b344edc57bba0a3091988c28">getKDD</a> ()</td></tr>
 <tr class="memdesc:a11458588b344edc57bba0a3091988c28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the kill-death difference.  <a href="#a11458588b344edc57bba0a3091988c28"></a><br/></td></tr>
 <tr class="separator:a11458588b344edc57bba0a3091988c28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0ce5fd303193df06c0ec584e2125153"><td class="memItemLeft" align="right" valign="top">Set&lt; <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html">AutoRefPlayer</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#ad0ce5fd303193df06c0ec584e2125153">getKillAssists</a> ()</td></tr>
+<tr class="memdesc:ad0ce5fd303193df06c0ec584e2125153"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the players responsible for killing this player.  <a href="#ad0ce5fd303193df06c0ec584e2125153"></a><br/></td></tr>
+<tr class="separator:ad0ce5fd303193df06c0ec584e2125153"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc2f015223bf8cc1569d9e65c66dfdd1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html">AutoRefPlayer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#abc2f015223bf8cc1569d9e65c66dfdd1">getKiller</a> ()</td></tr>
+<tr class="memdesc:abc2f015223bf8cc1569d9e65c66dfdd1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the player responsible for killing this player.  <a href="#abc2f015223bf8cc1569d9e65c66dfdd1"></a><br/></td></tr>
+<tr class="separator:abc2f015223bf8cc1569d9e65c66dfdd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0bb92202fd5a4aaa07751c9913ba0337"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a0bb92202fd5a4aaa07751c9913ba0337">getKills</a> (<a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html">AutoRefPlayer</a> apl)</td></tr>
 <tr class="memdesc:a0bb92202fd5a4aaa07751c9913ba0337"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the number of times this player has killed a specific player.  <a href="#a0bb92202fd5a4aaa07751c9913ba0337"></a><br/></td></tr>
 <tr class="separator:a0bb92202fd5a4aaa07751c9913ba0337"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -632,6 +638,42 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 
 <p>Gets the kill-death difference. </p>
 <dl class="section return"><dt>Returns</dt><dd>difference of the kills and deaths </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="ad0ce5fd303193df06c0ec584e2125153"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Set&lt;<a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html">AutoRefPlayer</a>&gt; org.mctourney.AutoReferee.AutoRefPlayer.getKillAssists </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the players responsible for killing this player. </p>
+<dl class="section return"><dt>Returns</dt><dd>killers </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="abc2f015223bf8cc1569d9e65c66dfdd1"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html">AutoRefPlayer</a> org.mctourney.AutoReferee.AutoRefPlayer.getKiller </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the player responsible for killing this player. </p>
+<dl class="section return"><dt>Returns</dt><dd>killer </dd></dl>
 
 </div>
 </div>

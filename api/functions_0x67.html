@@ -74,6 +74,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li class="current"><a href="functions.html"><span>All</span></a></li>
       <li><a href="functions_func.html"><span>Functions</span></a></li>
+      <li><a href="functions_vars.html"><span>Variables</span></a></li>
+      <li><a href="functions_eval.html"><span>Enumerator</span></a></li>
     </ul>
   </div>
   <div id="navrow4" class="tabs3">
@@ -119,7 +121,7 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerator</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -133,7 +135,7 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
 
 <h3><a class="anchor" id="index_g"></a>- g -</h3><ul>
 <li>generate()
-: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_report_generator.html#aeb4cb422da804c4321387e302578399f">org.mctourney.AutoReferee.ReportGenerator</a>
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_report_generator.html#a0f254f84016bc748a5f9eec518c0dfbf">org.mctourney.AutoReferee.ReportGenerator</a>
 </li>
 <li>getAccuracy()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a0523fb97c0bb59045713e3faf6864988">org.mctourney.AutoReferee.AutoRefPlayer</a>
@@ -159,6 +161,9 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
 <li>getConsoleWorld()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#ab73d95be81c7df0cae0c844ca5b716b3">org.mctourney.AutoReferee.AutoReferee</a>
 </li>
+<li>getCurrentState()
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a71d749ed049ff07b01bb4797f4d8299a">org.mctourney.AutoReferee.AutoRefMatch</a>
+</li>
 <li>getData()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1util_1_1_block_data.html#a2c2dbeb6d0bb2ba6b0415699df14565e">org.mctourney.AutoReferee.util.BlockData</a>
 </li>
@@ -166,9 +171,9 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a882dc9315344a401ce21f78447e36173">org.mctourney.AutoReferee.AutoRefPlayer</a>
 </li>
 <li>getDisplayName()
-: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a35eae5ec80b3d7a3df1d8fd8cbe87c5f">org.mctourney.AutoReferee.AutoRefPlayer</a>
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1util_1_1_block_data.html#a7726d5cd2f94026c61ee7f941e59ba71">org.mctourney.AutoReferee.util.BlockData</a>
+, <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a35eae5ec80b3d7a3df1d8fd8cbe87c5f">org.mctourney.AutoReferee.AutoRefPlayer</a>
 , <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#aeb15c58f0c6e2e53cbb11bae2417da89">org.mctourney.AutoReferee.AutoRefTeam</a>
-, <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1util_1_1_block_data.html#a7726d5cd2f94026c61ee7f941e59ba71">org.mctourney.AutoReferee.util.BlockData</a>
 </li>
 <li>getDisplayPoints()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#ad418b4e691a9c3063e75c802784da533">org.mctourney.AutoReferee.AutoRefPlayer</a>
@@ -203,6 +208,12 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
 <li>getKDD()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a11458588b344edc57bba0a3091988c28">org.mctourney.AutoReferee.AutoRefPlayer</a>
 </li>
+<li>getKillAssists()
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#ad0ce5fd303193df06c0ec584e2125153">org.mctourney.AutoReferee.AutoRefPlayer</a>
+</li>
+<li>getKiller()
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#abc2f015223bf8cc1569d9e65c66dfdd1">org.mctourney.AutoReferee.AutoRefPlayer</a>
+</li>
 <li>getKills()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a0bb92202fd5a4aaa07751c9913ba0337">org.mctourney.AutoReferee.AutoRefPlayer</a>
 </li>
@@ -230,6 +241,9 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
 <li>getMap()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a9426623c216a06714618ca7332879484">org.mctourney.AutoReferee.AutoRefMap</a>
 </li>
+<li>getMapAuthors()
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a37483ecfff2996dbbd3659b60711170d">org.mctourney.AutoReferee.AutoRefMatch</a>
+</li>
 <li>getMapFolder()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#af00ad98a9bcedfefa5eee8812e9d4a1f">org.mctourney.AutoReferee.AutoRefMap</a>
 </li>
@@ -242,8 +256,14 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
 <li>getMapLibrary()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#ad741957a634801c9d36331e09dfb5753">org.mctourney.AutoReferee.AutoRefMap</a>
 </li>
+<li>getMapName()
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a4005465544e98b4822d19580a184633b">org.mctourney.AutoReferee.AutoRefMatch</a>
+</li>
 <li>getMapRepo()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#ab88f0c2e0be83ccc91037f847ba41955">org.mctourney.AutoReferee.AutoRefMatch</a>
+</li>
+<li>getMapVersion()
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a644407ef68eb507c099a0de92c1cc21c">org.mctourney.AutoReferee.AutoRefMatch</a>
 </li>
 <li>getMatch()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#a1a9752c90f9b10818125405cc8384150">org.mctourney.AutoReferee.AutoReferee</a>
@@ -252,6 +272,9 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
 <li>getMatches()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#a9d7f8b9889db53967dd1a858a37277d0">org.mctourney.AutoReferee.AutoReferee</a>
 </li>
+<li>getMatchName()
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a0c7a65b89a7d23227dc14017a356effe">org.mctourney.AutoReferee.AutoRefMatch</a>
+</li>
 <li>getMatchTime()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a91bf1297c5c97cb6862b4857e9866885">org.mctourney.AutoReferee.AutoRefMatch</a>
 </li>
@@ -259,8 +282,8 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1util_1_1_block_data.html#a2591499e2362e07161a52b1acb4e80ca">org.mctourney.AutoReferee.util.BlockData</a>
 </li>
 <li>getName()
-: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#aef42350b6a0557066c67b4cc55be7559">org.mctourney.AutoReferee.AutoRefMap</a>
-, <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a23d14828760f486772574d316df5ba69">org.mctourney.AutoReferee.AutoRefPlayer</a>
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a23d14828760f486772574d316df5ba69">org.mctourney.AutoReferee.AutoRefPlayer</a>
+, <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#aef42350b6a0557066c67b4cc55be7559">org.mctourney.AutoReferee.AutoRefMap</a>
 , <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#af273dad4ca66836c386326a61632106b">org.mctourney.AutoReferee.AutoRefTeam</a>
 , <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1util_1_1_block_data.html#a39d8981c65679554c43585af8c9c21d7">org.mctourney.AutoReferee.util.BlockData</a>
 </li>
@@ -277,10 +300,9 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#ad623e35b1a736c69447be10e540f26ea">org.mctourney.AutoReferee.AutoRefTeam</a>
 </li>
 <li>getPlayer()
-: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#a6ad0071ac7dc90d7c330be5406b1a6ea">org.mctourney.AutoReferee.AutoRefTeam</a>
-, <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a501ed4f4e6a7ae3b49ea5d7c506b7c5a">org.mctourney.AutoReferee.AutoRefMatch</a>
-, <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#ae386b5e936680ed87035ec7c05981e26">org.mctourney.AutoReferee.AutoRefPlayer</a>
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#ae386b5e936680ed87035ec7c05981e26">org.mctourney.AutoReferee.AutoRefPlayer</a>
 , <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#a5a65731b1138061fa288e5e2dec661b7">org.mctourney.AutoReferee.AutoRefTeam</a>
+, <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a1305af4956b4db3358dda862d6fa2552">org.mctourney.AutoReferee.AutoRefMatch</a>
 </li>
 <li>getPlayerName()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a75d77d9623807904875a4fca0efbcdcc">org.mctourney.AutoReferee.AutoRefMatch</a>
@@ -301,13 +323,16 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a8f105d4498f7b161b2b701ecdfaff5b7">org.mctourney.AutoReferee.AutoRefMatch</a>
 </li>
 <li>getReferees()
-: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a57a914def075582e2ccb297b466f1d1a">org.mctourney.AutoReferee.AutoRefMatch</a>
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a7bf005861e53da5e67d18e83d26929f8">org.mctourney.AutoReferee.AutoRefMatch</a>
 </li>
 <li>getRegions()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#acb5c0664bf9bed7e8d5bebab547ec0d5">org.mctourney.AutoReferee.AutoRefTeam</a>
 </li>
 <li>getRemoteMaps()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#ab7befa7a0a042aa96220c572dde0753b">org.mctourney.AutoReferee.AutoRefMap</a>
+</li>
+<li>getReportGenerator()
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#acd4e9337798f21fccd13d8e57311a732">org.mctourney.AutoReferee.AutoRefMatch</a>
 </li>
 <li>getShotsFired()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#ab66ff7cff8a5ce6b62027c5544289825">org.mctourney.AutoReferee.AutoRefPlayer</a>
@@ -325,11 +350,17 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a3120d19d21d2ceab853e558038275c02">org.mctourney.AutoReferee.AutoRefMatch</a>
 </li>
 <li>getStreak()
-: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a71f6d0faeebbaeb5f40f12138186a470">org.mctourney.AutoReferee.AutoRefPlayer</a>
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a8a5f8cc0349810c5e8c0c01568e08e21">org.mctourney.AutoReferee.AutoRefPlayer</a>
+</li>
+<li>getStreamers()
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#acd99996514609c10b14f5a6ab843a3a9">org.mctourney.AutoReferee.AutoRefMatch</a>
 </li>
 <li>getTeam()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a4ad9b1eb1e8a9934c06efe2013d35ecd">org.mctourney.AutoReferee.AutoRefPlayer</a>
 , <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#af3dcb0e07d351dd6b8ca8e4720b37848">org.mctourney.AutoReferee.AutoReferee</a>
+</li>
+<li>getTeams()
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a145bc0a7972950128cb7e971696efecb">org.mctourney.AutoReferee.AutoRefMatch</a>
 </li>
 <li>getTimeLimit()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a55cc4ca3ff8c4cda05b704287ece84fe">org.mctourney.AutoReferee.AutoRefMatch</a>
@@ -338,7 +369,7 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a02251de2161d9b0b5b0cc355323e2bc8">org.mctourney.AutoReferee.AutoRefMatch</a>
 </li>
 <li>getTimestamp()
-: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a46283fe1b59547efbb974dc4833cd9f2">org.mctourney.AutoReferee.AutoRefMatch</a>
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a83d93bf20c5c3fecfd6e24626c2446a7">org.mctourney.AutoReferee.AutoRefMatch</a>
 </li>
 <li>getTranscript()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#ad32dfe51de10c433f7ae600a55c602fb">org.mctourney.AutoReferee.AutoRefMatch</a>
@@ -350,7 +381,8 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a5c7ca49ce72826fbec3a14e3d13a9051">org.mctourney.AutoReferee.AutoRefMap</a>
 </li>
 <li>getVersionString()
-: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#abf73cf4499001091636986eaf8f0a306">org.mctourney.AutoReferee.AutoRefMap</a>
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a78a07c8fa444b2d25f5c70d0357c88eb">org.mctourney.AutoReferee.AutoRefMatch</a>
+, <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#abf73cf4499001091636986eaf8f0a306">org.mctourney.AutoReferee.AutoRefMap</a>
 </li>
 <li>getVictoryMonumentLocation()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#a5e4662314165678c05931cd2ab0492ee">org.mctourney.AutoReferee.AutoRefTeam</a>
@@ -360,6 +392,12 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
 </li>
 <li>getWinningTeam()
 : <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a4fc75f0fd289710a3f6a542d9db5b4c5">org.mctourney.AutoReferee.AutoRefMatch</a>
+</li>
+<li>getWorld()
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a53e0cb61f8f6da0c8256498eb117e8a4">org.mctourney.AutoReferee.AutoRefMatch</a>
+</li>
+<li>getWorldSpawn()
+: <a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#acc303e3acef3cf55eeba9d797dc23959">org.mctourney.AutoReferee.AutoRefMatch</a>
 </li>
 </ul>
 </div><!-- contents -->

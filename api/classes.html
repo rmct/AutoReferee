@@ -90,7 +90,7 @@ $(document).ready(function(){initNavTree('classes.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerator</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -104,18 +104,21 @@ $(document).ready(function(){initNavTree('classes.html','');});
 <div class="title">Class Index</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="qindex"><a class="qindex" href="#letter_A">A</a>&#160;|&#160;<a class="qindex" href="#letter_B">B</a>&#160;|&#160;<a class="qindex" href="#letter_R">R</a></div>
+<div class="qindex"><a class="qindex" href="#letter_A">A</a>&#160;|&#160;<a class="qindex" href="#letter_B">B</a>&#160;|&#160;<a class="qindex" href="#letter_M">M</a>&#160;|&#160;<a class="qindex" href="#letter_R">R</a></div>
 <table style="margin: 10px; white-space: nowrap;" align="center" width="95%" border="0" cellspacing="0" cellpadding="0">
 <tr><td rowspan="2" valign="bottom"><a name="letter_A"></a><table border="0" cellspacing="0" cellpadding="0"><tr><td><div class="ah">&#160;&#160;A&#160;&#160;</div></td></tr></table>
-</td><td valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html">AutoRefMap</a> (org.mctourney.AutoReferee)&#160;&#160;&#160;</td><td valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html">AutoRefTeam</a> (org.mctourney.AutoReferee)&#160;&#160;&#160;</td><td rowspan="2" valign="bottom"><a name="letter_R"></a><table border="0" cellspacing="0" cellpadding="0"><tr><td><div class="ah">&#160;&#160;R&#160;&#160;</div></td></tr></table>
+</td><td valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html">AutoRefMatch</a> (org.mctourney.AutoReferee)&#160;&#160;&#160;</td><td rowspan="2" valign="bottom"><a name="letter_M"></a><table border="0" cellspacing="0" cellpadding="0"><tr><td><div class="ah">&#160;&#160;M&#160;&#160;</div></td></tr></table>
 </td><td></td></tr>
-<tr><td valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html">AutoRefMatch</a> (org.mctourney.AutoReferee)&#160;&#160;&#160;</td><td rowspan="2" valign="bottom"><a name="letter_B"></a><table border="0" cellspacing="0" cellpadding="0"><tr><td><div class="ah">&#160;&#160;B&#160;&#160;</div></td></tr></table>
+<tr><td valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html">AutoRefPlayer</a> (org.mctourney.AutoReferee)&#160;&#160;&#160;</td><td></td></tr>
+<tr><td valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html">AutoReferee</a> (org.mctourney.AutoReferee)&#160;&#160;&#160;</td><td valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html">AutoRefTeam</a> (org.mctourney.AutoReferee)&#160;&#160;&#160;</td><td valign="top"><a class="el" href="enumorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match_1_1_match_status.html">AutoRefMatch.MatchStatus</a> (org.mctourney.AutoReferee)&#160;&#160;&#160;</td><td></td></tr>
+<tr><td valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html">AutoRefMap</a> (org.mctourney.AutoReferee)&#160;&#160;&#160;</td><td rowspan="2" valign="bottom"><a name="letter_B"></a><table border="0" cellspacing="0" cellpadding="0"><tr><td><div class="ah">&#160;&#160;B&#160;&#160;</div></td></tr></table>
+</td><td rowspan="2" valign="bottom"><a name="letter_R"></a><table border="0" cellspacing="0" cellpadding="0"><tr><td><div class="ah">&#160;&#160;R&#160;&#160;</div></td></tr></table>
 </td><td></td></tr>
-<tr><td valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html">AutoReferee</a> (org.mctourney.AutoReferee)&#160;&#160;&#160;</td><td valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html">AutoRefPlayer</a> (org.mctourney.AutoReferee)&#160;&#160;&#160;</td><td valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_report_generator.html">ReportGenerator</a> (org.mctourney.AutoReferee)&#160;&#160;&#160;</td><td></td></tr>
-<tr><td></td><td></td><td valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1util_1_1_block_data.html">BlockData</a> (org.mctourney.AutoReferee.util)&#160;&#160;&#160;</td><td></td><td></td></tr>
-<tr><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1util_1_1_block_data.html">BlockData</a> (org.mctourney.AutoReferee.util)&#160;&#160;&#160;</td><td valign="top"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_report_generator.html">ReportGenerator</a> (org.mctourney.AutoReferee)&#160;&#160;&#160;</td><td></td></tr>
+<tr><td></td><td></td><td></td><td></td></tr>
 </table>
-<div class="qindex"><a class="qindex" href="#letter_A">A</a>&#160;|&#160;<a class="qindex" href="#letter_B">B</a>&#160;|&#160;<a class="qindex" href="#letter_R">R</a></div>
+<div class="qindex"><a class="qindex" href="#letter_A">A</a>&#160;|&#160;<a class="qindex" href="#letter_B">B</a>&#160;|&#160;<a class="qindex" href="#letter_M">M</a>&#160;|&#160;<a class="qindex" href="#letter_R">R</a></div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

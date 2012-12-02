@@ -20,6 +20,7 @@ var classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee =
     [ "parseTimeString", "classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#a37c9e6ea6b9d9c076b76cc78a2c79cbd", null ],
     [ "playerDone", "classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#ac73a197634ba977a0c5a5e260a803e34", null ],
     [ "playerWhitelisted", "classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#a2192c5efe9024e1421bc73bcf01af049", null ],
+    [ "sendMessageSync", "classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#a513212eef24d83d695889adac1dec826", null ],
     [ "setAffectsSpawning", "classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#ab91de96598f48c735a35dba149c35e9d", null ],
     [ "setAutoMode", "classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#aff31c58e0265b4931457b1078a5329ba", null ],
     [ "setCollidesWithEntities", "classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#a8cd9db25a0f67e4c6c7d7f7df39f459d", null ],

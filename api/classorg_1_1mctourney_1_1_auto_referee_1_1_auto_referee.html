@@ -90,7 +90,7 @@ $(document).ready(function(){initNavTree('classorg_1_1mctourney_1_1_auto_referee
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerator</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -148,6 +148,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a2192c5efe9024e1421bc73bcf01af049"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#a2192c5efe9024e1421bc73bcf01af049">playerWhitelisted</a> (Player player)</td></tr>
 <tr class="memdesc:a2192c5efe9024e1421bc73bcf01af049"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if the player should be white-listed on this server.  <a href="#a2192c5efe9024e1421bc73bcf01af049"></a><br/></td></tr>
 <tr class="separator:a2192c5efe9024e1421bc73bcf01af049"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a513212eef24d83d695889adac1dec826"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#a513212eef24d83d695889adac1dec826">sendMessageSync</a> (CommandSender sender, String msg)</td></tr>
+<tr class="memdesc:a513212eef24d83d695889adac1dec826"><td class="mdescLeft">&#160;</td><td class="mdescRight">Force a message to be sent synchronously.  <a href="#a513212eef24d83d695889adac1dec826"></a><br/></td></tr>
+<tr class="separator:a513212eef24d83d695889adac1dec826"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2e2c97b546480dcbf0ff1ff105342bff"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#a2e2c97b546480dcbf0ff1ff105342bff">setLobbyWorld</a> (World world)</td></tr>
 <tr class="memdesc:a2e2c97b546480dcbf0ff1ff105342bff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the world designated as the lobby world.  <a href="#a2e2c97b546480dcbf0ff1ff105342bff"></a><br/></td></tr>
 <tr class="separator:a2e2c97b546480dcbf0ff1ff105342bff"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -410,6 +413,41 @@ Static Public Member Functions</h2></td></tr>
 <p>Checks if the player should be white-listed on this server. </p>
 <p>Only used in auto-mode.</p>
 <dl class="section return"><dt>Returns</dt><dd>true if player should be whitelisted, otherwise false </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a513212eef24d83d695889adac1dec826"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void org.mctourney.AutoReferee.AutoReferee.sendMessageSync </td>
+          <td>(</td>
+          <td class="paramtype">CommandSender&#160;</td>
+          <td class="paramname"><em>sender</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">String&#160;</td>
+          <td class="paramname"><em>msg</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Force a message to be sent synchronously. </p>
+<p>Safe to use from an asynchronous task.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">msg</td><td>message to be sent </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
