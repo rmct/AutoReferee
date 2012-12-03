@@ -217,3 +217,7 @@ ul#other-links {
     margin-bottom: 3px;
     list-style: none;
 }
+
+#footer #attribution {
+    font-size: smaller;
+}
