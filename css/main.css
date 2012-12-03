@@ -145,6 +145,12 @@ ul#features li:first-child {
     font-size: smaller;
 }
 
+#other-downloads img#client-bug {
+    position: absolute;
+    right: -8px;
+    bottom: -8px;
+}
+
 #other-links {
     width: 300px;
     text-align: center;
