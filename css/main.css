@@ -20,10 +20,17 @@ body {
 #outer-container {
     color: #ffffff;
     background-color: #333;
+    margin: 0;
+}
+
+#outer-container #background-image {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+
     background-image: url('../images/background-1.png');
     background-position: top center;
     background-repeat: no-repeat;
-    margin: 0;
 }
 
 #main-container {
@@ -64,7 +71,7 @@ ul#features li:first-child {
 }
 
 #download {
-    width: 275px;
+    width: 325px;
     background: #666 url('/static/img/navigation-tab.png?f70a4f410b13') repeat-x top;
     padding: 10px 0 10px 50px;
     font-style: normal;
@@ -112,7 +119,7 @@ ul#features li:first-child {
 }
 
 #other-downloads {
-    width: 250px;
+    width: 300px;
     background: rgba(250, 50, 50, 0.5);
     padding: 0px 0px 10px 0px;
     font-style: normal;
@@ -139,7 +146,7 @@ ul#features li:first-child {
 }
 
 #other-links {
-    width: 250px;
+    width: 300px;
     text-align: center;
 }
 
