@@ -10,10 +10,6 @@ body {
     min-width: 980px;
 }
 
-::selection, ::moz-selection {
-    background-color: black;
-}
-
 .page-width {
     min-width: 980px;
     width: 980px;
@@ -24,7 +20,7 @@ body {
 #outer-container {
     color: #ffffff;
     background-color: #333;
-    background-image: url('/static/img/landing/dbd-feature-bg.jpg?fdb4a9c392cb');
+    background-image: url('../images/background-1.png');
     background-position: top center;
     background-repeat: no-repeat;
     margin: 0;
