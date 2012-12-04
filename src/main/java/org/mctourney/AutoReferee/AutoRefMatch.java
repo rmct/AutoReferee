@@ -2376,13 +2376,14 @@ public class AutoRefMatch
 	/**
 	 * Send updated match information to a player.
 	 */
-	public void sendMatchInfo(Player player)
+	public void sendMatchInfo(CommandSender sender)
 	{
-		player.sendMessage(ChatColor.RESET + "Map: " + ChatColor.GRAY + getMapName() +
+		sender.sendMessage(ChatColor.RESET + "Map: " + ChatColor.GRAY + getMapName() +
 			" v" + getMapVersion() + ChatColor.ITALIC + " by " + getMapAuthors());
 
-		if (player != null)
+		if (sender instanceof Player)
 		{
+			Player player = (Player) sender;
 			AutoRefPlayer apl = getPlayer(player);
 			String tmpflag = tmp ? "*" : "";
 
@@ -2392,14 +2393,14 @@ public class AutoRefMatch
 		}
 
 		for (AutoRefTeam team : getSortedTeams())
-			player.sendMessage(String.format("%s (%d) - %s",
+			sender.sendMessage(String.format("%s (%d) - %s",
 				team.getDisplayName(), team.getPlayers().size(), team.getPlayerList()));
 
 		long timestamp = (getWorld().getFullTime() - getStartTicks()) / 20L;
-		player.sendMessage("Match status is currently " + ChatColor.GRAY + getCurrentState().name());
-		player.sendMessage("Map difficulty is set to: " + ChatColor.GRAY + getWorld().getDifficulty().name());
+		sender.sendMessage("Match status is currently " + ChatColor.GRAY + getCurrentState().name());
+		sender.sendMessage("Map difficulty is set to: " + ChatColor.GRAY + getWorld().getDifficulty().name());
 		if (getCurrentState().inProgress())
-			player.sendMessage(String.format(ChatColor.GRAY + "The current match time is: %02d:%02d:%02d",
+			sender.sendMessage(String.format(ChatColor.GRAY + "The current match time is: %02d:%02d:%02d",
 				timestamp/3600L, (timestamp/60L)%60L, timestamp%60L));
 	}
 }

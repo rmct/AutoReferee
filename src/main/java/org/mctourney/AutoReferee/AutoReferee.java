@@ -1032,7 +1032,7 @@ public class AutoReferee extends JavaPlugin
 
 		if ("matchinfo".equalsIgnoreCase(cmd.getName()))
 		{
-			if (match != null) match.sendMatchInfo(player);
+			if (match != null) match.sendMatchInfo(sender);
 			else sender.sendMessage(ChatColor.GRAY +
 				this.getName() + " is not running for this world!");
 
@@ -1119,7 +1119,7 @@ public class AutoReferee extends JavaPlugin
 				rstate = !rstr.startsWith("f") && !rstr.startsWith("n");
 			}
 
-			if (match.isReferee(player))
+			if (player == null || match.isReferee(player))
 			{
 				// attempt to set the ready delay if one is specified
 				if (args.length > 0) try { match.setReadyDelay(Integer.parseInt(args[0])); }
