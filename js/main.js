@@ -3,6 +3,9 @@ $(document).ready(function()
 	var backgrounds = [
 		"images/background-1.png",
 		"images/background-2.png",
+		"images/background-3.png",
+		"images/background-4.png",
+		"images/background-5.png",
 	];
 
 	var backgroundsP = new Array();
