@@ -173,22 +173,30 @@ public class AutoRefMatch
 		/**
 		 * Waiting for players to join.
 		 */
-		WAITING,
+		WAITING(5*60*20L),
 
 		/**
 		 * Players joined, waiting for match start.
 		 */
-		READY,
+		READY(5*60*20L),
 
 		/**
 		 * Match in progress.
 		 */
-		PLAYING,
+		PLAYING(30*60*20L),
 
 		/**
 		 * Match completed.
 		 */
 		COMPLETED;
+
+		public long inactiveTicks;
+
+		private MatchStatus()
+		{ this(Long.MAX_VALUE); }
+
+		private MatchStatus(long ticks)
+		{ this.inactiveTicks = ticks; }
 
 		/**
 		 * Checks if the match has not yet started.
@@ -701,6 +709,25 @@ public class AutoRefMatch
 		setLastNotificationLocation(loc);
 	}
 
+	private class PlayerCountTask implements Runnable
+	{
+		private long lastOccupiedTick = 0;
+
+		public PlayerCountTask()
+		{ lastOccupiedTick = getWorld().getFullTime(); }
+
+		public void run()
+		{
+			long tick = getWorld().getFullTime();
+
+			// if there are people in this world/match, reset last-occupied
+			if (getUserCount() != 0) lastOccupiedTick = tick;
+
+			// if this world has been inactive for long enough, just unload it
+			if (tick - lastOccupiedTick >= getCurrentState().inactiveTicks) destroy();
+		}
+	}
+
 	protected AutoRefMatch(World world, boolean tmp, MatchStatus state)
 	{ this(world, tmp); setCurrentState(state); }
 
@@ -717,7 +744,19 @@ public class AutoRefMatch
 
 		// fix vanish
 		this.setupSpectators();
+
+		// startup the player count timer (for automatic unloading)
+		Plugin plugin = AutoReferee.getInstance();
+		plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new PlayerCountTask(), 0L, 60*20L);
 	}
+
+	/**
+	 * Gets number of users (players and spectators) present in this match.
+	 *
+	 * @return number of users
+	 */
+	public int getUserCount()
+	{ return world.getPlayers().size(); }
 
 	public Set<AutoRefPlayer> getPlayers()
 	{
