@@ -11,7 +11,6 @@ commands:
   autoref:
     aliases: [ar, autoreferee]
     description: AutoReferee configuration
-    permission: autoreferee.admin
     usage: /<command> [<action>] [args...]
     permission-message: Only admins have access to AutoReferee configuration.
   zone:

@@ -4,67 +4,41 @@ import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.text.StrMatcher;
-import org.apache.commons.lang.text.StrTokenizer;
-
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
-import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.conversations.BooleanPrompt;
-import org.bukkit.conversations.Conversation;
-import org.bukkit.conversations.ConversationContext;
-import org.bukkit.conversations.Prompt;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.generator.ChunkGenerator;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.Messenger;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
-import com.sk89q.worldedit.bukkit.selections.Selection;
 
-import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
+import org.mctourney.AutoReferee.commands.ConfigurationCommands;
+import org.mctourney.AutoReferee.commands.PlayerCommands;
+import org.mctourney.AutoReferee.commands.AdminCommands;
+import org.mctourney.AutoReferee.commands.RefereeCommands;
 import org.mctourney.AutoReferee.listeners.ObjectiveTracker;
 import org.mctourney.AutoReferee.listeners.CombatListener;
 import org.mctourney.AutoReferee.listeners.RefereeChannelListener;
 import org.mctourney.AutoReferee.listeners.TeamListener;
 import org.mctourney.AutoReferee.listeners.WorldListener;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
-import org.mctourney.AutoReferee.util.BlockData;
-import org.mctourney.AutoReferee.util.CuboidRegion;
 import org.mctourney.AutoReferee.util.NullChunkGenerator;
-import org.mctourney.AutoReferee.util.Vector3;
-import org.mctourney.AutoReferee.util.TeleportationUtil;
+import org.mctourney.AutoReferee.util.commands.CommandManager;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 /**
  * Base plugin class
@@ -113,6 +87,9 @@ public class AutoReferee extends JavaPlugin
 
 	// query server object
 	private QueryServer qserv = null;
+
+	// command manager
+	protected CommandManager commandManager = null;
 
 	private World lobby = null;
 
@@ -261,23 +238,22 @@ public class AutoReferee extends JavaPlugin
 
 		PluginManager pm = getServer().getPluginManager();
 
-		// events related to team management, chat, whitelists, respawn
+		// listener utility classes, subdivided for organization
 		pm.registerEvents(new TeamListener(this), this);
-
-		// events related to PvP, damage, death, mobs
 		pm.registerEvents(new CombatListener(this), this);
-
-		// events related to safe zones, creating zones, map conditions
 		pm.registerEvents(new ZoneListener(this), this);
-
-		// events related to worlds
 		pm.registerEvents(new WorldListener(this), this);
-
-		// events related to tracking objectives during a match
 		pm.registerEvents(new ObjectiveTracker(this), this);
 
-		// events related to referee channel
+		// save this reference to use for setting up the referee channel later
 		pm.registerEvents(refChannelListener = new RefereeChannelListener(this), this);
+
+		// user interface commands in a custom command manager
+		commandManager = new CommandManager();
+		commandManager.registerCommands(new PlayerCommands(this), this);
+		commandManager.registerCommands(new AdminCommands(this), this);
+		commandManager.registerCommands(new RefereeCommands(this), this);
+		commandManager.registerCommands(new ConfigurationCommands(this), this);
 
 		// global configuration object (can't be changed, so don't save onDisable)
 		InputStream configInputStream = getResource("defaults/config.yml");
@@ -382,7 +358,7 @@ public class AutoReferee extends JavaPlugin
 		if (isAutoMode()) p.kickPlayer(AutoReferee.COMPLETED_KICK_MESSAGE);
 	}
 
-	private WorldEditPlugin getWorldEdit()
+	public WorldEditPlugin getWorldEdit()
 	{
 		Plugin plugin = getServer().getPluginManager().getPlugin("WorldEdit");
 
@@ -405,9 +381,6 @@ public class AutoReferee extends JavaPlugin
 		return getExpectedTeam(player) != null;
 	}
 
-	// save previous location before teleport
-	private Map<String, Location> prevLocation = Maps.newHashMap();
-
 	private World consoleWorld = null;
 
 	/**
@@ -421,54 +394,26 @@ public class AutoReferee extends JavaPlugin
 		return worlds.size() == 1 ? worlds.get(0) : consoleWorld;
 	}
 
-	static Options teleportOptions = new Options();
-	static Options viewInventoryOptions = new Options();
-	static
+	/**
+	 * Sets the world that the console user has selected.
+	 */
+	public void setConsoleWorld(World world)
+	{ consoleWorld = world; }
+
+	/**
+	 * Sets the world that the console user has selected.
+	 */
+	public void setConsoleWorld(String name)
+	{ this.setConsoleWorld(getServer().getWorld(name)); }
+
+	/**
+	 * Gets the world associated with a command sender.
+	 */
+	public World getSenderWorld(CommandSender sender)
 	{
-		OptionBuilder.withLongOpt("bed");
-		OptionBuilder.withDescription("teleport to player's bed");
-		teleportOptions.addOption(OptionBuilder.create('b'));
-
-		OptionBuilder.withLongOpt("death");
-		OptionBuilder.withDescription("teleport to last death location");
-		teleportOptions.addOption(OptionBuilder.create('d'));
-
-		OptionBuilder.withLongOpt("logout");
-		OptionBuilder.withDescription("teleport to last logout location");
-		teleportOptions.addOption(OptionBuilder.create('l'));
-
-		OptionBuilder.withLongOpt("objective");
-		OptionBuilder.withDescription("teleport to last objective location");
-		teleportOptions.addOption(OptionBuilder.create('o'));
-
-		OptionBuilder.withLongOpt("spawn");
-		OptionBuilder.withDescription("teleport to spawn");
-		teleportOptions.addOption(OptionBuilder.create('s'));
-
-		OptionBuilder.withLongOpt("teleport");
-		OptionBuilder.withDescription("teleport to last teleport event");
-		teleportOptions.addOption(OptionBuilder.create('t'));
-
-		OptionBuilder.withLongOpt("return");
-		OptionBuilder.withDescription("teleport to previous location");
-		teleportOptions.addOption(OptionBuilder.create('r'));
-
-		OptionBuilder.withLongOpt("vm");
-		OptionBuilder.withDescription("teleport to victory monument");
-		teleportOptions.addOption(OptionBuilder.create('v'));
-
-		OptionBuilder.withLongOpt("help");
-		OptionBuilder.withDescription("show the list of teleportation options");
-		teleportOptions.addOption(OptionBuilder.create('h'));
-
-		OptionBuilder.withLongOpt("exact");
-		OptionBuilder.withDescription("teleport to exact location");
-		OptionBuilder.hasArgs(3).withValueSeparator(',');
-		teleportOptions.addOption(OptionBuilder.create('x'));
-
-		OptionBuilder.withLongOpt("previous");
-		OptionBuilder.withDescription("show inventory from previous life");
-		viewInventoryOptions.addOption(OptionBuilder.create('p'));
+		if (sender instanceof Player)
+			return ((Player) sender).getWorld();
+		return getConsoleWorld();
 	}
 
 	@Override
@@ -477,808 +422,7 @@ public class AutoReferee extends JavaPlugin
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
 	{
-		World world = null;
-		Player player = null;
-
-		if (sender instanceof Player)
-		{
-			player = (Player) sender;
-			world = player.getWorld();
-		}
-		else world = getConsoleWorld();
-		AutoRefMatch match = getMatch(world);
-
-		// reparse the args properly using the string tokenizer from org.apache.commons
-		args = new StrTokenizer(StringUtils.join(args, ' '), StrMatcher.splitMatcher(),
-			StrMatcher.quoteMatcher()).setTrimmerMatcher(StrMatcher.trimMatcher()).getTokenArray();
-
-		if ("autoref".equalsIgnoreCase(cmd.getName()) && sender.hasPermission("autoreferee.configure"))
-		{
-			// CMD: /autoref cfg ...
-			if (args.length > 1 && "cfg".equalsIgnoreCase(args[0]))
-			{
-				// CMD: /autoref cfg save
-				if (args.length >= 2 && "save".equalsIgnoreCase(args[1]) && match != null)
-				{
-					match.saveWorldConfiguration();
-					sender.sendMessage(ChatColor.GREEN + CFG_FILENAME + " saved.");
-				}
-
-				// CMD: /autoref init
-				if (args.length >= 2 && "init".equalsIgnoreCase(args[1]))
-				{
-					// if there is not yet a match object for this map
-					if (match == null)
-					{
-						addMatch(match = new AutoRefMatch(world, false));
-						match.saveWorldConfiguration();
-						match.setCurrentState(MatchStatus.NONE);
-
-						sender.sendMessage(ChatColor.GREEN + CFG_FILENAME + " generated.");
-					}
-					else sender.sendMessage(this.getName() + " already initialized for " +
-						match.getMapName() + ".");
-				}
-
-				// CMD: /autoref cfg reload
-				if (args.length >= 2 && "reload".equalsIgnoreCase(args[1]) && match != null)
-				{
-					match.reload();
-					sender.sendMessage(ChatColor.GREEN + CFG_FILENAME + " reload complete!");
-				}
-
-				return true;
-			}
-
-			// CMD: /autoref archive [zip]
-			if (args.length >= 1 && "archive".equalsIgnoreCase(args[0]) && match != null) try
-			{
-				// LAST MINUTE CLEANUP!!!
-				match.clearEntities();
-				world.setTime(match.getStartTime());
-
-				// save the world and configuration first
-				world.save();
-				match.saveWorldConfiguration();
-
-				File archiveFolder = null;
-				if (args.length >= 2 && "zip".equalsIgnoreCase(args[1]))
-					archiveFolder = match.distributeMap();
-				else archiveFolder = match.archiveMapData();
-
-				String resp = String.format("%s %s", match.getVersionString(),
-					archiveFolder == null ? "failed to archive." : "archived!");
-				sender.sendMessage(ChatColor.GREEN + resp); getLogger().info(resp);
-				return true;
-			}
-			catch (Exception e) { return false; }
-
-			// CMD: /autoref debug [console]
-			if (args.length >= 1 && "debug".equalsIgnoreCase(args[0]) && match != null)
-			{
-				if (match.isDebugMode())
-				{ match.setDebug(null); return true; }
-
-				boolean consoleDebug = args.length >= 2 && "console".equalsIgnoreCase(args[1]);
-				match.setDebug(consoleDebug ? getServer().getConsoleSender() : sender);
-
-				return true;
-			}
-
-			// CMD: /autoref tool <type>
-			if (args.length >= 1 && "tool".equalsIgnoreCase(args[0]))
-			{
-				// get the tool for setting win condition
-				if (args.length >= 2 && "wincond".equalsIgnoreCase(args[1]))
-				{
-					// get the tool used to set the win conditions
-					int toolID = ZoneListener.parseTool(getConfig().getString(
-						"config-mode.tools.win-condition", null), Material.GOLD_SPADE);
-					ItemStack toolitem = new ItemStack(toolID);
-
-					// add to the inventory and switch to holding it
-					PlayerInventory inv = player.getInventory();
-					inv.addItem(toolitem);
-
-					// let the player know what the tool is and how to use it
-					sender.sendMessage("Given win condition tool: " + toolitem.getType().name());
-					sender.sendMessage("Right-click on a block to set it as a win-condition.");
-					return true;
-				}
-				// get the tool for setting starting mechanisms
-				if (args.length >= 2 && "startmech".equalsIgnoreCase(args[1]))
-				{
-					// get the tool used to set the starting mechanisms
-					int toolID = ZoneListener.parseTool(getConfig().getString(
-						"config-mode.tools.start-mechanism", null), Material.GOLD_AXE);
-					ItemStack toolitem = new ItemStack(toolID);
-
-					// add to the inventory and switch to holding it
-					PlayerInventory inv = player.getInventory();
-					inv.addItem(toolitem);
-
-					// let the player know what the tool is and how to use it
-					sender.sendMessage("Given start mechanism tool: " + toolitem.getType().name());
-					sender.sendMessage("Right-click on a device to set it as a starting mechanism.");
-					return true;
-				}
-				// get the tool for setting protected entities
-				if (args.length >= 2 && "protect".equalsIgnoreCase(args[1]))
-				{
-					// get the tool used to set the starting mechanisms
-					int toolID = ZoneListener.parseTool(getConfig().getString(
-						"config-mode.tools.protect-entities", null), Material.GOLD_SWORD);
-					ItemStack toolitem = new ItemStack(toolID);
-
-					// add to the inventory and switch to holding it
-					PlayerInventory inv = player.getInventory();
-					inv.addItem(toolitem);
-
-					// let the player know what the tool is and how to use it
-					sender.sendMessage("Given entity protection tool: " + toolitem.getType().name());
-					sender.sendMessage("Right-click on an entity to protect it from butchering.");
-					return true;
-				}
-			}
-
-			// CMD: /autoref nocraft
-			if (args.length >= 1 && "nocraft".equalsIgnoreCase(args[0]) && match != null)
-			{
-				ItemStack item = player.getItemInHand();
-				if (item != null) match.addIllegalCraft(BlockData.fromItemStack(item));
-				return true;
-			}
-
-			// CMD: /autoref setspawn <team>
-			if (args.length >= 2 && "setspawn".equalsIgnoreCase(args[0]) && match != null && player != null)
-			{
-				AutoRefTeam team = match.teamNameLookup(args[1]);
-				if (team == null)
-				{
-					// team name is invalid. let the player know
-					sender.sendMessage(ChatColor.DARK_GRAY + args[1] +
-						ChatColor.RESET + " is not a valid team.");
-					sender.sendMessage("Teams are " + match.getTeamList());
-				}
-				else
-				{
-					team.setSpawnLocation(player.getLocation());
-					String coords = Vector3.fromLocation(player.getLocation()).toBlockCoords();
-					sender.sendMessage(ChatColor.GRAY + "Spawn set to " +
-						coords + " for " + team.getDisplayName());
-				}
-				return true;
-			}
-		}
-
-		if ("autoref".equalsIgnoreCase(cmd.getName()) && sender.hasPermission("autoreferee.admin"))
-		{
-			// CMD: /autoref world <world>
-			if (args.length == 2 && "world".equalsIgnoreCase(args[0]))
-			{
-				consoleWorld = getServer().getWorld(args[1]);
-				if (consoleWorld != null) sender.sendMessage("Selected world " + consoleWorld.getName());
-				return consoleWorld != null;
-			}
-
-			// CMD: /autoref load <map> [<custom>]
-			if (args.length >= 2 && "load".equalsIgnoreCase(args[0])) try
-			{
-				// get generate a map name from the args
-				String mapName = args[1];
-
-				// may specify a custom world name as the 3rd argument
-				String customName = args.length >= 3 ? args[2] : null;
-
-				// get world setup for match
-				sender.sendMessage(ChatColor.GREEN + "Please wait...");
-				AutoRefMap.loadMap(sender, mapName, customName);
-
-				return true;
-			}
-			catch (Exception e) { e.printStackTrace(); return true; }
-
-			// CMD: /autoref loadurl <url> [<custom>]
-			if (args.length >= 2 && "loadurl".equalsIgnoreCase(args[0])) try
-			{
-				// may specify a custom world name as the 3rd argument
-				String customName = args.length >= 3 ? args[2] : null;
-
-				// get world setup for match
-				sender.sendMessage(ChatColor.GREEN + "Please wait...");
-				AutoRefMap.loadMapFromURL(sender, args[1], customName);
-
-				return true;
-			}
-			catch (Exception e) { e.printStackTrace(); return true; }
-
-			// CMD: /autoref unload
-			if (args.length == 1 && "unload".equalsIgnoreCase(args[0]) && match != null)
-			{
-				match.destroy();
-				return true;
-			}
-
-			// CMD: /autoref reload
-			if (args.length == 1 && "reload".equalsIgnoreCase(args[0]) && match != null) try
-			{
-				AutoRefMap map = AutoRefMap.getMap(match.getMapName());
-				if (map == null || !map.isInstalled())
-				{
-					sender.sendMessage(ChatColor.DARK_GRAY +
-						"No archive of this map exists " + match.getMapName());
-					return true;
-				}
-
-				sender.sendMessage(ChatColor.DARK_GRAY +
-					"Preparing a new copy of " + map.getVersionString());
-
-				AutoRefMatch newmatch = AutoRefMap.createMatch(map, null);
-				for (Player p : match.getWorld().getPlayers())
-					p.teleport(newmatch.getWorldSpawn());
-
-				match.destroy();
-				return true;
-			}
-			catch (Exception e) { e.printStackTrace(); return true; }
-
-			// CMD: /autoref maplist
-			if (args.length == 1 && "maplist".equalsIgnoreCase(args[0]))
-			{
-				List<AutoRefMap> maps = Lists.newArrayList(AutoRefMap.getAvailableMaps());
-				Collections.sort(maps);
-
-				sender.sendMessage(ChatColor.GOLD + String.format("Available Maps (%d):", maps.size()));
-				for (AutoRefMap mapInfo : maps)
-				{
-					ChatColor color = mapInfo.isInstalled() ? ChatColor.WHITE : ChatColor.DARK_GRAY;
-					sender.sendMessage("* " + color + mapInfo.getVersionString());
-				}
-
-				return true;
-			}
-
-			// CMD: /autoref update [force]
-			if (args.length >= 1 && "update".equalsIgnoreCase(args[0]))
-			{
-				boolean force = (args.length >= 2 && args[1].startsWith("f"));
-				AutoRefMap.getUpdates(sender, force);
-				return true;
-			}
-
-			// CMD: /autoref state [<new state>]
-			if (args.length >= 1 && "state".equalsIgnoreCase(args[0]) &&
-				match != null && match.isDebugMode()) try
-			{
-				if (args.length >= 2)
-					match.setCurrentState(MatchStatus.valueOf(args[1].toUpperCase()));
-				getLogger().info("Match Status is now " + match.getCurrentState().name());
-
-				return true;
-			}
-			catch (Exception e) { return false; }
-
-			// CMD: /autoref autoinvite <players...>
-			if (args.length > 1 && "autoinvite".equalsIgnoreCase(args[0]))
-			{
-				for (int i = 1; i < args.length; ++i)
-				{
-					// first, remove this player from all expected player lists
-					OfflinePlayer opl = getServer().getOfflinePlayer(args[i]);
-					for (AutoRefMatch m : getMatches()) m.removeExpectedPlayer(opl);
-
-					// add them to the expected players list
-					match.addExpectedPlayer(opl);
-
-					// if this player cannot be found, skip
-					Player invited = getServer().getPlayer(args[i]);
-					if (invited == null) continue;
-
-					// if this player is already busy competing in a match, skip
-					AutoRefMatch m = getMatch(invited.getWorld());
-					if (m != null && m.isPlayer(invited) && m.getCurrentState().inProgress()) continue;
-
-					// otherwise, let's drag them in (no asking)
-					match.acceptInvitation(invited);
-				}
-
-				return true;
-			}
-
-			// CMD: /autoref send <msg> [<recipient>]
-			if (args.length >= 2 && "send".equalsIgnoreCase(args[0]) &&
-				match != null && match.isDebugMode())
-			{
-				Set<Player> targets = match.getReferees();
-				if (args.length >= 3) targets = Sets.newHashSet(getServer().getPlayer(args[2]));
-
-				for (Player ref : targets) if (ref != null) ref.sendPluginMessage(this,
-					AutoReferee.REFEREE_PLUGIN_CHANNEL, args[1].getBytes());
-
-				return true;
-			}
-		}
-
-		if ("autoref".equalsIgnoreCase(cmd.getName()) && sender.hasPermission("autoreferee.referee"))
-		{
-			// CMD: /autoref teamname <currentname> <newname>
-			if (args.length == 3 && "teamname".equalsIgnoreCase(args[0]) && match != null)
-			{
-				AutoRefTeam team = match.teamNameLookup(args[1]);
-				if (team == null)
-				{
-					sender.sendMessage(ChatColor.DARK_GRAY + args[1] +
-						ChatColor.RESET + " is not a valid team.");
-					sender.sendMessage("Teams are " + match.getTeamList());
-				}
-				else team.setName(args[2]);
-				return true;
-			}
-
-			// CMD: /autoref hud ...
-			if (args.length >= 1 && "hud".equalsIgnoreCase(args[0]) && match != null)
-			{
-				// CMD: /autoref hud swap
-				if (args.length >= 2 && "swap".equalsIgnoreCase(args[1]))
-				{
-					match.messageReferee(player, "match", match.getWorld().getName(), "swap");
-					return true;
-				}
-			}
-
-			// CMD: /autoref swapteams <team1> <team2>
-			if (args.length == 3 && "swapteams".equalsIgnoreCase(args[0]) && match != null)
-			{
-				AutoRefTeam team1 = match.teamNameLookup(args[1]);
-				AutoRefTeam team2 = match.teamNameLookup(args[2]);
-
-				if (team1 == null)
-				{
-					sender.sendMessage(ChatColor.DARK_GRAY + args[1] +
-						ChatColor.RESET + " is not a valid team.");
-					sender.sendMessage("Teams are " + match.getTeamList());
-				}
-				else if (team2 == null)
-				{
-					sender.sendMessage(ChatColor.DARK_GRAY + args[2] +
-						ChatColor.RESET + " is not a valid team.");
-					sender.sendMessage("Teams are " + match.getTeamList());
-				}
-				else AutoRefTeam.switchTeams(team1, team2);
-				return true;
-			}
-
-			// CMD: /autoref countdown [<seconds>]
-			if (args.length >= 1 && "countdown".equalsIgnoreCase(args[0]) && match != null)
-			{
-				int sec = 3;
-				if (args.length >= 2)
-					try { sec = Integer.parseInt(args[1]); }
-					catch (NumberFormatException e) {  }
-
-				match.startCountdown(sec, false);
-				return true;
-			}
-
-			// CMD: /autoref timelimit <min>
-			if (args.length == 2 && "timelimit".equalsIgnoreCase(args[0]) && match != null)
-			{
-				long time = -1L;
-				if (!"none".equalsIgnoreCase(args[1]))
-					try { time = Integer.parseInt(args[1]) * 60L; }
-					catch (NumberFormatException e) { return true; }
-
-				// set the time limit
-				match.setTimeLimit(time);
-				return true;
-			}
-
-			// CMD: /autoref endmatch [<winner>]
-			if (args.length >= 1 && "endmatch".equalsIgnoreCase(args[0]) && match != null)
-			{
-				if (args.length >= 2)
-				{
-					if ("none".equalsIgnoreCase(args[1]) || "tie".equalsIgnoreCase(args[1]))
-						match.matchComplete(null);
-					else match.matchComplete(match.teamNameLookup(args[1]));
-				}
-				else match.matchComplete();
-				return true;
-			}
-		}
-
-		if ("autoref".equalsIgnoreCase(cmd.getName()))
-		{
-			// CMD: /autoref invite <players...>
-			if (args.length > 1 && "invite".equalsIgnoreCase(args[0]) &&
-				match != null && match.getCurrentState().isBeforeMatch())
-			{
-				// who is doing the inviting
-				String from = (sender instanceof Player) ? match.getPlayerName(player) : "This server";
-
-				for (int i = 1; i < args.length; ++i)
-				{
-					// if this player cannot be found, skip
-					Player invited = getServer().getPlayer(args[i]);
-					if (invited == null) continue;
-
-					// if this player is already busy competing in a match, skip
-					AutoRefMatch m = getMatch(invited.getWorld());
-					if (m != null && m.isPlayer(invited) && m.getCurrentState().inProgress()) continue;
-
-					// otherwise, invite them
-					if (invited.getWorld() != match.getWorld())
-						new Conversation(this, invited, new InvitationPrompt(match, from)).begin();
-				}
-
-				return true;
-			}
-
-			// CMD: /autoref version
-			if (args.length >= 1 && "version".equalsIgnoreCase(args[0]))
-			{
-				sender.sendMessage(ChatColor.DARK_GRAY + "This server is running " +
-					ChatColor.BLUE + this.getDescription().getFullName());
-				return true;
-			}
-		}
-
-		if ("zones".equalsIgnoreCase(cmd.getName()) && match != null)
-		{
-			Set<AutoRefTeam> lookupTeams = null;
-
-			// if a team has been specified as an argument
-			if (args.length > 1)
-			{
-				AutoRefTeam t = match.teamNameLookup(args[1]);
-				if (t == null)
-				{
-					// team name is invalid. let the player know
-					sender.sendMessage(ChatColor.DARK_GRAY + args[1] +
-						ChatColor.RESET + " is not a valid team.");
-					return true;
-				}
-
-				lookupTeams = Sets.newHashSet();
-				lookupTeams.add(t);
-			}
-
-			// otherwise, just print all the teams
-			else lookupTeams = match.getTeams();
-
-			// sanity check...
-			if (lookupTeams == null) return false;
-
-			// for all the teams being looked up
-			for (AutoRefTeam team : lookupTeams)
-			{
-				// print team-name header
-				sender.sendMessage(team.getDisplayName() + "'s Regions:");
-
-				// print all the regions owned by this team
-				if (team.getRegions().size() > 0) for (CuboidRegion reg : team.getRegions())
-				{
-					Vector3 mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
-					sender.sendMessage("  (" + mn.toCoords() + ") => (" + mx.toCoords() + ")");
-				}
-
-				// if there are no regions, print None
-				else sender.sendMessage("  <None>");
-			}
-
-			return true;
-		}
-
-		if ("zone".equalsIgnoreCase(cmd.getName()) && match != null)
-		{
-			WorldEditPlugin worldEdit = getWorldEdit();
-			if (worldEdit == null)
-			{
-				// world edit not installed
-				sender.sendMessage("This method requires WorldEdit installed and running.");
-				return true;
-			}
-
-			if (args.length == 0)
-			{
-				// command is invalid. let the player know
-				sender.sendMessage("Must specify a team as this zone's owner.");
-				return true;
-			}
-
-			// START is a sentinel Team object representing the start region
-			AutoRefTeam t, START = new AutoRefTeam(); String tname = args[0];
-			t = "start".equals(tname) ? START : match.teamNameLookup(tname);
-
-			if (t == null)
-			{
-				// team name is invalid. let the player know
-				sender.sendMessage(ChatColor.DARK_GRAY + tname +
-					ChatColor.RESET + " is not a valid team.");
-				sender.sendMessage("Teams are " + match.getTeamList());
-				return true;
-			}
-
-			Selection sel = worldEdit.getSelection(player);
-			if ((sel instanceof CuboidSelection))
-			{
-				CuboidSelection csel = (CuboidSelection) sel;
-				CuboidRegion reg = new CuboidRegion(
-					new Vector3(csel.getNativeMinimumPoint()),
-					new Vector3(csel.getNativeMaximumPoint())
-				);
-
-				// sentinel value represents the start region
-				if (t == START)
-				{
-					// set the start region to the selection
-					match.setStartRegion(reg);
-					sender.sendMessage("Region now marked as " +
-						"the start region!");
-				}
-				else
-				{
-					AutoRefRegion areg = new AutoRefRegion(reg);
-					if (args.length >= 2) for (String f : args[1].split(",")) areg.toggle(f);
-
-					// add the region to the team, announce
-					t.getRegions().add(areg);
-					sender.sendMessage("Region now marked as " +
-						t.getDisplayName() + "'s zone! " + areg.getFlags());
-				}
-			}
-			return true;
-		}
-
-		if ("matchinfo".equalsIgnoreCase(cmd.getName()))
-		{
-			if (match != null) match.sendMatchInfo(sender);
-			else sender.sendMessage(ChatColor.GRAY +
-				this.getName() + " is not running for this world!");
-
-			return true;
-		}
-
-		if ("jointeam".equalsIgnoreCase(cmd.getName()) && match != null && !isAutoMode())
-		{
-			// get the target team
-			AutoRefTeam team = args.length > 0 ? match.teamNameLookup(args[0]) :
-				match.getArbitraryTeam();
-
-			if (team == null)
-			{
-				// team name is invalid. let the player know
-				if (args.length > 0)
-				{
-					sender.sendMessage(ChatColor.DARK_GRAY + args[0] +
-						ChatColor.RESET + " is not a valid team.");
-					sender.sendMessage("Teams are " + match.getTeamList());
-				}
-				return true;
-			}
-
-			// if there are players specified on the command line, add them
-			if (args.length >= 2 && sender.hasPermission("autoreferee.referee"))
-				for (int i = 1; i < args.length; ++i)
-			{
-				Player target = getServer().getPlayer(args[i]);
-				if (target != null) match.joinTeam(target, team, true);
-			}
-
-			// otherwise, add yourself
-			else match.joinTeam(player, team, sender.hasPermission("autoreferee.referee"));
-			return true;
-		}
-
-		if ("leaveteam".equalsIgnoreCase(cmd.getName()) && match != null && !isAutoMode())
-		{
-			// if there are players specified on the command line, remove them
-			if (args.length >= 1 && sender.hasPermission("autoreferee.referee"))
-				for (int i = 0; i < args.length; ++i)
-			{
-				Player target = getServer().getPlayer(args[i]);
-				if (target != null) match.leaveTeam(target, true);
-			}
-
-			// otherwise, remove yourself
-			else match.leaveTeam(player, sender.hasPermission("autoreferee.referee"));
-			return true;
-		}
-
-		if ("viewinventory".equalsIgnoreCase(cmd.getName()) && args.length >= 0
-			&& match != null && player != null) try
-		{
-			CommandLineParser parser = new GnuParser();
-			CommandLine cli = parser.parse(viewInventoryOptions, args);
-
-			args = cli.getArgs();
-			if (args.length > 1) return false;
-
-			if (!match.isReferee(player))
-			{ sender.sendMessage("You do not have permission."); return true; }
-
-			AutoRefPlayer target = args.length > 0 ? match.getPlayer(args[0])
-				: match.getNearestPlayer(player.getLocation());
-			if (target != null)
-			{
-				if (cli.hasOption('p')) target.showSavedInventory(player);
-				else target.showInventory(player);
-			}
-
-			return true;
-		}
-		catch (ParseException e) { return false; }
-
-		if ("ready".equalsIgnoreCase(cmd.getName()) &&
-			match != null && match.getCurrentState().isBeforeMatch())
-		{
-			boolean rstate = true;
-			if (args.length > 0)
-			{
-				String rstr = args[0].toLowerCase();
-				rstate = !rstr.startsWith("f") && !rstr.startsWith("n");
-			}
-
-			if (player == null || match.isReferee(player))
-			{
-				// attempt to set the ready delay if one is specified
-				if (args.length > 0) try { match.setReadyDelay(Integer.parseInt(args[0])); }
-				catch (NumberFormatException e) {  };
-
-				match.setRefereeReady(rstate);
-			}
-			else
-			{
-				AutoRefTeam team = match.getPlayerTeam(player);
-				if (team != null) team.setReady(rstate);
-			}
-
-			match.checkTeamsStart();
-			return true;
-		}
-
-		if ("artp".equalsIgnoreCase(cmd.getName()) && match != null && player != null)
-		{
-			// just dump location into this for teleporting later
-			Location tplocation = null;
-
-			if (args.length > 0) try
-			{
-				CommandLineParser parser = new GnuParser();
-				CommandLine cli = parser.parse(teleportOptions, args);
-
-				args = cli.getArgs();
-
-				if (cli.hasOption('b'))
-				{
-					AutoRefPlayer apl = match.getPlayer(args[0]);
-					Location bedloc = apl.getBedLocation();
-
-					if (bedloc == null || bedloc.getBlock().getType() != Material.BED_BLOCK)
-					{
-						player.sendMessage(apl.getDisplayName() + ChatColor.DARK_GRAY + " does not have a bed set.");
-						return true;
-					}
-					else tplocation = TeleportationUtil.blockTeleport(bedloc);
-				}
-				else if (cli.hasOption('d'))
-				{
-					if (args.length > 0)
-					{
-						AutoRefPlayer apl = match.getPlayer(args[0]);
-						if (apl != null) tplocation = apl.getLastDeathLocation();
-					}
-					else tplocation = match.getLastDeathLocation();
-					tplocation = TeleportationUtil.locationTeleport(tplocation);
-				}
-				else if (cli.hasOption('l'))
-				{
-					if (args.length > 0)
-					{
-						AutoRefPlayer apl = match.getPlayer(args[0]);
-						if (apl != null) tplocation = apl.getLastLogoutLocation();
-					}
-					else tplocation = match.getLastLogoutLocation();
-					tplocation = TeleportationUtil.locationTeleport(tplocation);
-				}
-				else if (cli.hasOption('t'))
-				{
-					if (args.length > 0)
-					{
-						AutoRefPlayer apl = match.getPlayer(args[0]);
-						if (apl != null) tplocation = apl.getLastTeleportLocation();
-					}
-					else tplocation = match.getLastTeleportLocation();
-					tplocation = TeleportationUtil.locationTeleport(tplocation);
-				}
-				else if (cli.hasOption('s'))
-				{
-					if (args.length > 0)
-					{
-						AutoRefTeam team = match.teamNameLookup(args[0]);
-						if (team != null) tplocation = team.getSpawnLocation();
-					}
-					else tplocation = match.getWorld().getSpawnLocation();
-					tplocation = TeleportationUtil.locationTeleport(tplocation);
-				}
-				else if (cli.hasOption('o'))
-				{
-					if (args.length > 0)
-					{
-						AutoRefTeam team = match.teamNameLookup(args[0]);
-						if (team != null) tplocation = team.getLastObjectiveLocation();
-					}
-					else tplocation = match.getLastObjectiveLocation();
-					tplocation = TeleportationUtil.locationTeleport(tplocation);
-				}
-				else if (cli.hasOption('v'))
-				{
-					if (args.length > 0)
-					{
-						AutoRefTeam team = match.teamNameLookup(args[0]);
-						if (team != null) tplocation = team.getVictoryMonumentLocation();
-					}
-					tplocation = TeleportationUtil.locationTeleport(tplocation);
-				}
-				else if (cli.hasOption('x'))
-				{
-					try
-					{
-						String[] coords = cli.getOptionValues('x');
-						tplocation = new Location(match.getWorld(),
-							Integer.parseInt(coords[0]), Integer.parseInt(coords[1]), Integer.parseInt(coords[2]));
-						tplocation = TeleportationUtil.blockTeleport(tplocation);
-					}
-					catch (NumberFormatException e) {  }
-				}
-				else if (cli.hasOption('r'))
-				{
-					// get location in lookup table, or null
-					tplocation = prevLocation.get(player.getName());
-				}
-				else
-				{
-					Player pl = getServer().getPlayer(args[0]);
-					if (pl != null) tplocation = match.isPlayer(pl)
-						? TeleportationUtil.entityTeleport(pl) : pl.getLocation();
-				}
-			}
-			catch (ParseException e) {  }
-			else tplocation = TeleportationUtil.locationTeleport(match.getLastNotificationLocation());
-
-			// if we ever found a valid teleport, take it!
-			if (tplocation != null)
-			{
-				prevLocation.put(player.getName(), player.getLocation());
-				player.setFlying(true); player.teleport(tplocation);
-			}
-			else player.sendMessage(ChatColor.DARK_GRAY + "You cannot teleport to this location: invalid or unsafe.");
-			return true;
-		}
-
 		return false;
-	}
-
-	private class InvitationPrompt extends BooleanPrompt
-	{
-		public InvitationPrompt(AutoRefMatch match, String from)
-		{ this.match = match; this.from = from; }
-
-		private AutoRefMatch match;
-		private String from;
-
-		@Override
-		public String getPromptText(ConversationContext context)
-		{ return String.format(">>> %s is inviting you to %s. Do you accept?", from, match.getMapName()); }
-
-		@Override
-		protected Prompt acceptValidatedInput(ConversationContext context, boolean response)
-		{
-			if (response && context.getForWhom() instanceof Player)
-				match.acceptInvitation((Player) context.getForWhom());
-			return Prompt.END_OF_CONVERSATION;
-		}
-
 	}
 
 	/**

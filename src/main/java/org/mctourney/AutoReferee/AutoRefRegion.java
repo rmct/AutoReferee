@@ -99,14 +99,14 @@ public class AutoRefRegion extends CuboidRegion
 	public AutoRefRegion toggle(RegionFlag flag)
 	{ flags ^= flag.getValue(); return this; }
 
-	protected AutoRefRegion toggle(String nm)
+	public AutoRefRegion toggle(String nm)
 	{
 		for (RegionFlag f : RegionFlag.values())
 			if (f.getName().equalsIgnoreCase(nm)) return toggle(f);
 		return this;
 	}
 
-	protected AutoRefRegion toggle(char c)
+	public AutoRefRegion toggle(char c)
 	{
 		for (RegionFlag f : RegionFlag.values())
 			if (f.getMark() == c) return toggle(f);

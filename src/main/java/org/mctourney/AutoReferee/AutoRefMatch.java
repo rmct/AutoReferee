@@ -260,7 +260,7 @@ public class AutoRefMatch
 		return sortedTeams;
 	}
 
-	protected String getTeamList()
+	public String getTeamList()
 	{
 		Set<String> tlist = Sets.newHashSet();
 		for (AutoRefTeam team : getSortedTeams())
@@ -728,10 +728,10 @@ public class AutoRefMatch
 		}
 	}
 
-	protected AutoRefMatch(World world, boolean tmp, MatchStatus state)
+	public AutoRefMatch(World world, boolean tmp, MatchStatus state)
 	{ this(world, tmp); setCurrentState(state); }
 
-	protected AutoRefMatch(World world, boolean tmp)
+	public AutoRefMatch(World world, boolean tmp)
 	{
 		setWorld(world);
 		loadWorldConfiguration();
@@ -832,6 +832,33 @@ public class AutoRefMatch
 	{
 		if (isReferee(player)) return true;
 		return !getCurrentState().isBeforeMatch() && !isPlayer(player);
+	}
+
+	public enum Role
+	{
+		// this list provides an ordering of roles. do not permute.
+		NONE, PLAYER, SPECTATOR, STREAMER, REFEREE;
+
+		public int getRank()
+		{ return this.ordinal(); }
+	}
+
+	/**
+	 * Gets the role that this player has in this match.
+	 *
+	 * @return a role corresponding to this player
+	 */
+	public Role getRole(OfflinePlayer player)
+	{
+		if (isPlayer(player)) return Role.PLAYER;
+		if (!player.isOnline()) return Role.NONE;
+
+		Player pl = player.getPlayer();
+		if (isStreamer(pl)) return Role.STREAMER;
+		if (isReferee(pl)) return Role.REFEREE;
+		if (isSpectator(pl)) return Role.SPECTATOR;
+
+		return Role.NONE;
 	}
 
 	/**
@@ -1312,8 +1339,7 @@ public class AutoRefMatch
 		}
 
 		@Override public String toString()
-		{ return state.getType().name() + "(" + Vector3.fromLocation(loc).toCoords() +
-			"):" + Boolean.toString(flip); }
+		{ return state.getType().name() + "(" + this.serialize() + ")"; }
 
 		public Location getLocation()
 		{ return loc; }
@@ -2053,7 +2079,7 @@ public class AutoRefMatch
 	 *
 	 * @return matching AutoRefPlayer object, or null if no match
 	 */
-	public AutoRefPlayer getPlayer(Player player)
+	public AutoRefPlayer getPlayer(OfflinePlayer player)
 	{ return player == null ? null : getPlayer(player.getName()); }
 
 	/**
@@ -2061,7 +2087,7 @@ public class AutoRefMatch
 	 *
 	 * @return true if player is on a team, otherwise false
 	 */
-	public boolean isPlayer(Player pl)
+	public boolean isPlayer(OfflinePlayer pl)
 	{ return getPlayer(pl) != null; }
 
 	/**
