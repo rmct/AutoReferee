@@ -290,7 +290,8 @@ public class ZoneListener implements Listener
 			if (!plugin.isAutoMode() && match.isStartMechanism(loc)
 				&& match.getCurrentState().isBeforeMatch()) return;
 
-			if (match.isStartMechanism(loc) && !match.getCurrentState().isBeforeMatch())
+			if (match.isStartMechanism(loc) && !match.getCurrentState().isBeforeMatch()
+				&& match.getStartMechanism(loc).active())
 			{ event.setCancelled(true); return; }
 
 			if (!validPlayer(player))

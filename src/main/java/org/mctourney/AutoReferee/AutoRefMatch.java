@@ -1349,6 +1349,15 @@ public class AutoRefMatch
 
 		public boolean getFlippedPosition()
 		{ return flip; }
+
+		public boolean active()
+		{
+			MaterialData bdata = getLocation().getBlock().getState().getData();
+
+			if (bdata instanceof Redstone) return flip == ((Redstone) bdata).isPowered();
+			if (bdata instanceof PressureSensor) return flip == ((PressureSensor) bdata).isPressed();
+			return false;
+		}
 	}
 
 	/**
@@ -1373,17 +1382,25 @@ public class AutoRefMatch
 	}
 
 	/**
+	 * Gets the start mechanism associated with this location.
+	 *
+	 * @return start mechanism located at that position, otherwise null
+	 */
+	public StartMechanism getStartMechanism(Location loc)
+	{
+		if (loc == null) return null;
+		for (StartMechanism sm : startMechanisms)
+			if (loc.equals(sm.getLocation())) return sm;
+		return null;
+	}
+
+	/**
 	 * Checks if a specified block location is a start mechanism for this match.
 	 *
 	 * @return true if a start mechanism is located at that position, otherwise false
 	 */
 	public boolean isStartMechanism(Location loc)
-	{
-		if (loc == null) return false;
-		for (StartMechanism sm : startMechanisms)
-			if (loc.equals(sm.getLocation())) return true;
-		return false;
-	}
+	{ return getStartMechanism(loc) != null; }
 
 	/**
 	 * Parameters necessary to configure a match.
