@@ -84,7 +84,7 @@ public class CommandManager implements CommandExecutor
 			if (sender instanceof Player)
 			{
 				Player player = (Player) sender;
-				Role role = match.getRole(player);
+				Role role = match == null ? AutoRefMatch.Role.NONE : match.getRole(player);
 
 				if (permissions.role().getRank() > role.getRank())
 					throw new CommandPermissionException(command, "Command not available to " + role);
