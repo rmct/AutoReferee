@@ -49,7 +49,15 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	private String md5sum;
 
 	protected AutoRefMap(String name, String version, File folder)
-	{ this.name = name; this.version = version; this.folder = folder; }
+	{
+		this.name = name; this.version = version;
+		File checksum = new File(this.folder = folder, "checksum");
+
+		this.md5sum = null;
+		if (checksum.exists())
+			try { this.md5sum = FileUtils.readFileToString(checksum); }
+			catch (IOException e) {  }
+	}
 
 	protected AutoRefMap(String csv)
 	{
@@ -366,7 +374,9 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 			{
 				// get the remote version and check if there is an update
 				AutoRefMap rmap = remote.get(map.name);
-				if (rmap != null && (force || !map.version.equalsIgnoreCase(rmap.version)))
+
+				boolean needsUpdate = map.md5sum != null && !map.md5sum.equals(rmap.md5sum);
+				if (rmap != null && (force || needsUpdate))
 				{
 					AutoReferee.getInstance().sendMessageSync(sender, String.format(
 						"UPDATING %s (%s -> %s)...", rmap.name, map.version, rmap.version));
@@ -457,6 +467,8 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 
 	private static File unzipMapFolder(File zip) throws IOException
 	{
+		String md5 = DigestUtils.md5Hex(new FileInputStream(zip));
+
 		ZipFile zfile = new ZipFile(zip);
 		Enumeration<? extends ZipEntry> entries = zfile.entries();
 
@@ -476,6 +488,9 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 
 		zfile.close();
 		zip.delete();
+
+		// add the checksum to the map directory to determine if an update is needed
+		FileUtils.writeStringToFile(new File(basedir, "checksum"), md5);
 		return basedir;
 	}
 

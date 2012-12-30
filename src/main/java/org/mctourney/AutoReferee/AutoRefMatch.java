@@ -25,6 +25,7 @@ import java.util.zip.ZipOutputStream;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -1162,6 +1163,11 @@ public class AutoRefMatch
 
 		// (4) make an empty data folder:
 		new File(archiveFolder, "data").mkdir();
+
+		// remove any existing checksum file
+		File checksum = new File(getWorld().getWorldFolder(), "checksum");
+		if (checksum.exists()) checksum.delete();
+
 		return archiveFolder;
 	}
 
@@ -1189,6 +1195,12 @@ public class AutoRefMatch
 		addToZip(zip, archiveFolder, AutoRefMap.getMapLibrary());
 
 		zip.close();
+
+		// rewrite a checksum file for this zip
+		File checksum = new File(archiveFolder, "checksum");
+		String md5 = DigestUtils.md5Hex(new FileInputStream(outZipfile));
+		FileUtils.writeStringToFile(checksum, md5);
+
 		return archiveFolder;
 	}
 
