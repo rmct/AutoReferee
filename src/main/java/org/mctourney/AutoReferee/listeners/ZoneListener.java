@@ -607,7 +607,7 @@ public class ZoneListener implements Listener
 	@EventHandler
 	public void endermanPickup(EntityChangeBlockEvent event)
 	{
-		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
+		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
 		if (match == null) return;
 
 		// don't let endermen pick up blocks, as a rule
