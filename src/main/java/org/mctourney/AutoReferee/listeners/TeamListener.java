@@ -23,6 +23,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
 
+import org.mctourney.AutoReferee.AutoRefMap;
 import org.mctourney.AutoReferee.AutoRefMatch;
 import org.mctourney.AutoReferee.AutoRefPlayer;
 import org.mctourney.AutoReferee.AutoRefTeam;
@@ -117,9 +118,6 @@ public class TeamListener implements Listener
 		World world = event.getPlayer().getWorld();
 		AutoRefMatch match = plugin.getMatch(world);
 
-		if (match == null) for (AutoRefMatch m : plugin.getMatches())
-			if (m.isPlayer(event.getPlayer())) match = m;
-
 		if (match != null && match.isPlayer(event.getPlayer()))
 		{
 			// does this player have a bed spawn?
@@ -189,16 +187,31 @@ public class TeamListener implements Listener
 		Player player = event.getPlayer();
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
 
-		if (match != null && match.getCurrentState().isBeforeMatch() && event.hasBlock() &&
-			event.getClickedBlock().getState() instanceof Sign && match.inStartRegion(event.getClickedBlock().getLocation()))
+		if (event.hasBlock() && event.getClickedBlock().getState() instanceof Sign)
 		{
 			String[] lines = ((Sign) event.getClickedBlock().getState()).getLines();
 			if (lines[0] == null || !"[AutoReferee]".equals(lines[0])) return;
 
-			// execute the command on the sign (and hope like hell that AutoReferee picks it up)
-			if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
-				player.performCommand(ChatColor.stripColor(lines[1] + " " + lines[2]).trim());
-			event.setCancelled(true);
+			if (match != null && match.getCurrentState().isBeforeMatch() &&
+				match.inStartRegion(event.getClickedBlock().getLocation()))
+			{
+				// execute the command on the sign (and hope like hell that AutoReferee picks it up)
+				if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
+					player.performCommand(ChatColor.stripColor(lines[1] + " " + lines[2]).trim());
+				event.setCancelled(true);
+			}
+
+			else if (player.getWorld() == plugin.getLobbyWorld())
+			{
+				// load the world named on the sign
+				if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
+				{
+					player.sendMessage(ChatColor.GREEN + "Please wait...");
+					String mapName = lines[1] + " " + lines[2] + " " + lines[3];
+					AutoRefMap.loadMap(player, mapName.trim(), null);
+				}
+				event.setCancelled(true);
+			}
 		}
 	}
 

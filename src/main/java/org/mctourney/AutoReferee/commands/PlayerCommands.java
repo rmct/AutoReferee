@@ -1,11 +1,13 @@
 package org.mctourney.AutoReferee.commands;
 
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.conversations.BooleanPrompt;
 import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.Prompt;
+import org.bukkit.conversations.StringPrompt;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -98,6 +100,64 @@ public class PlayerCommands
 		return true;
 	}
 
+	@AutoRefCommand(name={"joinmatch"}, argmin=1, argmax=1)
+	@AutoRefPermission(console=false)
+
+	public boolean joinMatch(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		// if the plugin is running in auto-mode, quit
+		if (plugin.isAutoMode()) return false;
+
+		// if the player is preoccupied, don't let this happen
+		if (match != null && match.isPlayer((OfflinePlayer) sender) &&
+			match.getCurrentState().inProgress()) return false;
+
+		// get the player this command is targeting
+		Player player = plugin.getServer().getPlayer(args[0]);
+		if (player == null) return true;
+
+		// the match we are interested in is the match they are trying to join
+		match = plugin.getMatch(player.getWorld());
+
+		if (!sender.hasPermission("autoreferee.referee") && match.access != AutoRefMatch.AccessType.PUBLIC)
+			sender.sendMessage(ChatColor.RED + "You do not have permission to join this match.");
+		else match.acceptInvitation((Player) sender);
+		return true;
+	}
+
+	@AutoRefCommand(name={"leavematch"}, argmax=1)
+	@AutoRefPermission(console=true)
+
+	public boolean leaveMatch(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		// if the plugin is running in auto-mode, quit
+		if (plugin.isAutoMode()) return false;
+		Player player = sender instanceof Player ? (Player) sender : null;
+
+		if (sender.hasPermission("autoreferee.referee") && args.length > 0)
+			match = plugin.getMatch((player = plugin.getServer().getPlayer(args[0])).getWorld());
+
+		if (match != null) plugin.sendPlayerToLobby(player);
+		return true;
+	}
+
+	@AutoRefCommand(name={"setaccess"}, argmin=1, argmax=1)
+	@AutoRefPermission(console=true)
+
+	public boolean setAccess(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		// if the plugin is running in auto-mode, quit
+		if (plugin.isAutoMode()) return false;
+		AutoRefMatch.AccessType access = match.access;
+
+		try { access = AutoRefMatch.AccessType.valueOf(args[0].toUpperCase()); }
+		catch (Exception e) { return true; }
+
+		if (access != null) match.access = access;
+		sender.sendMessage("This match is now " + match.access.name());
+		return true;
+	}
+
 	@AutoRefCommand(name={"ready"}, argmax=1, options="tfyns+")
 	@AutoRefPermission(console=true)
 
@@ -177,7 +237,10 @@ class InvitationPrompt extends BooleanPrompt
 
 	@Override
 	public String getPromptText(ConversationContext context)
-	{ return String.format(">>> %s is inviting you to %s. Do you accept?", from, match.getMapName()); }
+	{
+		return ChatColor.GREEN + String.format(">>> %s is inviting you to %s.",
+			from, match.getMapName()) + " Do you accept?";
+	}
 
 	@Override
 	protected Prompt acceptValidatedInput(ConversationContext context, boolean response)
@@ -186,5 +249,4 @@ class InvitationPrompt extends BooleanPrompt
 			match.acceptInvitation((Player) context.getForWhom());
 		return Prompt.END_OF_CONVERSATION;
 	}
-
 }

@@ -104,6 +104,11 @@ public class AutoRefMatch
 		if (!matchSummaryDirectory.exists()) matchSummaryDirectory.mkdir();
 	}
 
+	public enum AccessType
+	{ PRIVATE, PUBLIC; }
+
+	public AccessType access = AccessType.PRIVATE;
+
 	// world this match is taking place on
 	private World world;
 	private Location worldSpawn = null;
@@ -1239,7 +1244,7 @@ public class AutoRefMatch
 		AutoReferee autoref = AutoReferee.getInstance();
 
 		// first, handle all the players
-		for (Player p : world.getPlayers()) autoref.playerDone(p);
+		for (Player p : world.getPlayers()) autoref.sendPlayerToLobby(p);
 
 		// if everyone has been moved out of this world, clean it up
 		if (world.getPlayers().size() == 0)
@@ -2490,9 +2495,11 @@ public class AutoRefMatch
 			sender.sendMessage(String.format("%s (%d) - %s",
 				team.getDisplayName(), team.getPlayers().size(), team.getPlayerList()));
 
-		long timestamp = (getWorld().getFullTime() - getStartTicks()) / 20L;
-		sender.sendMessage("Match status is currently " + ChatColor.GRAY + getCurrentState().name());
+		sender.sendMessage("Match status is currently " + ChatColor.GRAY + getCurrentState().name() +
+			(this.getCurrentState().isBeforeMatch() ? (" [" + this.access.name() + "]") : ""));
 		sender.sendMessage("Map difficulty is set to: " + ChatColor.GRAY + getWorld().getDifficulty().name());
+
+		long timestamp = (getWorld().getFullTime() - getStartTicks()) / 20L;
 		if (getCurrentState().inProgress())
 			sender.sendMessage(String.format(ChatColor.GRAY + "The current match time is: %02d:%02d:%02d",
 				timestamp/3600L, (timestamp/60L)%60L, timestamp%60L));

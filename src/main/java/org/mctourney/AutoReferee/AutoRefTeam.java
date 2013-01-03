@@ -572,7 +572,8 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	public boolean leave(Player player, boolean force)
 	{
 		// if the match is in progress, no one may leave their team
-		if (!match.getCurrentState().isBeforeMatch() && !force) return false;
+		if (!match.getCurrentState().isBeforeMatch() && !force &&
+			match.getReferees().size() > 0) return false;
 
 		// create an APL object for this player.
 		AutoRefPlayer apl = new AutoRefPlayer(player);
@@ -580,10 +581,10 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		String name = apl.getName() + ChatColor.RESET;
 		match.broadcast(name + " has left " + getDisplayName());
-		player.teleport(match.getWorldSpawn());
 
-		if (player.isOnline() && (player instanceof Player))
-			((Player) player).setPlayerListName(player.getName());
+		// by the time this is actually called, they may have left the world to join
+		// a different match. this teleport shouldn't occur if they aren't in this world
+		if (player.getWorld() == match.getWorld()) player.teleport(match.getWorldSpawn());
 
 		match.messageReferees("team", getName(), "player", "-" + apl.getName());
 

@@ -345,7 +345,7 @@ public class AutoReferee extends JavaPlugin
 		m.registerIncomingPluginChannel(this, REFEREE_PLUGIN_CHANNEL, refChannelListener);
 	}
 
-	protected void playerDone(Player p)
+	public void sendPlayerToLobby(Player p)
 	{
 		// take them back to the lobby, one way or another
 		if (p.getWorld() != getLobbyWorld())
@@ -391,7 +391,7 @@ public class AutoReferee extends JavaPlugin
 	public World getConsoleWorld()
 	{
 		List<World> worlds = getServer().getWorlds();
-		return worlds.size() == 1 ? worlds.get(0) : consoleWorld;
+		return consoleWorld == null ? worlds.get(0) : consoleWorld;
 	}
 
 	/**
