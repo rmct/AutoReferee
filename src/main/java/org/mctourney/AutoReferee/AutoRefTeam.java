@@ -539,15 +539,16 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			player.teleport(getSpawnLocation());
 		player.setGameMode(GameMode.SURVIVAL);
 
+		Location bed = player.getBedSpawnLocation();
+		if (bed != null && bed.getWorld() != match.getWorld())
+			player.setBedSpawnLocation(null);
+
 		this.addPlayer(apl);
 		match.messageReferees("team", getName(), "player", "+" + apl.getName());
 		match.messageReferees("player", apl.getName(), "login");
 
 		String name = getColor() + apl.getName() + ChatColor.RESET;
 		match.broadcast(name + " has joined " + getDisplayName());
-
-		//FIXME if (pl.isOnline() && (pl instanceof Player))
-		//	((Player) pl).setPlayerListName(StringUtils.substring(colorName, 0, 16));
 
 		match.setupSpectators();
 		match.checkTeamsReady();
