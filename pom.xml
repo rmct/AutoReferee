@@ -37,6 +37,10 @@
       <id>sk89q-mvn2</id>
       <url>http://mvn2.sk89q.com/repo</url>
     </repository>
+    <repository>
+      <id>Plugin Metrics</id>
+      <url>http://repo.mcstats.org/content/repositories/public</url>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -103,11 +107,12 @@
       <version>1.4</version>
     </dependency>
 
-    <!--dependency>
-      <groupId>org.xerial</groupId>
-      <artifactId>sqlite-jdbc</artifactId>
-      <version>3.7.2</version>
-    </dependency-->
+    <dependency>
+      <groupId>org.mcstats.bukkit</groupId>
+      <artifactId>metrics</artifactId>
+      <version>R6</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -193,8 +198,8 @@
                   <include>commons-codec:commons-codec</include>
                   <include>commons-cli:commons-cli</include>
                   <include>commons-collections:commons-collections</include>
-    	          <include>com.google.code.gson:gson</include>
-    	          <!--include>org.xerial:sqlite-jdbc</include-->
+                  <include>com.google.code.gson:gson</include>
+                  <include>org.mcstats.bukkit:metrics</include>
                 </includes>
               </artifactSet>
             </configuration>

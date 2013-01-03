@@ -1,11 +1,13 @@
 package org.mctourney.AutoReferee;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,6 +27,8 @@ import org.bukkit.plugin.messaging.Messenger;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 
+import org.mcstats.Metrics;
+import org.mcstats.Metrics.Graph;
 import org.mctourney.AutoReferee.commands.ConfigurationCommands;
 import org.mctourney.AutoReferee.commands.PlayerCommands;
 import org.mctourney.AutoReferee.commands.AdminCommands;
@@ -37,8 +41,11 @@ import org.mctourney.AutoReferee.listeners.WorldListener;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.util.NullChunkGenerator;
 import org.mctourney.AutoReferee.util.commands.CommandManager;
+import org.mctourney.AutoReferee.util.metrics.IncrementPlotter;
+import org.mctourney.AutoReferee.util.metrics.PieChartGraph;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * Base plugin class
@@ -279,6 +286,10 @@ public class AutoReferee extends JavaPlugin
 		// attempt to setup the plugin channels
 		setupPluginChannels();
 
+		// fire up the plugin metrics
+		try { setupPluginMetrics(); }
+		catch (IOException e) { getLogger().severe("Plugin Metrics not enabled."); }
+
 		// wrap up, debug to follow this message
 		getLogger().info(this.getName() + " loaded successfully" +
 			(hasSportBukkitApi() ? " with SportBukkit API" : "") + ".");
@@ -343,6 +354,26 @@ public class AutoReferee extends JavaPlugin
 		// setup referee plugin channels
 		m.registerOutgoingPluginChannel(this, REFEREE_PLUGIN_CHANNEL);
 		m.registerIncomingPluginChannel(this, REFEREE_PLUGIN_CHANNEL, refChannelListener);
+	}
+
+	protected PieChartGraph playedMapsTracker = null;
+	protected IncrementPlotter matchesPlayed = null;
+
+	private void setupPluginMetrics()
+		throws IOException
+	{
+		Metrics metrics = new Metrics(this);
+
+		Set<String> mapNames = Sets.newHashSet();
+		for (AutoRefMap map : AutoRefMap.getRemoteMaps())
+			mapNames.add(map.getName());
+
+		Graph gMaps = metrics.createGraph("Most Popular Maps");
+		playedMapsTracker = new PieChartGraph(gMaps, mapNames);
+
+		metrics.addCustomData(matchesPlayed = new IncrementPlotter("Matches Played"));
+
+		metrics.start();
 	}
 
 	public void sendPlayerToLobby(Player p)

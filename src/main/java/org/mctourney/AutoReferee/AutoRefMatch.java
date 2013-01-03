@@ -1515,11 +1515,14 @@ public class AutoRefMatch
 		setCurrentState(MatchStatus.PLAYING);
 
 		// match minute timer
-		Plugin plugin = AutoReferee.getInstance();
+		AutoReferee plugin = AutoReferee.getInstance();
 		clockTask = new MatchClockTask();
 
 		clockTask.task = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(
 			plugin, clockTask, 60 * 20L, 60 * 20L);
+
+		if (plugin.playedMapsTracker != null)
+			plugin.playedMapsTracker.increment(normalizeMapName(this.getMapName()));
 	}
 
 	private static final Set<Long> announceMinutes =
@@ -1964,7 +1967,10 @@ public class AutoRefMatch
 
 		cancelClock();
 
+		// increment the metrics for number of matches played
 		AutoReferee plugin = AutoReferee.getInstance();
+		if (plugin.matchesPlayed != null) plugin.matchesPlayed.increment();
+
 		int termDelay = plugin.getConfig().getInt(
 			"delay-seconds.completed", COMPLETED_SECONDS);
 
