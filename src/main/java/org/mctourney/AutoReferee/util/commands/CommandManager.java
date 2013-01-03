@@ -14,6 +14,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrMatcher;
 import org.apache.commons.lang.text.StrTokenizer;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -87,7 +88,9 @@ public class CommandManager implements CommandExecutor
 				Role role = match == null ? AutoRefMatch.Role.NONE : match.getRole(player);
 
 				if (permissions.role().getRank() > role.getRank())
-					throw new CommandPermissionException(command, "Command not available to " + role);
+					throw new CommandPermissionException(command, match == null
+						? "Command available only within an AutoReferee match"
+						: ("Command not available to " + role.toString().toLowerCase()));
 
 				for (String node : permissions.nodes()) if (!player.hasPermission(node))
 					throw new CommandPermissionException(command, "Insufficient permissions");
@@ -130,8 +133,13 @@ public class CommandManager implements CommandExecutor
 		args = new StrTokenizer(StringUtils.join(args, ' '), StrMatcher.splitMatcher(),
 			StrMatcher.quoteMatcher()).setTrimmerMatcher(StrMatcher.trimMatcher()).getTokenArray();
 
-		CommandHandler handler = this.getHandler(command.getName(), args);
-		return handler == null ? false : handler.execute(sender, match, args);
+		try
+		{
+			CommandHandler handler = this.getHandler(command.getName(), args);
+			return handler == null ? false : handler.execute(sender, match, args);
+		}
+		catch (CommandPermissionException e)
+		{ sender.sendMessage(ChatColor.DARK_GRAY + e.getMessage()); return true; }
 	}
 
 	private CommandHandler getHandler(String cmd, String[] args)

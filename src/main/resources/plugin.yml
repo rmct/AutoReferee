@@ -12,42 +12,42 @@ commands:
     aliases: [ar, autoreferee]
     description: AutoReferee configuration
     usage: /<command> [<action>] [args...]
-    permission-message: Only admins have access to AutoReferee configuration.
   zone:
     description: Set a region's ownership
-    permission: autoreferee.admin
-    usage: /<command> <teamname>|start
+    usage: /<command> <team>|start
   zones:
     description: Show a list of all zones
-    permission: autoreferee.player
-    usage: /<command> <teamname>|start
+    usage: /<command>
   matchinfo:
     description: Show info about current match
-    permission: autoreferee.player
     usage: /<command>
+  joinmatch:
+    description: Join another player's match
+    usage: /<command> <player>
+  leavematch:
+    description: Leave the current match
+    usage: /<command>
+  setaccess:
+    description: Set access type of the current match
+    usage: /<command> <type>
   jointeam:
     aliases: [join, j]
     description: Set player's team
-    permission: autoreferee.player
-    usage: /<command> [<teamname>] [<playername>]
+    usage: /<command> [<team>] [<player>]
   leaveteam:
     aliases: leave
     description: Remove player's team
-    permission: autoreferee.player
-    usage: /<command> [<playername>]
+    usage: /<command> [<player>]
   ready:
     description: Mark team as ready to play
-    permission: autoreferee.player
-    usage: /<command> [true|false|yes|no]
+    usage: /<command> -tfyn
   viewinventory:
     aliases: vi
     description: View the inventory of the player
-    permission: autoreferee.referee
-    usage: /<command> <playername>
+    usage: /<command> [-p] <player>
   artp:
     aliases: [atp]
     description: Teleport spectators safely
-    permission: autoreferee.referee
     usage: /<command> [<options>] <target>
 
 permissions:
