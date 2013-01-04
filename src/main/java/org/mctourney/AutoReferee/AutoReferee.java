@@ -387,6 +387,9 @@ public class AutoReferee extends JavaPlugin
 			p.teleport(getLobbyWorld().getSpawnLocation());
 		}
 
+		// resets the player to default state
+		PlayerUtil.reset(p);
+
 		// if the server is in online mode, remove them as well
 		if (isAutoMode()) p.kickPlayer(AutoReferee.COMPLETED_KICK_MESSAGE);
 	}
