@@ -21,6 +21,7 @@ import org.mctourney.AutoReferee.AutoRefTeam.WinCondition;
 import org.mctourney.AutoReferee.util.AchievementPoints;
 import org.mctourney.AutoReferee.util.ArmorPoints;
 import org.mctourney.AutoReferee.util.BlockData;
+import org.mctourney.AutoReferee.util.PlayerUtil;
 import org.mctourney.AutoReferee.util.Vector3;
 
 import org.apache.commons.collections.map.DefaultedMap;
@@ -553,27 +554,14 @@ public class AutoRefPlayer
 	 */
 	public void heal()
 	{
-		getPlayer().setHealth    ( 20 ); // 10 hearts
-		getPlayer().setFoodLevel ( 20 ); // full food
-		getPlayer().setSaturation(  5 ); // saturation depletes hunger
-		getPlayer().setExhaustion(  0 ); // exhaustion depletes saturation
+		Player p = getPlayer();
+		if (p != null) PlayerUtil.heal(p);
 	}
 
-	public void enterLane()
+	public void reset()
 	{
-		Player pl = getPlayer();
-		if (pl == null) return;
-
-		this.heal();
-		this.clearInventory();
-
-		// reset the player's level
-		pl.setLevel(0);
-		pl.setExp(0.0f);
-
-		// remove all potion effects upon entering the lane
-		for (PotionEffect effect : pl.getActivePotionEffects())
-			pl.removePotionEffect(effect.getType());
+		Player p = getPlayer();
+		if (p != null) PlayerUtil.reset(p);
 	}
 
 	public void registerDamage(EntityDamageEvent e, Player damager)

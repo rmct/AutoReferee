@@ -29,6 +29,7 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 
 import org.mcstats.Metrics;
 import org.mcstats.Metrics.Graph;
+
 import org.mctourney.AutoReferee.commands.ConfigurationCommands;
 import org.mctourney.AutoReferee.commands.PlayerCommands;
 import org.mctourney.AutoReferee.commands.AdminCommands;
@@ -40,6 +41,7 @@ import org.mctourney.AutoReferee.listeners.TeamListener;
 import org.mctourney.AutoReferee.listeners.WorldListener;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.util.NullChunkGenerator;
+import org.mctourney.AutoReferee.util.PlayerUtil;
 import org.mctourney.AutoReferee.util.commands.CommandManager;
 import org.mctourney.AutoReferee.util.metrics.IncrementPlotter;
 import org.mctourney.AutoReferee.util.metrics.PieChartGraph;
@@ -391,13 +393,8 @@ public class AutoReferee extends JavaPlugin
 
 	public WorldEditPlugin getWorldEdit()
 	{
-		Plugin plugin = getServer().getPluginManager().getPlugin("WorldEdit");
-
-		// WorldEdit may not be loaded
-		if (plugin == null || !(plugin instanceof WorldEditPlugin))
-			return null;
-
-		return (WorldEditPlugin) plugin;
+		Plugin x = getServer().getPluginManager().getPlugin("WorldEdit");
+		return (x != null && x instanceof WorldEditPlugin) ? (WorldEditPlugin) x : null;
 	}
 
 	/**

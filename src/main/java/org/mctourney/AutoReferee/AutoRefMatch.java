@@ -1,6 +1,5 @@
 package org.mctourney.AutoReferee;
 
-import java.awt.Image;
 import java.awt.image.RenderedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
