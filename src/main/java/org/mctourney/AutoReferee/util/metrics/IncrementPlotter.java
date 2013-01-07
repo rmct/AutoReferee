@@ -25,7 +25,7 @@ public class IncrementPlotter extends Metrics.Plotter
 
 	@Override
 	public int getValue()
-	{ AutoReferee.getInstance().getLogger().info("Sending " + this.value + " for " + this.name); return this.last = this.value; }
+	{ return this.last = this.value; }
 
 	public void increment()
 	{ ++this.value; }
