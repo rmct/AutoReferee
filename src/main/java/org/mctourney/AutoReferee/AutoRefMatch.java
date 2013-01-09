@@ -52,6 +52,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.material.*;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
 
 import org.mctourney.AutoReferee.AutoRefTeam.WinCondition;
 import org.mctourney.AutoReferee.listeners.RefereeChannelListener;
@@ -766,7 +767,7 @@ public class AutoRefMatch
 
 		// startup the player count timer (for automatic unloading)
 		Plugin plugin = AutoReferee.getInstance();
-		plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new PlayerCountTask(), 0L, 60*20L);
+		plugin.getServer().getScheduler().runTaskTimer(plugin, new PlayerCountTask(), 0L, 60*20L);
 	}
 
 	/**
@@ -1116,7 +1117,7 @@ public class AutoRefMatch
 	public void broadcastSync(String msg)
 	{
 		Plugin plugin = AutoReferee.getInstance();
-		plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new SyncBroadcastTask(msg));
+		plugin.getServer().getScheduler().runTask(plugin, new SyncBroadcastTask(msg));
 	}
 
 	private class SyncBroadcastTask implements Runnable
@@ -1225,7 +1226,7 @@ public class AutoRefMatch
 	private class WorldFolderDeleter implements Runnable
 	{
 		private File worldFolder;
-		public int task = -1;
+		public BukkitTask task = null;
 
 		WorldFolderDeleter(World w)
 		{ this.worldFolder = w.getWorldFolder(); }
@@ -1238,10 +1239,10 @@ public class AutoRefMatch
 			{
 				// if we fail, we loop back around again on the next try...
 				FileUtils.deleteDirectory(worldFolder);
+				autoref.getLogger().info(worldFolder.getName() + " deleted!");
 
 				// otherwise, stop the repeating task
-				autoref.getLogger().info(worldFolder.getName() + " deleted!");
-				autoref.getServer().getScheduler().cancelTask(task);
+				task.cancel();
 			}
 			catch (IOException e)
 			{ autoref.getLogger().info("File lock held on " + worldFolder.getName()); }
@@ -1274,7 +1275,7 @@ public class AutoRefMatch
 				{
 					WorldFolderDeleter wfd = new WorldFolderDeleter(world);
 					wfd.task = autoref.getServer().getScheduler()
-						.scheduleSyncRepeatingTask(autoref, wfd, 0L, 10 * 20L);
+						.runTaskTimer(autoref, wfd, 0L, 10 * 20L);
 				}
 			}
 		}
@@ -1531,7 +1532,7 @@ public class AutoRefMatch
 		AutoReferee plugin = AutoReferee.getInstance();
 		clockTask = new MatchClockTask();
 
-		clockTask.task = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(
+		clockTask.task = plugin.getServer().getScheduler().runTaskTimer(
 			plugin, clockTask, 60 * 20L, 60 * 20L);
 
 		if (plugin.playedMapsTracker != null)
@@ -1546,14 +1547,13 @@ public class AutoRefMatch
 
 	private void cancelClock()
 	{
-		if (clockTask != null && clockTask.task != -1) AutoReferee.getInstance()
-			.getServer().getScheduler().cancelTask(clockTask.task);
+		if (clockTask != null && clockTask.task != null) clockTask.task.cancel();
 		clockTask = null;
 	}
 
 	private class MatchClockTask implements Runnable
 	{
-		public int task;
+		public BukkitTask task;
 
 		public void run()
 		{
@@ -1668,15 +1668,14 @@ public class AutoRefMatch
 	 * @return true if the countdown is in progress, otherwise false
 	 */
 	public boolean isCountdownRunning()
-	{ return matchStarter != null && matchStarter.task != -1; }
+	{ return matchStarter != null && matchStarter.task != null; }
 
 	/**
 	 * Cancels the match countdown in progress.
 	 */
 	public void cancelCountdown()
 	{
-		if (isCountdownRunning())
-			AutoReferee.getInstance().getServer().getScheduler().cancelTask(matchStarter.task);
+		if (isCountdownRunning()) matchStarter.task.cancel();
 		matchStarter = null;
 	}
 
@@ -1685,7 +1684,7 @@ public class AutoRefMatch
 	{
 		public static final ChatColor COLOR = ChatColor.GREEN;
 
-		public int task = -1;
+		public BukkitTask task = null;
 		private int remainingSeconds = 3;
 
 		private AutoRefMatch match = null;
@@ -1772,12 +1771,12 @@ public class AutoRefMatch
 		BukkitScheduler scheduler = AutoReferee.getInstance().getServer().getScheduler();
 
 		// cancel any previous match-start task
-		if (this.matchStarter != null && this.matchStarter.task != -1)
-			scheduler.cancelTask(this.matchStarter.task);
+		if (this.matchStarter != null && this.matchStarter.task != null)
+			this.matchStarter.task.cancel();
 
 		// schedule the task to announce and prepare the match
 		this.matchStarter = new CountdownTask(this, delay, start);
-		this.matchStarter.task = scheduler.scheduleSyncRepeatingTask(
+		this.matchStarter.task = scheduler.runTaskTimer(
 				AutoReferee.getInstance(), this.matchStarter, 0L, 20L);
 	}
 
@@ -1865,7 +1864,7 @@ public class AutoRefMatch
 	public void checkWinConditions()
 	{
 		Plugin plugin = AutoReferee.getInstance();
-		plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+		plugin.getServer().getScheduler().runTask(plugin,
 			new Runnable(){ public void run(){ delayedCheckWinConditions(); } });
 	}
 
@@ -1987,7 +1986,7 @@ public class AutoRefMatch
 		int termDelay = plugin.getConfig().getInt(
 			"delay-seconds.completed", COMPLETED_SECONDS);
 
-		plugin.getServer().getScheduler().scheduleSyncDelayedTask(
+		plugin.getServer().getScheduler().runTaskLater(
 			plugin, new MatchEndTask(), termDelay * 20L);
 
 		// set the time to day
@@ -2263,7 +2262,7 @@ public class AutoRefMatch
 	{
 		// upload WEBSTATS (do via an async query in case uploading the stats lags the main thread)
 		Plugin plugin = AutoReferee.getInstance();
-		plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, new MatchReportSaver());
+		plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new MatchReportSaver());
 	}
 
 	private String uploadReport(String report)

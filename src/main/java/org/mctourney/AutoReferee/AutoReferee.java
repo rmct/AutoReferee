@@ -463,7 +463,7 @@ public class AutoReferee extends JavaPlugin
 	 */
 	public void sendMessageSync(CommandSender sender, String msg)
 	{
-		getServer().getScheduler().scheduleSyncDelayedTask(this, new SyncMessageTask(sender, msg));
+		getServer().getScheduler().runTask(this, new SyncMessageTask(sender, msg));
 	}
 
 	private class SyncMessageTask implements Runnable

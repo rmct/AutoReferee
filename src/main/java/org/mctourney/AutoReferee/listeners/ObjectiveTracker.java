@@ -193,7 +193,7 @@ public class ObjectiveTracker implements Listener
 		{
 			AutoRefPlayer apl = match.getPlayer((Player) entity);
 			if (apl != null) plugin.getServer().getScheduler()
-				.scheduleSyncDelayedTask(plugin, new InventoryChangeTask(apl));
+				.runTask(plugin, new InventoryChangeTask(apl));
 		}
 	}
 
@@ -233,7 +233,7 @@ public class ObjectiveTracker implements Listener
 		{
 			AutoRefPlayer apl = match.getPlayer((Player) entity);
 			if (apl != null) plugin.getServer().getScheduler()
-				.scheduleSyncDelayedTask(plugin, new HealthArmorChangeTask(apl));
+				.runTask(plugin, new HealthArmorChangeTask(apl));
 		}
 	}
 
