@@ -1,6 +1,5 @@
 package org.mctourney.AutoReferee.util.commands;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
@@ -148,7 +147,7 @@ public class CommandManager implements CommandExecutor
 		if (node == null) return null;
 
 		// attempt to narrow down the method using the args
-		int x = 0; for (String arg : args)
+		for (String arg : args)
 		{
 			// lowercase to maintain case insensitivity
 			arg = arg.toLowerCase();
@@ -157,7 +156,7 @@ public class CommandManager implements CommandExecutor
 			if (next == null) break;
 
 			// move on to the next node, increment the cut length
-			node = next; ++x;
+			node = next;
 		}
 
 		// return the appropriate handler

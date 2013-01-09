@@ -336,7 +336,6 @@ public class ReportGenerator
 		}
 	};
 
-	@SuppressWarnings("unchecked")
 	private static String getPlayerStats(AutoRefMatch match)
 	{
 		List<AutoRefPlayer> players = Lists.newArrayList(match.getPlayers());

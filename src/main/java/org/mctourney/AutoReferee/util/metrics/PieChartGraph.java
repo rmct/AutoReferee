@@ -9,13 +9,10 @@ import com.google.common.collect.Maps;
 
 public class PieChartGraph
 {
-	private Metrics.Graph graph;
 	private Map<String, IncrementPlotter> items;
 
 	public PieChartGraph(Metrics.Graph graph, Set<String> choices)
 	{
-		this.graph = graph;
-
 		this.items = Maps.newHashMap();
 		for (String choice : choices)
 		{

@@ -1,6 +1,5 @@
 package org.mctourney.AutoReferee.listeners;
 
-import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;

@@ -1,7 +1,6 @@
 package org.mctourney.AutoReferee.util.metrics;
 
 import org.mcstats.Metrics;
-import org.mctourney.AutoReferee.AutoReferee;
 
 /**
  * Represents an incremental tracker for discrete events.

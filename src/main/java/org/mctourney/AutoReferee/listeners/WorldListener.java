@@ -18,7 +18,6 @@ import org.bukkit.plugin.Plugin;
 import org.apache.commons.collections.map.DefaultedMap;
 
 import org.mctourney.AutoReferee.AutoRefMatch;
-import org.mctourney.AutoReferee.AutoRefPlayer;
 import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.util.PlayerUtil;
 

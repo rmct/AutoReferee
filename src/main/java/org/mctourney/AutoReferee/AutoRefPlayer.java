@@ -17,7 +17,6 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
@@ -29,10 +28,8 @@ import org.mctourney.AutoReferee.util.PlayerUtil;
 import org.mctourney.AutoReferee.util.Vector3;
 
 import org.apache.commons.collections.map.DefaultedMap;
-import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /**
@@ -63,9 +60,6 @@ public class AutoRefPlayer
 	 */
 	public Player getPlayer()
 	{ return AutoReferee.getInstance().getServer().getPlayer(pname); }
-
-	private void setPlayer(Player player)
-	{ this.setName(player.getName()); }
 
 	/**
 	 * Checks if the player is online.
