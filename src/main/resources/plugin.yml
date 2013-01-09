@@ -49,6 +49,18 @@ commands:
     aliases: [atp]
     description: Teleport spectators safely
     usage: /<command> [<options>] <target>
+  announce:
+    aliases: [a, ann]
+    description: Make an announcement to players and streamers
+    usage: /<command> <message>
+  broadcast:
+    aliases: [b, bcast]
+    description: Make a broadcast to players and streamers
+    usage: /<command> <message>
+  notify:
+    aliases: [n]
+    description: Notify streamers and referees of a matter of interest
+    usage: /<command> <message>
 
 permissions:
   autoreferee.*:

@@ -18,6 +18,7 @@ import org.mctourney.AutoReferee.util.commands.AutoRefCommand;
 import org.mctourney.AutoReferee.util.commands.AutoRefPermission;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.lang.StringUtils;
 
 public class PlayerCommands
 {
@@ -195,6 +196,16 @@ public class PlayerCommands
 	{
 		sender.sendMessage(ChatColor.DARK_GRAY + "This server is running " +
 			ChatColor.BLUE + plugin.getDescription().getFullName());
+		return true;
+	}
+
+	@AutoRefCommand(name={"notify"})
+	@AutoRefPermission(console=false)
+
+	public boolean notify(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		if (match == null) return false;
+		match.notify(((Player) sender).getLocation(), StringUtils.join(args, ' '));
 		return true;
 	}
 

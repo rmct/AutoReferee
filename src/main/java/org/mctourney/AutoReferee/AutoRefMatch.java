@@ -72,6 +72,9 @@ import com.google.common.collect.Sets;
  */
 public class AutoRefMatch
 {
+	private static final String GENERIC_NOTIFICATION_MESSAGE =
+		"A notification has been sent. Type /artp to teleport.";
+
 	// online map list
 	private static String MAPREPO = "http://s3.amazonaws.com/autoreferee/maps/";
 
@@ -655,6 +658,17 @@ public class AutoRefMatch
 	public void setReadyDelay(int delay)
 	{ this.customReadyDelay = delay; }
 
+	public void notify(Location loc, String message)
+	{
+		// give spectators a location to warp to (null is acceptable)
+		this.setLastNotificationLocation(loc);
+
+		// send a notification message
+		if (message.trim().isEmpty()) message = GENERIC_NOTIFICATION_MESSAGE;
+		String m = ChatColor.DARK_GRAY + "[N] " + message;
+		for (Player pl : this.getReferees(false)) pl.sendMessage(m);
+	}
+
 	private Location lastNotificationLocation = null;
 
 	public Location getLastNotificationLocation()
@@ -859,9 +873,9 @@ public class AutoRefMatch
 		if (!player.isOnline()) return Role.NONE;
 
 		Player pl = player.getPlayer();
-		if (isStreamer(pl)) return Role.STREAMER;
-		if (isReferee(pl)) return Role.REFEREE;
-		if (isSpectator(pl)) return Role.SPECTATOR;
+		if (pl.hasPermission("autoreferee.streamer")) return Role.STREAMER;
+		if (pl.hasPermission("autoreferee.referee")) return Role.REFEREE;
+		if (!getCurrentState().isBeforeMatch()) return Role.SPECTATOR;
 
 		return Role.NONE;
 	}

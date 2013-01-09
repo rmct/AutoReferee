@@ -25,6 +25,7 @@ import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMap;
 import org.mctourney.AutoReferee.AutoRefMatch;
+import org.mctourney.AutoReferee.AutoRefMatch.Role;
 import org.mctourney.AutoReferee.AutoRefPlayer;
 import org.mctourney.AutoReferee.AutoRefTeam;
 import org.mctourney.AutoReferee.AutoReferee;
@@ -45,30 +46,40 @@ public class TeamListener implements Listener
 	public void chatMessage(AsyncPlayerChatEvent event)
 	{
 		// typical chat message format, swap out with colored version
-		Player player = event.getPlayer();
-		AutoRefMatch match = plugin.getMatch(player.getWorld());
+		Player speaker = event.getPlayer();
+		AutoRefMatch match = plugin.getMatch(speaker.getWorld());
 
-		if (match == null) return;
-		event.setFormat("<" + match.getPlayerName(player) + "> " + event.getMessage());
-
-		// if we are currently playing and speaker on a team, restrict recipients
-		boolean speakerReferee = match.isReferee(player);
-		AutoRefTeam team = match.getPlayerTeam(player);
-
+		// restrict listeners to being in the same match (not world).
+		// this should avoid messing up multi-world chat on multipurpose servers
 		Iterator<Player> iter = event.getRecipients().iterator();
 		while (iter.hasNext())
 		{
-			Player recipient = iter.next();
+			Player listener = iter.next();
 
-			// if the listener is in a different world
-			if (recipient.getWorld() != player.getWorld())
+			if (plugin.getMatch(listener.getWorld()) != match)
+			{ iter.remove(); continue; }
+		}
+
+		// if the speaker isn't in a match, that's all we can do
+		if (match == null) return;
+
+		AutoRefTeam speakerTeam = match.getPlayerTeam(speaker);
+		Role speakerRole = match.getRole(speaker);
+
+		event.setFormat("<" + match.getDisplayName(speaker) + "> " + event.getMessage());
+
+		iter = event.getRecipients().iterator();
+		if (!match.getCurrentState().isBeforeMatch()) while (iter.hasNext())
+		{
+			Player listener = iter.next();
+
+			// if listener is a streamer and the speaker is a non-streamer spectator, hide it
+			if (match.isStreamer(listener) && speakerTeam == null && speakerRole != Role.STREAMER)
 			{ iter.remove(); continue; }
 
-			// if listener is on a team, and its not the same team as the
-			// speaker, remove them from the recipients list
-			if (AutoReferee.getInstance().isAutoMode() && !speakerReferee &&
-				match.getCurrentState().inProgress() && team != match.getPlayerTeam(recipient))
-					{ iter.remove(); continue; }
+			// if listener is on a team, and speaker is a spectator, hide message
+			if (speakerTeam == null && match.getPlayerTeam(listener) != null)
+			{ iter.remove(); continue; }
 		}
 	}
 

@@ -18,6 +18,7 @@ import org.mctourney.AutoReferee.util.commands.AutoRefCommand;
 import org.mctourney.AutoReferee.util.commands.AutoRefPermission;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Maps;
 
@@ -32,6 +33,28 @@ public class RefereeCommands
 	{
 		this.plugin = (AutoReferee) plugin;
 		prevLocation = Maps.newHashMap();
+	}
+
+	@AutoRefCommand(name={"announce"})
+	@AutoRefPermission(console=true)
+
+	public boolean announce(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		if (match == null) return false;
+		String n = sender instanceof Player ? match.getDisplayName((Player) sender) : sender.getName();
+		match.broadcast(String.format("<%s> %s", n, StringUtils.join(args, ' ')));
+		return true;
+	}
+
+	@AutoRefCommand(name={"broadcast"})
+	@AutoRefPermission(console=true)
+
+	public boolean broadcast(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		if (match == null) return false;
+		match.broadcast(ChatColor.DARK_GRAY + "[B] " +
+			ChatColor.GRAY + StringUtils.join(args, ' '));
+		return true;
 	}
 
 	@AutoRefCommand(name={"viewinventory"}, argmax=1, options="p")
