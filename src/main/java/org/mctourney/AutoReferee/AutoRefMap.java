@@ -62,6 +62,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	protected AutoRefMap(String csv)
 	{
 		String[] parts = csv.split(";", 5);
+		if (parts.length < 4) return;
 
 		// normalized name and version are first 2 columns
 		this.name = AutoRefMatch.normalizeMapName(parts[0]);
