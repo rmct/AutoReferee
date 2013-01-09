@@ -161,7 +161,7 @@ public class AdminCommands
 			if (m != null && m.isPlayer(invited) && m.getCurrentState().inProgress()) continue;
 
 			// otherwise, let's drag them in (no asking)
-			match.acceptInvitation(invited);
+			match.joinMatch(invited);
 		}
 
 		return true;

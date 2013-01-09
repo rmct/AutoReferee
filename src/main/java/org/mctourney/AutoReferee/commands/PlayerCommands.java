@@ -122,7 +122,7 @@ public class PlayerCommands
 
 		if (!sender.hasPermission("autoreferee.referee") && match.access != AutoRefMatch.AccessType.PUBLIC)
 			sender.sendMessage(ChatColor.RED + "You do not have permission to join this match.");
-		else match.acceptInvitation((Player) sender);
+		else match.joinMatch((Player) sender);
 		return true;
 	}
 
@@ -218,7 +218,7 @@ public class PlayerCommands
 
 		// who is doing the inviting
 		String from = (sender instanceof Player)
-			? match.getPlayerName((Player) sender) : "This server";
+			? match.getDisplayName((Player) sender) : "This server";
 
 		for (int i = 0; i < args.length; ++i)
 		{
@@ -257,7 +257,7 @@ class InvitationPrompt extends BooleanPrompt
 	protected Prompt acceptValidatedInput(ConversationContext context, boolean response)
 	{
 		if (response && context.getForWhom() instanceof Player)
-			match.acceptInvitation((Player) context.getForWhom());
+			match.joinMatch((Player) context.getForWhom());
 		return Prompt.END_OF_CONVERSATION;
 	}
 }

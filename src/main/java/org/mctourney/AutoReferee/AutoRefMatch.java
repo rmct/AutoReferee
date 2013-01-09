@@ -2061,7 +2061,7 @@ public class AutoRefMatch
 	/**
 	 * Teleports a player to a match they have been added to, joining the team inviting them.
 	 */
-	public void acceptInvitation(Player player)
+	public void joinMatch(Player player)
 	{
 		// if already here, skip this
 		if (this.isPlayer(player)) return;
@@ -2181,7 +2181,7 @@ public class AutoRefMatch
 	 *
 	 * @return colored player name
 	 */
-	public String getPlayerName(Player player)
+	public String getDisplayName(Player player)
 	{
 		AutoRefPlayer apl = getPlayer(player);
 		return (apl == null) ? player.getName() : apl.getDisplayName();

@@ -60,7 +60,7 @@ public class WorldListener implements Listener
 		if (match != null)
 		{
 			// if we are logging in to the wrong world, teleport to the correct world
-			if (player.getWorld() != match.getWorld()) match.acceptInvitation(player);
+			if (player.getWorld() != match.getWorld()) match.joinMatch(player);
 
 			if (!match.getCurrentState().inProgress() || match.isPlayer(player))
 				match.broadcast(match.colorMessage(event.getJoinMessage()));
