@@ -14,7 +14,11 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.AutoRefTeam.WinCondition;
@@ -25,8 +29,10 @@ import org.mctourney.AutoReferee.util.PlayerUtil;
 import org.mctourney.AutoReferee.util.Vector3;
 
 import org.apache.commons.collections.map.DefaultedMap;
+import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /**
@@ -817,8 +823,46 @@ public class AutoRefPlayer
 		newContents[oldContents.length + 2] = pInventory.getLeggings();
 		newContents[oldContents.length + 3] = pInventory.getBoots();
 
-		newContents[oldContents.length + 7] = new ItemStack(Material.APPLE, player.getHealth());
-		newContents[oldContents.length + 8] = new ItemStack(Material.COOKED_BEEF, player.getFoodLevel());
+		if (player.getActivePotionEffects().size() > 0)
+		{
+			ItemStack potion = new Potion(PotionType.WATER).toItemStack(1);
+			ItemMeta meta = potion.getItemMeta();
+
+			List<String> effects = Lists.newLinkedList();
+			for (PotionEffect effect : player.getActivePotionEffects())
+				effects.add(ChatColor.RESET + "" + ChatColor.GRAY +
+					PlayerUtil.getStatusEffectName(effect));
+
+			meta.setDisplayName(ChatColor.BLUE + "" + ChatColor.ITALIC + "Status Effects");
+			meta.setLore(effects);
+
+			potion.setItemMeta(meta);
+			newContents[oldContents.length + 6] = potion;
+		}
+
+		{
+			ItemStack health = new ItemStack(Material.APPLE, player.getHealth());
+			ItemMeta meta = health.getItemMeta();
+
+			meta.setDisplayName(ChatColor.RED + "" + ChatColor.ITALIC + "Player Health");
+			meta.setLore(Lists.newArrayList(ChatColor.GRAY + "" + ChatColor.ITALIC +
+				String.format("%2.1f hearts", player.getHealth() / 2.0)));
+
+			health.setItemMeta(meta);
+			newContents[oldContents.length + 7] = health;
+		}
+
+		{
+			ItemStack hunger = new ItemStack(Material.COOKED_BEEF, player.getFoodLevel());
+			ItemMeta meta = hunger.getItemMeta();
+
+			meta.setDisplayName(ChatColor.GOLD + "" + ChatColor.ITALIC + "Player Hunger");
+			meta.setLore(Lists.newArrayList(ChatColor.GRAY + "" + ChatColor.ITALIC +
+				String.format("%2.1f food", player.getFoodLevel() / 2.0)));
+
+			hunger.setItemMeta(meta);
+			newContents[oldContents.length + 8] = hunger;
+		}
 
 		for (int i = 0; i < oldContents.length; ++i)
 			if (newContents[i] != null) newContents[i] = newContents[i].clone();
