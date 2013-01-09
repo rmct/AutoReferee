@@ -156,7 +156,7 @@ public class RefereeCommands
 				? TeleportationUtil.entityTeleport(pl) : pl.getLocation();
 		}
 		// if no arguments were passed, teleport to last notification
-		else tplocation = TeleportationUtil.locationTeleport(match.getLastNotificationLocation());
+		else tplocation = match.getLastNotificationLocation();
 
 		// if we ever found a valid teleport, take it!
 		if (tplocation != null)
