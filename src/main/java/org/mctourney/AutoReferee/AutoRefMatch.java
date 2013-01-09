@@ -49,6 +49,8 @@ import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.material.*;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -59,6 +61,7 @@ import org.mctourney.AutoReferee.listeners.RefereeChannelListener;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.util.ArmorPoints;
 import org.mctourney.AutoReferee.util.BlockData;
+import org.mctourney.AutoReferee.util.BookUtil;
 import org.mctourney.AutoReferee.util.CuboidRegion;
 import org.mctourney.AutoReferee.util.MapImageGenerator;
 import org.mctourney.AutoReferee.util.Vector3;
@@ -2488,6 +2491,62 @@ public class AutoRefMatch
 			for (WinCondition wc : team.getWinConditions()) message = message.replaceAll(
 				wc.getBlockData().getName(), wc.getBlockData().getDisplayName());
 		return ChatColor.RESET + message;
+	}
+
+	public ItemStack getMatchInfoBook()
+	{
+		ItemStack book = new ItemStack(Material.WRITTEN_BOOK, 1);
+		BookMeta meta = (BookMeta) book.getItemMeta();
+
+		meta.setTitle(ChatColor.RED + "" + ChatColor.BOLD + this.getMapName());
+		meta.setAuthor(ChatColor.DARK_GRAY + this.getMapAuthors());
+
+		List<String> pages = Lists.newArrayList();
+
+		// PAGE 1
+		pages.add(BookUtil.makePage(
+			BookUtil.center(ChatColor.BOLD + "[" + AutoReferee.getInstance().getName() + "]")
+		,	BookUtil.center(ChatColor.DARK_GRAY + this.getMapName())
+		,	BookUtil.center(" by " + ChatColor.DARK_GRAY + this.getMapAuthors())
+		,	BookUtil.center("(v" + this.getMapVersion() + ")")
+		,	""
+		,	BookUtil.center(ChatColor.DARK_GRAY + "" + ChatColor.BOLD + "-- Teams --")
+		,	BookUtil.center(this.getTeamList())
+		,	""
+		,	ChatColor.BOLD + "Pg2." + ChatColor.RESET + " About the Map"
+		,	ChatColor.BOLD + "Pg3." + ChatColor.RESET + " About the Plugin"
+		));
+
+		// PAGE 2
+		pages.add(BookUtil.makePage(
+			BookUtil.center(ChatColor.BOLD + "[" + AutoReferee.getInstance().getName() + "]")
+		,	BookUtil.center(ChatColor.DARK_GRAY + this.getMapName())
+		,	BookUtil.center(" by " + ChatColor.DARK_GRAY + this.getMapAuthors())
+		,	BookUtil.center("(v" + this.getMapVersion() + ")")
+		,	""
+		,	BookUtil.center("Coming soon...")
+		));
+
+		// PAGE 3
+		pages.add(BookUtil.makePage(
+			BookUtil.center(ChatColor.BOLD + "[" + AutoReferee.getInstance().getName() + "]")
+		,	""
+		,	ChatColor.BOLD + "/jointeam <team>"
+		,	"  Join team"
+		,	""
+		,	ChatColor.BOLD + "/jointeam"
+		,	"  Join random team"
+		,	""
+		,	ChatColor.BOLD + "/leaveteam"
+		,	"  Leave current team"
+		,	""
+		,	ChatColor.BOLD + "/ready"
+		,	"  Mark team as ready"
+		));
+
+		meta.setPages(pages);
+		book.setItemMeta(meta);
+		return book;
 	}
 
 	/**

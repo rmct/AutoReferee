@@ -20,6 +20,7 @@ import org.apache.commons.collections.map.DefaultedMap;
 import org.mctourney.AutoReferee.AutoRefMatch;
 import org.mctourney.AutoReferee.AutoRefPlayer;
 import org.mctourney.AutoReferee.AutoReferee;
+import org.mctourney.AutoReferee.util.PlayerUtil;
 
 public class WorldListener implements Listener
 {
@@ -69,6 +70,10 @@ public class WorldListener implements Listener
 			match.sendMatchInfo(player);
 			match.setupSpectators(player);
 
+			// give them a book with info about the match
+			PlayerUtil.clearInventory(player);
+			player.getInventory().addItem(match.getMatchInfoBook());
+
 			if (match.isReferee(player))
 				match.updateReferee(player);
 		}
@@ -107,22 +112,28 @@ public class WorldListener implements Listener
 		AutoRefMatch matchFm = plugin.getMatch(event.getFrom());
 		if (matchFm != null) matchFm.checkTeamsReady();
 
-		AutoRefMatch matchTo = plugin.getMatch(event.getPlayer().getWorld());
+		Player player = event.getPlayer();
+		AutoRefMatch matchTo = plugin.getMatch(player.getWorld());
+
 		if (matchTo != null)
 		{
 			matchTo.checkTeamsReady();
-			matchTo.sendMatchInfo(event.getPlayer());
-			matchTo.setupSpectators(event.getPlayer());
+			matchTo.sendMatchInfo(player);
+			matchTo.setupSpectators(player);
 
-			if (matchTo.isReferee(event.getPlayer()))
-				matchTo.updateReferee(event.getPlayer());
+			if (matchTo.isReferee(player))
+				matchTo.updateReferee(player);
+
+			// give them a book with info about the match
+			PlayerUtil.clearInventory(player);
+			player.getInventory().addItem(matchTo.getMatchInfoBook());
 		}
 
 		// if they are leaving AutoReferee-managed worlds
 		if (matchFm != null && matchTo == null)
 		{
-			GameMode dgm = getDefaultGamemode(event.getPlayer().getWorld());
-			matchFm.setSpectatorMode(event.getPlayer(), false, dgm);
+			GameMode dgm = getDefaultGamemode(player.getWorld());
+			matchFm.setSpectatorMode(player, false, dgm);
 		}
 	}
 }
