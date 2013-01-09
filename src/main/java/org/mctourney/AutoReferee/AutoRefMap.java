@@ -403,7 +403,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	public static void getUpdates(CommandSender sender, boolean force)
 	{
 		AutoReferee instance = AutoReferee.getInstance();
-		instance.getServer().getScheduler().scheduleAsyncDelayedTask(
+		instance.getServer().getScheduler().runTask(
 			instance, new MapUpdateTask(sender, force));
 	}
 
@@ -580,7 +580,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	public static void loadMap(CommandSender sender, String name, String worldname)
 	{
 		AutoReferee instance = AutoReferee.getInstance();
-		instance.getServer().getScheduler().scheduleAsyncDelayedTask(
+		instance.getServer().getScheduler().runTask(
 			instance, new MapRepoDownloader(sender, name, worldname));
 	}
 
@@ -594,7 +594,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	public static void loadMapFromURL(CommandSender sender, String url, String worldname)
 	{
 		AutoReferee instance = AutoReferee.getInstance();
-		instance.getServer().getScheduler().scheduleAsyncDelayedTask(
+		instance.getServer().getScheduler().runTask(
 			instance, new MapURLDownloader(sender, url, worldname));
 	}
 }
