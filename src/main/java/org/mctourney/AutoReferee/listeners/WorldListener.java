@@ -69,9 +69,13 @@ public class WorldListener implements Listener
 			match.sendMatchInfo(player);
 			match.setupSpectators(player);
 
-			// give them a book with info about the match
-			PlayerUtil.clearInventory(player);
-			player.getInventory().addItem(match.getMatchInfoBook());
+			// only clear inventories and give books if before match or not a player
+			if (match.getCurrentState().isBeforeMatch() || !match.isPlayer(player))
+			{
+				// give them a book with info about the match
+				PlayerUtil.clearInventory(player);
+				player.getInventory().addItem(match.getMatchInfoBook());
+			}
 
 			if (match.isReferee(player))
 				match.updateReferee(player);
