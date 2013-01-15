@@ -74,7 +74,7 @@ public class BookUtil
 			else w += 1 + getCharWidth(c, isBold);
 		}
 
-		int sw = charWidth.get(' ') + 1;
-		return StringUtils.repeat(' ', (LINE_WIDTH - w) / (2 * sw)) + text;
+		int repeat = (LINE_WIDTH - w) / (2 * (charWidth.get(' ') + 1));
+		return StringUtils.repeat(' ', repeat < 0 ? 0 : repeat) + text;
 	}
 }
