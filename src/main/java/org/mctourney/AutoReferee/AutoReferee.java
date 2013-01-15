@@ -84,7 +84,7 @@ public class AutoReferee extends JavaPlugin
 	private RefereeChannelListener refChannelListener = null;
 
 	// name of the stored map configuration file
-	public static final String CFG_FILENAME = "autoreferee.yml";
+	public static final String CFG_FILENAME = "autoreferee.xml";
 
 	// prefix for temporary worlds
 	public static final String WORLD_PREFIX = "world-autoref-";

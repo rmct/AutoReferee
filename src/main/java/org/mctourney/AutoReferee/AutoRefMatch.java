@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
@@ -15,7 +14,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -41,7 +39,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -56,15 +53,20 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 
-import org.mctourney.AutoReferee.AutoRefTeam.WinCondition;
+import org.jdom2.Element;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.XMLOutputter;
+
+import org.mctourney.AutoReferee.goals.AutoRefGoal;
 import org.mctourney.AutoReferee.listeners.RefereeChannelListener;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
+import org.mctourney.AutoReferee.regions.AutoRefRegion;
+import org.mctourney.AutoReferee.regions.CuboidRegion;
 import org.mctourney.AutoReferee.util.ArmorPoints;
 import org.mctourney.AutoReferee.util.BlockData;
 import org.mctourney.AutoReferee.util.BookUtil;
-import org.mctourney.AutoReferee.util.CuboidRegion;
+import org.mctourney.AutoReferee.util.LocationUtil;
 import org.mctourney.AutoReferee.util.MapImageGenerator;
-import org.mctourney.AutoReferee.util.Vector3;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -116,15 +118,15 @@ public class AutoRefMatch
 	public AccessType access = AccessType.PRIVATE;
 
 	// world this match is taking place on
-	private World world;
+	private World primaryWorld;
 	private Location worldSpawn = null;
 
-	private void setWorld(World w)
+	private void setPrimaryWorld(World w)
 	{
-		world = w;
+		primaryWorld = w;
 
-		worldSpawn = world.getSpawnLocation();
-		while (world.getBlockTypeIdAt(worldSpawn) != Material.AIR.getId())
+		worldSpawn = primaryWorld.getSpawnLocation();
+		while (primaryWorld.getBlockTypeIdAt(worldSpawn) != Material.AIR.getId())
 			worldSpawn = worldSpawn.add(0, 1, 0);
 	}
 
@@ -134,7 +136,7 @@ public class AutoRefMatch
 	 * @return world
 	 */
 	public World getWorld()
-	{ return world; }
+	{ return primaryWorld; }
 
 	@Override public int hashCode()
 	{ return getWorld().hashCode(); }
@@ -297,7 +299,7 @@ public class AutoRefMatch
 	{ winningTeam = team; }
 
 	// region defined as the "start" region (safe zone)
-	private CuboidRegion startRegion = null;
+	private Set<AutoRefRegion> startRegions = Sets.newHashSet();
 
 	/**
 	 * Gets the region designated as the start platform. This region should contain the
@@ -306,17 +308,33 @@ public class AutoRefMatch
 	 *
 	 * @return start region
 	 */
-	public CuboidRegion getStartRegion()
-	{ return startRegion; }
+	public Set<AutoRefRegion> getStartRegions()
+	{ return startRegions; }
 
-	public void setStartRegion(CuboidRegion startRegion)
-	{ this.startRegion = startRegion; }
+	public void addStartRegion(AutoRefRegion reg)
+	{ this.startRegions.add(reg); }
+
+	public double distanceToStartRegion(Location loc)
+	{
+		double dist = Double.MAX_VALUE;
+		for (AutoRefRegion reg : startRegions)
+		{
+			double d = reg.distanceToRegion(loc);
+			if (d < dist) dist = d;
+		}
+
+		return dist;
+	}
 
 	public CuboidRegion getMapCuboid()
 	{
-		CuboidRegion cube = getStartRegion();
-		for (AutoRefTeam team : getTeams()) for (CuboidRegion reg : team.getRegions())
-			cube = CuboidRegion.combine(cube, reg);
+		CuboidRegion cube = null;
+		for (AutoRefRegion reg : getStartRegions())
+			cube = AutoRefRegion.combine(cube, reg);
+
+		for (AutoRefTeam team : getTeams())
+			for (AutoRefRegion reg : team.getRegions())
+				cube = AutoRefRegion.combine(cube, reg);
 		return cube;
 	}
 
@@ -353,7 +371,7 @@ public class AutoRefMatch
 
 	// configuration information for the world
 	private File worldConfigFile;
-	private FileConfiguration worldConfig;
+	private Element worldConfig;
 
 	// basic variables loaded from file
 	private String mapName = null;
@@ -493,7 +511,7 @@ public class AutoRefMatch
 	public void toggleProtection(UUID uuid)
 	{ if (isProtected(uuid)) unprotect(uuid); else protect(uuid); }
 
-	private boolean allowFriendlyFire = false;
+	private boolean allowFriendlyFire = true;
 
 	/**
 	 * Checks if friendly fire is allowed in this match.
@@ -632,7 +650,8 @@ public class AutoRefMatch
 	public RenderedImage getMapImage()
 	{
 		CuboidRegion cube = getMapCuboid();
-		Vector3 min = cube.getMinimumPoint(), max = cube.getMaximumPoint();
+		Location min = cube.getMinimumPoint(),
+			max = cube.getMaximumPoint();
 
 		return MapImageGenerator.generateFromWorld(getWorld(),
 			min.getBlockX(), max.getBlockX(), min.getBlockZ(), max.getBlockZ());
@@ -756,7 +775,7 @@ public class AutoRefMatch
 
 	public AutoRefMatch(World world, boolean tmp)
 	{
-		setWorld(world);
+		setPrimaryWorld(world);
 		loadWorldConfiguration();
 
 		// is this world a temporary world?
@@ -779,7 +798,7 @@ public class AutoRefMatch
 	 * @return number of users
 	 */
 	public int getUserCount()
-	{ return world.getPlayers().size(); }
+	{ return primaryWorld.getPlayers().size(); }
 
 	public Set<AutoRefPlayer> getPlayers()
 	{
@@ -806,7 +825,7 @@ public class AutoRefMatch
 	public Set<Player> getReferees(boolean excludeStreamers)
 	{
 		Set<Player> refs = Sets.newHashSet();
-		for (Player p : world.getPlayers())
+		for (Player p : primaryWorld.getPlayers())
 			if (isReferee(p) && !(excludeStreamers && isStreamer(p))) refs.add(p);
 		return refs;
 	}
@@ -819,7 +838,7 @@ public class AutoRefMatch
 	public Set<Player> getStreamers()
 	{
 		Set<Player> streamers = Sets.newHashSet();
-		for (Player p : world.getPlayers())
+		for (Player p : primaryWorld.getPlayers())
 			if (isStreamer(p)) streamers.add(p);
 		return streamers;
 	}
@@ -898,41 +917,38 @@ public class AutoRefMatch
 	public void reload()
 	{ this.loadWorldConfiguration(); }
 
-	@SuppressWarnings("unchecked")
 	private void loadWorldConfiguration()
 	{
 		// file stream and configuration object (located in world folder)
-		worldConfigFile = new File(world.getWorldFolder(), "autoreferee.yml");
-		worldConfig = YamlConfiguration.loadConfiguration(worldConfigFile);
-
-		// load up our default values file, so that we can have a base to work with
-		InputStream defConfigStream = AutoReferee.getInstance().getResource("defaults/map.yml");
-		if (defConfigStream != null) worldConfig.setDefaults(
-			YamlConfiguration.loadConfiguration(defConfigStream));
-
-		// make sure any defaults get copied into the map file
-		worldConfig.options().copyDefaults(true);
-		worldConfig.options().header(AutoReferee.getInstance().getDescription().getFullName());
-		worldConfig.options().copyHeader(false);
+		worldConfigFile = new File(primaryWorld.getWorldFolder(), AutoReferee.CFG_FILENAME);
+		try { worldConfig = new SAXBuilder().build(worldConfigFile).getRootElement(); }
+		catch (Exception e) { e.printStackTrace(); return; }
 
 		teams = Sets.newHashSet();
 		messageReferees("match", getWorld().getName(), "init");
 		setCurrentState(MatchStatus.WAITING);
 
-		for (Map<?, ?> map : worldConfig.getMapList("match.teams"))
-			teams.add(AutoRefTeam.fromMap((Map<String, Object>) map, this));
+		// get the extra settings cached
+		Element meta = worldConfig.getChild("meta");
+		if (meta != null)
+		{
+			mapName = meta.getChildText("name");
+			versionString = meta.getChildText("version");
+
+			mapAuthors = Lists.newLinkedList();
+			for (Element e : meta.getChild("creators").getChildren("creator"))
+				mapAuthors.add(e.getText());
+		}
+
+		for (Element e : worldConfig.getChild("teams").getChildren("team"))
+			teams.add(AutoRefTeam.fromElement(e, this));
 
 		startMechanisms = Sets.newHashSet();
-		for (String sm : worldConfig.getStringList("match.start-mechanisms"))
-			startMechanisms.add(StartMechanism.unserialize(world, sm));
+		for (Element e : worldConfig.getChild("mechanisms").getChildren())
+			startMechanisms.add(StartMechanism.fromElement(e, primaryWorld));
 
 		protectedEntities = Sets.newHashSet();
-		for (String uid : worldConfig.getStringList("match.protected-entities"))
-			protectedEntities.add(UUID.fromString(uid));
-
 		prohibitCraft = Sets.newHashSet();
-		for (String b : worldConfig.getStringList("match.no-craft"))
-			prohibitCraft.add(BlockData.unserialize(b));
 
 		// HELPER: ensure all protected entities are still present in world
 		Set<UUID> uuidSearch = Sets.newHashSet(protectedEntities);
@@ -941,34 +957,52 @@ public class AutoRefMatch
 			ChatColor.RESET + "One or more protected entities are missing!");
 
 		// get the start region (safe for both teams, no pvp allowed)
-		if (worldConfig.isString("match.start-region"))
-			startRegion = CuboidRegion.fromCoords(worldConfig.getString("match.start-region"));
+		for (Element e : worldConfig.getChild("startregion").getChildren())
+			addStartRegion(AutoRefRegion.fromElement(this, e));
+
+		Element gameplay = worldConfig.getChild("gameplay");
 
 		// get the time the match is set to start
-		if (worldConfig.isString("match.start-time"))
-			startTime = AutoReferee.parseTimeString(worldConfig.getString("match.start-time"));
+		if (gameplay.getChild("clockstart") != null)
+			startTime = AutoReferee.parseTimeString(gameplay.getChildText("clockstart"));
 
-		// get the extra settings cached
-		mapName = worldConfig.getString("map.name", "<Untitled>");
-		versionString = worldConfig.getString("map.version", "1.0");
-		mapAuthors = worldConfig.getStringList("map.creators");
-
-		setFriendlyFire(worldConfig.getBoolean("match.allow-ff", false));
-		setObjectiveCraft(worldConfig.getBoolean("match.allow-craft", false));
+		if (gameplay.getChild("allow-ff") != null)
+			setFriendlyFire(Boolean.parseBoolean(gameplay.getChildText("allow-ff")));
 
 		// attempt to set world difficulty as best as possible
-		String diff = worldConfig.getString("match.difficulty", "HARD");
-		world.setDifficulty(getDifficulty(diff));
+		String diff = "HARD";
+		if (gameplay.getChild("difficulty") != null)
+			diff = gameplay.getChildText("difficulty");
+		primaryWorld.setDifficulty(getDifficulty(diff));
+
+		Element regions = worldConfig.getChild("regions");
+		for (Element reg : regions.getChildren())
+			this.addRegion(AutoRefRegion.fromElement(this, reg));
+
+		Element goals = worldConfig.getChild("goals");
+		if (goals != null) for (Element teamgoals : goals.getChildren("teamgoals"))
+		{
+			AutoRefTeam team = this.teamNameLookup(teamgoals.getAttributeValue("team"));
+			if (team != null) for (Element gelt : teamgoals.getChildren()) team.addGoal(gelt);
+		}
+
+		Element mechanisms = worldConfig.getChild("mechanisms");
+		if (mechanisms != null) for (Element mech : mechanisms.getChildren())
+		{
+			boolean state = Boolean.parseBoolean(mech.getText());
+			Location mechloc = LocationUtil.fromCoords(getWorld(), mech.getAttributeValue("pos"));
+			this.addStartMech(getWorld().getBlockAt(mechloc), state);
+		}
 
 		// restore competitive settings and some default values
-		world.setPVP(true);
-		world.setSpawnFlags(true, true);
+		primaryWorld.setPVP(true);
+		primaryWorld.setSpawnFlags(true, true);
 
-		world.setTicksPerAnimalSpawns(-1);
-		world.setTicksPerMonsterSpawns(-1);
+		primaryWorld.setTicksPerAnimalSpawns(-1);
+		primaryWorld.setTicksPerMonsterSpawns(-1);
 
 		// last, send an update about the match to everyone logged in
-		for (Player pl : world.getPlayers()) sendMatchInfo(pl);
+		for (Player pl : primaryWorld.getPlayers()) sendMatchInfo(pl);
 	}
 
 	private static Difficulty getDifficulty(String d)
@@ -981,43 +1015,25 @@ public class AutoRefMatch
 	}
 
 	/**
-	 * Saves copy of autoreferee.yml back to the world folder.
+	 * Saves copy of autoreferee.xml back to the world folder.
 	 */
 	public void saveWorldConfiguration()
 	{
 		// if there is no configuration object or file, nothin' doin'...
 		if (worldConfigFile == null || worldConfig == null) return;
 
-		// create and save the team data list
-		List<Map<String, Object>> teamData = Lists.newArrayList();
-		for (AutoRefTeam t : teams) teamData.add(t.toMap());
-		worldConfig.set("match.teams", teamData);
-
-		// save the start mechanisms
-		List<String> smList = Lists.newArrayList();
-		for ( StartMechanism sm : startMechanisms ) smList.add(sm.serialize());
-		worldConfig.set("match.start-mechanisms", smList);
-
-		// save the protected entities
-		List<String> peList = Lists.newArrayList();
-		for ( UUID uid : protectedEntities ) peList.add(uid.toString());
-		worldConfig.set("match.protected-entities", peList);
-
-		// save the craft blacklist
-		List<String> ncList = Lists.newArrayList();
-		for ( BlockData bd : prohibitCraft ) ncList.add(bd.serialize());
-		worldConfig.set("match.no-craft", ncList);
-
-		// save the start region
-		if (startRegion != null)
-			worldConfig.set("match.start-region", startRegion.toBlockCoords());
+		// TODO
 
 		// save the configuration file back to the original filename
-		try { worldConfig.save(worldConfigFile); }
+		try
+		{
+			XMLOutputter xmlout = new XMLOutputter();
+			xmlout.output(worldConfig, new FileOutputStream(worldConfigFile));
+		}
 
 		// log errors, report which world did not save
 		catch (java.io.IOException e)
-		{ AutoReferee.getInstance().getLogger().info("Could not save world config: " + world.getName()); }
+		{ AutoReferee.getInstance().getLogger().info("Could not save world config: " + primaryWorld.getName()); }
 	}
 
 	/**
@@ -1064,12 +1080,8 @@ public class AutoRefMatch
 			messageReferee(ref, "team", team.getName(), "init");
 			messageReferee(ref, "team", team.getName(), "color", team.getColor().toString());
 
-			for (WinCondition wc : team.getWinConditions())
-			{
-				messageReferee(ref, "team", team.getName(), "obj", "+" + wc.getBlockData().serialize());
-				messageReferee(ref, "team", team.getName(), "state", wc.getBlockData().serialize(),
-						wc.getStatus().toString());
-			}
+			for (AutoRefGoal goal : team.getTeamGoals())
+				goal.updateReferee(ref);
 
 			for (AutoRefPlayer apl : team.getPlayers())
 			{
@@ -1109,7 +1121,7 @@ public class AutoRefMatch
 	{
 		if (AutoReferee.getInstance().isConsoleLoggingEnabled())
 			AutoReferee.getInstance().getLogger().info(ChatColor.stripColor(msg));
-		for (Player p : world.getPlayers()) p.sendMessage(msg);
+		for (Player p : primaryWorld.getPlayers()) p.sendMessage(msg);
 	}
 
 	/**
@@ -1261,10 +1273,10 @@ public class AutoRefMatch
 		AutoReferee autoref = AutoReferee.getInstance();
 
 		// first, handle all the players
-		for (Player p : world.getPlayers()) autoref.sendPlayerToLobby(p);
+		for (Player p : primaryWorld.getPlayers()) autoref.sendPlayerToLobby(p);
 
 		// if everyone has been moved out of this world, clean it up
-		if (world.getPlayers().size() == 0)
+		if (primaryWorld.getPlayers().size() == 0)
 		{
 			// if we are running in auto-mode and this is OUR world
 			if (autoref.isAutoMode() || this.isTemporaryWorld())
@@ -1273,10 +1285,10 @@ public class AutoRefMatch
 				this.setCurrentState(MatchStatus.NONE);
 				autoref.clearMatch(this);
 
-				autoref.getServer().unloadWorld(world, false);
+				autoref.getServer().unloadWorld(primaryWorld, false);
 				if (!autoref.getConfig().getBoolean("save-worlds", false))
 				{
-					WorldFolderDeleter wfd = new WorldFolderDeleter(world);
+					WorldFolderDeleter wfd = new WorldFolderDeleter(primaryWorld);
 					wfd.task = autoref.getServer().getScheduler()
 						.runTaskTimer(autoref, wfd, 0L, 10 * 20L);
 				}
@@ -1332,6 +1344,27 @@ public class AutoRefMatch
 		return vteams.get(new Random().nextInt(vteams.size()));
 	}
 
+	private Set<AutoRefRegion> regions = Sets.newHashSet();
+
+	public Set<AutoRefRegion> getRegions()
+	{ return regions; }
+
+	public Set<AutoRefRegion> getRegions(AutoRefTeam team)
+	{
+		Set<AutoRefRegion> teamRegions = Sets.newHashSet();
+		for (AutoRefRegion reg : regions)
+			if (reg.isOwner(team)) teamRegions.add(reg);
+		return teamRegions;
+	}
+
+	public boolean addRegion(AutoRefRegion reg)
+	{ return !regions.contains(reg) && regions.add(reg); }
+
+	public boolean removeRegion(AutoRefRegion reg)
+	{ return regions.remove(reg); }
+
+	public void clearRegions() { regions.clear(); }
+
 	/**
 	 * A redstone mechanism necessary to start a match.
 	 *
@@ -1360,14 +1393,12 @@ public class AutoRefMatch
 		{ return (o instanceof StartMechanism) && hashCode() == o.hashCode(); }
 
 		public String serialize()
-		{ return Vector3.fromLocation(loc).toBlockCoords() + ":" + Boolean.toString(flip); }
+		{ return LocationUtil.toBlockCoords(loc) + ":" + Boolean.toString(flip); }
 
-		public static StartMechanism unserialize(World w, String sm)
+		public static StartMechanism fromElement(Element e, World w)
 		{
-			String[] p = sm.split(":");
-
-			Block block = w.getBlockAt(Vector3.fromCoords(p[0]).toLocation(w));
-			boolean state = Boolean.parseBoolean(p[1]);
+			Block block = w.getBlockAt(LocationUtil.fromCoords(w, e.getAttributeValue("pos")));
+			boolean state = Boolean.parseBoolean(e.getTextTrim());
 
 			return new StartMechanism(block, state);
 		}
@@ -1480,8 +1511,8 @@ public class AutoRefMatch
 	public void start()
 	{
 		// set up the world time one last time
-		world.setTime(startTime);
-		this.setStartTicks(world.getFullTime());
+		primaryWorld.setTime(startTime);
+		this.setStartTicks(primaryWorld.getFullTime());
 
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_START,
 			"Match began.", null, null, null));
@@ -1660,7 +1691,7 @@ public class AutoRefMatch
 	 */
 	public void clearEntities()
 	{
-		for (Entity e : world.getEntitiesByClasses(Monster.class,
+		for (Entity e : primaryWorld.getEntitiesByClasses(Monster.class,
 			Animals.class, Item.class, ExperienceOrb.class, Arrow.class))
 			if (!protectedEntities.contains(e.getUniqueId())) e.remove();
 	}
@@ -1737,14 +1768,14 @@ public class AutoRefMatch
 		if (isCountdownRunning()) return;
 
 		// set the current time to the start time
-		world.setTime(this.startTime);
+		primaryWorld.setTime(this.startTime);
 
 		// remove all mobs, animals, and items
 		this.clearEntities();
 
 		// turn off weather forever (or for a long time)
-		world.setStorm(false);
-		world.setWeatherDuration(Integer.MAX_VALUE);
+		primaryWorld.setStorm(false);
+		primaryWorld.setWeatherDuration(Integer.MAX_VALUE);
 
 		// save a copy of the map image quickly before the match starts...
 		saveMapImage();
@@ -1855,11 +1886,11 @@ public class AutoRefMatch
 	/**
 	 * Checks if a given block type exists within a cube centered around a location.
 	 *
-	 * @param wc win condition object
+	 * @param goal win condition object
 	 * @return location of a matching block within the region if one exists, otherwise null
 	 */
-	public Location blockInRange(WinCondition wc)
-	{ return blockInRange(wc.getBlockData(), wc.getLocation(), wc.getInexactRange()); }
+	public Location blockInRange(org.mctourney.AutoReferee.goals.BlockGoal goal)
+	{ return blockInRange(goal.getItem(), goal.getTarget(), goal.getInexactRange()); }
 
 	/**
 	 * Checks if any team has satisfied the win conditions.
@@ -1880,15 +1911,12 @@ public class AutoRefMatch
 		if (getCurrentState().inProgress()) for (AutoRefTeam team : this.teams)
 		{
 			// if there are no win conditions set, skip this team
-			if (team.getWinConditions().size() == 0) continue;
+			if (team.getTeamGoals().size() == 0) continue;
 
 			// check all win condition blocks (AND together)
 			boolean win = true;
-			for (WinCondition wc : team.getWinConditions())
-			{
-				Location placedLoc = blockInRange(wc);
-				win &= (placedLoc != null);
-			}
+			for (AutoRefGoal goal : team.getTeamGoals())
+				win &= goal.isSatisfied(this);
 
 			// force an update of objective status
 			team.updateObjectives();
@@ -2199,7 +2227,7 @@ public class AutoRefMatch
 	{
 		AutoRefTeam team = getPlayerTeam(player);
 		if (team != null) return team.getSpawnLocation();
-		return world.getSpawnLocation();
+		return primaryWorld.getSpawnLocation();
 	}
 
 	/**
@@ -2212,7 +2240,7 @@ public class AutoRefMatch
 	{
 		if (this.inStartRegion(loc)) return true;
 		for (AutoRefTeam team : getTeams()) for (AutoRefRegion reg : team.getRegions())
-			if (reg.contains(Vector3.fromLocation(loc)) && reg.isSafeZone()) return true;
+			if (reg.contains(loc) && reg.isSafeZone()) return true;
 		return false;
 	}
 
@@ -2298,7 +2326,11 @@ public class AutoRefMatch
 	 * @return true if location is inside start region, otherwise false
 	 */
 	public boolean inStartRegion(Location loc)
-	{ return startRegion != null && startRegion.distanceToRegion(loc) < ZoneListener.SNEAK_DISTANCE; }
+	{
+		if (getStartRegions() != null) for (AutoRefRegion reg : getStartRegions())
+			if (reg.distanceToRegion(loc) < ZoneListener.SNEAK_DISTANCE) return true;
+		return false;
+	}
 
 	public void updateCarrying(AutoRefPlayer apl, Set<BlockData> oldCarrying, Set<BlockData> newCarrying)
 	{
@@ -2487,9 +2519,6 @@ public class AutoRefMatch
 		message = ChatColor.stripColor(message);
 		for (AutoRefPlayer apl : getPlayers()) if (apl != null)
 			message = message.replaceAll(apl.getName(), apl.getDisplayName());
-		for (AutoRefTeam team : getTeams()) if (team.getWinConditions() != null)
-			for (WinCondition wc : team.getWinConditions()) message = message.replaceAll(
-				wc.getBlockData().getName(), wc.getBlockData().getDisplayName());
 		return ChatColor.RESET + message;
 	}
 

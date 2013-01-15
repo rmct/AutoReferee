@@ -20,12 +20,13 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
 
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
-import org.mctourney.AutoReferee.AutoRefTeam.WinCondition;
+import org.mctourney.AutoReferee.goals.AutoRefGoal;
+import org.mctourney.AutoReferee.goals.BlockGoal;
 import org.mctourney.AutoReferee.util.AchievementPoints;
 import org.mctourney.AutoReferee.util.ArmorPoints;
 import org.mctourney.AutoReferee.util.BlockData;
+import org.mctourney.AutoReferee.util.LocationUtil;
 import org.mctourney.AutoReferee.util.PlayerUtil;
-import org.mctourney.AutoReferee.util.Vector3;
 
 import org.apache.commons.collections.map.DefaultedMap;
 
@@ -591,7 +592,7 @@ public class AutoRefPlayer
 		Location loc = e.getEntity().getLocation();
 		if (getExitLocation() != null) loc = getExitLocation();
 
-		match.messageReferees("player", getName(), "deathpos", Vector3.fromLocation(loc).toBlockCoords());
+		match.messageReferees("player", getName(), "deathpos", LocationUtil.toBlockCoords(loc));
 		match.messageReferees("player", getName(), "deaths", Integer.toString(totalDeaths));
 
 		match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DEATH,
@@ -744,17 +745,20 @@ public class AutoRefPlayer
 
 			if (newCarrying != oldCarrying)
 			{
-				for (WinCondition wc : getTeam().getWinConditions())
-					if (wc.getStatus() == WinCondition.GoalStatus.NONE && newCarrying.contains(wc.getBlockData()))
+				for (AutoRefGoal goal : getTeam().getTeamGoals()) if (goal instanceof BlockGoal)
 				{
-					// generate a transcript event for seeing the box
-					String m = String.format("%s is carrying %s", getName(), wc.getBlockData().getName());
-					getTeam().getMatch().addEvent(new TranscriptEvent(getTeam().getMatch(),
-						TranscriptEvent.EventType.OBJECTIVE_FOUND, m, getLocation(), this, wc.getBlockData()));
-					this.addPoints(AchievementPoints.OBJECTIVE_FOUND);
+					BlockGoal bgoal = (BlockGoal) goal;
+					if (bgoal.getItemStatus() == AutoRefGoal.ItemStatus.NONE && newCarrying.contains(bgoal.getItem()))
+					{
+						// generate a transcript event for seeing the box
+						String m = String.format("%s is carrying %s", getName(), bgoal.getItem().getName());
+						getTeam().getMatch().addEvent(new TranscriptEvent(getTeam().getMatch(),
+							TranscriptEvent.EventType.OBJECTIVE_FOUND, m, getLocation(), this, bgoal.getItem()));
+						this.addPoints(AchievementPoints.OBJECTIVE_FOUND);
 
-					// store the player's location as the last objective location
-					getTeam().setLastObjectiveLocation(getLocation());
+						// store the player's location as the last objective location
+						getTeam().setLastObjectiveLocation(getLocation());
+					}
 				}
 				getTeam().updateCarrying(this, oldCarrying, newCarrying);
 			}

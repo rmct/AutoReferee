@@ -17,15 +17,16 @@ import org.apache.commons.lang.StringUtils;
 
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.material.Colorable;
 
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
-import org.mctourney.AutoReferee.AutoRefTeam.WinCondition;
+import org.mctourney.AutoReferee.goals.AutoRefGoal;
 import org.mctourney.AutoReferee.util.BlockData;
+import org.mctourney.AutoReferee.util.LocationUtil;
 import org.mctourney.AutoReferee.util.MapImageGenerator;
-import org.mctourney.AutoReferee.util.Vector3;
 import org.mctourney.AutoReferee.util.ColorConverter;
 
 import com.google.common.collect.Lists;
@@ -102,7 +103,7 @@ public class ReportGenerator
 
 		File mapImage = new File(match.getWorld().getWorldFolder(), "map.png");
 		if (!mapImage.exists()) match.saveMapImage();
-		Vector3 ptMin = match.getMapCuboid().getMinimumPoint();
+		Location ptMin = match.getMapCuboid().getMinimumPoint();
 
 		return (htm
 			// base files get replaced first
@@ -265,8 +266,8 @@ public class ReportGenerator
 	{
 		Set<BlockData> blocks = Sets.newHashSet();
 		for (AutoRefTeam team : match.getTeams())
-			for (WinCondition wc : team.getWinConditions())
-				blocks.add(wc.getBlockData());
+			for (AutoRefGoal goal : team.getTeamGoals())
+				blocks.add(goal.getItem());
 
 		StringWriter css = new StringWriter();
 		for (BlockData bd : blocks)
@@ -411,7 +412,7 @@ public class ReportGenerator
 					mat, data, bd.getName()));
 		}
 
-		String coords = Vector3.fromLocation(e.getLocation()).toBlockCoords();
+		String coords = LocationUtil.toBlockCoords(e.getLocation());
 		String fmt = "<tr class='transcript-event %s' data-location='%s'%s>" +
 			"<td class='message'>%s</td><td class='timestamp'>%s</td></tr>\n";
 		return String.format(fmt, StringUtils.join(rowClasses, " "), coords, xtra, m, e.getTimestamp());

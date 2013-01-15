@@ -1,8 +1,6 @@
 package org.mctourney.AutoReferee;
 
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.ChatColor;
@@ -10,20 +8,21 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
+import org.jdom2.Element;
+
+import org.mctourney.AutoReferee.goals.AutoRefGoal;
+import org.mctourney.AutoReferee.goals.BlockGoal;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
+import org.mctourney.AutoReferee.regions.AutoRefRegion;
 import org.mctourney.AutoReferee.util.BlockData;
-import org.mctourney.AutoReferee.util.CuboidRegion;
-import org.mctourney.AutoReferee.util.Vector3;
+import org.mctourney.AutoReferee.util.LocationUtil;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Maps;
 
 /**
  * Represents a collection of players in a match.
@@ -197,9 +196,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	public Location getVictoryMonumentLocation()
 	{
 		Vector vmin = null, vmax = null;
-		for (WinCondition wc : winConditions)
+		for (AutoRefGoal goal : goals)
 		{
-			Vector v = wc.getLocation().toVector().add(HALF_BLOCK_VECTOR);
+			Vector v = goal.getTarget().toVector().add(HALF_BLOCK_VECTOR);
 			vmin = vmin == null ? v : Vector.getMinimum(vmin, v);
 			vmax = vmax == null ? v : Vector.getMaximum(vmax, v);
 		}
@@ -208,124 +207,45 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		return vmin.getMidpoint(vmax).toLocation(w);
 	}
 
-	// list of regions
-	private Set<AutoRefRegion> regions = null;
-
 	/**
 	 * Gets all regions owned by this team.
 	 *
 	 * @return collection of regions
 	 */
 	public Set<AutoRefRegion> getRegions()
-	{ return regions; }
+	{ return match.getRegions(this); }
+
+	public boolean addRegion(AutoRefRegion reg)
+	{ return getRegions().add(reg); }
 
 	// location of custom spawn
-	private Location spawn;
+	private AutoRefRegion spawn;
 
 	/**
 	 * Sets this team's spawn location.
 	 */
 	public void setSpawnLocation(Location loc)
 	{
-		getMatch().broadcast("Set " + getDisplayName() + "'s spawn to " +
-			Vector3.fromLocation(loc).toBlockCoords());
-		this.spawn = loc;
+		getMatch().broadcast("Set " + getDisplayName() + "'s spawn to " + 
+			LocationUtil.toBlockCoords(loc));
+		this.spawn = new org.mctourney.AutoReferee.regions.PointRegion(loc);
 	}
 
 	/**
 	 * Gets this team's spawn location.
 	 */
 	public Location getSpawnLocation()
-	{ return spawn == null ? match.getWorldSpawn() : spawn; }
+	{ return spawn == null ? match.getWorldSpawn() : spawn.getRandomLocation(); }
 
-	/**
-	 * Represents a condition for victory.
-	 *
-	 * @author authorblues
-	 */
-	public static class WinCondition
-	{
-		/**
-		 * Represents the status of a win condition.
-		 *
-		 * @author authorblues
-		 */
-		public static enum GoalStatus
-		{
-			NONE("none"),
-			SEEN("found"),
-			CARRYING("carry"),
-			PLACED("vm");
-
-			private String messageText;
-
-			private GoalStatus(String mtext)
-			{ messageText = mtext; }
-
-			@Override
-			public String toString()
-			{ return messageText; }
-		}
-
-		private Location loc;
-		private BlockData blockdata;
-		private int range;
-		private GoalStatus status = GoalStatus.NONE;
-
-		/**
-		 * Constructs a team's win condition.
-		 *
-		 * @param loc target location for objective
-		 * @param blockdata objective block type
-		 * @param range maximum allowed distance from target
-		 */
-		public WinCondition(Location loc, BlockData blockdata, int range)
-		{ this.loc = loc; this.blockdata = blockdata; this.range = range; }
-
-		/**
-		 * Gets the target location for this objective.
-		 */
-		public Location getLocation()
-		{ return loc; }
-
-		/**
-		 * Gets the block type for this objective.
-		 */
-		public BlockData getBlockData()
-		{ return blockdata; }
-
-		/**
-		 * Gets the maximum range this objective may be placed from its target.
-		 */
-		public int getInexactRange()
-		{ return range; }
-
-		/**
-		 * Gets the current status of this win condition.
-		 *
-		 * @return goal status
-		 */
-		public GoalStatus getStatus()
-		{ return status; }
-
-		/**
-		 * Sets the current status of this win condition.
-		 *
-		 * @param status goal status
-		 */
-		public void setStatus(GoalStatus status)
-		{ this.status = status; }
-	}
-
-	private Set<WinCondition> winConditions;
+	private Set<AutoRefGoal> goals = Sets.newHashSet();
 
 	/**
 	 * Get this team's win conditions.
 	 *
 	 * @return collection of win conditions
 	 */
-	public Set<WinCondition> getWinConditions()
-	{ return Collections.unmodifiableSet(winConditions); }
+	public Set<AutoRefGoal> getTeamGoals()
+	{ return Collections.unmodifiableSet(goals); }
 
 	// does a provided search string match this team?
 	public boolean matches(String needle)
@@ -341,8 +261,8 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 	public void startMatch()
 	{
-		for (WinCondition wc : winConditions)
-			wc.setStatus(WinCondition.GoalStatus.NONE);
+		for (AutoRefGoal goal : goals) if (goal.hasItem())
+			goal.setItemStatus(AutoRefGoal.ItemStatus.NONE);
 
 		for (AutoRefPlayer apl : getPlayers())
 		{
@@ -351,114 +271,41 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		}
 	}
 
-	// a factory for processing config maps
-	@SuppressWarnings("unchecked")
-	protected static AutoRefTeam fromMap(Map<String, Object> conf, AutoRefMatch match)
+	// a factory for processing config xml
+	protected static AutoRefTeam fromElement(Element elt, AutoRefMatch match)
 	{
+		// the element we are building on needs to be a team element
+		assert elt.getName().toLowerCase() == "team";
+
 		AutoRefTeam newTeam = new AutoRefTeam();
 		newTeam.color = ChatColor.RESET;
 		newTeam.maxSize = 0;
 
 		newTeam.match = match;
-		World w = match.getWorld();
 
 		// get name from map
-		if (!conf.containsKey("name")) return null;
-		newTeam.name = (String) conf.get("name");
+		if (null == (newTeam.name = elt.getChildTextTrim("name"))) return null;
 
-		// get the color from the map
-		if (conf.containsKey("color"))
-		{
-			String clr = ((String) conf.get("color")).toUpperCase();
-			try { newTeam.color = ChatColor.valueOf(clr); }
-			catch (IllegalArgumentException e) { }
-		}
+		String clr = elt.getAttributeValue("color");
+		String msz = elt.getAttributeValue("max");
+
+		if (clr != null) try
+		{ newTeam.color = ChatColor.valueOf(clr.toUpperCase()); }
+		catch (IllegalArgumentException e) { }
 
 		// initialize this team for referees
 		match.messageReferees("team", newTeam.getName(), "init");
 		match.messageReferees("team", newTeam.getName(), "color", newTeam.color.toString());
 
 		// get the max size from the map
-		if (conf.containsKey("maxsize"))
-		{
-			Integer msz = (Integer) conf.get("maxsize");
-			if (msz != null) newTeam.maxSize = msz.intValue();
-		}
+		if (msz != null) newTeam.maxSize = Integer.parseInt(msz);
 
-		newTeam.regions = Sets.newHashSet();
-		if (conf.containsKey("regions"))
-		{
-			List<String> coordstrings = (List<String>) conf.get("regions");
-			if (coordstrings != null) for (String coords : coordstrings)
-			{
-				AutoRefRegion creg = AutoRefRegion.fromCoords(coords);
-				if (creg != null) newTeam.regions.add(creg);
-			}
-		}
-
-		newTeam.spawn = !conf.containsKey("spawn") ? null :
-			Vector3.fromCoords((String) conf.get("spawn")).toLocation(w);
-
-		// setup both objective-based data-structures together
-		// -- avoids an NPE with getObjectives()
-		newTeam.winConditions = Sets.newHashSet();
-		if (conf.containsKey("win-condition"))
-		{
-			List<String> slist = (List<String>) conf.get("win-condition");
-			if (slist != null) for (String s : slist)
-			{
-				String[] sp = s.split(":");
-
-				int range = sp.length > 2 ? Integer.parseInt(sp[2]) : match.getInexactRange();
-				newTeam.addWinCondition(Vector3.fromCoords(sp[0]).toLocation(w),
-					BlockData.unserialize(sp[1]), range);
-			}
-		}
+		Element spawn = elt.getChild("spawn");
+		newTeam.spawn = spawn == null ? null :
+			AutoRefRegion.fromElement(match, spawn.getChildren().get(0));
 
 		newTeam.players = Sets.newHashSet();
 		return newTeam;
-	}
-
-	protected Map<String, Object> toMap()
-	{
-		Map<String, Object> map = Maps.newHashMap();
-
-		// add name to the map
-		map.put("name", name);
-
-		// add string representation of the color
-		map.put("color", color.name());
-
-		// add the maximum team size
-		map.put("maxsize", new Integer(maxSize));
-
-		// set the team spawn (if there is a custom spawn)
-		if (spawn != null) map.put("spawn", Vector3.fromLocation(spawn).toBlockCoords());
-
-		// convert the win conditions to strings
-		List<String> wcond = Lists.newArrayList();
-		for (WinCondition wc : winConditions)
-		{
-			String range = "";
-			if (wc.getInexactRange() != match.getInexactRange())
-				range = ":" + wc.getInexactRange();
-
-			wcond.add(Vector3.fromLocation(wc.getLocation()).toBlockCoords()
-				+ ":" + wc.getBlockData().serialize() + range);
-		}
-
-		// add the win condition list
-		map.put("win-condition", wcond);
-
-		// convert regions to strings
-		List<String> regstr = Lists.newArrayList();
-		for (AutoRefRegion reg : regions) regstr.add(reg.toBlockCoords());
-
-		// add the region list
-		map.put("regions", regstr);
-
-		// return the map
-		return map;
 	}
 
 	/**
@@ -599,8 +446,10 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	 */
 	public double distanceToClosestRegion(Location loc)
 	{
-		double distance = match.getStartRegion().distanceToRegion(loc);
-		if (regions != null) for ( CuboidRegion reg : regions ) if (distance > 0)
+		double distance = match.distanceToStartRegion(loc);
+		Set<AutoRefRegion> regions = getRegions();
+
+		if (regions != null) for ( AutoRefRegion reg : regions ) if (distance > 0)
 			distance = Math.min(distance, reg.distanceToRegion(loc));
 		return distance;
 	}
@@ -621,7 +470,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	 */
 	public boolean canEnter(Location loc, Double distance)
 	{
-		double bestdist = match.getStartRegion().distanceToRegion(loc);
+		double bestdist = match.distanceToStartRegion(loc);
+		Set<AutoRefRegion> regions = getRegions();
+
 		if (regions != null) for ( AutoRefRegion reg : regions ) if (bestdist > 0)
 		{
 			bestdist = Math.min(bestdist, reg.distanceToRegion(loc));
@@ -640,53 +491,30 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		// start region is a permanent no-build zone
 		if (getMatch().inStartRegion(loc)) return false;
 
-		boolean build = false;
+		boolean build = false; Set<AutoRefRegion> regions = getRegions();
 		if (regions != null) for ( AutoRefRegion reg : regions )
-			if (reg.contains(Vector3.fromLocation(loc)))
-			{ build = true; if (!reg.canBuild()) return false; }
+			if (reg.contains(loc)) { build = true; if (!reg.canBuild()) return false; }
 		return build;
 	}
 
 	/**
 	 * Sets a new win condition.
-	 *
-	 * @param block block type and location
-	 * @param range maximum range of valid placement location (0 = exact)
 	 */
-	public void addWinCondition(Block block, int range)
-	{
-		// if the block is null, forget it
-		if (block == null) return;
-
-		// add the block data to the win-condition listing
-		BlockData blockdata = BlockData.fromBlock(block);
-		this.addWinCondition(block.getLocation(), blockdata, range);
-	}
+	public void addGoal(Element elt)
+	{ this.addGoal(AutoRefGoal.fromElement(this, elt)); }
 
 	/**
 	 * Sets a new win condition.
-	 *
-	 * @param loc block location
-	 * @param blockdata block type
-	 * @param range maximum range of valid placement location (0 = exact)
 	 */
-	public void addWinCondition(Location loc, BlockData blockdata, int range)
+	public void addGoal(AutoRefGoal goal)
 	{
-		// if the block is null, forget it
-		if (loc == null || blockdata == null) return;
-
-		Set<BlockData> prevObj = getObjectives();
-		winConditions.add(new WinCondition(loc, blockdata, range));
-		Set<BlockData> newObj = getObjectives();
-
-		newObj.removeAll(prevObj);
-		for (BlockData nbd : newObj) match.messageReferees(
-			"team", this.getName(), "obj", "+" + nbd.serialize());
+		goals.add(goal);
+		for (Player ref : getMatch().getReferees(false))
+			goal.updateReferee(ref);
 
 		// broadcast the update
-		for (Player cfg : loc.getWorld().getPlayers()) if (cfg.hasPermission("autoreferee.configure"))
-			cfg.sendMessage(blockdata.getDisplayName() + " is now a win condition for " + getDisplayName() +
-				" @ " + Vector3.fromLocation(loc).toBlockCoords());
+		for (Player cfg : getMatch().getWorld().getPlayers()) if (cfg.hasPermission("autoreferee.configure"))
+			cfg.sendMessage(goal.toString() + " is now a win condition for " + getDisplayName());
 	}
 
 	/**
@@ -697,42 +525,42 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	public Set<BlockData> getObjectives()
 	{
 		Set<BlockData> objectives = Sets.newHashSet();
-		for (WinCondition wc : winConditions)
-			objectives.add(wc.getBlockData());
+		for (AutoRefGoal goal : goals)
+			if (goal.hasItem()) objectives.add(goal.getItem());
 		objectives.remove(BlockData.AIR);
 		return objectives;
 	}
 
-	private void changeObjectiveStatus(WinCondition wc, WinCondition.GoalStatus status)
+	private void changeObjectiveStatus(AutoRefGoal goal, AutoRefGoal.ItemStatus status)
 	{
-		if (wc.getStatus() == status) return;
+		if (!goal.hasItem() || goal.getItemStatus() == status) return;
 		getMatch().messageReferees("team", this.getName(), "state",
-			wc.getBlockData().serialize(), status.toString());
-		wc.setStatus(status);
+			goal.getItem().serialize(), status.toString());
+		goal.setItemStatus(status);
 	}
 
 	protected void updateObjectives()
 	{
-		objloop: for (WinCondition wc : winConditions)
+		objloop: for (AutoRefGoal goal : goals) if (goal.hasItem())
 		{
-			if (getMatch().blockInRange(wc) != null)
-			{ changeObjectiveStatus(wc, WinCondition.GoalStatus.PLACED); continue objloop; }
+			if (goal instanceof BlockGoal && getMatch().blockInRange((BlockGoal) goal) != null)
+			{ changeObjectiveStatus(goal, AutoRefGoal.ItemStatus.TARGET); continue objloop; }
 
 			for (AutoRefPlayer apl : getPlayers())
 			{
-				if (!apl.getCarrying().contains(wc.getBlockData())) continue;
-				changeObjectiveStatus(wc, WinCondition.GoalStatus.CARRYING); continue objloop;
+				if (!apl.getCarrying().contains(goal.getItem())) continue;
+				changeObjectiveStatus(goal, AutoRefGoal.ItemStatus.CARRYING); continue objloop;
 			}
 
-			if (wc.getStatus() != WinCondition.GoalStatus.NONE)
-			{ changeObjectiveStatus(wc, WinCondition.GoalStatus.SEEN); continue; }
+			if (goal.getItemStatus() != AutoRefGoal.ItemStatus.NONE)
+			{ changeObjectiveStatus(goal, AutoRefGoal.ItemStatus.SEEN); continue; }
 		}
 	}
 
-	private int objCount(WinCondition.GoalStatus status)
+	private int objCount(AutoRefGoal.ItemStatus status)
 	{
-		int k = 0; for (WinCondition wc : winConditions)
-			if (wc.getStatus() == status) ++k;
+		int k = 0; for (AutoRefGoal goal : goals)
+			if (goal.getItemStatus() == status) ++k;
 		return k;
 	}
 
@@ -742,7 +570,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	 * @return number of placed objectives
 	 */
 	public int getObjectivesPlaced()
-	{ return objCount(WinCondition.GoalStatus.PLACED); }
+	{ return objCount(AutoRefGoal.ItemStatus.TARGET); }
 
 	/**
 	 * Gets the number of objectives found by this team.
@@ -750,7 +578,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	 * @return number of found objectives
 	 */
 	public int getObjectivesFound()
-	{ return winConditions.size() - objCount(WinCondition.GoalStatus.NONE); }
+	{ return goals.size() - objCount(AutoRefGoal.ItemStatus.NONE); }
 
 	protected void updateCarrying(AutoRefPlayer apl, Set<BlockData> oldCarrying, Set<BlockData> newCarrying)
 	{

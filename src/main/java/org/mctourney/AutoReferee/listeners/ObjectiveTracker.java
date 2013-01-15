@@ -23,7 +23,8 @@ import org.bukkit.plugin.Plugin;
 import org.mctourney.AutoReferee.AutoRefMatch;
 import org.mctourney.AutoReferee.AutoRefPlayer;
 import org.mctourney.AutoReferee.AutoRefTeam;
-import org.mctourney.AutoReferee.AutoRefTeam.WinCondition;
+import org.mctourney.AutoReferee.goals.AutoRefGoal;
+import org.mctourney.AutoReferee.goals.BlockGoal;
 import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.util.AchievementPoints;
@@ -51,13 +52,14 @@ public class ObjectiveTracker implements Listener
 
 		if (match != null && apl != null)
 		{
-			for (WinCondition wc : apl.getTeam().getWinConditions())
+			for (AutoRefGoal goal : apl.getTeam().getTeamGoals()) if (goal.hasItem())
 			{
-				BlockData b = wc.getBlockData();
-				if (match.blockInRange(wc) != null && b.matchesBlock(block) && wc.getStatus() != WinCondition.GoalStatus.PLACED)
+				BlockData b = goal.getItem();
+				if (goal instanceof BlockGoal && match.blockInRange((BlockGoal) goal) != null &&
+					b.matchesBlock(block) && goal.getItemStatus() != AutoRefGoal.ItemStatus.TARGET)
 				{
 					match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.OBJECTIVE_PLACED,
-						String.format("%s has placed %s", apl.getName(), b.getName()), wc.getLocation(), apl, b));
+						String.format("%s has placed %s", apl.getName(), b.getName()), goal.getTarget(), apl, b));
 					apl.addPoints(AchievementPoints.OBJECTIVE_PLACE);
 				}
 			}

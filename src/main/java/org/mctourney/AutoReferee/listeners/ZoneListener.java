@@ -48,8 +48,9 @@ import org.mctourney.AutoReferee.AutoRefTeam;
 import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.AutoRefMatch.StartMechanism;
 import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
-import org.mctourney.AutoReferee.util.Vector3;
+import org.mctourney.AutoReferee.goals.BlockGoal;
 import org.mctourney.AutoReferee.util.BlockData;
+import org.mctourney.AutoReferee.util.LocationUtil;
 
 import com.google.common.collect.Maps;
 
@@ -394,7 +395,7 @@ public class ZoneListener implements Listener
 
 				for (AutoRefTeam team : match.getTeams())
 					if (team.canBuild(block.getLocation()))
-						team.addWinCondition(block, match.getInexactRange());
+						team.addGoal(new BlockGoal(team, block));
 
 				break;
 
@@ -463,7 +464,7 @@ public class ZoneListener implements Listener
 
 				// entity name
 				String ename = String.format("%s @ %s", event.getRightClicked().getType().getName(),
-					Vector3.fromLocation(event.getRightClicked().getLocation()).toBlockCoords());
+					LocationUtil.toBlockCoords(event.getRightClicked().getLocation()));
 
 				// save the entity's unique id
 				UUID uid; match.toggleProtection(uid = event.getRightClicked().getUniqueId());
@@ -543,7 +544,7 @@ public class ZoneListener implements Listener
 		// generate message regarding the teleport event
 		String bedrock = match.blockInRange(BlockData.BEDROCK, to, 5) != null ? " (near bedrock)" : "";
 		String message = apl.getDisplayName() + ChatColor.GRAY + " has teleported @ " +
-			Vector3.fromLocation(to).toBlockCoords() + bedrock;
+			LocationUtil.toBlockCoords(to) + bedrock;
 
 		boolean excludeStreamers = dsq <= LONG_TELE_DISTANCE * LONG_TELE_DISTANCE;
 		for (Player ref : match.getReferees(excludeStreamers)) ref.sendMessage(message);

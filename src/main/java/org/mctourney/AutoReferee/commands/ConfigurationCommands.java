@@ -13,14 +13,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
-import org.mctourney.AutoReferee.AutoRefRegion;
 import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.AutoRefMatch;
 import org.mctourney.AutoReferee.AutoRefTeam;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
+import org.mctourney.AutoReferee.regions.AutoRefRegion;
+import org.mctourney.AutoReferee.regions.CuboidRegion;
 import org.mctourney.AutoReferee.util.BlockData;
-import org.mctourney.AutoReferee.util.CuboidRegion;
-import org.mctourney.AutoReferee.util.Vector3;
+import org.mctourney.AutoReferee.util.LocationUtil;
 import org.mctourney.AutoReferee.util.commands.AutoRefCommand;
 import org.mctourney.AutoReferee.util.commands.AutoRefPermission;
 
@@ -162,7 +162,7 @@ public class ConfigurationCommands
 		else
 		{
 			team.setSpawnLocation(player.getLocation());
-			String coords = Vector3.fromLocation(player.getLocation()).toBlockCoords();
+			String coords = LocationUtil.toBlockCoords(player.getLocation());
 			sender.sendMessage(ChatColor.GRAY + "Spawn set to " +
 				coords + " for " + team.getDisplayName());
 		}
@@ -207,11 +207,9 @@ public class ConfigurationCommands
 			sender.sendMessage(team.getDisplayName() + "'s Regions:");
 
 			// print all the regions owned by this team
-			if (team.getRegions().size() > 0) for (CuboidRegion reg : team.getRegions())
-			{
-				Vector3 mn = reg.getMinimumPoint(), mx = reg.getMaximumPoint();
-				sender.sendMessage("  (" + mn.toBlockCoords() + ") => (" + mx.toBlockCoords() + ")");
-			}
+			if (team.getRegions().size() > 0)
+				for (AutoRefRegion reg : team.getRegions())
+					sender.sendMessage("  " + reg.toString());
 
 			// if there are no regions, print None
 			else sender.sendMessage("  <None>");
@@ -220,7 +218,7 @@ public class ConfigurationCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"zone"}, argmin=1, argmax=1, options="bns")
+	@AutoRefCommand(name={"zone"}, argmin=0, options="bnsxS")
 	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
 
 	public boolean setupZone(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -236,45 +234,42 @@ public class ConfigurationCommands
 			return true;
 		}
 
-		// "start" is a sentinel representing the start region
-		String tname = args[0]; AutoRefTeam team = match.teamNameLookup(tname);
-		if (team == null && !"start".equalsIgnoreCase(tname))
+		Set<AutoRefTeam> teams = Sets.newHashSet();
+		for (String arg : args)
+		{
+			AutoRefTeam team = match.teamNameLookup(arg);
+			if (team != null) teams.add(team);
+		}
+
+		boolean isStartRegion = options.hasOption('S');
+		if (teams.isEmpty() && !isStartRegion)
 		{
 			// team name is invalid. let the player know
-			sender.sendMessage(ChatColor.DARK_GRAY + tname +
-				ChatColor.RESET + " is not a valid team.");
+			sender.sendMessage(ChatColor.DARK_GRAY + "No valid team names given.");
 			sender.sendMessage("Teams are " + match.getTeamList());
 			return true;
 		}
 
 		Selection sel = worldEdit.getSelection(player);
+		AutoRefRegion reg = null;
+
 		if ((sel instanceof CuboidSelection))
 		{
 			CuboidSelection csel = (CuboidSelection) sel;
-			CuboidRegion reg = new CuboidRegion(
-				new Vector3(csel.getNativeMinimumPoint()),
-				new Vector3(csel.getNativeMaximumPoint())
-			);
-
-			// sentinel value represents the start region
-			if ("start".equalsIgnoreCase(tname))
-			{
-				// set the start region to the selection
-				match.setStartRegion(reg);
-				sender.sendMessage("Region now marked as " +
-					"the start region!");
-			}
-			else
-			{
-				AutoRefRegion areg = new AutoRefRegion(reg);
-				for (String opt : options.getArgs()) areg.toggle(opt.charAt(0));
-
-				// add the region to the team, announce
-				sender.sendMessage("Region now marked as " +
-					team.getDisplayName() + "'s zone! " + areg.getFlags());
-				team.getRegions().add(areg);
-			}
+			reg = new CuboidRegion(csel.getMinimumPoint(), csel.getMaximumPoint());
 		}
+
+		// add the selection to the start regions
+		if (isStartRegion)
+		{
+			match.addStartRegion(reg);
+			sender.sendMessage("Region now marked as a start region!");
+			return true;
+		}
+
+		for (String opt : options.getArgs())
+			reg.toggle(AutoRefRegion.Flag.fromChar(opt.charAt(0)));
+		for (AutoRefTeam team : teams) team.addRegion(reg);
 		return true;
 	}
 

@@ -22,9 +22,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+
+import org.jdom2.Element;
+import org.jdom2.input.SAXBuilder;
 
 import org.mctourney.AutoReferee.util.NullChunkGenerator;
 
@@ -461,9 +462,19 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		if (!cfgFile.exists()) return null;
 
 		// check the map name, if it matches, this is the one we want
-		FileConfiguration cfg = YamlConfiguration.loadConfiguration(cfgFile);
-		return new AutoRefMap(AutoRefMatch.normalizeMapName(cfg.getString("map.name")),
-			cfg.getString("map.version", "1.0"), folder);
+		Element worldConfig = null;
+		try { worldConfig = new SAXBuilder().build(cfgFile).getRootElement(); }
+		catch (Exception e) { e.printStackTrace(); return null; }
+
+		String mapName = "??", version = "1.0";
+		Element meta = worldConfig.getChild("meta");
+		if (meta != null)
+		{
+			mapName = meta.getChildText("name");
+			version = meta.getChildText("version");
+		}
+
+		return new AutoRefMap(AutoRefMatch.normalizeMapName(mapName), version, folder);
 	}
 
 	private static File unzipMapFolder(File zip) throws IOException

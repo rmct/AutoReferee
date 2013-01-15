@@ -1,0 +1,114 @@
+package org.mctourney.AutoReferee.regions;
+
+import java.util.Random;
+
+import org.bukkit.Location;
+import org.bukkit.World;
+
+import org.jdom2.Element;
+
+import org.mctourney.AutoReferee.AutoRefMatch;
+import org.mctourney.AutoReferee.util.LocationUtil;
+
+public class CuboidRegion extends AutoRefRegion
+{
+	public double x1, y1, z1;
+	public double x2, y2, z2;
+
+	public World world;
+
+	public CuboidRegion(Location v1, Location v2)
+	{
+		// if the two locations are from different worlds, quit
+		assert v1.getWorld() == v2.getWorld();
+
+		world = v1.getWorld();
+		x1 = Math.min(v1.getX(), v2.getX()); x2 = Math.max(v1.getX(), v2.getX());
+		y1 = Math.min(v1.getY(), v2.getY()); y2 = Math.max(v1.getY(), v2.getY());
+		z1 = Math.min(v1.getZ(), v2.getZ()); z2 = Math.max(v1.getZ(), v2.getZ());
+	}
+
+	public CuboidRegion(World world, double x1, double x2, double y1, double y2, double z1, double z2)
+	{
+		this.world = world;
+		this.x1 = x1; this.x2 = x2;
+		this.y1 = y1; this.y2 = y2;
+		this.z1 = z1; this.z2 = z2;
+	}
+
+	public CuboidRegion(AutoRefMatch match, Element elt)
+	{
+		this(
+			LocationUtil.fromCoords(match.getWorld(), elt.getAttributeValue("min")),
+			LocationUtil.fromCoords(match.getWorld(), elt.getAttributeValue("max"))
+		);
+	}
+
+	@Override
+	public int hashCode()
+	{ return getMinimumPoint().hashCode() ^ getMaximumPoint().hashCode(); }
+
+	@Override
+	public boolean equals(Object o)
+	{ return (o instanceof CuboidRegion) && hashCode() == o.hashCode(); }
+
+	public Location getMinimumPoint()
+	{ return new Location(world, x1, y1, z1); }
+
+	public Location getMaximumPoint()
+	{ return new Location(world, x2, y2, z2); }
+
+	@Override
+	public boolean contains(Location loc)
+	{
+		return loc.getX() >= x1 && loc.getY() >= y1 && loc.getZ() >= z1
+		    && loc.getX() <= x2 && loc.getY() <= y2 && loc.getZ() <= z2
+			&& world == loc.getWorld();
+	}
+
+	public static CuboidRegion combine(CuboidRegion a, CuboidRegion b)
+	{
+		assert a.world == b.world;
+		return new CuboidRegion(a.world,
+			Math.min(a.x1, b.x1), Math.max(a.x2, b.x2),
+			Math.min(a.y1, b.y1), Math.max(a.y2, b.y2),
+			Math.min(a.z1, b.z1), Math.max(a.z2, b.z2));
+	}
+
+	// wrote this dumb helper function because `distanceToRegion` was looking ugly...
+	public static double multimax(double base, double ... more )
+	{ for ( double x : more ) base = Math.max(base, x); return base; }
+
+	// distance from region, axially aligned (value less than actual distance, but
+	// appropriate for measurements on cuboid regions)
+	@Override
+	public double distanceToRegion(Location v)
+	{
+		// garbage-in, garbage-out
+		if (v == null || v.getWorld() != world)
+			return Double.POSITIVE_INFINITY;
+
+		double x = v.getX(), y = v.getY(), z = v.getZ();
+		Location mx = getMaximumPoint(), mn = getMinimumPoint();
+
+		// return maximum distance from this region
+		// (max on all sides, axially-aligned)
+		return CuboidRegion.multimax ( 0
+		,	mn.getX() - x, x - mx.getX() - 1
+		,	mn.getY() - y, y - mx.getY() - 1
+		,	mn.getZ() - z, z - mx.getZ() - 1
+		);
+	}
+
+	@Override
+	public Location getRandomLocation(Random r)
+	{
+		return getMinimumPoint().add(
+			(x2 - x1 + 1) * r.nextDouble(),
+			(y2 - y1 + 1) * r.nextDouble(),
+			(z2 - z1 + 1) * r.nextDouble());
+	}
+
+	@Override
+	public CuboidRegion getBoundingCuboid() { return this; }
+}
