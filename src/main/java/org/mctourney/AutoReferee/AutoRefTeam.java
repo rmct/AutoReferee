@@ -226,7 +226,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	 */
 	public void setSpawnLocation(Location loc)
 	{
-		getMatch().broadcast("Set " + getDisplayName() + "'s spawn to " + 
+		getMatch().broadcast("Set " + getDisplayName() + "'s spawn to " +
 			LocationUtil.toBlockCoords(loc));
 		this.spawn = new org.mctourney.AutoReferee.regions.PointRegion(loc);
 	}

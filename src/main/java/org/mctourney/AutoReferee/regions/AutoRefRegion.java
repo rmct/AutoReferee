@@ -105,7 +105,7 @@ public abstract class AutoRefRegion
 		return this;
 	}
 
-	private AutoRefRegion getRegionSettings(AutoRefMatch match, Element e)
+	protected AutoRefRegion getRegionSettings(AutoRefMatch match, Element e)
 	{
 		this.addFlags(e.getChild("flags"));
 		for (Element owner : e.getChildren("owner"))

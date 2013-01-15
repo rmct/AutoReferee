@@ -74,7 +74,7 @@ public abstract class AutoRefGoal
 	public boolean hasTarget()
 	{ return getTarget() != null; }
 
-	private AutoRefGoal getGoalSettings(AutoRefTeam team, Element elt)
+	protected AutoRefGoal getGoalSettings(AutoRefTeam team, Element elt)
 	{
 		return this;
 	}
