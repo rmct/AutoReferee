@@ -22,6 +22,8 @@ public class BlockGoal extends AutoRefGoal
 	private BlockData blockdata;
 	private int range;
 
+	private String customName = null;
+
 	/**
 	 * Constructs a team's win condition.
 	 *
@@ -62,8 +64,6 @@ public class BlockGoal extends AutoRefGoal
 	 */
 	public BlockGoal(AutoRefTeam team, Block block)
 	{ this(team, block, team.getMatch().getInexactRange()); }
-
-	private String customName = null;
 
 	public BlockGoal(AutoRefTeam team, Element elt)
 	{

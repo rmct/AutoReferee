@@ -2522,8 +2522,27 @@ public class AutoRefMatch
 		return ChatColor.RESET + message;
 	}
 
+	private ItemStack customMatchInfoBook = null;
+
+	/**
+	 * Sets a custom book given to players upon joining this match.
+	 *
+	 * @param book book given to players, or null for default (generated) book.
+	 */
+	public void setCustomMatchInfoBook(ItemStack book)
+	{
+		if (book != null) assert book.getType() == Material.WRITTEN_BOOK;
+		this.customMatchInfoBook = book;
+	}
+
+	/**
+	 * Gets the book given to players upon joining this match.
+	 */
 	public ItemStack getMatchInfoBook()
 	{
+		if (this.customMatchInfoBook != null)
+			return this.customMatchInfoBook.clone();
+
 		ItemStack book = new ItemStack(Material.WRITTEN_BOOK, 1);
 		BookMeta meta = (BookMeta) book.getItemMeta();
 
