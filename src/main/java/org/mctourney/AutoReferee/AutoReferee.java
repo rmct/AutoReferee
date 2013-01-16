@@ -109,12 +109,7 @@ public class AutoReferee extends JavaPlugin
 	 * @return lobby world
 	 */
 	public World getLobbyWorld()
-	{
-		if (lobby == null)
-			setLobbyWorld(!getConfig().isString("lobby-world") ? getServer().getWorlds().get(0) :
-				getServer().getWorld(getConfig().getString("lobby-world", null)));
-		return lobby;
-	}
+	{ return lobby; }
 
 	/**
 	 * Sets the world designated as the lobby world.
@@ -319,6 +314,17 @@ public class AutoReferee extends JavaPlugin
 		// update maps automatically if auto-update is enabled
 		if (getConfig().getBoolean("auto-update", true))
 			AutoRefMap.getUpdates(Bukkit.getConsoleSender(), false);
+
+		// get the lobby world ASAP (allow for null lobby world)
+		getServer().getScheduler().runTask(this, new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				String lobby = getConfig().getString("lobby-world", null);
+				if (lobby != null) setLobbyWorld(getServer().getWorld(lobby));
+			}
+		});
 	}
 
 	private boolean makeServerConnection(String qurl)
@@ -381,10 +387,11 @@ public class AutoReferee extends JavaPlugin
 	public void sendPlayerToLobby(Player p)
 	{
 		// take them back to the lobby, one way or another
-		if (p.getWorld() != getLobbyWorld())
+		World wLobby = getLobbyWorld();
+		if (wLobby != null && p.getWorld() != wLobby)
 		{
-			p.setGameMode(WorldListener.getDefaultGamemode(getLobbyWorld()));
-			p.teleport(getLobbyWorld().getSpawnLocation());
+			p.setGameMode(WorldListener.getDefaultGamemode(wLobby));
+			p.teleport(wLobby.getSpawnLocation());
 		}
 
 		// resets the player to default state
