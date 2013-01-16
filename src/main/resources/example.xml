@@ -20,7 +20,7 @@
     <team color="BLUE" max="4">
       <name>Right</name>
       <spawn>
-        <location pos="322,72,-57">Blue Spawn</location>
+        <location pos="322,72,-57"></location>
       </spawn>
     </team>
   </teams>
