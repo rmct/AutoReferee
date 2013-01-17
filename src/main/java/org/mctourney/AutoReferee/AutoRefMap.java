@@ -375,19 +375,20 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 			for (AutoRefMap map : getInstalledMaps()) try
 			{
 				// get the remote version and check if there is an update
-				AutoRefMap rmap = remote.get(map.name);
-
-				boolean needsUpdate = map.md5sum != null && !map.md5sum.equals(rmap.md5sum);
-				if (rmap != null && (force || needsUpdate))
+				AutoRefMap rmap; if ((rmap = remote.get(map.name)) != null)
 				{
-					AutoReferee.getInstance().sendMessageSync(sender, String.format(
-						"UPDATING %s (%s -> %s)...", rmap.name, map.version, rmap.version));
-					if (rmap.getFolder() == null) sender.sendMessage("Update FAILED");
-					else
+					boolean needsUpdate = map.md5sum != null && !map.md5sum.equals(rmap.md5sum);
+					if (force || needsUpdate)
 					{
-						if (map.isInstalled()) FileUtils.deleteDirectory(map.folder);
-						AutoReferee.getInstance().sendMessageSync(sender,
-							"Update SUCCESS: " + rmap.getVersionString());
+						AutoReferee.getInstance().sendMessageSync(sender, String.format(
+							"UPDATING %s (%s -> %s)...", rmap.name, map.version, rmap.version));
+						if (rmap.getFolder() == null) sender.sendMessage("Update FAILED");
+						else
+						{
+							if (map.isInstalled()) FileUtils.deleteDirectory(map.folder);
+							AutoReferee.getInstance().sendMessageSync(sender,
+								"Update SUCCESS: " + rmap.getVersionString());
+						}
 					}
 				}
 			}
