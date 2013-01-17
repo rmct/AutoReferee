@@ -1020,15 +1020,15 @@ public class AutoRefMatch
 			diff = getDifficulty(gameplay.getChildText("difficulty"));
 		primaryWorld.setDifficulty(diff);
 
-		// elimination mode
-		if (gameplay.getChild("elimination") != null)
+		// respawn mode
+		if (gameplay.getChild("respawn") != null)
 		{
-			Element elim = gameplay.getChild("elimination");
+			String rtext = gameplay.getChildTextTrim("respawn");
 			RespawnMode rmode = null;
 
-			String rattr = elim.getAttributeValue("respawn");
-			if (rattr != null) rmode = RespawnMode.valueOf(rattr.toUpperCase());
-			setRespawnMode(rmode == null ? RespawnMode.DISALLOW : rmode);
+			if (rtext != null && !rtext.isEmpty())
+				rmode = RespawnMode.valueOf(rtext.toUpperCase());
+			setRespawnMode(rmode == null ? RespawnMode.ALLOW : rmode);
 		}
 	}
 
