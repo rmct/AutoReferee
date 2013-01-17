@@ -117,7 +117,7 @@ public class AutoReferee extends JavaPlugin
 	 * @param world lobby world
 	 */
 	public void setLobbyWorld(World world)
-	{ this.lobby = world; }
+	{ if (!AutoRefMatch.isCompatible(world)) this.lobby = world; }
 
 	// is this plugin in online mode?
 	private boolean autoMode = true;
