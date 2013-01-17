@@ -80,6 +80,8 @@ public class WorldListener implements Listener
 
 			if (match.isReferee(player))
 				match.updateReferee(player);
+
+			player.teleport(match.getWorldSpawn());
 		}
 	}
 
@@ -133,6 +135,8 @@ public class WorldListener implements Listener
 			// give them a book with info about the match
 			PlayerUtil.clearInventory(player);
 			player.getInventory().addItem(matchTo.getMatchInfoBook());
+
+			player.teleport(matchTo.getWorldSpawn());
 		}
 		else AutoReferee.setOverheadName(player, player.getName());
 

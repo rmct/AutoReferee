@@ -59,6 +59,12 @@ public abstract class AutoRefRegion
 
 	private int flags;
 
+	// yaw = f * 90, SOUTH = 0
+	private Float yaw = null;
+
+	// -90 = up, 0 = level, 90 = down
+	private Float pitch = null;
+
 	private Set<AutoRefTeam> owners = Sets.newHashSet();
 
 	public AutoRefRegion()
@@ -70,7 +76,13 @@ public abstract class AutoRefRegion
 	public abstract CuboidRegion getBoundingCuboid();
 
 	public Location getRandomLocation()
-	{ return getRandomLocation(random); }
+	{
+		Location loc = getRandomLocation(random);
+		if (pitch != null) loc.setPitch(pitch);
+		if (yaw != null) loc.setPitch(yaw);
+
+		return loc;
+	}
 
 	public boolean contains(Location loc)
 	{ return distanceToRegion(loc) <= 0.0; }
@@ -110,6 +122,12 @@ public abstract class AutoRefRegion
 		this.addFlags(e.getChild("flags"));
 		for (Element owner : e.getChildren("owner"))
 			this.addOwners(match.teamNameLookup(owner.getTextTrim()));
+
+		if (e.getAttribute("yaw") != null)
+			yaw = Float.parseFloat(e.getAttributeValue("yaw"));
+
+		if (e.getAttribute("pitch") != null)
+			pitch = Float.parseFloat(e.getAttributeValue("pitch"));
 
 		return this;
 	}

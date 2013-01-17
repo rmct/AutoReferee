@@ -16,11 +16,23 @@ public abstract class LocationUtil
 		try
 		{
 			String[] values = coords.split(",");
-			return new Location(world,
-				Double.parseDouble(values[0]),
-				Double.parseDouble(values[1]),
-				Double.parseDouble(values[2]));
+			Location ret = new Location(world, parseDouble(values[0]),
+				parseDouble(values[1]), parseDouble(values[2]));
+
+			if (values.length > 3) ret.setYaw(Float.parseFloat(values[3]));
+			if (values.length > 4) ret.setPitch(Float.parseFloat(values[4]));
+			return ret;
 		}
 		catch (Exception e) { return null; }
+	}
+
+	// simply here for utility
+	private static double parseDouble(String v)
+	{
+		if (v.endsWith("oo") || v.endsWith("inf"))
+			return v.startsWith("-")
+				? Double.NEGATIVE_INFINITY
+				: Double.POSITIVE_INFINITY;
+		return Double.parseDouble(v);
 	}
 }
