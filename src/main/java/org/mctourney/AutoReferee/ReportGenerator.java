@@ -267,7 +267,7 @@ public class ReportGenerator
 		Set<BlockData> blocks = Sets.newHashSet();
 		for (AutoRefTeam team : match.getTeams())
 			for (AutoRefGoal goal : team.getTeamGoals())
-				blocks.add(goal.getItem());
+				if (goal.hasItem()) blocks.add(goal.getItem());
 
 		StringWriter css = new StringWriter();
 		for (BlockData bd : blocks)
@@ -299,7 +299,7 @@ public class ReportGenerator
 		for (AutoRefTeam team : match.getSortedTeams())
 		{
 			Set<String> members = Sets.newHashSet();
-			for (AutoRefPlayer apl : team.getPlayers())
+			for (AutoRefPlayer apl : team.getCachedPlayers())
 				members.add("<li><input type='checkbox' class='player-toggle' data-player='" +
 					getTag(apl) + "'>" + playerHTML(apl) + "</li>\n");
 

@@ -143,7 +143,7 @@ public class AdminCommands
 
 	public boolean autoInvite(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
-		for (int i = 0; i < args.length; ++i)
+		if (match != null) for (int i = 0; i < args.length; ++i)
 		{
 			// first, remove this player from all expected player lists
 			OfflinePlayer opl = plugin.getServer().getOfflinePlayer(args[i]);

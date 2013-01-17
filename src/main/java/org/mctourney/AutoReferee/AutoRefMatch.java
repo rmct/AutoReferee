@@ -59,6 +59,7 @@ import org.jdom2.output.XMLOutputter;
 
 import org.mctourney.AutoReferee.goals.AutoRefGoal;
 import org.mctourney.AutoReferee.listeners.RefereeChannelListener;
+import org.mctourney.AutoReferee.listeners.WorldListener;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.regions.AutoRefRegion;
 import org.mctourney.AutoReferee.regions.CuboidRegion;
@@ -67,6 +68,7 @@ import org.mctourney.AutoReferee.util.BlockData;
 import org.mctourney.AutoReferee.util.BookUtil;
 import org.mctourney.AutoReferee.util.LocationUtil;
 import org.mctourney.AutoReferee.util.MapImageGenerator;
+import org.mctourney.AutoReferee.util.PlayerUtil;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -961,19 +963,7 @@ public class AutoRefMatch
 			addStartRegion(AutoRefRegion.fromElement(this, e));
 
 		Element gameplay = worldConfig.getChild("gameplay");
-
-		// get the time the match is set to start
-		if (gameplay.getChild("clockstart") != null)
-			startTime = AutoReferee.parseTimeString(gameplay.getChildText("clockstart"));
-
-		if (gameplay.getChild("allow-ff") != null)
-			setFriendlyFire(Boolean.parseBoolean(gameplay.getChildText("allow-ff")));
-
-		// attempt to set world difficulty as best as possible
-		String diff = "HARD";
-		if (gameplay.getChild("difficulty") != null)
-			diff = gameplay.getChildText("difficulty");
-		primaryWorld.setDifficulty(getDifficulty(diff));
+		if (gameplay != null) this.parseExtraGameRules(gameplay);
 
 		Element regions = worldConfig.getChild("regions");
 		for (Element reg : regions.getChildren())
@@ -1012,6 +1002,34 @@ public class AutoRefMatch
 		catch (NumberFormatException e) {  }
 
 		return diff;
+	}
+
+	private void parseExtraGameRules(Element gameplay)
+	{
+		// get the time the match is set to start
+		if (gameplay.getChild("clockstart") != null)
+			startTime = AutoReferee.parseTimeString(gameplay.getChildText("clockstart"));
+
+		// allow or disallow friendly fire
+		if (gameplay.getChild("friendlyfire") != null)
+			setFriendlyFire(Boolean.parseBoolean(gameplay.getChildText("friendlyfire")));
+
+		// attempt to set world difficulty as best as possible
+		Difficulty diff = Difficulty.HARD;
+		if (gameplay.getChild("difficulty") != null)
+			diff = getDifficulty(gameplay.getChildText("difficulty"));
+		primaryWorld.setDifficulty(diff);
+
+		// elimination mode
+		if (gameplay.getChild("elimination") != null)
+		{
+			Element elim = gameplay.getChild("elimination");
+			RespawnMode rmode = null;
+
+			String rattr = elim.getAttributeValue("respawn");
+			if (rattr != null) rmode = RespawnMode.valueOf(rattr.toUpperCase());
+			setRespawnMode(rmode == null ? RespawnMode.DISALLOW : rmode);
+		}
 	}
 
 	/**
@@ -1264,33 +1282,57 @@ public class AutoRefMatch
 		}
 	}
 
+	public void ejectPlayer(Player player)
+	{
+		// resets the player to default state
+		PlayerUtil.reset(player);
+
+		// teleport them if there is somewhere else they can go
+		AutoReferee plugin = AutoReferee.getInstance();
+		World target; if ((target = plugin.getLobbyWorld()) == null)
+		{
+			// find a non-AutoReferee world to drop them in
+			for (World w : plugin.getServer().getWorlds())
+				if (!AutoRefMatch.isCompatible(w)) { target = w; break; }
+		}
+
+		// if there is a reasonable place to teleport them, do so
+		if (target != null)
+		{
+			player.setGameMode(WorldListener.getDefaultGamemode(target));
+			player.teleport(target.getSpawnLocation());
+		}
+
+		// otherwise, kick them from the server
+		else player.kickPlayer(AutoReferee.COMPLETED_KICK_MESSAGE);
+	}
+
 	/**
 	 * Unloads and cleans up this match. Players will be teleported out or kicked,
 	 * the map will be unloaded, and the map folder may be deleted.
 	 */
 	public void destroy()
 	{
-		AutoReferee autoref = AutoReferee.getInstance();
-
 		// first, handle all the players
-		for (Player p : primaryWorld.getPlayers()) autoref.sendPlayerToLobby(p);
+		for (Player p : primaryWorld.getPlayers()) this.ejectPlayer(p);
 
 		// if everyone has been moved out of this world, clean it up
 		if (primaryWorld.getPlayers().size() == 0)
 		{
 			// if we are running in auto-mode and this is OUR world
-			if (autoref.isAutoMode() || this.isTemporaryWorld())
+			AutoReferee plugin = AutoReferee.getInstance();
+			if (plugin.isAutoMode() || this.isTemporaryWorld())
 			{
 				// only change the state if we are sure we are going to unload
 				this.setCurrentState(MatchStatus.NONE);
-				autoref.clearMatch(this);
+				plugin.clearMatch(this);
 
-				autoref.getServer().unloadWorld(primaryWorld, false);
-				if (!autoref.getConfig().getBoolean("save-worlds", false))
+				plugin.getServer().unloadWorld(primaryWorld, false);
+				if (!plugin.getConfig().getBoolean("save-worlds", false))
 				{
 					WorldFolderDeleter wfd = new WorldFolderDeleter(primaryWorld);
-					wfd.task = autoref.getServer().getScheduler()
-						.runTaskTimer(autoref, wfd, 0L, 10 * 20L);
+					wfd.task = plugin.getServer().getScheduler()
+						.runTaskTimer(plugin, wfd, 0L, 10 * 20L);
 				}
 			}
 		}
@@ -2135,6 +2177,33 @@ public class AutoRefMatch
 	 */
 	public void leaveTeam(Player player, boolean force)
 	{ for (AutoRefTeam team : teams) team.leave(player, force); }
+
+	public enum RespawnMode
+	{ ALLOW, BEDSONLY, DISALLOW; }
+
+	private RespawnMode respawnMode = RespawnMode.ALLOW;
+
+	public RespawnMode getRespawnMode()
+	{ return respawnMode; }
+
+	public void setRespawnMode(RespawnMode mode)
+	{ this.respawnMode = mode; }
+
+
+	/**
+	 * Eliminates player from the match.
+	 */
+	public void eliminatePlayer(Player player)
+	{
+		AutoRefTeam team = getPlayerTeam(player);
+		if (team == null) return;
+
+		String name = this.getDisplayName(player);
+		if (!team.leaveQuietly(player)) return;
+
+		this.broadcast(name + " has been eliminated!");
+		this.ejectPlayer(player);
+	}
 
 	/**
 	 * Gets AutoRefPlayer object associated with a given player.

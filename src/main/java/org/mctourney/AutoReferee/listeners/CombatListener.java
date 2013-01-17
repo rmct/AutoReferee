@@ -107,6 +107,21 @@ public class CombatListener implements Listener
 			if (AutoReferee.getInstance().isAutoMode())
 				for (Entity e : match.getWorld().getEntitiesByClass(EnderPearl.class))
 					if (((EnderPearl) e).getShooter() == victim) e.remove();
+
+			// handle respawn modes
+			switch (match.getRespawnMode())
+			{
+				case BEDSONLY:
+					// INTENTIONAL FALL-THROUGH HERE!
+					if (victim.getBedSpawnLocation() != null) break;
+
+				case DISALLOW:
+					match.eliminatePlayer((Player) event.getEntity());
+					break;
+
+				// typically, no action should be taken
+				default: break;
+			}
 		}
 		else for (Player pl : event.getEntity().getWorld().getPlayers())
 			pl.sendMessage(event.getDeathMessage());

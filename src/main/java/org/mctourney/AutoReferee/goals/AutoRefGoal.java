@@ -65,6 +65,9 @@ public abstract class AutoRefGoal
 	public boolean hasItem()
 	{ return getItem() != null; }
 
+	public boolean canCraftItem()
+	{ return false; }
+
 	public ItemStatus getItemStatus()
 	{ return itemStatus; }
 
@@ -83,6 +86,7 @@ public abstract class AutoRefGoal
 	static
 	{
 		goalNames.put("block", BlockGoal.class);
+		goalNames.put("survive", SurvivalGoal.class);
 	}
 
 	public static void addGoalType(String tag, Class<? extends AutoRefGoal> cls)

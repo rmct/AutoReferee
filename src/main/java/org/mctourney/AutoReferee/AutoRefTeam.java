@@ -44,6 +44,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 	// player information
 	private Set<AutoRefPlayer> players = Sets.newHashSet();
+	private Set<AutoRefPlayer> playersCache = Sets.newHashSet();
 
 	/**
 	 * Gets the members of this team.
@@ -51,10 +52,10 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	 * @return collection of players
 	 */
 	public Set<AutoRefPlayer> getPlayers()
-	{
-		if (players != null) return players;
-		return Sets.newHashSet();
-	}
+	{ return players; }
+
+	public Set<AutoRefPlayer> getCachedPlayers()
+	{ return playersCache; }
 
 	protected String getPlayerList()
 	{
@@ -269,6 +270,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			apl.heal();
 			apl.updateCarrying();
 		}
+
+		// save all players currently on team
+		playersCache.addAll(players);
 	}
 
 	// a factory for processing config xml
@@ -337,7 +341,11 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	{ return player == null ? null : getPlayer(player.getName()); }
 
 	protected void addPlayer(AutoRefPlayer apl)
-	{ apl.setTeam(this); this.players.add(apl); }
+	{
+		apl.setTeam(this); this.players.add(apl);
+		if (this.getMatch() != null && this.getMatch().getCurrentState().inProgress())
+			this.playersCache.add(apl);
+	}
 
 	protected boolean removePlayer(AutoRefPlayer apl)
 	{ return this.players.remove(apl); }
@@ -392,8 +400,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		match.messageReferees("team", getName(), "player", "+" + apl.getName());
 		match.messageReferees("player", apl.getName(), "login");
 
-		String name = getColor() + apl.getName() + ChatColor.RESET;
-		match.broadcast(name + " has joined " + getDisplayName());
+		match.broadcast(apl.getDisplayName() + " has joined " + getDisplayName());
 
 		match.setupSpectators();
 		match.checkTeamsReady();
@@ -421,21 +428,35 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		if (!match.getCurrentState().isBeforeMatch() && !force &&
 			match.getReferees().size() > 0) return false;
 
+		String name = match.getDisplayName(player);
+		if (!this.leaveQuietly(player)) return false;
+
+		match.broadcast(name + " has left " + getDisplayName());
+		return true;
+	}
+
+	/**
+	 * Removes a player from this team quietly.
+	 *
+	 * @return true if player was successfully removed, otherwise false
+	 */
+	public boolean leaveQuietly(Player player)
+	{
 		// create an APL object for this player.
 		AutoRefPlayer apl = new AutoRefPlayer(player);
 		if (!this.removePlayer(apl)) return false;
 
-		String name = apl.getName() + ChatColor.RESET;
-		match.broadcast(name + " has left " + getDisplayName());
-
 		// by the time this is actually called, they may have left the world to join
 		// a different match. this teleport shouldn't occur if they aren't in this world
-		if (player.getWorld() == match.getWorld()) player.teleport(match.getWorldSpawn());
+		if (player.getWorld() == match.getWorld())
+			player.teleport(match.getWorldSpawn());
 
 		match.messageReferees("team", getName(), "player", "-" + apl.getName());
 
 		match.setupSpectators();
 		match.checkTeamsReady();
+		match.checkWinConditions();
+
 		return true;
 	}
 
@@ -508,6 +529,8 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	 */
 	public void addGoal(AutoRefGoal goal)
 	{
+		if (goal == null) return;
+
 		goals.add(goal);
 		for (Player ref : getMatch().getReferees(false))
 			goal.updateReferee(ref);
@@ -529,6 +552,14 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			if (goal.hasItem()) objectives.add(goal.getItem());
 		objectives.remove(BlockData.AIR);
 		return objectives;
+	}
+
+	public boolean canCraft(BlockData bdata)
+	{
+		for (AutoRefGoal goal : goals)
+		 if (goal.hasItem() && goal.getItem().equals(bdata) && goal.canCraftItem())
+			return false;
+		return true;
 	}
 
 	private void changeObjectiveStatus(AutoRefGoal goal, AutoRefGoal.ItemStatus status)

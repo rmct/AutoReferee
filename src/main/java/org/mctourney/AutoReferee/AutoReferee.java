@@ -384,23 +384,6 @@ public class AutoReferee extends JavaPlugin
 		metrics.start();
 	}
 
-	public void sendPlayerToLobby(Player p)
-	{
-		// take them back to the lobby, one way or another
-		World wLobby = getLobbyWorld();
-		if (wLobby != null && p.getWorld() != wLobby)
-		{
-			p.setGameMode(WorldListener.getDefaultGamemode(wLobby));
-			p.teleport(wLobby.getSpawnLocation());
-		}
-
-		// resets the player to default state
-		PlayerUtil.reset(p);
-
-		// if the server is in online mode, remove them as well
-		if (isAutoMode()) p.kickPlayer(AutoReferee.COMPLETED_KICK_MESSAGE);
-	}
-
 	public WorldEditPlugin getWorldEdit()
 	{
 		Plugin x = getServer().getPluginManager().getPlugin("WorldEdit");

@@ -257,8 +257,7 @@ public class ObjectiveTracker implements Listener
 		AutoRefTeam team = plugin.getTeam((Player) event.getWhoClicked());
 
 		BlockData recipeTarget = BlockData.fromItemStack(event.getRecipe().getResult());
-		if (team != null && team.getObjectives().contains(recipeTarget) && !match.allowObjectiveCraft())
-			event.setCancelled(true);
+		if (team != null && !team.canCraft(recipeTarget)) event.setCancelled(true);
 
 		// if this is on the blacklist, cancel
 		if (!match.canCraft(recipeTarget)) event.setCancelled(true);

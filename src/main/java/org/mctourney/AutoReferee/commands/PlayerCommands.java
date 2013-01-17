@@ -137,7 +137,7 @@ public class PlayerCommands
 		if (sender.hasPermission("autoreferee.referee") && args.length > 0)
 			match = plugin.getMatch((player = plugin.getServer().getPlayer(args[0])).getWorld());
 
-		if (match != null) plugin.sendPlayerToLobby(player);
+		if (match != null) match.ejectPlayer(player);
 		return true;
 	}
 

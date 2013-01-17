@@ -23,6 +23,7 @@ public class BlockGoal extends AutoRefGoal
 	private int range;
 
 	private String customName = null;
+	private boolean canCraft = false;
 
 	/**
 	 * Constructs a team's win condition.
@@ -78,6 +79,9 @@ public class BlockGoal extends AutoRefGoal
 			range = Integer.parseInt(arange);
 		else range = team.getMatch().getInexactRange();
 
+		String acraft = elt.getAttributeValue("craftable");
+		this.canCraft = (acraft != null && Boolean.parseBoolean(acraft));
+
 		String text = elt.getTextTrim();
 		if (text != null && !text.isEmpty())
 			customName = text;
@@ -111,6 +115,10 @@ public class BlockGoal extends AutoRefGoal
 	@Override
 	public BlockData getItem()
 	{ return blockdata; }
+
+	@Override
+	public boolean canCraftItem()
+	{ return canCraft; }
 
 	@Override
 	public String toString()
