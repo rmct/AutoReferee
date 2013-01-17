@@ -25,7 +25,7 @@ public class PointRegion extends AutoRefRegion
 
 	@Override
 	public Location getRandomLocation(Random r)
-	{ return pos; }
+	{ return pos.clone().add(0.5, 0.0, 0.5); }
 
 	@Override
 	public CuboidRegion getBoundingCuboid()
