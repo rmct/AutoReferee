@@ -906,13 +906,13 @@ public class AutoRefMatch
 	/**
 	 * Checks if the given world is compatible with AutoReferee
 	 * @param world world to check
-	 * @return true if the world contains an autoreferee.yml, otherwise false
+	 * @return true if the world contains a config file, otherwise false
 	 */
 	public static boolean isCompatible(World world)
-	{ return new File(world.getWorldFolder(), "autoreferee.yml").exists(); }
+	{ return new File(world.getWorldFolder(), AutoReferee.CFG_FILENAME).exists(); }
 
 	/**
-	 * Reloads world configuration from autoreferee.yml.
+	 * Reloads world configuration from config file.
 	 */
 	public void reload()
 	{ this.loadWorldConfiguration(); }

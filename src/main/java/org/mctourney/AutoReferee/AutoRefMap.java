@@ -449,7 +449,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	/**
 	 * Get map info object associated with a folder
 	 *
-	 * @param folder folder containing an autoreferee.yml file
+	 * @param folder folder containing a configuration file
 	 * @return map info object if folder contains a map, otherwise null
 	 */
 	public static AutoRefMap getMapInfo(File folder)
