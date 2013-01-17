@@ -126,10 +126,17 @@ public class AutoRefMatch
 	private void setPrimaryWorld(World w)
 	{
 		primaryWorld = w;
+		setWorldSpawn(primaryWorld.getSpawnLocation());
+	}
 
-		worldSpawn = primaryWorld.getSpawnLocation();
-		while (primaryWorld.getBlockTypeIdAt(worldSpawn) != Material.AIR.getId())
+	private void setWorldSpawn(Location loc)
+	{
+		worldSpawn = loc;
+		while (worldSpawn.getWorld().getBlockTypeIdAt(worldSpawn) != Material.AIR.getId())
 			worldSpawn = worldSpawn.add(0, 1, 0);
+
+		worldSpawn.getWorld().setSpawnLocation(worldSpawn.getBlockX(),
+			worldSpawn.getBlockY(), worldSpawn.getBlockZ());
 	}
 
 	/**
@@ -496,7 +503,7 @@ public class AutoRefMatch
 	private AutoRefMatch.CountdownTask matchStarter = null;
 
 	// mechanisms to open the starting gates
-	private Set<StartMechanism> startMechanisms = null;
+	private Set<StartMechanism> startMechanisms = Sets.newHashSet();
 
 	// protected entities - only protected from "butchering"
 	private Set<UUID> protectedEntities = Sets.newHashSet();
@@ -945,10 +952,6 @@ public class AutoRefMatch
 		for (Element e : worldConfig.getChild("teams").getChildren("team"))
 			teams.add(AutoRefTeam.fromElement(e, this));
 
-		startMechanisms = Sets.newHashSet();
-		for (Element e : worldConfig.getChild("mechanisms").getChildren())
-			startMechanisms.add(StartMechanism.fromElement(e, primaryWorld));
-
 		protectedEntities = Sets.newHashSet();
 		prohibitCraft = Sets.newHashSet();
 
@@ -959,8 +962,12 @@ public class AutoRefMatch
 			ChatColor.RESET + "One or more protected entities are missing!");
 
 		// get the start region (safe for both teams, no pvp allowed)
+		assert worldConfig.getChild("startregion") != null;
 		for (Element e : worldConfig.getChild("startregion").getChildren())
 			addStartRegion(AutoRefRegion.fromElement(this, e));
+
+		String attrSpawn = worldConfig.getChild("startregion").getAttributeValue("spawn");
+		if (attrSpawn != null) setWorldSpawn(LocationUtil.fromCoords(getWorld(), attrSpawn));
 
 		Element gameplay = worldConfig.getChild("gameplay");
 		if (gameplay != null) this.parseExtraGameRules(gameplay);
