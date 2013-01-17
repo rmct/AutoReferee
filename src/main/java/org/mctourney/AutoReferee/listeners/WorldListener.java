@@ -62,6 +62,7 @@ public class WorldListener implements Listener
 			// if we are logging in to the wrong world, teleport to the correct world
 			if (player.getWorld() != match.getWorld()) match.joinMatch(player);
 
+			AutoReferee.setOverheadName(player, match.getDisplayName(player));
 			if (!match.getCurrentState().inProgress() || match.isPlayer(player))
 				match.broadcast(match.colorMessage(event.getJoinMessage()));
 			event.setJoinMessage(null);
@@ -120,6 +121,8 @@ public class WorldListener implements Listener
 
 		if (matchTo != null)
 		{
+			AutoReferee.setOverheadName(player, matchTo.getDisplayName(player));
+
 			matchTo.checkTeamsReady();
 			matchTo.sendMatchInfo(player);
 			matchTo.setupSpectators(player);
@@ -131,6 +134,7 @@ public class WorldListener implements Listener
 			PlayerUtil.clearInventory(player);
 			player.getInventory().addItem(matchTo.getMatchInfoBook());
 		}
+		else AutoReferee.setOverheadName(player, player.getName());
 
 		// if they are leaving AutoReferee-managed worlds
 		if (matchFm != null && matchTo == null)

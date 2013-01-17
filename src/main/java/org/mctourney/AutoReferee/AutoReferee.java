@@ -522,8 +522,12 @@ public class AutoReferee extends JavaPlugin
 
 	// ************************ CUSTOM API ************************
 
+	private static boolean sportBukkitApi = true;
+
+	// custom methods, retrieved by reflection
 	private static Method mAffectsSpawning = null;
 	private static Method mCollidesWithEntities = null;
+	private static Method mSetOverheadName = null;
 
 	static
 	{
@@ -531,25 +535,26 @@ public class AutoReferee extends JavaPlugin
 		{
 			mAffectsSpawning = HumanEntity.class.getDeclaredMethod("setAffectsSpawning", boolean.class);
 			mCollidesWithEntities = Player.class.getDeclaredMethod("setCollidesWithEntities", boolean.class);
+			mSetOverheadName = Player.class.getDeclaredMethod("setOverheadName", String.class);
 		}
-		catch (Exception e) {  }
+		catch (Exception e) { sportBukkitApi = false; }
 	}
 
 	/**
 	 * Checks if AutoReferee is installed on a system supporting the SportBukkit API
 	 *
 	 * @return true if SportBukkit is installed, false otherwise
-	 * @see http://www.github.com/rmct/SportBukkit
+	 * @see http://www.github.com/ProjectAres/SportBukkit
 	 */
 	public static boolean hasSportBukkitApi()
-	{ return mAffectsSpawning != null && mCollidesWithEntities != null; }
+	{ return sportBukkitApi; }
 
 	/**
 	 * Sets whether player affects spawning via natural spawn and mob spawners.
 	 * Uses last_username's affects-spawning API from SportBukkit
 	 *
 	 * @param affectsSpawning Set whether player affects spawning
-	 * @see http://www.github.com/rmct/SportBukkit
+	 * @see http://www.github.com/ProjectAres/SportBukkit
 	 */
 	public static void setAffectsSpawning(Player player, boolean affectsSpawning)
 	{
@@ -563,12 +568,26 @@ public class AutoReferee extends JavaPlugin
 	 * Uses last_username's collides-with-entities API from SportBukkit
 	 *
 	 * @param collidesWithEntities Set whether player collides with entities
-	 * @see http://www.github.com/rmct/SportBukkit
+	 * @see http://www.github.com/ProjectAres/SportBukkit
 	 */
 	public static void setCollidesWithEntities(Player player, boolean collidesWithEntities)
 	{
 		if (mCollidesWithEntities != null) try
 		{ mCollidesWithEntities.invoke(player, collidesWithEntities); }
+		catch (Exception e) {  }
+	}
+
+	/**
+	 * Sets the overhead name, allowing for ChatColor characters.
+	 * Uses anxuiz's set-overhead-name API from SportBukkit
+	 *
+	 * @param overheadName New string to display above player's head
+	 * @see http://www.github.com/ProjectAres/SportBukkit
+	 */
+	public static void setOverheadName(Player player, String overheadName)
+	{
+		if (mSetOverheadName != null) try
+		{ mSetOverheadName.invoke(player, overheadName); }
 		catch (Exception e) {  }
 	}
 }

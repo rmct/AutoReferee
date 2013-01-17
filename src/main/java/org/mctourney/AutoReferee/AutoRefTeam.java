@@ -401,6 +401,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		match.messageReferees("player", apl.getName(), "login");
 
 		match.broadcast(apl.getDisplayName() + " has joined " + getDisplayName());
+		AutoReferee.setOverheadName(player, apl.getDisplayName());
 
 		match.setupSpectators();
 		match.checkTeamsReady();
@@ -452,6 +453,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			player.teleport(match.getWorldSpawn());
 
 		match.messageReferees("team", getName(), "player", "-" + apl.getName());
+		AutoReferee.setOverheadName(player, player.getName());
 
 		match.setupSpectators();
 		match.checkTeamsReady();
