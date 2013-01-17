@@ -154,7 +154,7 @@ public class AutoRefMatch
 	private boolean isTemporaryWorld()
 	{ return tmp; }
 
-	private long startTime = 8000L;
+	private long startTime = 0L;
 
 	/**
 	 * Gets the time to set the world to at the start of the match.
@@ -257,7 +257,7 @@ public class AutoRefMatch
 	{ this.currentState = status; this.setupSpectators(); }
 
 	// teams participating in the match
-	private Set<AutoRefTeam> teams = null;
+	private Set<AutoRefTeam> teams = Sets.newHashSet();
 
 	/**
 	 * Gets the teams participating in this match.
