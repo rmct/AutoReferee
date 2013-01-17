@@ -1729,6 +1729,7 @@ public class AutoRefMatch
 	public void setSpectatorMode(Player player, boolean b, GameMode gamemode)
 	{
 		player.setGameMode(gamemode);
+		if (!player.getAllowFlight()) player.setFallDistance(0.0f);
 		AutoReferee.setAffectsSpawning(player, !b);
 
 		boolean noEntityCollide = b && getCurrentState().inProgress();
