@@ -81,7 +81,8 @@ public class WorldListener implements Listener
 			if (match.isReferee(player))
 				match.updateReferee(player);
 
-			player.teleport(match.getWorldSpawn());
+			if (!player.hasPlayedBefore())
+				player.teleport(match.getWorldSpawn());
 		}
 	}
 
