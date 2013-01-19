@@ -4,8 +4,10 @@ import java.awt.image.RenderedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
@@ -55,6 +57,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 import org.mctourney.AutoReferee.goals.AutoRefGoal;
@@ -126,10 +129,11 @@ public class AutoRefMatch
 	private void setPrimaryWorld(World w)
 	{
 		primaryWorld = w;
+		worldConfigFile = new File(w.getWorldFolder(), AutoReferee.CFG_FILENAME);
 		setWorldSpawn(primaryWorld.getSpawnLocation());
 	}
 
-	private void setWorldSpawn(Location loc)
+	public void setWorldSpawn(Location loc)
 	{
 		worldSpawn = loc;
 		while (worldSpawn.getWorld().getBlockTypeIdAt(worldSpawn) != Material.AIR.getId())
@@ -928,9 +932,13 @@ public class AutoRefMatch
 
 	private void loadWorldConfiguration()
 	{
-		// file stream and configuration object (located in world folder)
-		worldConfigFile = new File(primaryWorld.getWorldFolder(), AutoReferee.CFG_FILENAME);
-		try { worldConfig = new SAXBuilder().build(worldConfigFile).getRootElement(); }
+		try
+		{
+			// file stream and configuration object (located in world folder)
+			InputStream cfgStream = worldConfigFile.exists() ? new FileInputStream(worldConfigFile)
+				: AutoReferee.getInstance().getResource("defaults/map.xml");
+			worldConfig = new SAXBuilder().build(cfgStream).getRootElement();
+		}
 		catch (Exception e) { e.printStackTrace(); return; }
 
 		teams = Sets.newHashSet();
@@ -954,6 +962,11 @@ public class AutoRefMatch
 
 		protectedEntities = Sets.newHashSet();
 		prohibitCraft = Sets.newHashSet();
+
+		Element eProtect = worldConfig.getChild("protect");
+		if (eProtect != null) for (Element c : eProtect.getChildren())
+			try { protectedEntities.add(UUID.fromString(c.getTextTrim())); }
+			catch (Exception e) {  }
 
 		// HELPER: ensure all protected entities are still present in world
 		Set<UUID> uuidSearch = Sets.newHashSet(protectedEntities);
@@ -980,6 +993,7 @@ public class AutoRefMatch
 		if (goals != null) for (Element teamgoals : goals.getChildren("teamgoals"))
 		{
 			AutoRefTeam team = this.teamNameLookup(teamgoals.getAttributeValue("team"));
+			AutoReferee.getInstance().getLogger().info("Loading goals for " + team.getName());
 			if (team != null) for (Element gelt : teamgoals.getChildren()) team.addGoal(gelt);
 		}
 
@@ -1045,14 +1059,86 @@ public class AutoRefMatch
 	public void saveWorldConfiguration()
 	{
 		// if there is no configuration object or file, nothin' doin'...
-		if (worldConfigFile == null || worldConfig == null) return;
+		if (worldConfig == null)
+		{
+			try
+			{
+				InputStream mapXML = AutoReferee.getInstance().getResource("defaults/map.xml");
+				worldConfig = new SAXBuilder().build(mapXML).getRootElement();
+			}
+			catch (Exception e) { e.printStackTrace(); return; }
+		}
 
-		// TODO
+		else
+		{
+			// get the teams object
+			Element eTeams = worldConfig.getChild("teams");
+			if (eTeams == null) worldConfig.addContent(eTeams = new Element("team"));
+
+			// reset the teams to whatever has been saved
+			eTeams.removeContent();
+			for (AutoRefTeam team : teams)
+				eTeams.addContent(team.toElement());
+
+			// get the regions object
+			Element eRegions = worldConfig.getChild("regions");
+			if (eRegions == null) worldConfig.addContent(eRegions = new Element("regions"));
+
+			// reset the regions to whatever has been saved
+			eRegions.removeContent();
+			for (AutoRefRegion reg : this.getRegions())
+				eRegions.addContent(reg.toElement());
+
+			// get startregion object
+			Element eStartRegions = worldConfig.getChild("startregion");
+			if (getWorldSpawn() != null) eStartRegions.setAttribute("spawn",
+				LocationUtil.toBlockCoordsWithYaw(getWorldSpawn()));
+
+			eStartRegions.removeContent();
+			for (AutoRefRegion reg : this.getStartRegions())
+				eStartRegions.addContent(reg.toElement());
+
+			// get the protections object
+			Element eProtect = worldConfig.getChild("protect");
+			if (eProtect == null) worldConfig.addContent(eProtect = new Element("protect"));
+
+			// reset the protections to whatever has been saved
+			eProtect.removeContent();
+			for (UUID uid : protectedEntities)
+			{
+				AutoReferee.getInstance().getLogger().info(uid.toString());
+				eProtect.addContent(new Element("entity").setText(uid.toString()));
+			}
+
+			// get the goals object
+			Element eGoals = worldConfig.getChild("goals");
+			if (eGoals == null) worldConfig.addContent(eGoals = new Element("goals"));
+
+			// reset the goals to whatever has been saved
+			eGoals.removeContent();
+			for (AutoRefTeam team : this.getTeams())
+			{
+				Element tgoals = new Element("teamgoals")
+					.setAttribute("team", team.getName());
+				eGoals.addContent(tgoals);
+				for (AutoRefGoal goal : team.getTeamGoals())
+					tgoals.addContent(goal.toElement());
+			}
+
+			// get the mechanisms object
+			Element eMechanisms = worldConfig.getChild("mechanisms");
+			if (eMechanisms == null) worldConfig.addContent(eProtect = new Element("mechanisms"));
+
+			// reset the mechanisms to whatever has been saved
+			eMechanisms.removeContent();
+			for (StartMechanism mech : this.startMechanisms)
+				eMechanisms.addContent(mech.toElement());
+		}
 
 		// save the configuration file back to the original filename
 		try
 		{
-			XMLOutputter xmlout = new XMLOutputter();
+			XMLOutputter xmlout = new XMLOutputter(Format.getPrettyFormat());
 			xmlout.output(worldConfig, new FileOutputStream(worldConfigFile));
 		}
 
@@ -1432,6 +1518,13 @@ public class AutoRefMatch
 			state = block.getState();
 		}
 
+		public Element toElement()
+		{
+			return new Element(state.getType().name().toLowerCase())
+				.setAttribute("pos", LocationUtil.toBlockCoords(loc))
+				.setText(Boolean.toString(flip));
+		}
+
 		public StartMechanism(Block block)
 		{ this(block, true); }
 
@@ -1468,8 +1561,10 @@ public class AutoRefMatch
 		{
 			MaterialData bdata = getLocation().getBlock().getState().getData();
 
-			if (bdata instanceof Redstone) return flip == ((Redstone) bdata).isPowered();
-			if (bdata instanceof PressureSensor) return flip == ((PressureSensor) bdata).isPressed();
+			if (bdata instanceof Redstone)
+				return flip == ((Redstone) bdata).isPowered();
+			if (bdata instanceof PressureSensor)
+				return flip == ((PressureSensor) bdata).isPressed();
 			return false;
 		}
 	}
@@ -2418,8 +2513,8 @@ public class AutoRefMatch
 		rem.removeAll(newCarrying);
 
 		Player player = apl.getPlayer();
-		for (BlockData bd : add) messageReferees("player", player.getName(), "obj", "+" + bd.serialize());
-		for (BlockData bd : rem) messageReferees("player", player.getName(), "obj", "-" + bd.serialize());
+		for (BlockData bd : add) messageReferees("player", player.getName(), "goal", "+" + bd.serialize());
+		for (BlockData bd : rem) messageReferees("player", player.getName(), "goal", "-" + bd.serialize());
 	}
 
 	public void updateHealthArmor(AutoRefPlayer apl, int oldHealth,

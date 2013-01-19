@@ -217,7 +217,14 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	{ return match.getRegions(this); }
 
 	public boolean addRegion(AutoRefRegion reg)
-	{ return getRegions().add(reg); }
+	{
+		for (AutoRefRegion ereg : match.getRegions())
+			if (reg.equals(ereg)) { ereg.addOwners(this); return true; }
+
+		reg.addOwners(this);
+		match.getRegions().add(reg);
+		return true;
+	}
 
 	// location of custom spawn
 	private AutoRefRegion spawn;
@@ -312,6 +319,22 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		return newTeam;
 	}
 
+	public Element toElement()
+	{
+		Element elt = new Element("team");
+		elt.addContent(new Element("name").setText(getName()));
+
+		if (this.getColor() != ChatColor.RESET) elt.setAttribute(
+			"color", this.getColor().name());
+		if (this.maxSize != 0) elt.setAttribute(
+			"maxsize", Integer.toString(this.maxSize));
+
+		if (this.spawn != null) elt.addContent(
+			new Element("spawn").addContent(this.spawn.toElement()));
+
+		return elt;
+	}
+
 	/**
 	 * Gets a player from this team by name.
 	 *
@@ -389,7 +412,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		// prepare the player
 		if (match != null && !match.getCurrentState().inProgress())
-			player.teleport(getSpawnLocation());
+			player.teleport(this.getSpawnLocation());
 		player.setGameMode(GameMode.SURVIVAL);
 
 		Location bed = player.getBedSpawnLocation();

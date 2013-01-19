@@ -25,6 +25,7 @@ import org.mctourney.AutoReferee.util.commands.AutoRefCommand;
 import org.mctourney.AutoReferee.util.commands.AutoRefPermission;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 
 import com.google.common.collect.Sets;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
@@ -143,13 +144,22 @@ public class ConfigurationCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "setspawn"}, argmin=1, argmax=1)
+	@AutoRefCommand(name={"autoref", "setspawn"}, argmin=0, argmax=1)
 	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
 
 	public boolean setSpawn(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
 		if (match == null) return false;
 		Player player = (Player) sender;
+
+		if (args.length == 0)
+		{
+			match.setWorldSpawn(player.getLocation());
+			String coords = LocationUtil.toBlockCoords(match.getWorldSpawn());
+			sender.sendMessage(ChatColor.GRAY + "Global spawn set to " + coords);
+
+			return true;
+		}
 
 		AutoRefTeam team = match.teamNameLookup(args[0]);
 		if (team == null)
@@ -267,9 +277,10 @@ public class ConfigurationCommands
 			return true;
 		}
 
-		for (String opt : options.getArgs())
-			reg.toggle(AutoRefRegion.Flag.fromChar(opt.charAt(0)));
-		for (AutoRefTeam team : teams) team.addRegion(reg);
+		for (AutoRefRegion.Flag flag : AutoRefRegion.Flag.values())
+			if (options.hasOption(flag.getMark())) reg.toggle(flag);
+		for (AutoRefTeam team : teams) if (team.addRegion(reg))
+			sender.sendMessage(reg.toString() + " set as " + team.getDisplayName() + "'s region.");
 		return true;
 	}
 

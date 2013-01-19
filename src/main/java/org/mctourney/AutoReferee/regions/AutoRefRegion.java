@@ -41,6 +41,13 @@ public abstract class AutoRefRegion
 
 		public String getName() { return name; }
 
+		public static Flag fromName(String name)
+		{
+			for (Flag f : values())
+				if (f.name.equals(name)) return f;
+			return null;
+		}
+
 		// character marker for config files
 		private char mark;
 
@@ -60,10 +67,10 @@ public abstract class AutoRefRegion
 	private int flags;
 
 	// yaw = f * 90, SOUTH = 0
-	private Float yaw = null;
+	protected Integer yaw = null;
 
 	// -90 = up, 0 = level, 90 = down
-	private Float pitch = null;
+	protected Integer pitch = null;
 
 	private Set<AutoRefTeam> owners = Sets.newHashSet();
 
@@ -75,11 +82,13 @@ public abstract class AutoRefRegion
 	public abstract Location getRandomLocation(Random r);
 	public abstract CuboidRegion getBoundingCuboid();
 
+	public abstract Element toElement();
+
 	public Location getRandomLocation()
 	{
 		Location loc = getRandomLocation(random);
 		if (pitch != null) loc.setPitch(pitch);
-		if (yaw != null) loc.setPitch(yaw);
+		if (yaw != null) loc.setYaw(yaw);
 
 		return loc;
 	}
@@ -110,10 +119,11 @@ public abstract class AutoRefRegion
 	public AutoRefRegion toggle(Flag flag)
 	{ if (flag != null) flags ^= flag.getValue(); return this; }
 
-	public AutoRefRegion addFlags(Element e)
+	public AutoRefRegion addFlags(Element elt)
 	{
-		if (e != null) for (Element c : e.getChildren())
-			flags |= Flag.valueOf(c.getName()).getValue();
+		if (elt != null) for (Element c : elt.getChildren())
+			try { flags |= Flag.fromName(c.getName()).getValue(); }
+			catch (Exception e) { e.printStackTrace(); }
 		return this;
 	}
 
@@ -124,12 +134,35 @@ public abstract class AutoRefRegion
 			this.addOwners(match.teamNameLookup(owner.getTextTrim()));
 
 		if (e.getAttribute("yaw") != null)
-			yaw = Float.parseFloat(e.getAttributeValue("yaw"));
+			yaw = Integer.parseInt(e.getAttributeValue("yaw"));
 
 		if (e.getAttribute("pitch") != null)
-			pitch = Float.parseFloat(e.getAttributeValue("pitch"));
+			pitch = Integer.parseInt(e.getAttributeValue("pitch"));
 
 		return this;
+	}
+
+	private int ANGLE_RND = 15;
+
+	protected Element setRegionSettings(Element e)
+	{
+		Set<Flag> fset = getFlags();
+		if (!fset.isEmpty())
+		{
+			Element eFlags; e.addContent(eFlags = new Element("flags"));
+			for (Flag f : fset) eFlags.addContent(new Element(f.name.toLowerCase()));
+		}
+
+		for (AutoRefTeam team : getOwners())
+			e.addContent(new Element("owner").setText(team.getName()));
+
+		if (yaw != null) e.setAttribute("yaw",
+			Integer.toString(Math.round((float)yaw/ANGLE_RND)*ANGLE_RND));
+
+		if (pitch != null) e.setAttribute("pitch",
+			Integer.toString(Math.round((float)pitch/ANGLE_RND)*ANGLE_RND));
+
+		return e;
 	}
 
 	public Set<AutoRefTeam> getOwners()

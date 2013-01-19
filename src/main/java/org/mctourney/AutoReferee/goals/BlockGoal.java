@@ -88,6 +88,26 @@ public class BlockGoal extends AutoRefGoal
 	}
 
 	@Override
+	public Element toElement()
+	{
+		Element elt = new Element("block");
+
+		if (this.customName != null)
+			elt.setText(this.customName);
+
+		elt.setAttribute("pos", LocationUtil.toBlockCoords(this.loc));
+		elt.setAttribute("id", this.blockdata.serialize());
+
+		if (this.range != getOwner().getMatch().getInexactRange())
+			elt.setAttribute("range", Integer.toString(this.range));
+
+		if (this.canCraft)
+			elt.setAttribute("craftable", Boolean.toString(this.canCraft));
+
+		return elt;
+	}
+
+	@Override
 	public boolean isSatisfied(AutoRefMatch match)
 	{ return null != match.blockInRange(blockdata, loc, range); }
 
@@ -97,7 +117,7 @@ public class BlockGoal extends AutoRefGoal
 		AutoRefMatch match = getOwner().getMatch();
 		String bd = getItem().serialize();
 
-		match.messageReferee(ref, "team", getOwner().getName(), "obj", "+" + bd);
+		match.messageReferee(ref, "team", getOwner().getName(), "goal", "+" + bd);
 		match.messageReferee(ref, "team", getOwner().getName(), "state", bd,
 				getItemStatus().toString());
 	}

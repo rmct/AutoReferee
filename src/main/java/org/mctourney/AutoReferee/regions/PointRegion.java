@@ -14,10 +14,16 @@ public class PointRegion extends AutoRefRegion
 	Location pos = null;
 
 	public PointRegion(Location loc)
-	{ this.pos = loc; }
+	{ this.pos = loc.getBlock().getLocation(); this.yaw = (int)loc.getYaw(); }
 
 	public PointRegion(AutoRefMatch match, Element e)
 	{ this(LocationUtil.fromCoords(match.getWorld(), e.getAttributeValue("pos"))); }
+
+	public Element toElement()
+	{
+		return this.setRegionSettings(new Element("location")
+			.setAttribute("pos", LocationUtil.toBlockCoords(pos)));
+	}
 
 	@Override
 	public double distanceToRegion(Location loc)
@@ -38,4 +44,8 @@ public class PointRegion extends AutoRefRegion
 	@Override
 	public boolean equals(Object o)
 	{ return (o instanceof PointRegion) && hashCode() == o.hashCode(); }
+
+	@Override
+	public String toString()
+	{ return String.format("POINT(%s)", LocationUtil.toBlockCoords(pos)); }
 }

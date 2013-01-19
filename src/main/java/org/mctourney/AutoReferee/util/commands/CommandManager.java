@@ -123,10 +123,10 @@ public class CommandManager implements CommandExecutor
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
 	{
-		AutoReferee autoref = AutoReferee.getInstance();
+		AutoReferee plugin = AutoReferee.getInstance();
 
-		World world = autoref.getSenderWorld(sender);
-		AutoRefMatch match = autoref.getMatch(world);
+		World world = plugin.getSenderWorld(sender);
+		AutoRefMatch match = plugin.getMatch(world);
 
 		// reparse the args properly using the string tokenizer from org.apache.commons
 		args = new StrTokenizer(StringUtils.join(args, ' '), StrMatcher.splitMatcher(),

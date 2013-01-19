@@ -10,6 +10,7 @@ import org.jdom2.Element;
 
 import org.mctourney.AutoReferee.AutoRefMatch;
 import org.mctourney.AutoReferee.AutoRefTeam;
+import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.util.BlockData;
 
 import com.google.common.collect.Maps;
@@ -26,6 +27,9 @@ public abstract class AutoRefGoal
 
 	public abstract BlockData getItem();
 	public abstract Location getTarget();
+
+	// for saving the data
+	public abstract Element toElement();
 
 	/**
 	 * Represents the status of a tracked item.

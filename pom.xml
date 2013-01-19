@@ -140,7 +140,7 @@
         <filtering>true</filtering>
         <directory>${basedir}/src/main/resources/</directory>
         <includes>
-          <include>map.yml</include>
+          <include>map.xml</include>
           <include>config.yml</include>
         </includes>
       </resource>

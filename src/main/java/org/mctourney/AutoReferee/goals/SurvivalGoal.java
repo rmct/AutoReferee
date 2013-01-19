@@ -14,6 +14,13 @@ public class SurvivalGoal extends AutoRefGoal
 	public SurvivalGoal(AutoRefTeam team, Element elt)
 	{ super(team); }
 
+	public Element toElement()
+	{ return new Element("survive"); }
+
+	@Override
+	public String toString()
+	{ return "SURVIVE"; }
+
 	@Override
 	public boolean isSatisfied(AutoRefMatch match)
 	{

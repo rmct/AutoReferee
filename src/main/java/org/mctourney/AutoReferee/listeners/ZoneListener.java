@@ -43,6 +43,7 @@ import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMatch;
+import org.mctourney.AutoReferee.AutoRefMatch.Role;
 import org.mctourney.AutoReferee.AutoRefPlayer;
 import org.mctourney.AutoReferee.AutoRefTeam;
 import org.mctourney.AutoReferee.AutoReferee;
@@ -191,9 +192,11 @@ public class ZoneListener implements Listener
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
 		if (match == null || match.getCurrentState() == MatchStatus.NONE) return true;
 
+		Role role = match.getRole(player);
+
 		// if the player is a referee or is creative, nothing is off-limits
-		if (match.isReferee(player) || (match.getCurrentState().inProgress()
-			&& player.getGameMode() == GameMode.CREATIVE)) return true;
+		if (role == Role.REFEREE || (match.getCurrentState().inProgress()
+			&& player.getGameMode() == GameMode.CREATIVE && role == Role.PLAYER)) return true;
 
 		// if the match isn't currently in progress, a player should
 		// not be allowed to place or destroy blocks anywhere

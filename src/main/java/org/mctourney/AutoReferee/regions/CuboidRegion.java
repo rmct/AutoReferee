@@ -44,6 +44,13 @@ public class CuboidRegion extends AutoRefRegion
 		);
 	}
 
+	public Element toElement()
+	{
+		return this.setRegionSettings(new Element("cuboid")
+			.setAttribute("min", LocationUtil.toBlockCoords(this.getMinimumPoint()))
+			.setAttribute("max", LocationUtil.toBlockCoords(this.getMaximumPoint())));
+	}
+
 	@Override
 	public int hashCode()
 	{ return getMinimumPoint().hashCode() ^ getMaximumPoint().hashCode(); }
@@ -51,6 +58,15 @@ public class CuboidRegion extends AutoRefRegion
 	@Override
 	public boolean equals(Object o)
 	{ return (o instanceof CuboidRegion) && hashCode() == o.hashCode(); }
+
+	@Override
+	public String toString()
+	{
+		return String.format("CUBOID(%s:%s), A=%d",
+			LocationUtil.toBlockCoords(this.getMinimumPoint()),
+			LocationUtil.toBlockCoords(this.getMaximumPoint()),
+			(int)((x2-x1+1) * (y2-y1+1) * (z2-z1+1)));
+	}
 
 	public Location getMinimumPoint()
 	{ return new Location(world, x1, y1, z1); }

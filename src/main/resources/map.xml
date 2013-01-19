@@ -1,43 +1,28 @@
 <?xml version="1.0"?>
 <map protocol="2.0.0">
   <meta>
-    <name>My Competitive Map</name>
-    <version>1.0</version>
+    <name>Competitive Map</name>
+    <version>1.x</version>
 
     <creators>
-      <creator>Notch</creator>
-      <creator>Dinnerbone</creator>
+      <creator>Creator1</creator>
+      <creator>Creator2</creator>
     </creators>
   </meta>
 
   <teams>
-    <team color="RED" max="4">Red</team>
-    <team color="BLUE" max="4">Blue</team>
+    <team color="RED" max="4">
+      <name>Left</name>
+    </team>
+
+    <team color="BLUE" max="4">
+      <name>Right</name>
+    </team>
   </teams>
 
-  <regions>
-  </regions>
-
-  <spawns>
-    <spawn team="Red">
-      <location pos="0,0,0">Red Spawn</location>
-    </spawn>
-  </spawns>
-
-  <goals>
-    <teamgoals team="Red">
-      <block id="35:16" pos="0,0,0">Red Wool</block>
-    </teamgoals>
-    <teamgoals team="Blue">
-      <block id="35:16" pos="0,0,0">Red Wool</block>
-    </teamgoals>
-  </goals>
-
-  <gameplay>
-    <!-- match difficulty, words or numbers allowed -->
-    <difficulty>HARD</difficulty>
-
-    <!-- time of day the match should start -->
-    <clockstart>6am</clockstart>
-  </gameplay>
+  <startregion />
+  <regions />
+  <goals />
+  <mechanisms />
+  <gameplay />
 </map>
