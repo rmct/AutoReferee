@@ -290,12 +290,7 @@ public class ZoneListener implements Listener
 
 		if (match.isPlayer(player))
 		{
-			// if this is a start mechanism, this should always be allowed
-			if (!plugin.isAutoMode() && match.isStartMechanism(loc)
-				&& match.getCurrentState().isBeforeMatch()) return;
-
-			if (match.isStartMechanism(loc) && !match.getCurrentState().isBeforeMatch()
-				&& match.getStartMechanism(loc).active())
+			if (match.isStartMechanism(loc) && !match.getStartMechanism(loc).canFlip(match))
 			{ event.setCancelled(true); return; }
 
 			if (!validPlayer(player))

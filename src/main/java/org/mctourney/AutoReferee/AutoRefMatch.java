@@ -1567,6 +1567,13 @@ public class AutoRefMatch
 				return flip == ((PressureSensor) bdata).isPressed();
 			return false;
 		}
+
+		public boolean canFlip(AutoRefMatch match)
+		{
+			MatchStatus mstate = match.getCurrentState();
+			if (mstate.isBeforeMatch()) return false;
+			return !mstate.isBeforeMatch() && !active();
+		}
 	}
 
 	/**
