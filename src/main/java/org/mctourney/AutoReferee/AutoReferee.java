@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -434,6 +435,8 @@ public class AutoReferee extends JavaPlugin
 	{
 		if (sender instanceof Player)
 			return ((Player) sender).getWorld();
+		if (sender instanceof BlockCommandSender)
+			return ((BlockCommandSender) sender).getBlock().getWorld();
 		return getConsoleWorld();
 	}
 
