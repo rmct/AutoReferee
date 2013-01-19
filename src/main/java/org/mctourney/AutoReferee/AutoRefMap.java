@@ -162,17 +162,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	 * @throws IOException if map download fails
 	 */
 	public static AutoRefMatch createMatch(String map, String world) throws IOException
-	{
-		// add a match object now marked as temporary
-		AutoReferee plugin = AutoReferee.getInstance();
-		World w = createMatchWorld(map, world);
-
-		if (w == null) return null;
-
-		// return the added temporary match
-		AutoRefMatch match = new AutoRefMatch(w, true);
-		plugin.addMatch(match); return match;
-	}
+	{ return createMatch(AutoRefMap.getMap(map), world); }
 
 	/**
 	 * Creates match object given map name and an optional custom world name.
@@ -576,6 +566,9 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 			AutoRefMatch match = null;
 			try { match = AutoRefMap.createMatch(this.map, this.custom); }
 			catch (IOException e) {  }
+
+			AutoReferee.getInstance().getLogger().info(sender.getName() +
+				" loaded " + match.getVersionString());
 
 			sender.sendMessage(ChatColor.DARK_GRAY + match.getVersionString() + " setup!");
 			if (sender instanceof Player) ((Player) sender).teleport(match.getWorldSpawn());
