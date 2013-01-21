@@ -167,6 +167,11 @@ public class CombatListener implements Listener
 				if (apl != null) apl.incrementShotsHit();
 			}
 
+			// spectators cannot cause damage to any entity
+			if (match.getCurrentState().inProgress() &&
+				null != damager && match.isSpectator(damager))
+			{ event.setCancelled(true); return; }
+
 			// if either of these aren't players, nothing to do here
 			if (null == damager || null == damaged) return;
 
