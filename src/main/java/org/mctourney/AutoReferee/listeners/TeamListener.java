@@ -217,11 +217,13 @@ public class TeamListener implements Listener
 				// load the world named on the sign
 				if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
 				{
+					// cancel the event only if its a right click
+					event.setCancelled(true);
+
 					player.sendMessage(ChatColor.GREEN + "Please wait...");
 					String mapName = lines[1] + " " + lines[2] + " " + lines[3];
 					AutoRefMap.loadMap(player, mapName.trim(), null);
 				}
-				event.setCancelled(true);
 			}
 		}
 	}
