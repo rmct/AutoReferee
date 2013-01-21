@@ -818,6 +818,14 @@ public class AutoRefMatch
 		return players;
 	}
 
+	public Set<AutoRefPlayer> getCachedPlayers()
+	{
+		Set<AutoRefPlayer> players = Sets.newHashSet();
+		for (AutoRefTeam team : teams)
+			players.addAll(team.getCachedPlayers());
+		return players;
+	}
+
 	/**
 	 * Gets all non-streamer referees present in this match.
 	 *

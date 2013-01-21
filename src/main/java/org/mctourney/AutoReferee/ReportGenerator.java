@@ -339,7 +339,7 @@ public class ReportGenerator
 
 	private static String getPlayerStats(AutoRefMatch match)
 	{
-		List<AutoRefPlayer> players = Lists.newArrayList(match.getPlayers());
+		List<AutoRefPlayer> players = Lists.newArrayList(match.getCachedPlayers());
 		Collections.sort(players, new Comparator<AutoRefPlayer>()
 		{
 			public int compare(AutoRefPlayer apl1, AutoRefPlayer apl2)
