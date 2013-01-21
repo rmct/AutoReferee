@@ -2392,7 +2392,7 @@ public class AutoRefMatch
 		for (AutoRefPlayer a : getPlayers())
 		{
 			Player pl = a.getPlayer();
-			if (pl == null) continue;
+			if (pl == null || pl.getWorld() != loc.getWorld()) continue;
 
 			double d = loc.distanceSquared(pl.getLocation());
 			if (d < distance) { apl = a; distance = d; }
