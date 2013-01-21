@@ -1,5 +1,7 @@
 package org.mctourney.AutoReferee.commands;
 
+import java.util.List;
+
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -18,6 +20,8 @@ import org.mctourney.AutoReferee.util.commands.AutoRefPermission;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
+
+import com.google.common.collect.Lists;
 
 public class PlayerCommands
 {
@@ -100,13 +104,32 @@ public class PlayerCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"joinmatch"}, argmin=1, argmax=1)
+	@AutoRefCommand(name={"joinmatch"}, argmin=0, argmax=1)
 	@AutoRefPermission(console=false)
 
 	public boolean joinMatch(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
 		// if the plugin is running in auto-mode, quit
 		if (plugin.isAutoMode()) return false;
+
+		if (args.length == 0)
+		{
+			sender.sendMessage(ChatColor.DARK_GRAY + "Available matches:");
+			List<String> lines = Lists.newLinkedList();
+
+			for (AutoRefMatch m : plugin.getMatches())
+			{
+				List<Player> players = m.getWorld().getPlayers();
+				if (m.access == AutoRefMatch.AccessType.PUBLIC && players.size() > 0)
+					lines.add("* " + ChatColor.GRAY + m.getMapName() + " v" + m.getMapVersion() +
+						ChatColor.RESET + " with " + ChatColor.RED + players.get(0).getName());
+			}
+
+			if (lines.size() == 0) sender.sendMessage(ChatColor.GRAY + "None available. Create one now!");
+			else for (String line : lines) sender.sendMessage(line);
+
+			return true;
+		}
 
 		// if the player is preoccupied, don't let this happen
 		if (match != null && match.isPlayer((OfflinePlayer) sender) &&
@@ -119,9 +142,12 @@ public class PlayerCommands
 		// the match we are interested in is the match they are trying to join
 		match = plugin.getMatch(player.getWorld());
 
-		if (!sender.hasPermission("autoreferee.referee") && match.access != AutoRefMatch.AccessType.PUBLIC)
-			sender.sendMessage(ChatColor.RED + "You do not have permission to join this match.");
-		else match.joinMatch((Player) sender);
+		if (match != null)
+		{
+			if (!sender.hasPermission("autoreferee.referee") && match.access != AutoRefMatch.AccessType.PUBLIC)
+				sender.sendMessage(ChatColor.RED + "You do not have permission to join this match.");
+			else match.joinMatch((Player) sender);
+		}
 		return true;
 	}
 
@@ -141,7 +167,7 @@ public class PlayerCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"setaccess"}, argmin=1, argmax=1)
+	@AutoRefCommand(name={"setaccess"}, argmin=1, argmax=1, options="q")
 	@AutoRefPermission(console=true)
 
 	public boolean setAccess(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -154,7 +180,16 @@ public class PlayerCommands
 		catch (Exception e) { return true; }
 
 		if (access != null) match.access = access;
-		sender.sendMessage("This match is now " + match.access.name());
+		sender.sendMessage(ChatColor.DARK_GRAY + "This match is now " + ChatColor.RED + match.access.name());
+
+		if (access == AutoRefMatch.AccessType.PUBLIC && sender instanceof Player && !options.hasOption('q') &&
+			plugin.getLobbyWorld() != null) for (Player p : plugin.getLobbyWorld().getPlayers())
+		{
+			p.sendMessage(ChatColor.DARK_GRAY + sender.getName() + "'s " + match.getMapName() + " is now public");
+			p.sendMessage(ChatColor.DARK_GRAY + "Type " + ChatColor.RED + "/joinmatch " + sender.getName() +
+				ChatColor.DARK_GRAY + " to join!");
+		}
+
 		return true;
 	}
 
