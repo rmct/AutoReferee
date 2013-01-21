@@ -751,7 +751,7 @@ public class AutoRefPlayer
 					if (bgoal.getItemStatus() == AutoRefGoal.ItemStatus.NONE && newCarrying.contains(bgoal.getItem()))
 					{
 						// generate a transcript event for seeing the box
-						String m = String.format("%s is carrying %s", getName(), bgoal.getItem().getName());
+						String m = String.format("%s is carrying %s", getName(), bgoal.getItem().getDisplayName());
 						getTeam().getMatch().addEvent(new TranscriptEvent(getTeam().getMatch(),
 							TranscriptEvent.EventType.OBJECTIVE_FOUND, m, getLocation(), this, bgoal.getItem()));
 						this.addPoints(AchievementPoints.OBJECTIVE_FOUND);
