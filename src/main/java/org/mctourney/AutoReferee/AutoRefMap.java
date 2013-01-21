@@ -567,7 +567,8 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 			try { match = AutoRefMap.createMatch(this.map, this.custom); }
 			catch (IOException e) {  }
 
-			AutoReferee.getInstance().getLogger().info(sender.getName() +
+			AutoReferee plugin = AutoReferee.getInstance();
+			plugin.getLogger().info(sender.getName() +
 				" loaded " + match.getVersionString());
 
 			sender.sendMessage(ChatColor.DARK_GRAY + match.getVersionString() + " setup!");

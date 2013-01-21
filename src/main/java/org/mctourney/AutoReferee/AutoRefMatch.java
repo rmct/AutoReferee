@@ -124,7 +124,7 @@ public class AutoRefMatch
 
 	// world this match is taking place on
 	private World primaryWorld;
-	private Location worldSpawn = null;
+	private AutoRefRegion worldSpawn = null;
 
 	private void setPrimaryWorld(World w)
 	{
@@ -135,12 +135,9 @@ public class AutoRefMatch
 
 	public void setWorldSpawn(Location loc)
 	{
-		worldSpawn = loc;
-		while (worldSpawn.getWorld().getBlockTypeIdAt(worldSpawn) != Material.AIR.getId())
-			worldSpawn = worldSpawn.add(0, 1, 0);
-
-		worldSpawn.getWorld().setSpawnLocation(worldSpawn.getBlockX(),
-			worldSpawn.getBlockY(), worldSpawn.getBlockZ());
+		while (loc.getWorld().getBlockTypeIdAt(loc) != Material.AIR.getId()) loc = loc.add(0, 1, 0);
+		worldSpawn = new org.mctourney.AutoReferee.regions.PointRegion(loc);
+		loc.getWorld().setSpawnLocation(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 	}
 
 	/**
@@ -160,7 +157,7 @@ public class AutoRefMatch
 	 * @return global spawn location
 	 */
 	public Location getWorldSpawn()
-	{ return worldSpawn; }
+	{ return worldSpawn.getRandomLocation(); }
 
 	private boolean tmp;
 
