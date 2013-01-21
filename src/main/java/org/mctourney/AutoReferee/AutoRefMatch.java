@@ -1056,6 +1056,12 @@ public class AutoRefMatch
 				rmode = RespawnMode.valueOf(rtext.toUpperCase());
 			setRespawnMode(rmode == null ? RespawnMode.ALLOW : rmode);
 		}
+
+		if (gameplay.getChild("nocraft") != null)
+		{
+			for (Element item : gameplay.getChild("nocraft").getChildren("item"))
+				this.addIllegalCraft(BlockData.unserialize(item.getAttributeValue("id")));
+		}
 	}
 
 	/**
@@ -1138,6 +1144,22 @@ public class AutoRefMatch
 			eMechanisms.removeContent();
 			for (StartMechanism mech : this.startMechanisms)
 				eMechanisms.addContent(mech.toElement());
+
+			Element eGameplay = worldConfig.getChild("gameplay");
+			if (eGameplay == null) worldConfig.addContent(eGameplay = new Element("gameplay"));
+
+			if (this.prohibitCraft.size() > 0)
+			{
+				Element eNoCraft = eGameplay.getChild("nocraft");
+				if (eNoCraft == null) eGameplay.addContent(eNoCraft = new Element("nocraft"));
+
+				eNoCraft.removeContent();
+				for (BlockData bd : prohibitCraft)
+				{
+					Element nocraft = new Element("item").setText(bd.getName());
+					eNoCraft.addContent(nocraft.setAttribute("id", bd.serialize()));
+				}
+			}
 		}
 
 		// save the configuration file back to the original filename
