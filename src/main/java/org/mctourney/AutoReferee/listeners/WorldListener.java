@@ -4,18 +4,25 @@ import java.util.Map;
 
 import org.bukkit.GameMode;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.command.BlockCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.world.WorldEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.plugin.Plugin;
 
 import org.apache.commons.collections.map.DefaultedMap;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.text.StrMatcher;
+import org.apache.commons.lang.text.StrTokenizer;
 
 import org.mctourney.AutoReferee.AutoRefMatch;
 import org.mctourney.AutoReferee.AutoReferee;
@@ -41,6 +48,22 @@ public class WorldListener implements Listener
 	private void checkLoadedWorld(WorldEvent event)
 	{
 		AutoRefMatch.setupWorld(event.getWorld(), false);
+	}
+
+	@EventHandler(priority=EventPriority.LOWEST)
+	public void commandBlockCommandEvent(ServerCommandEvent event)
+	{
+		if (!(event.getSender() instanceof BlockCommandSender)) return;
+		Block commandBlock = ((BlockCommandSender) event.getSender()).getBlock();
+
+		AutoRefMatch match = plugin.getMatch(commandBlock.getWorld());
+		if (match == null) return;
+
+		if (event.getCommand().startsWith("say"))
+		{
+			match.broadcast(event.getCommand().substring(3).trim());
+			event.setCommand(null); return;
+		}
 	}
 
 	@EventHandler
