@@ -109,14 +109,16 @@ public class CombatListener implements Listener
 					if (((EnderPearl) e).getShooter() == victim) e.remove();
 
 			// handle respawn modes
+			Location bedloc = victim.getBedSpawnLocation();
 			switch (match.getRespawnMode())
 			{
 				case BEDSONLY:
 					// INTENTIONAL FALL-THROUGH HERE!
-					if (victim.getBedSpawnLocation() != null) break;
+					if (bedloc != null && bedloc.getBlock().getType() == Material.BED_BLOCK) break;
 
 				case DISALLOW:
-					match.eliminatePlayer((Player) event.getEntity());
+					if (match.getCurrentState().inProgress())
+						match.eliminatePlayer((Player) event.getEntity());
 					break;
 
 				// typically, no action should be taken
