@@ -2730,7 +2730,6 @@ public class AutoRefMatch
 	 */
 	public String colorMessage(String message)
 	{
-		message = ChatColor.stripColor(message);
 		for (AutoRefPlayer apl : getPlayers()) if (apl != null)
 			message = message.replaceAll(apl.getName(), apl.getDisplayName());
 		return ChatColor.RESET + message;
