@@ -184,7 +184,7 @@ public class TeamListener implements Listener
 			apl.setLastLogoutLocation(player.getLocation());
 
 		// if this player was damaged recently (during the match), notify
-		if (match.getCurrentState().inProgress() && apl != null && apl.wasDamagedRecently())
+		if (match.getCurrentState().inProgress() && apl != null && !apl.isDead() && apl.wasDamagedRecently())
 		{
 			String message = apl.getDisplayName() + ChatColor.GRAY + " logged out during combat " +
 				String.format("with %2.1f hearts remaining", apl.getPlayer().getHealth() / 2.0);

@@ -71,6 +71,14 @@ public class AutoRefPlayer
 	{ return AutoReferee.getInstance().getServer().getOfflinePlayer(pname).isOnline(); }
 
 	/**
+	 * Checks if the player is dead.
+	 *
+	 * @return true if player is dead, otherwise false
+	 */
+	public boolean isDead()
+	{ return currentHealth <= 0; }
+
+	/**
 	 * Gets raw player name.
 	 *
 	 * @return player name
