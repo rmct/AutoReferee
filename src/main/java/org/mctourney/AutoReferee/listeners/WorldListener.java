@@ -2,6 +2,7 @@ package org.mctourney.AutoReferee.listeners;
 
 import java.util.Map;
 
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -20,9 +21,6 @@ import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.plugin.Plugin;
 
 import org.apache.commons.collections.map.DefaultedMap;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.text.StrMatcher;
-import org.apache.commons.lang.text.StrTokenizer;
 
 import org.mctourney.AutoReferee.AutoRefMatch;
 import org.mctourney.AutoReferee.AutoReferee;
@@ -61,8 +59,9 @@ public class WorldListener implements Listener
 
 		if (event.getCommand().startsWith("say"))
 		{
-			match.broadcast(event.getCommand().substring(3).trim());
-			event.setCommand(null); return;
+			match.broadcast(ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + "[@] " +
+				ChatColor.RESET + event.getCommand().substring(3).trim());
+			event.setCommand(""); return;
 		}
 	}
 
