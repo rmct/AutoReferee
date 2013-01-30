@@ -96,7 +96,7 @@ public class RefereeCommands
 		{
 			AutoRefPlayer apl = match.getPlayer(options.getOptionValue('b'));
 			Location bedloc = apl == null ? null : apl.getBedLocation();
-			if (bedloc == null || bedloc.getBlock().getType() != Material.BED_BLOCK)
+			if (bedloc == null)
 			{
 				player.sendMessage(apl.getDisplayName() + ChatColor.DARK_GRAY + " does not have a bed set.");
 				return true;

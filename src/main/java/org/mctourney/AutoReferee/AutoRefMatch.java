@@ -157,7 +157,7 @@ public class AutoRefMatch
 	 * @return global spawn location
 	 */
 	public Location getWorldSpawn()
-	{ return worldSpawn.getRandomLocation(); }
+	{ return worldSpawn.getLocation(); }
 
 	private boolean tmp;
 

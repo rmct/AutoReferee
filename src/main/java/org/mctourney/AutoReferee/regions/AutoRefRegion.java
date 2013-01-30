@@ -11,6 +11,8 @@ import org.jdom2.Element;
 
 import org.mctourney.AutoReferee.AutoRefMatch;
 import org.mctourney.AutoReferee.AutoRefTeam;
+import org.mctourney.AutoReferee.AutoReferee;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 

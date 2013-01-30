@@ -361,8 +361,7 @@ public class AutoRefPlayer
 	public Location getBedLocation()
 	{
 		Player pl = getPlayer();
-		if (pl == null) return null;
-		return pl.getBedSpawnLocation();
+		return pl == null ? null : pl.getBedSpawnLocation();
 	}
 
 	private Location lastDeathLocation = null;

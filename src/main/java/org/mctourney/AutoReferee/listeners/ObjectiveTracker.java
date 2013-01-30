@@ -21,6 +21,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMatch;
+import org.mctourney.AutoReferee.AutoRefMatch.RespawnMode;
 import org.mctourney.AutoReferee.AutoRefPlayer;
 import org.mctourney.AutoReferee.AutoRefTeam;
 import org.mctourney.AutoReferee.goals.AutoRefGoal;
@@ -243,8 +244,13 @@ public class ObjectiveTracker implements Listener
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void playerRespawn(PlayerRespawnEvent event)
 	{
-		inventoryChange(event.getPlayer());
-		healthArmorChange(event.getPlayer());
+		Player player = event.getPlayer();
+		inventoryChange(player);
+		healthArmorChange(player);
+
+		AutoRefMatch match = plugin.getMatch(event.getRespawnLocation().getWorld());
+		if (match != null && match.getRespawnMode() == RespawnMode.BEDSONLY)
+			if (player.getBedSpawnLocation() == null) match.eliminatePlayer(player);
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
