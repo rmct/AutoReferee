@@ -590,7 +590,8 @@ public class AutoReferee extends JavaPlugin
 	public static void setOverheadName(Player player, String overheadName)
 	{
 		if (mSetOverheadName != null) try
-		{ mSetOverheadName.invoke(player, overheadName); }
+		{ mSetOverheadName.invoke(player, overheadName.trim()
+			.replaceAll(ChatColor.RESET.toString(), "")); }
 		catch (Exception e) {  }
 	}
 }
