@@ -71,47 +71,48 @@ public class TeleportationUtil
 		return res;
 	}
 
-	private static Set<Material> passableBlocks;
-	static
-	{
-		passableBlocks = Sets.newHashSet();
-		passableBlocks.add(Material.AIR);
-		passableBlocks.add(Material.DEAD_BUSH);
-		passableBlocks.add(Material.DIODE_BLOCK_ON);
-		passableBlocks.add(Material.DIODE_BLOCK_OFF);
-		passableBlocks.add(Material.LADDER);
-		passableBlocks.add(Material.LEVER);
-		passableBlocks.add(Material.LONG_GRASS);
-		passableBlocks.add(Material.MELON_STEM);
-		passableBlocks.add(Material.NETHER_STALK);
-		passableBlocks.add(Material.NETHER_WARTS);
-		passableBlocks.add(Material.POWERED_RAIL);
-		passableBlocks.add(Material.PUMPKIN_STEM);
-		passableBlocks.add(Material.RAILS);
-		passableBlocks.add(Material.RED_ROSE);
-		passableBlocks.add(Material.REDSTONE_TORCH_ON);
-		passableBlocks.add(Material.REDSTONE_TORCH_OFF);
-		passableBlocks.add(Material.REDSTONE_WIRE);
-		passableBlocks.add(Material.SAPLING);
-		passableBlocks.add(Material.SIGN);
-		passableBlocks.add(Material.SIGN_POST);
-		passableBlocks.add(Material.SNOW);
-		passableBlocks.add(Material.STATIONARY_WATER);
-		passableBlocks.add(Material.STONE_BUTTON);
-		passableBlocks.add(Material.STONE_PLATE);
-		passableBlocks.add(Material.TORCH);
-		passableBlocks.add(Material.TRIPWIRE);
-		passableBlocks.add(Material.TRIPWIRE_HOOK);
-		passableBlocks.add(Material.VINE);
-		passableBlocks.add(Material.WALL_SIGN);
-		passableBlocks.add(Material.WATER);
-		passableBlocks.add(Material.WATER_LILY);
-		passableBlocks.add(Material.WOOD_PLATE);
-		passableBlocks.add(Material.YELLOW_FLOWER);
-	}
+	private static Set<Material> passableBlocks = Sets.newHashSet
+	(	Material.AIR
+	,	Material.DEAD_BUSH
+	,	Material.DIODE_BLOCK_ON
+	,	Material.DIODE_BLOCK_OFF
+	,	Material.LADDER
+	,	Material.LEVER
+	,	Material.LONG_GRASS
+	,	Material.MELON_STEM
+	,	Material.NETHER_STALK
+	,	Material.NETHER_WARTS
+	,	Material.POWERED_RAIL
+	,	Material.PUMPKIN_STEM
+	,	Material.RAILS
+	,	Material.RED_ROSE
+	,	Material.REDSTONE_TORCH_ON
+	,	Material.REDSTONE_TORCH_OFF
+	,	Material.REDSTONE_WIRE
+	,	Material.SAPLING
+	,	Material.SIGN
+	,	Material.SIGN_POST
+	,	Material.SNOW
+	,	Material.STATIONARY_WATER
+	,	Material.STONE_BUTTON
+	,	Material.STONE_PLATE
+	,	Material.TORCH
+	,	Material.TRIPWIRE
+	,	Material.TRIPWIRE_HOOK
+	,	Material.VINE
+	,	Material.WALL_SIGN
+	,	Material.WATER
+	,	Material.WATER_LILY
+	,	Material.WOOD_PLATE
+	,	Material.YELLOW_FLOWER
+	);
 
 	private static boolean isBlockPassable(Block b)
 	{ return passableBlocks.contains(b.getType()); }
+
+	public static boolean safeLocation(Location loc)
+	{ return isBlockPassable(loc.getBlock()) &&
+		isBlockPassable(loc.getBlock().getRelative(0, 1, 0)); }
 
 	private static final int teleportDistance = 4;
 	private static Location checkDirection(Location loc, Vector v)
@@ -153,13 +154,10 @@ public class TeleportationUtil
 		return d < 0 ? best : best.subtract(0, 1, 0);
 	}
 
-	private static Set<Vector> directions;
-	static
-	{
-		directions = Sets.newHashSet();
-		directions.add(new Vector( 0,  0,  1));
-		directions.add(new Vector( 0,  0, -1));
-		directions.add(new Vector( 1,  0,  0));
-		directions.add(new Vector(-1,  0,  0));
-	}
+	private static Set<Vector> directions = Sets.newHashSet
+	(	new Vector( 0,  0,  1)
+	,	new Vector( 0,  0, -1)
+	,	new Vector( 1,  0,  0)
+	,	new Vector(-1,  0,  0)
+	);
 }
