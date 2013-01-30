@@ -569,7 +569,7 @@ public class ZoneListener implements Listener
 	}
 
 	@EventHandler
-	public void safezoneExplosion(EntityExplodeEvent event)
+	public void explosion(EntityExplodeEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
 		if (match == null) return;
@@ -578,7 +578,7 @@ public class ZoneListener implements Listener
 		blockloop: while (iter.hasNext())
 		{
 			Block b = iter.next();
-			if (match.isSafeZone(b.getLocation()))
+			if (match.hasFlag(b.getLocation(), AutoRefRegion.Flag.NO_EXPLOSIONS))
 			{ iter.remove(); continue blockloop; }
 		}
 	}

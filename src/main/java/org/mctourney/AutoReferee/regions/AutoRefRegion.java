@@ -18,18 +18,24 @@ public abstract class AutoRefRegion
 {
 	private Random random = new Random();
 
-	public enum Flag
+	public static enum Flag
 	{
 		// - no place/break blocks
 		// - no fill/empty buckets
-		NO_BUILD(1 << 0, "nobuild", 'b'),
+		NO_BUILD(1 << 0, "nobuild", 'b', true),
 
 		// - negative region, used for fine tuning access controls
-		NO_ENTRY(1 << 1, "noentry", 'n'),
+		NO_ENTRY(1 << 1, "noentry", 'n', true),
 
 		// - no mob spawns
 		// - mobs will not track players in these regions
-		SAFE(1 << 2, "safe", 's');
+		SAFE(1 << 2, "safe", 's', false),
+
+		// - explosions will not damage blocks
+		NO_EXPLOSIONS(1 << 3, "noexplosion", 'e', false);
+
+		// generated from above values
+		public static final String OPTIONS = "bnse";
 
 		// value for the flag set
 		private int value;
@@ -53,8 +59,10 @@ public abstract class AutoRefRegion
 
 		public char getMark() { return mark; }
 
-		Flag(int val, String name, char c)
-		{ this.value = val; this.name = name; this.mark = c; }
+		public boolean defaultValue;
+
+		Flag(int val, String name, char c, boolean def)
+		{ this.value = val; this.name = name; this.mark = c; this.defaultValue = def; }
 
 		public static Flag fromChar(char c)
 		{

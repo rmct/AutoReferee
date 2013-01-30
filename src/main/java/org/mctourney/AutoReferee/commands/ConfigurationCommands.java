@@ -228,7 +228,7 @@ public class ConfigurationCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"zone"}, argmin=0, options="bnsxS")
+	@AutoRefCommand(name={"zone"}, argmin=0, options=AutoRefRegion.Flag.OPTIONS + "XS")
 	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
 
 	public boolean setupZone(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)

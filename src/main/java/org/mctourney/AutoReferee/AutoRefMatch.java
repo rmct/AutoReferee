@@ -324,6 +324,15 @@ public class AutoRefMatch
 	public void addStartRegion(AutoRefRegion reg)
 	{ this.startRegions.add(reg); }
 
+	private Set<AutoRefRegion.Flag> startRegionFlags = Sets.newHashSet
+	(	AutoRefRegion.Flag.NO_BUILD
+	,	AutoRefRegion.Flag.SAFE
+	,	AutoRefRegion.Flag.NO_EXPLOSIONS
+	);
+
+	public Set<AutoRefRegion.Flag> getStartRegionFlags()
+	{ return Collections.unmodifiableSet(startRegionFlags); }
+
 	public double distanceToStartRegion(Location loc)
 	{
 		double dist = Double.MAX_VALUE;
