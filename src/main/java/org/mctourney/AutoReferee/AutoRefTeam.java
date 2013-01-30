@@ -243,7 +243,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	 * Gets this team's spawn location.
 	 */
 	public Location getSpawnLocation()
-	{ return spawn == null ? match.getWorldSpawn() : spawn.getRandomLocation(); }
+	{ return spawn == null ? match.getWorldSpawn() : spawn.getLocation(); }
 
 	private Set<AutoRefGoal> goals = Sets.newHashSet();
 

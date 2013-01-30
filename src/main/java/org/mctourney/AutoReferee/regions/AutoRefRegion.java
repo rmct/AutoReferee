@@ -94,13 +94,13 @@ public abstract class AutoRefRegion
 
 	public abstract Element toElement();
 
-	public Location getRandomLocation()
+	public Location getLocation()
 	{
 		Location loc = getRandomLocation(random);
 		if (pitch != null) loc.setPitch(pitch);
 		if (yaw != null) loc.setYaw(yaw);
 
-		return loc;
+		return loc.add(0.0, 0.75, 0.0);
 	}
 
 	public boolean contains(Location loc)

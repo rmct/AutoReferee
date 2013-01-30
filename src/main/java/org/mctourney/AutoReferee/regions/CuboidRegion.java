@@ -119,7 +119,7 @@ public class CuboidRegion extends AutoRefRegion
 	@Override
 	public Location getRandomLocation(Random r)
 	{
-		return getMinimumPoint().add(0.0, 0.5, 0.0).add(
+		return getMinimumPoint().add(
 			(x2 - x1 + 1) * r.nextDouble(),
 			(y2 - y1 + 1) * r.nextDouble(),
 			(z2 - z1 + 1) * r.nextDouble());
