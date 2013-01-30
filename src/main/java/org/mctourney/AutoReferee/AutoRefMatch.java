@@ -2345,6 +2345,7 @@ public class AutoRefMatch
 
 		this.broadcast(name + " has been eliminated!");
 		this.ejectPlayer(player);
+		this.checkWinConditions();
 	}
 
 	/**

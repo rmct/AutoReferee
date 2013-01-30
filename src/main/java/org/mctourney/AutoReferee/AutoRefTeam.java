@@ -480,7 +480,6 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		match.setupSpectators();
 		match.checkTeamsReady();
-		match.checkWinConditions();
 
 		return true;
 	}
