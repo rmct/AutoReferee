@@ -532,6 +532,7 @@ public class ZoneListener implements Listener
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void playerTeleport(PlayerTeleportEvent event)
 	{
+		playerMove(event);
 		switch (event.getCause())
 		{
 			case PLUGIN: // if this teleport is caused by a plugin
