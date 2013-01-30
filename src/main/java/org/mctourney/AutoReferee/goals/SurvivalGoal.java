@@ -25,8 +25,8 @@ public class SurvivalGoal extends AutoRefGoal
 	public boolean isSatisfied(AutoRefMatch match)
 	{
 		for (AutoRefTeam team : match.getTeams())
-			if (team != this.getOwner())
-				if (team.getPlayers().size() > 0) return false;
+			if (team != this.getOwner()) if (team.getPlayers().size() > 0 ||
+				team.getCachedPlayers().size() == 0) return false;
 		return true;
 	}
 
