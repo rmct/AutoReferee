@@ -16,9 +16,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <bukkit.version>1.4.6-R0.3</bukkit.version>
-    <bukkit.build.number>2586</bukkit.build.number>
-    <bukkit.build.url>http://dl.bukkit.org/downloads/craftbukkit/view/01774_1.4.6-R0.3</bukkit.build.url>
+    <bukkit.version>1.4.7-R0.1</bukkit.version>
     <java.target.version>1.6</java.target.version>
   </properties>
 
