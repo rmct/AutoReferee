@@ -1617,7 +1617,7 @@ public class AutoRefMatch
 	 * @param block block containing the start mechanism
 	 * @param state whether this mechanism should be set powered or unpowered
 	 * @return generated start mechanism object
-	 * @see http://www.github.com/rmct/SportBukkit
+	 * @see <a href="http://www.github.com/rmct/SportBukkit">SportBukkit</a>
 	 */
 	public StartMechanism addStartMech(Block block, boolean state)
 	{

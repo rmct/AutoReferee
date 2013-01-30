@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
@@ -42,7 +43,6 @@ import org.mctourney.AutoReferee.listeners.TeamListener;
 import org.mctourney.AutoReferee.listeners.WorldListener;
 import org.mctourney.AutoReferee.listeners.ZoneListener;
 import org.mctourney.AutoReferee.util.NullChunkGenerator;
-import org.mctourney.AutoReferee.util.PlayerUtil;
 import org.mctourney.AutoReferee.util.commands.CommandManager;
 import org.mctourney.AutoReferee.util.metrics.IncrementPlotter;
 import org.mctourney.AutoReferee.util.metrics.PieChartGraph;
@@ -547,7 +547,7 @@ public class AutoReferee extends JavaPlugin
 	 * Checks if AutoReferee is installed on a system supporting the SportBukkit API
 	 *
 	 * @return true if SportBukkit is installed, false otherwise
-	 * @see http://www.github.com/ProjectAres/SportBukkit
+	 * @see <a href="http://www.github.com/ProjectAres/SportBukkit">SportBukkit</a>
 	 */
 	public static boolean hasSportBukkitApi()
 	{ return sportBukkitApi; }
@@ -557,7 +557,7 @@ public class AutoReferee extends JavaPlugin
 	 * Uses last_username's affects-spawning API from SportBukkit
 	 *
 	 * @param affectsSpawning Set whether player affects spawning
-	 * @see http://www.github.com/ProjectAres/SportBukkit
+	 * @see <a href="http://www.github.com/ProjectAres/SportBukkit">SportBukkit</a>
 	 */
 	public static void setAffectsSpawning(Player player, boolean affectsSpawning)
 	{
@@ -571,7 +571,7 @@ public class AutoReferee extends JavaPlugin
 	 * Uses last_username's collides-with-entities API from SportBukkit
 	 *
 	 * @param collidesWithEntities Set whether player collides with entities
-	 * @see http://www.github.com/ProjectAres/SportBukkit
+	 * @see <a href="http://www.github.com/ProjectAres/SportBukkit">SportBukkit</a>
 	 */
 	public static void setCollidesWithEntities(Player player, boolean collidesWithEntities)
 	{
@@ -585,7 +585,7 @@ public class AutoReferee extends JavaPlugin
 	 * Uses anxuiz's set-overhead-name API from SportBukkit
 	 *
 	 * @param overheadName New string to display above player's head
-	 * @see http://www.github.com/ProjectAres/SportBukkit
+	 * @see <a href="http://www.github.com/ProjectAres/SportBukkit">SportBukkit</a>
 	 */
 	public static void setOverheadName(Player player, String overheadName)
 	{
