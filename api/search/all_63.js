@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['canbuild',['canBuild',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#a34c58412de345625761a59376315bba9',1,'org::mctourney::AutoReferee::AutoRefTeam']]],
   ['cancelcountdown',['cancelCountdown',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#ad728eefc1e77a98f3edbfabda83148dc',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
   ['cancraft',['canCraft',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a2db3c27d62be2526ba6307582ed05392',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
   ['canenter',['canEnter',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#a4186f6a8417c7f5bccf2cd558b4324b4',1,'org.mctourney.AutoReferee.AutoRefTeam.canEnter(Location loc)'],['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#a50d5cfa6fc0c96c8d31a2a62460702b4',1,'org.mctourney.AutoReferee.AutoRefTeam.canEnter(Location loc, Double distance)']]],

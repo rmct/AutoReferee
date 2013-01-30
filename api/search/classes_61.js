@@ -1,6 +1,7 @@
 var searchData=
 [
   ['autoreferee',['AutoReferee',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html',1,'org::mctourney::AutoReferee']]],
+  ['autorefgoal',['AutoRefGoal',['../classorg_1_1mctourney_1_1_auto_referee_1_1goals_1_1_auto_ref_goal.html',1,'org::mctourney::AutoReferee::goals']]],
   ['autorefmap',['AutoRefMap',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html',1,'org::mctourney::AutoReferee']]],
   ['autorefmatch',['AutoRefMatch',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html',1,'org::mctourney::AutoReferee']]],
   ['autorefplayer',['AutoRefPlayer',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html',1,'org::mctourney::AutoReferee']]],

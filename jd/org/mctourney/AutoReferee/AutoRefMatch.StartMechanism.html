@@ -32,7 +32,7 @@
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.MatchStatus.html" title="enum in org.mctourney.AutoReferee"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.Role.html" title="enum in org.mctourney.AutoReferee"><span class="strong">Prev Class</span></a></li>
 <li><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.TranscriptEvent.html" title="class in org.mctourney.AutoReferee"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
@@ -140,36 +140,48 @@ extends java.lang.Object</pre>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html#equals(java.lang.Object)">equals</a></strong>(java.lang.Object&nbsp;o)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html#active()">active</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>BlockState</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html#getBlockState()">getBlockState</a></strong>()</code>&nbsp;</td>
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html#canFlip(org.mctourney.AutoReferee.AutoRefMatch)">canFlip</a></strong>(<a href="../../../org/mctourney/AutoReferee/AutoRefMatch.html" title="class in org.mctourney.AutoReferee">AutoRefMatch</a>&nbsp;match)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html#getFlippedPosition()">getFlippedPosition</a></strong>()</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html#equals(java.lang.Object)">equals</a></strong>(java.lang.Object&nbsp;o)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>static <a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html" title="class in org.mctourney.AutoReferee">AutoRefMatch.StartMechanism</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html#fromElement(Element, World)">fromElement</a></strong>(Element&nbsp;e,
+           World&nbsp;w)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>BlockState</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html#getBlockState()">getBlockState</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html#getFlippedPosition()">getFlippedPosition</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>Location</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html#getLocation()">getLocation</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html#hashCode()">hashCode</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html#serialize()">serialize</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>Element</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html#toElement()">toElement</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html#toString()">toString</a></strong>()</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>static <a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html" title="class in org.mctourney.AutoReferee">AutoRefMatch.StartMechanism</a></code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html#unserialize(World, java.lang.String)">unserialize</a></strong>(World&nbsp;w,
-           java.lang.String&nbsp;sm)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -220,6 +232,15 @@ extends java.lang.Object</pre>
 <!--   -->
 </a>
 <h3>Method Detail</h3>
+<a name="toElement()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>toElement</h4>
+<pre>public&nbsp;Element&nbsp;toElement()</pre>
+</li>
+</ul>
 <a name="hashCode()">
 <!--   -->
 </a>
@@ -255,14 +276,14 @@ extends java.lang.Object</pre>
 <pre>public&nbsp;java.lang.String&nbsp;serialize()</pre>
 </li>
 </ul>
-<a name="unserialize(World, java.lang.String)">
+<a name="fromElement(Element, World)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>unserialize</h4>
-<pre>public static&nbsp;<a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html" title="class in org.mctourney.AutoReferee">AutoRefMatch.StartMechanism</a>&nbsp;unserialize(World&nbsp;w,
-                                      java.lang.String&nbsp;sm)</pre>
+<h4>fromElement</h4>
+<pre>public static&nbsp;<a href="../../../org/mctourney/AutoReferee/AutoRefMatch.StartMechanism.html" title="class in org.mctourney.AutoReferee">AutoRefMatch.StartMechanism</a>&nbsp;fromElement(Element&nbsp;e,
+                                      World&nbsp;w)</pre>
 </li>
 </ul>
 <a name="toString()">
@@ -299,10 +320,28 @@ extends java.lang.Object</pre>
 <a name="getFlippedPosition()">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>getFlippedPosition</h4>
 <pre>public&nbsp;boolean&nbsp;getFlippedPosition()</pre>
+</li>
+</ul>
+<a name="active()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>active</h4>
+<pre>public&nbsp;boolean&nbsp;active()</pre>
+</li>
+</ul>
+<a name="canFlip(org.mctourney.AutoReferee.AutoRefMatch)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>canFlip</h4>
+<pre>public&nbsp;boolean&nbsp;canFlip(<a href="../../../org/mctourney/AutoReferee/AutoRefMatch.html" title="class in org.mctourney.AutoReferee">AutoRefMatch</a>&nbsp;match)</pre>
 </li>
 </ul>
 </li>
@@ -329,7 +368,7 @@ extends java.lang.Object</pre>
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.MatchStatus.html" title="enum in org.mctourney.AutoReferee"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.Role.html" title="enum in org.mctourney.AutoReferee"><span class="strong">Prev Class</span></a></li>
 <li><a href="../../../org/mctourney/AutoReferee/AutoRefMatch.TranscriptEvent.html" title="class in org.mctourney.AutoReferee"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">

@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['incrementplotter',['IncrementPlotter',['../classorg_1_1mctourney_1_1_auto_referee_1_1util_1_1metrics_1_1_increment_plotter.html',1,'org::mctourney::AutoReferee::util::metrics']]],
   ['incrementshotsfired',['incrementShotsFired',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#aec405dc6f2251f28737e888b30c7f7e9',1,'org::mctourney::AutoReferee::AutoRefPlayer']]],
   ['incrementshotshit',['incrementShotsHit',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#ac3be898f68fd791113ff4e07ee5091e7',1,'org::mctourney::AutoReferee::AutoRefPlayer']]],
   ['inprogress',['inProgress',['../enumorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match_1_1_match_status.html#a89609fba2d8f1a08013c0aa2978afca6',1,'org::mctourney::AutoReferee::AutoRefMatch::MatchStatus']]],
@@ -9,18 +10,18 @@ var searchData=
   ['isbeforematch',['isBeforeMatch',['../enumorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match_1_1_match_status.html#ad5710a26fecedae8d227a32697e5affb',1,'org::mctourney::AutoReferee::AutoRefMatch::MatchStatus']]],
   ['iscompatible',['isCompatible',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a20fe60ff7bc7839b4e68417d6f5c3c82',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
   ['iscountdownrunning',['isCountdownRunning',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#ab7e79a5a791a52fd88a29d9e392b522a',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
+  ['isdead',['isDead',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#ad24736b0fbaafafdf774a89b96ce2b76',1,'org::mctourney::AutoReferee::AutoRefPlayer']]],
   ['isdebugmode',['isDebugMode',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a533399c144480f064495cc1c87b2f6fe',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
   ['isdominating',['isDominating',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#aa22eca8cd8d9e6e60c60dfdf213606e3',1,'org::mctourney::AutoReferee::AutoRefPlayer']]],
   ['isemptyteam',['isEmptyTeam',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#a610e3ac7e957e26d7cf6479d766a6d24',1,'org::mctourney::AutoReferee::AutoRefTeam']]],
   ['isinstalled',['isInstalled',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a7d4ff100aa76848ef60f11ecfc6888ac',1,'org::mctourney::AutoReferee::AutoRefMap']]],
   ['isonline',['isOnline',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a1967d2a17edccb99cc16b709b1a78bfe',1,'org::mctourney::AutoReferee::AutoRefPlayer']]],
-  ['isplayer',['isPlayer',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a458bd1a263aa4debccc71e2ef992be39',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
+  ['isplayer',['isPlayer',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a06ddfa10585251bac827bedfb44b06d0',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
   ['isplayerexpected',['isPlayerExpected',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a953dcc3872752cc98b10b7bfbd9f4d14',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
   ['ispresent',['isPresent',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a35d3a0dcc6178d14196413a341fc073a',1,'org::mctourney::AutoReferee::AutoRefPlayer']]],
   ['isready',['isReady',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#a8052fe36fe0d962648bebf997b6d3c4b',1,'org::mctourney::AutoReferee::AutoRefTeam']]],
   ['isreferee',['isReferee',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a6354a47b3ae274d74375f0a5fd2982da',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
   ['isrefereeready',['isRefereeReady',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#af4a4b8c24a02fdc020a8b351f9ae87e2',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
-  ['issafezone',['isSafeZone',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a58dab111620f686b057ef09e2c7f07ba',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
   ['isspectator',['isSpectator',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a5b8b9cc08c9886985829531b6f609b96',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
   ['isstartmechanism',['isStartMechanism',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#ae90c70e638052f65892f822f78ae04df',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
   ['isstreamer',['isStreamer',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#aa875dae56d85e1b055bff1aeb4e225be',1,'org::mctourney::AutoReferee::AutoRefMatch']]]
