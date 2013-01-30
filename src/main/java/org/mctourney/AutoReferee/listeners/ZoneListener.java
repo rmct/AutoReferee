@@ -52,7 +52,6 @@ import org.mctourney.AutoReferee.AutoRefMatch.StartMechanism;
 import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
 import org.mctourney.AutoReferee.goals.BlockGoal;
 import org.mctourney.AutoReferee.regions.AutoRefRegion;
-import org.mctourney.AutoReferee.regions.AutoRefRegion.Flag;
 import org.mctourney.AutoReferee.util.BlockData;
 import org.mctourney.AutoReferee.util.LocationUtil;
 
@@ -278,6 +277,9 @@ public class ZoneListener implements Listener
 		}
 		else // is spectator
 		{
+			if (!match.isReferee(player) && match.getCurrentState().inProgress())
+				event.setCancelled(true);
+
 			Material type = event.getClickedBlock().getType();
 			if ((type == Material.WOOD_PLATE || type == Material.STONE_PLATE)
 				&& match.getCurrentState().inProgress()) { event.setCancelled(true); return; }
