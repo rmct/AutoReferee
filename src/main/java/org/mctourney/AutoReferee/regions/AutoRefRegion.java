@@ -123,7 +123,7 @@ public abstract class AutoRefRegion
 	{
 		if (elt != null) for (Element c : elt.getChildren())
 			try { flags |= Flag.fromName(c.getName()).getValue(); }
-			catch (Exception e) { e.printStackTrace(); }
+			catch (Exception e) { AutoReferee.log("Unrecognized flag: " + c.getName()); }
 		return this;
 	}
 

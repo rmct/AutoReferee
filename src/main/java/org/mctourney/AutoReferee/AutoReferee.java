@@ -68,7 +68,7 @@ public class AutoReferee extends JavaPlugin
 	public static AutoReferee getInstance()
 	{ return instance; }
 
-	protected void log(String msg)
+	public static void log(String msg)
 	{ getInstance().getLogger().info(msg); }
 
 	// expected configuration version number

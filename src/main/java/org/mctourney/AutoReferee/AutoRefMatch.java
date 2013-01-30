@@ -629,8 +629,7 @@ public class AutoRefMatch
 	public void setDebug(CommandSender recipient)
 	{
 		if (recipient != null && recipient.hasPermission("autoreferee.streamer"))
-			AutoReferee.getInstance().getLogger().info(
-				"You may not direct debug message to a streamer!");
+			AutoReferee.log("You may not direct debug message to a streamer!");
 
 		debugRecipient = recipient;
 		debug(ChatColor.GREEN + "Debug mode is now " +
@@ -998,7 +997,7 @@ public class AutoRefMatch
 		if (goals != null) for (Element teamgoals : goals.getChildren("teamgoals"))
 		{
 			AutoRefTeam team = this.teamNameLookup(teamgoals.getAttributeValue("team"));
-			AutoReferee.getInstance().getLogger().info("Loading goals for " + team.getName());
+			AutoReferee.log("Loading goals for " + team.getName());
 			if (team != null) for (Element gelt : teamgoals.getChildren()) team.addGoal(gelt);
 		}
 
@@ -1056,6 +1055,7 @@ public class AutoRefMatch
 				rmode = RespawnMode.valueOf(rtext.toUpperCase());
 			setRespawnMode(rmode == null ? RespawnMode.ALLOW : rmode);
 		}
+		AutoReferee.log("Respawn mode is " + getRespawnMode().name());
 
 		if (gameplay.getChild("nocraft") != null)
 		{
@@ -1116,10 +1116,7 @@ public class AutoRefMatch
 			// reset the protections to whatever has been saved
 			eProtect.removeContent();
 			for (UUID uid : protectedEntities)
-			{
-				AutoReferee.getInstance().getLogger().info(uid.toString());
 				eProtect.addContent(new Element("entity").setText(uid.toString()));
-			}
 
 			// get the goals object
 			Element eGoals = worldConfig.getChild("goals");
@@ -1171,7 +1168,7 @@ public class AutoRefMatch
 
 		// log errors, report which world did not save
 		catch (java.io.IOException e)
-		{ AutoReferee.getInstance().getLogger().info("Could not save world config: " + primaryWorld.getName()); }
+		{ AutoReferee.log("Could not save world config: " + primaryWorld.getName()); }
 	}
 
 	/**
@@ -1197,7 +1194,7 @@ public class AutoRefMatch
 				msg.getBytes(AutoReferee.PLUGIN_CHANNEL_ENC));
 		}
 		catch (UnsupportedEncodingException e)
-		{ AutoReferee.getInstance().getLogger().info("Unsupported encoding: " + AutoReferee.PLUGIN_CHANNEL_ENC); }
+		{ AutoReferee.log("Unsupported encoding: " + AutoReferee.PLUGIN_CHANNEL_ENC); }
 	}
 
 	/**
@@ -1258,7 +1255,7 @@ public class AutoRefMatch
 	public void broadcast(String msg)
 	{
 		if (AutoReferee.getInstance().isConsoleLoggingEnabled())
-			AutoReferee.getInstance().getLogger().info(ChatColor.stripColor(msg));
+			AutoReferee.log(ChatColor.stripColor(msg));
 		for (Player p : primaryWorld.getPlayers()) p.sendMessage(msg);
 	}
 
@@ -1387,18 +1384,18 @@ public class AutoRefMatch
 		@Override
 		public void run()
 		{
-			AutoReferee autoref = AutoReferee.getInstance();
+			AutoReferee plugin = AutoReferee.getInstance();
 			try
 			{
 				// if we fail, we loop back around again on the next try...
 				FileUtils.deleteDirectory(worldFolder);
-				autoref.getLogger().info(worldFolder.getName() + " deleted!");
+				plugin.getLogger().info(worldFolder.getName() + " deleted!");
 
 				// otherwise, stop the repeating task
 				task.cancel();
 			}
 			catch (IOException e)
-			{ autoref.getLogger().info("File lock held on " + worldFolder.getName()); }
+			{ plugin.getLogger().info("File lock held on " + worldFolder.getName()); }
 		}
 	}
 
@@ -1619,8 +1616,7 @@ public class AutoRefMatch
 		StartMechanism sm = new StartMechanism(block, state);
 		startMechanisms.add(sm);
 
-		AutoReferee.getInstance().getLogger().info(
-			sm.toString() + " is a start mechanism.");
+		AutoReferee.log(sm.toString() + " is a start mechanism.");
 		return sm;
 	}
 
@@ -2144,7 +2140,7 @@ public class AutoRefMatch
 		}
 
 		// let the console know that the match cannot be ruled upon
-		AutoReferee.getInstance().getLogger().info("Match tied. Deferring to referee intervention...");
+		AutoReferee.log("Match tied. Deferring to referee intervention...");
 		cancelClock();
 	}
 
