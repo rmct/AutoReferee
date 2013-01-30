@@ -96,17 +96,8 @@ public abstract class AutoRefRegion
 	public boolean contains(Location loc)
 	{ return distanceToRegion(loc) <= 0.0; }
 
-	private boolean is(Flag flag)
+	public boolean is(Flag flag)
 	{ return 0 != (flag.getValue() & this.flags); }
-
-	public boolean canBuild()
-	{ return !is(Flag.NO_BUILD); }
-
-	public boolean canEnter()
-	{ return !is(Flag.NO_ENTRY); }
-
-	public boolean isSafeZone()
-	{ return is(Flag.SAFE); }
 
 	public Set<Flag> getFlags()
 	{

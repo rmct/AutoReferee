@@ -13,6 +13,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -50,6 +51,8 @@ import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.AutoRefMatch.StartMechanism;
 import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
 import org.mctourney.AutoReferee.goals.BlockGoal;
+import org.mctourney.AutoReferee.regions.AutoRefRegion;
+import org.mctourney.AutoReferee.regions.AutoRefRegion.Flag;
 import org.mctourney.AutoReferee.util.BlockData;
 import org.mctourney.AutoReferee.util.LocationUtil;
 
@@ -215,16 +218,7 @@ public class ZoneListener implements Listener
 	{
 		Player player = event.getPlayer();
 		Location loc = event.getBlock().getLocation();
-
-		AutoRefMatch match = plugin.getMatch(loc.getWorld());
-		if (match == null) return;
-
-		if (!validPlayer(player))
-		{ event.setCancelled(true); return; }
-
-		AutoRefPlayer apl = match.getPlayer(player);
-		if (apl != null && !apl.getTeam().canBuild(loc))
-		{ event.setCancelled(true); return; }
+		locationEvent(event, player, loc);
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
@@ -232,16 +226,7 @@ public class ZoneListener implements Listener
 	{
 		Player player = event.getPlayer();
 		Location loc = event.getBlock().getLocation();
-
-		AutoRefMatch match = plugin.getMatch(loc.getWorld());
-		if (match == null) return;
-
-		if (!validPlayer(player))
-		{ event.setCancelled(true); return; }
-
-		AutoRefPlayer apl = match.getPlayer(player);
-		if (apl != null && !apl.getTeam().canBuild(loc))
-		{ event.setCancelled(true); return; }
+		locationEvent(event, player, loc);
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
@@ -249,16 +234,7 @@ public class ZoneListener implements Listener
 	{
 		Player player = event.getPlayer();
 		Location loc = event.getBlockClicked().getRelative(event.getBlockFace()).getLocation();
-
-		AutoRefMatch match = plugin.getMatch(loc.getWorld());
-		if (match == null) return;
-
-		if (!validPlayer(player))
-		{ event.setCancelled(true); return; }
-
-		AutoRefPlayer apl = match.getPlayer(player);
-		if (apl != null && !apl.getTeam().canBuild(loc))
-		{ event.setCancelled(true); return; }
+		locationEvent(event, player, loc);
 	}
 
 
@@ -267,7 +243,11 @@ public class ZoneListener implements Listener
 	{
 		Player player = event.getPlayer();
 		Location loc = event.getBlockClicked().getRelative(event.getBlockFace()).getLocation();
+		locationEvent(event, player, loc);
+	}
 
+	public void locationEvent(Cancellable event, Player player, Location loc)
+	{
 		AutoRefMatch match = plugin.getMatch(loc.getWorld());
 		if (match == null) return;
 
@@ -275,7 +255,7 @@ public class ZoneListener implements Listener
 		{ event.setCancelled(true); return; }
 
 		AutoRefPlayer apl = match.getPlayer(player);
-		if (apl != null && !apl.getTeam().canBuild(loc))
+		if (apl != null && apl.getTeam().hasFlag(loc, AutoRefRegion.Flag.NO_BUILD))
 		{ event.setCancelled(true); return; }
 	}
 
@@ -392,7 +372,7 @@ public class ZoneListener implements Listener
 				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
 
 				for (AutoRefTeam team : match.getTeams())
-					if (team.canBuild(block.getLocation()))
+					if (!team.hasFlag(block.getLocation(), AutoRefRegion.Flag.NO_BUILD))
 						team.addGoal(new BlockGoal(team, block));
 
 				break;
@@ -518,7 +498,7 @@ public class ZoneListener implements Listener
 		{ event.setCancelled(true); return; }
 
 		// if this is a safe zone, cancel
-		if (match.isSafeZone(event.getLocation()))
+		if (match.hasFlag(event.getLocation(), AutoRefRegion.Flag.SAFE))
 		{ event.setCancelled(true); return; }
 	}
 
@@ -584,7 +564,7 @@ public class ZoneListener implements Listener
 		{ event.setTarget(null); return; }
 
 		if (!match.getCurrentState().inProgress() ||
-			match.isSafeZone(event.getTarget().getLocation()))
+			match.hasFlag(event.getTarget().getLocation(), AutoRefRegion.Flag.SAFE))
 		{ event.setTarget(null); return; }
 	}
 

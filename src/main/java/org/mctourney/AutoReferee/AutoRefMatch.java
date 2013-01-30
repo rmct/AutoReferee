@@ -2433,17 +2433,19 @@ public class AutoRefMatch
 	}
 
 	/**
-	 * Checks if the specified location is inside a "safe" region. While inside a safe region,
-	 * players will not attract mobs. Also, new mobs will never spawn within the safe zone.
+	 * Checks if a region is marked with a specific region flag.
 	 *
-	 * @return true if the location is within a safe zone, otherwise false
+	 * @return true if location contains flag, otherwise false
 	 */
-	public boolean isSafeZone(Location loc)
+	public boolean hasFlag(Location loc, AutoRefRegion.Flag flag)
 	{
-		if (this.inStartRegion(loc)) return true;
-		for (AutoRefTeam team : getTeams()) for (AutoRefRegion reg : team.getRegions())
-			if (reg.contains(loc) && reg.isSafeZone()) return true;
-		return false;
+		// check start region flags
+		if (inStartRegion(loc)) return getStartRegionFlags().contains(flag);
+
+		boolean is = flag.defaultValue; Set<AutoRefRegion> regions = getRegions();
+		if (regions != null) for ( AutoRefRegion reg : regions )
+			if (reg.contains(loc)) { is = false; if (reg.is(flag)) return true; }
+		return is;
 	}
 
 	private class MatchReportSaver implements Runnable

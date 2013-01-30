@@ -522,25 +522,27 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		if (regions != null) for ( AutoRefRegion reg : regions ) if (bestdist > 0)
 		{
 			bestdist = Math.min(bestdist, reg.distanceToRegion(loc));
-			if (!reg.canEnter() && reg.distanceToRegion(loc) <= distance) return false;
+			if (reg.is(AutoRefRegion.Flag.NO_ENTRY) &&
+				reg.distanceToRegion(loc) <= distance) return false;
 		}
 		return bestdist <= distance;
 	}
 
 	/**
-	 * Checks if players on this team can build at a given location.
+	 * Checks if a region is marked with a specific region flag.
 	 *
-	 * @return true if location is valid to build, otherwise false
+	 * @return true if location contains flag, otherwise false
 	 */
-	public boolean canBuild(Location loc)
+	public boolean hasFlag(Location loc, AutoRefRegion.Flag flag)
 	{
-		// start region is a permanent no-build zone
-		if (getMatch().inStartRegion(loc)) return false;
+		// check start region flags
+		if (getMatch().inStartRegion(loc))
+			return getMatch().getStartRegionFlags().contains(flag);
 
-		boolean build = false; Set<AutoRefRegion> regions = getRegions();
+		boolean is = flag.defaultValue; Set<AutoRefRegion> regions = getRegions();
 		if (regions != null) for ( AutoRefRegion reg : regions )
-			if (reg.contains(loc)) { build = true; if (!reg.canBuild()) return false; }
-		return build;
+			if (reg.contains(loc)) { is = false; if (reg.is(flag)) return true; }
+		return is;
 	}
 
 	/**
