@@ -1523,7 +1523,7 @@ public class AutoRefMatch
 	}
 
 	public boolean addRegion(AutoRefRegion reg)
-	{ return !regions.contains(reg) && regions.add(reg); }
+	{ return reg != null && !regions.contains(reg) && regions.add(reg); }
 
 	public boolean removeRegion(AutoRefRegion reg)
 	{ return regions.remove(reg); }
