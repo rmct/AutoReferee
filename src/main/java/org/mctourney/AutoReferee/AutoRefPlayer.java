@@ -534,27 +534,27 @@ public class AutoRefPlayer
 		}
 	}
 
+	private boolean active = false;
+
+	public boolean isActive()
+	{ return active; }
+
+	public void setActive()
+	{ active = true; }
+
 	/**
 	 * Clears the contents of this player's inventory.
 	 */
 	public void clearInventory()
 	{
 		Player p = getPlayer();
-		if (p == null) return;
-
-		// clear the player's inventory
-		p.getInventory().clear();
-
-		// clear the armor slots seperately
-		p.getInventory().setHelmet(null);
-		p.getInventory().setChestplate(null);
-		p.getInventory().setLeggings(null);
-		p.getInventory().setBoots(null);
+		if (p != null) PlayerUtil.clearInventory(p);
 	}
 
 	public void respawn()
 	{
 		this.setExitLocation(null);
+		this.active = false;
 	}
 
 	/**

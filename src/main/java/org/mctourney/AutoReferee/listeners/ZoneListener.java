@@ -150,9 +150,14 @@ public class ZoneListener implements Listener
 		// if a player leaves the start region...
 		if (!match.inStartRegion(event.getTo()))
 		{
-			// if game isn't going yet, they are leaving the start region
-			if (match.getCurrentState().inProgress() && match.inStartRegion(event.getFrom()))
-				apl.reset();
+			if (match.getCurrentState().inProgress())
+			{
+				// if they are leaving the start region, clear everything
+				if (match.inStartRegion(event.getFrom()) && !apl.isActive()) apl.reset();
+
+				// one way or another, the player is now active
+				apl.setActive();
+			}
 
 			else if (match.getCurrentState().isBeforeMatch())
 			{ if (onGround) apl.die(null, false); return; }

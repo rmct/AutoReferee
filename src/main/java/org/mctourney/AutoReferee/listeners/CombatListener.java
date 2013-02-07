@@ -186,10 +186,11 @@ public class CombatListener implements Listener
 			// if the damaged entity was a player
 			if (null != damaged)
 			{
+				AutoRefPlayer apl = match.getPlayer(damaged);
+
 				// if the match is in progress and player is in start region
 				// cancel any damage dealt to the player
-				if (match.getCurrentState().inProgress() &&
-					match.inStartRegion(damaged.getLocation()))
+				if (match.getCurrentState().inProgress() && apl != null && !apl.isActive())
 				{ event.setCancelled(true); return; }
 			}
 
