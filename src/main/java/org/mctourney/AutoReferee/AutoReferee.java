@@ -26,6 +26,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.Messenger;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 
@@ -449,6 +450,8 @@ public class AutoReferee extends JavaPlugin
 		return false;
 	}
 
+	private SyncMessageTask messageQueue = new SyncMessageTask();
+
 	/**
 	 * Force a message to be sent synchronously. Safe to use from an asynchronous task.
 	 *
@@ -456,21 +459,32 @@ public class AutoReferee extends JavaPlugin
 	 */
 	public void sendMessageSync(CommandSender sender, String msg)
 	{
-		getServer().getScheduler().runTask(this, new SyncMessageTask(sender, msg));
+		messageQueue.cancel();
+		messageQueue.addMessage(sender, msg);
+		messageQueue.runTask(this);
 	}
 
-	private class SyncMessageTask implements Runnable
+	private class SyncMessageTask extends BukkitRunnable
 	{
-		private String message = null;
-		private CommandSender sender = null;
+		private class RoutedMessage
+		{
+			public CommandSender sender;
+			public String message;
 
-		public SyncMessageTask(CommandSender sender, String message)
-		{ this.sender = sender; this.message = message; }
+			public RoutedMessage(CommandSender s, String m)
+			{ sender = s; message = m; }
+		}
+
+		private List<RoutedMessage> msgQueue = Lists.newLinkedList();
+
+		public SyncMessageTask addMessage(CommandSender sender, String message)
+		{ msgQueue.add(new RoutedMessage(sender, message)); return this; }
 
 		@Override public void run()
 		{
-			if (this.message != null && this.sender != null)
-				this.sender.sendMessage(this.message);
+			for (RoutedMessage msg : msgQueue)
+				msg.sender.sendMessage(msg.message);
+			msgQueue.clear();
 		}
 	}
 

@@ -4,7 +4,6 @@ import java.awt.image.RenderedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,7 +51,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.material.*;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import org.jdom2.Element;
@@ -212,7 +211,7 @@ public class AutoRefMatch
 		/**
 		 * Match completed.
 		 */
-		COMPLETED;
+		COMPLETED(5*60*20L);
 
 		public long inactiveTicks;
 
@@ -510,7 +509,7 @@ public class AutoRefMatch
 	}
 
 	// task that starts the match
-	private AutoRefMatch.CountdownTask matchStarter = null;
+	private CountdownTask matchStarter = null;
 
 	// mechanisms to open the starting gates
 	private Set<StartMechanism> startMechanisms = Sets.newHashSet();
@@ -769,7 +768,7 @@ public class AutoRefMatch
 		setLastNotificationLocation(loc);
 	}
 
-	private class PlayerCountTask implements Runnable
+	private class PlayerCountTask extends BukkitRunnable
 	{
 		private long lastOccupiedTick = 0;
 
@@ -788,6 +787,8 @@ public class AutoRefMatch
 		}
 	}
 
+	PlayerCountTask countTask = null;
+
 	public AutoRefMatch(World world, boolean tmp, MatchStatus state)
 	{ this(world, tmp); setCurrentState(state); }
 
@@ -795,6 +796,9 @@ public class AutoRefMatch
 	{
 		setPrimaryWorld(world);
 		loadWorldConfiguration();
+
+		// setup player count task (after assigning the world)
+		countTask = new PlayerCountTask();
 
 		// is this world a temporary world?
 		this.tmp = tmp;
@@ -806,8 +810,7 @@ public class AutoRefMatch
 		this.setupSpectators();
 
 		// startup the player count timer (for automatic unloading)
-		Plugin plugin = AutoReferee.getInstance();
-		plugin.getServer().getScheduler().runTaskTimer(plugin, new PlayerCountTask(), 0L, 60*20L);
+		countTask.runTaskTimer(AutoReferee.getInstance(), 0L, 60*20L);
 	}
 
 	/**
@@ -1268,6 +1271,8 @@ public class AutoRefMatch
 		for (Player p : primaryWorld.getPlayers()) p.sendMessage(msg);
 	}
 
+	private SyncBroadcastTask broadcastTask = new SyncBroadcastTask();
+
 	/**
 	 * Force a broadcast to be sent synchronously. Safe to use from an asynchronous task.
 	 *
@@ -1275,19 +1280,24 @@ public class AutoRefMatch
 	 */
 	public void broadcastSync(String msg)
 	{
-		Plugin plugin = AutoReferee.getInstance();
-		plugin.getServer().getScheduler().runTask(plugin, new SyncBroadcastTask(msg));
+		broadcastTask.cancel();
+		broadcastTask.addMessage(msg);
+		broadcastTask.runTask(AutoReferee.getInstance());
 	}
 
-	private class SyncBroadcastTask implements Runnable
+	private class SyncBroadcastTask extends BukkitRunnable
 	{
-		private String message = null;
+		private List<String> msgQueue = Lists.newLinkedList();
 
-		public SyncBroadcastTask(String message)
-		{ this.message = message; }
+		public SyncBroadcastTask addMessage(String message)
+		{ msgQueue.add(message); return this; }
 
 		@Override public void run()
-		{ if (this.message != null) broadcast(this.message); }
+		{
+			for (String msg : msgQueue)
+				AutoRefMatch.this.broadcast(msg);
+			msgQueue.clear();
+		}
 	}
 
 	/**
@@ -1382,10 +1392,9 @@ public class AutoRefMatch
 		return archiveFolder;
 	}
 
-	private class WorldFolderDeleter implements Runnable
+	private class WorldFolderDeleter extends BukkitRunnable
 	{
 		private File worldFolder;
-		public BukkitTask task = null;
 
 		WorldFolderDeleter(World w)
 		{ this.worldFolder = w.getWorldFolder(); }
@@ -1393,18 +1402,18 @@ public class AutoRefMatch
 		@Override
 		public void run()
 		{
-			AutoReferee plugin = AutoReferee.getInstance();
-			try
+			World world = AutoReferee.getInstance().getServer().getWorld(worldFolder.getName());
+			if (world == null && worldFolder.exists()) try
 			{
 				// if we fail, we loop back around again on the next try...
 				FileUtils.deleteDirectory(worldFolder);
-				plugin.getLogger().info(worldFolder.getName() + " deleted!");
-
-				// otherwise, stop the repeating task
-				task.cancel();
+				AutoReferee.log(worldFolder.getName() + " deleted!");
 			}
 			catch (IOException e)
-			{ plugin.getLogger().info("File lock held on " + worldFolder.getName()); }
+			{ AutoReferee.log("File lock held on " + worldFolder.getName()); }
+
+			// stop the repeating task if the file is gone
+			if (!worldFolder.exists()) this.cancel();
 		}
 	}
 
@@ -1449,17 +1458,12 @@ public class AutoRefMatch
 			AutoReferee plugin = AutoReferee.getInstance();
 			if (plugin.isAutoMode() || this.isTemporaryWorld())
 			{
-				// only change the state if we are sure we are going to unload
-				this.setCurrentState(MatchStatus.NONE);
 				plugin.clearMatch(this);
+				this.countTask.cancel();
 
 				plugin.getServer().unloadWorld(primaryWorld, false);
 				if (!plugin.getConfig().getBoolean("save-worlds", false))
-				{
-					WorldFolderDeleter wfd = new WorldFolderDeleter(primaryWorld);
-					wfd.task = plugin.getServer().getScheduler()
-						.runTaskTimer(plugin, wfd, 0L, 10 * 20L);
-				}
+					new WorldFolderDeleter(primaryWorld).runTaskTimer(plugin, 0L, 10 * 20L);
 			}
 		}
 	}
@@ -1747,10 +1751,7 @@ public class AutoRefMatch
 
 		// match minute timer
 		AutoReferee plugin = AutoReferee.getInstance();
-		clockTask = new MatchClockTask();
-
-		clockTask.task = plugin.getServer().getScheduler().runTaskTimer(
-			plugin, clockTask, 60 * 20L, 60 * 20L);
+		clockTask.runTaskTimer(plugin, 60 * 20L, 60 * 20L);
 
 		if (plugin.playedMapsTracker != null)
 			plugin.playedMapsTracker.increment(normalizeMapName(this.getMapName()));
@@ -1760,18 +1761,10 @@ public class AutoRefMatch
 		Sets.newHashSet(60L, 30L, 10L, 5L, 4L, 3L, 2L, 1L);
 
 	// handle to the clock task
-	private MatchClockTask clockTask = null;
+	private MatchClockTask clockTask = new MatchClockTask();
 
-	private void cancelClock()
+	private class MatchClockTask extends BukkitRunnable
 	{
-		if (clockTask != null && clockTask.task != null) clockTask.task.cancel();
-		clockTask = null;
-	}
-
-	private class MatchClockTask implements Runnable
-	{
-		public BukkitTask task;
-
 		public void run()
 		{
 			AutoRefMatch match = AutoRefMatch.this;
@@ -1886,23 +1879,21 @@ public class AutoRefMatch
 	 * @return true if the countdown is in progress, otherwise false
 	 */
 	public boolean isCountdownRunning()
-	{ return matchStarter != null && matchStarter.task != null; }
+	{ return matchStarter != null; }
 
 	/**
 	 * Cancels the match countdown in progress.
 	 */
 	public void cancelCountdown()
 	{
-		if (isCountdownRunning()) matchStarter.task.cancel();
+		if (isCountdownRunning()) matchStarter.cancel();
 		matchStarter = null;
 	}
 
 	// helper class for starting match, synchronous task
-	private static class CountdownTask implements Runnable
+	private static class CountdownTask extends BukkitRunnable
 	{
 		public static final ChatColor COLOR = ChatColor.GREEN;
-
-		public BukkitTask task = null;
 		private int remainingSeconds = 3;
 
 		private AutoRefMatch match = null;
@@ -1940,9 +1931,6 @@ public class AutoRefMatch
 			// count down
 			--remainingSeconds;
 		}
-
-		public int getRemainingSeconds()
-		{ return remainingSeconds; }
 	}
 
 	// prepare this world to start
@@ -1985,17 +1973,12 @@ public class AutoRefMatch
 	 */
 	public void startCountdown(int delay, boolean start)
 	{
-		// get a copy of the bukkit scheduling daemon
-		BukkitScheduler scheduler = AutoReferee.getInstance().getServer().getScheduler();
-
 		// cancel any previous match-start task
-		if (this.matchStarter != null && this.matchStarter.task != null)
-			this.matchStarter.task.cancel();
+		this.cancelCountdown();
 
 		// schedule the task to announce and prepare the match
 		this.matchStarter = new CountdownTask(this, delay, start);
-		this.matchStarter.task = scheduler.runTaskTimer(
-				AutoReferee.getInstance(), this.matchStarter, 0L, 20L);
+		this.matchStarter.runTaskTimer(AutoReferee.getInstance(), 0L, 20L);
 	}
 
 	/**
@@ -2111,7 +2094,7 @@ public class AutoRefMatch
 	}
 
 	// helper class for terminating world, synchronous task
-	private class MatchEndTask implements Runnable
+	private class MatchEndTask extends BukkitRunnable
 	{
 		public void run()
 		{ destroy(); }
@@ -2150,7 +2133,7 @@ public class AutoRefMatch
 
 		// let the console know that the match cannot be ruled upon
 		AutoReferee.log("Match tied. Deferring to referee intervention...");
-		cancelClock();
+		clockTask.cancel();
 	}
 
 	/**
@@ -2192,7 +2175,7 @@ public class AutoRefMatch
 		setWinningTeam(team);
 		logPlayerStats();
 
-		cancelClock();
+		clockTask.cancel();
 
 		// increment the metrics for number of matches played
 		AutoReferee plugin = AutoReferee.getInstance();
@@ -2201,8 +2184,8 @@ public class AutoRefMatch
 		int termDelay = plugin.getConfig().getInt(
 			"delay-seconds.completed", COMPLETED_SECONDS);
 
-		plugin.getServer().getScheduler().runTaskLater(
-			plugin, new MatchEndTask(), termDelay * 20L);
+		if (plugin.getLobbyWorld() != null)
+			new MatchEndTask().runTaskLater(plugin, termDelay * 20L);
 
 		// set the time to day
 		getWorld().setTime(0L);
@@ -2458,7 +2441,7 @@ public class AutoRefMatch
 		return is;
 	}
 
-	private class MatchReportSaver implements Runnable
+	private class MatchReportSaver extends BukkitRunnable
 	{
 		private File localStorage = null;
 		private String webDirectory = null;
@@ -2506,8 +2489,7 @@ public class AutoRefMatch
 	private void logPlayerStats()
 	{
 		// upload WEBSTATS (do via an async query in case uploading the stats lags the main thread)
-		Plugin plugin = AutoReferee.getInstance();
-		plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new MatchReportSaver());
+		new MatchReportSaver().runTaskAsynchronously(AutoReferee.getInstance());
 	}
 
 	private String uploadReport(String report)
