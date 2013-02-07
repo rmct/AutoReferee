@@ -9,10 +9,12 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrMatcher;
 import org.apache.commons.lang.text.StrTokenizer;
+
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -64,12 +66,13 @@ public class CommandManager implements CommandExecutor
 		}
 
 		public boolean execute(CommandSender sender, AutoRefMatch match, String[] args)
-			throws CommandPermissionException
+			throws CommandPermissionException, UnrecognizedOptionException
 		{
 			CommandLineParser parser = new GnuParser();
 			CommandLine cli = null;
 
 			try { cli = parser.parse(commandOptions, args); args = cli.getArgs(); }
+			catch (UnrecognizedOptionException e) { throw e; }
 			catch (ParseException e) { e.printStackTrace(); }
 
 			AutoRefCommand command = method.getAnnotation(AutoRefCommand.class);
@@ -138,6 +141,8 @@ public class CommandManager implements CommandExecutor
 			return handler == null ? false : handler.execute(sender, match, args);
 		}
 		catch (CommandPermissionException e)
+		{ sender.sendMessage(ChatColor.DARK_GRAY + e.getMessage()); return true; }
+		catch (UnrecognizedOptionException e)
 		{ sender.sendMessage(ChatColor.DARK_GRAY + e.getMessage()); return true; }
 	}
 
