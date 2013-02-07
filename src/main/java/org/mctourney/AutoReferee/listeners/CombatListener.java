@@ -87,7 +87,7 @@ public class CombatListener implements Listener
 						if (tntOwner.get(ed.getDamager().getUniqueId()) != vapl)
 						{
 							kapl = tntOwner.get(ed.getDamager().getUniqueId());
-							dmsg = victim.getName() + " was blown up by " + kapl.getName();
+							if (kapl != null) dmsg = victim.getName() + " was blown up by " + kapl.getName();
 						}
 					break;
 				}
