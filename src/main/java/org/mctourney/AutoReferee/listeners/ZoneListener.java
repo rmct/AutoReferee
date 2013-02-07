@@ -122,7 +122,8 @@ public class ZoneListener implements Listener
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
 		if (match == null) return;
 
-		int blockUnder = match.getWorld().getBlockTypeIdAt(event.getTo().add(0.0, -0.1, 0.0));
+		Location locUnder = event.getTo().clone().add(0.0, -0.1, 0.0);
+		int blockUnder = match.getWorld().getBlockTypeIdAt(locUnder);
 		boolean onGround = (blockUnder != Material.AIR.getId());
 
 		AutoRefPlayer apl = match.getPlayer(player);
