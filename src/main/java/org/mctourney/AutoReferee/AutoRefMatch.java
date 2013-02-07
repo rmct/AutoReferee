@@ -2617,6 +2617,9 @@ public class AutoRefMatch
 		private String message;
 
 		public String getMessage()
+		{ return ChatColor.stripColor(message); }
+
+		public String getColoredMessage()
 		{ return message; }
 
 		private Location location;
@@ -2675,7 +2678,7 @@ public class AutoRefMatch
 		}
 
 		ChatColor clr = event.getType().getColor();
-		String message = event.getMessage();
+		String message = event.getColoredMessage();
 
 		if (clr == null) message = colorMessage(message);
 		else message = (clr + message + ChatColor.RESET);
