@@ -202,9 +202,9 @@ public class ZoneListener implements Listener
 
 		Role role = match.getRole(player);
 
-		// if the player is a referee or is creative, nothing is off-limits
+		// if the player is a referee or is flying, nothing is off-limits
 		if (role == Role.REFEREE || (match.getCurrentState().inProgress()
-			&& player.getGameMode() == GameMode.CREATIVE && role == Role.PLAYER)) return true;
+			&& player.isFlying() && role == Role.PLAYER)) return true;
 
 		// if the match isn't currently in progress, a player should
 		// not be allowed to place or destroy blocks anywhere
