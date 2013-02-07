@@ -114,8 +114,9 @@ public class BlockData
 		String bname = getMaterial().name().replaceAll("_+", " ");
 		if ((getMaterial().getNewData((byte) 0) instanceof Colorable))
 		{
-			DyeColor color = DyeColor.getByData(getData());
+			DyeColor color = DyeColor.getByWoolData(getData());
 			ChatColor chatColor = ColorConverter.dyeToChat(color);
+
 			String colorName = color.name().replaceAll("_+", " ");
 			bname = chatColor + colorName + " " + bname + ChatColor.RESET;
 

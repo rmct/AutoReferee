@@ -187,22 +187,22 @@ public class ReportGenerator
 
 	static
 	{
-		terrain_png.put(new BlockData(Material.WOOL, DyeColor.WHITE.getData()), 4 * 16 + 0);
-		terrain_png.put(new BlockData(Material.WOOL, DyeColor.BLACK.getData()), 7 * 16 + 1);
-		terrain_png.put(new BlockData(Material.WOOL, DyeColor.GRAY.getData()), 7 * 16 + 2);
-		terrain_png.put(new BlockData(Material.WOOL, DyeColor.RED.getData()), 8 * 16 + 1);
-		terrain_png.put(new BlockData(Material.WOOL, DyeColor.PINK.getData()), 8 * 16 + 2);
-		terrain_png.put(new BlockData(Material.WOOL, DyeColor.GREEN.getData()), 9 * 16 + 1);
-		terrain_png.put(new BlockData(Material.WOOL, DyeColor.LIME.getData()), 9 * 16 + 2);
-		terrain_png.put(new BlockData(Material.WOOL, DyeColor.BROWN.getData()), 10 * 16 + 1);
-		terrain_png.put(new BlockData(Material.WOOL, DyeColor.YELLOW.getData()), 10 * 16 + 2);
-		terrain_png.put(new BlockData(Material.WOOL, DyeColor.BLUE.getData()), 11 * 16 + 1);
-		terrain_png.put(new BlockData(Material.WOOL, DyeColor.LIGHT_BLUE.getData()), 11 * 16 + 2);
-		terrain_png.put(new BlockData(Material.WOOL, DyeColor.PURPLE.getData()), 12 * 16 + 1);
-		terrain_png.put(new BlockData(Material.WOOL, DyeColor.MAGENTA.getData()), 12 * 16 + 2);
-		terrain_png.put(new BlockData(Material.WOOL, DyeColor.CYAN.getData()), 13 * 16 + 1);
-		terrain_png.put(new BlockData(Material.WOOL, DyeColor.ORANGE.getData()), 13 * 16 + 2);
-		terrain_png.put(new BlockData(Material.WOOL, DyeColor.SILVER.getData()), 14 * 16 + 1);
+		terrain_png.put(new BlockData(Material.WOOL, DyeColor.WHITE.getWoolData()), 4 * 16 + 0);
+		terrain_png.put(new BlockData(Material.WOOL, DyeColor.BLACK.getWoolData()), 7 * 16 + 1);
+		terrain_png.put(new BlockData(Material.WOOL, DyeColor.GRAY.getWoolData()), 7 * 16 + 2);
+		terrain_png.put(new BlockData(Material.WOOL, DyeColor.RED.getWoolData()), 8 * 16 + 1);
+		terrain_png.put(new BlockData(Material.WOOL, DyeColor.PINK.getWoolData()), 8 * 16 + 2);
+		terrain_png.put(new BlockData(Material.WOOL, DyeColor.GREEN.getWoolData()), 9 * 16 + 1);
+		terrain_png.put(new BlockData(Material.WOOL, DyeColor.LIME.getWoolData()), 9 * 16 + 2);
+		terrain_png.put(new BlockData(Material.WOOL, DyeColor.BROWN.getWoolData()), 10 * 16 + 1);
+		terrain_png.put(new BlockData(Material.WOOL, DyeColor.YELLOW.getWoolData()), 10 * 16 + 2);
+		terrain_png.put(new BlockData(Material.WOOL, DyeColor.BLUE.getWoolData()), 11 * 16 + 1);
+		terrain_png.put(new BlockData(Material.WOOL, DyeColor.LIGHT_BLUE.getWoolData()), 11 * 16 + 2);
+		terrain_png.put(new BlockData(Material.WOOL, DyeColor.PURPLE.getWoolData()), 12 * 16 + 1);
+		terrain_png.put(new BlockData(Material.WOOL, DyeColor.MAGENTA.getWoolData()), 12 * 16 + 2);
+		terrain_png.put(new BlockData(Material.WOOL, DyeColor.CYAN.getWoolData()), 13 * 16 + 1);
+		terrain_png.put(new BlockData(Material.WOOL, DyeColor.ORANGE.getWoolData()), 13 * 16 + 2);
+		terrain_png.put(new BlockData(Material.WOOL, DyeColor.SILVER.getWoolData()), 14 * 16 + 1);
 	}
 
 	private static Map<Material, Integer> items_png = Maps.newHashMap();
@@ -284,7 +284,7 @@ public class ReportGenerator
 
 			if ((bd.getMaterial().getNewData((byte) 0) instanceof Colorable))
 			{
-				DyeColor color = DyeColor.getByData(bd.getData());
+				DyeColor color = DyeColor.getByWoolData(bd.getData());
 				String hex = ColorConverter.dyeToHex(color);
 				css.write(String.format("%s { color: %s; }\n", selector, hex));
 			}
