@@ -1,6 +1,7 @@
 package org.mctourney.AutoReferee;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -9,9 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -48,6 +51,7 @@ import org.mctourney.AutoReferee.util.commands.CommandManager;
 import org.mctourney.AutoReferee.util.metrics.IncrementPlotter;
 import org.mctourney.AutoReferee.util.metrics.PieChartGraph;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -69,8 +73,17 @@ public class AutoReferee extends JavaPlugin
 	public static AutoReferee getInstance()
 	{ return instance; }
 
+	public static void log(String msg, Level level)
+	{ getInstance().getLogger().log(level, msg); }
+
 	public static void log(String msg)
-	{ getInstance().getLogger().info(msg); }
+	{ log(msg, Level.INFO); }
+
+	public String getMD5sum()
+	{
+		try { return DigestUtils.md5Hex(new FileInputStream(getFile())); }
+		catch (Exception e) { return "??"; }
+	}
 
 	// expected configuration version number
 	private static final int PLUGIN_CFG_VERSION = 2;
