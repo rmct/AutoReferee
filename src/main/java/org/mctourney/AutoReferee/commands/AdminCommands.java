@@ -30,7 +30,8 @@ public class AdminCommands
 		this.plugin = (AutoReferee) plugin;
 	}
 
-	@AutoRefCommand(name={"autoref", "world"}, argmin=1, argmax=1)
+	@AutoRefCommand(name={"autoref", "world"}, argmin=1, argmax=1,
+		description="Specifies the name of the world for console commands to modify.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean setConsoleWorld(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -42,7 +43,8 @@ public class AdminCommands
 		return world != null;
 	}
 
-	@AutoRefCommand(name={"autoref", "load"}, argmin=1, argmax=2)
+	@AutoRefCommand(name={"autoref", "load"}, argmin=1, argmax=2,
+		description="Loads a map by name.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean loadMap(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -60,7 +62,8 @@ public class AdminCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "loadurl"}, argmin=1, argmax=2)
+	@AutoRefCommand(name={"autoref", "loadurl"}, argmin=1, argmax=2,
+		description="Loads a map from a remote zip file, taking the URL as a parameter.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean loadMapFromURL(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -75,16 +78,20 @@ public class AdminCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "unload"}, argmin=0, argmax=0)
+	@AutoRefCommand(name={"autoref", "unload"}, argmin=0, argmax=0,
+		description="Unloads the current map. Connected players are either moved to the lobby or kicked.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean unloadMap(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
 		if (match != null) match.destroy();
+		else sender.sendMessage(ChatColor.GRAY + "No world to unload.");
+
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "reload"}, argmin=0, argmax=0)
+	@AutoRefCommand(name={"autoref", "reload"}, argmin=0, argmax=0,
+		description="Reloads the current map to its original, unmodified state.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean reloadMap(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -111,7 +118,8 @@ public class AdminCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "maplist"}, argmin=0, argmax=0)
+	@AutoRefCommand(name={"autoref", "maplist"}, argmin=0, argmax=0,
+		description="List all maps available, both on this server and in the repository.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean getMapList(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -129,7 +137,8 @@ public class AdminCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "update"}, argmin=0, argmax=0, options="f")
+	@AutoRefCommand(name={"autoref", "update"}, argmin=0, argmax=0, options="f",
+		description="Updates maps installed on server. Use -f to force an update.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean updateMaps(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -138,7 +147,8 @@ public class AdminCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "autoinvite"}, argmin=1)
+	@AutoRefCommand(name={"autoref", "autoinvite"}, argmin=1,
+		description="Invite player(s) to participate in match. Works for offline players as well.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean autoInvite(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
