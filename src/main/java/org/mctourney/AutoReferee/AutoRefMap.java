@@ -18,6 +18,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -206,9 +207,6 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 				.generator(new NullChunkGenerator()));
 	}
 
-	private static World createMatchWorld(String map, String world) throws IOException
-	{ return createMatchWorld(AutoRefMap.getMap(map), world); }
-
 	/**
 	 * Handles JSON object to initialize matches.
 	 * @param json match parameters to be loaded
@@ -372,7 +370,8 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 					{
 						AutoReferee.getInstance().sendMessageSync(sender, String.format(
 							"UPDATING %s (%s -> %s)...", rmap.name, map.version, rmap.version));
-						if (rmap.getFolder() == null) sender.sendMessage("Update FAILED");
+						if (rmap.getFolder() == null) AutoReferee.getInstance()
+							.sendMessageSync(sender, "Update FAILED");
 						else
 						{
 							if (map.isInstalled()) FileUtils.deleteDirectory(map.folder);
@@ -382,7 +381,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 					}
 				}
 			}
-			catch (IOException e) {  }
+			catch (IOException e) { e.printStackTrace(); }
 		}
 	}
 
@@ -395,7 +394,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	public static void getUpdates(CommandSender sender, boolean force)
 	{
 		AutoReferee instance = AutoReferee.getInstance();
-		instance.getServer().getScheduler().runTask(
+		instance.getServer().getScheduler().runTaskAsynchronously(
 			instance, new MapUpdateTask(sender, force));
 	}
 
@@ -528,7 +527,8 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		public void run()
 		{
 			AutoRefMap map = AutoRefMap.getMap(this.mapName);
-			if (map == null) sender.sendMessage("No such map: " + this.mapName);
+			if (map == null) AutoReferee.getInstance()
+				.sendMessageSync(sender, "No such map: " + this.mapName);
 			else this.loadMap(map);
 		}
 	}
@@ -546,7 +546,8 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 			AutoRefMap map = null;
 			try { map = AutoRefMap.getMapFromURL(this.url); } catch (IOException e) {  }
 
-			if (map == null) sender.sendMessage("Could not load map from URL: " + this.url);
+			if (map == null) AutoReferee.getInstance()
+				.sendMessageSync(sender, "Could not load map from URL: " + this.url);
 			else this.loadMap(map);
 		}
 	}
@@ -568,11 +569,12 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 			catch (IOException e) {  }
 
 			AutoReferee plugin = AutoReferee.getInstance();
-			plugin.getLogger().info(sender.getName() +
-				" loaded " + match.getVersionString());
+			plugin.getLogger().info(String.format("%s loaded %s (%s)", sender.getName(),
+				match.getVersionString(), match.getWorld().getName()));
 
 			sender.sendMessage(ChatColor.DARK_GRAY + match.getVersionString() + " setup!");
 			if (sender instanceof Player) ((Player) sender).teleport(match.getWorldSpawn());
+			if (sender == Bukkit.getConsoleSender()) plugin.setConsoleWorld(match.getWorld());
 		}
 	}
 
@@ -586,7 +588,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	public static void loadMap(CommandSender sender, String name, String worldname)
 	{
 		AutoReferee instance = AutoReferee.getInstance();
-		instance.getServer().getScheduler().runTask(
+		instance.getServer().getScheduler().runTaskAsynchronously(
 			instance, new MapRepoDownloader(sender, name, worldname));
 	}
 
@@ -600,7 +602,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	public static void loadMapFromURL(CommandSender sender, String url, String worldname)
 	{
 		AutoReferee instance = AutoReferee.getInstance();
-		instance.getServer().getScheduler().runTask(
+		instance.getServer().getScheduler().runTaskAsynchronously(
 			instance, new MapURLDownloader(sender, url, worldname));
 	}
 }
