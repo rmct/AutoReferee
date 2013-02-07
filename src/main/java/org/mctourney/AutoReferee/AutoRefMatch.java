@@ -1003,7 +1003,8 @@ public class AutoRefMatch
 
 		Element regions = worldConfig.getChild("regions");
 		for (Element reg : regions.getChildren())
-			this.addRegion(AutoRefRegion.fromElement(this, reg));
+			if (!this.addRegion(AutoRefRegion.fromElement(this, reg)))
+				AutoReferee.log("Region did not load correctly: " + reg.getName(), java.util.logging.Level.SEVERE);
 
 		Element goals = worldConfig.getChild("goals");
 		if (goals != null) for (Element teamgoals : goals.getChildren("teamgoals"))
