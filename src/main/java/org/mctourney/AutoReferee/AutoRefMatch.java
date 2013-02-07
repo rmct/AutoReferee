@@ -1423,16 +1423,8 @@ public class AutoRefMatch
 		// resets the player to default state
 		PlayerUtil.reset(player);
 
-		// teleport them if there is somewhere else they can go
-		AutoReferee plugin = AutoReferee.getInstance();
-		World target; if ((target = plugin.getLobbyWorld()) == null)
-		{
-			// find a non-AutoReferee world to drop them in
-			for (World w : plugin.getServer().getWorlds())
-				if (!AutoRefMatch.isCompatible(w)) { target = w; break; }
-		}
-
-		// if there is a reasonable place to teleport them, do so
+		// if there is a lobby to teleport them, do so
+		World target = AutoReferee.getInstance().getLobbyWorld();
 		if (target != null)
 		{
 			player.setGameMode(WorldListener.getDefaultGamemode(target));
