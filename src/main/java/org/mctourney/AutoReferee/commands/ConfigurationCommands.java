@@ -8,6 +8,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.NPC;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -141,6 +143,21 @@ public class ConfigurationCommands
 
 		ItemStack item = ((Player) sender).getItemInHand();
 		if (item != null) match.addIllegalCraft(BlockData.fromItemStack(item));
+		return true;
+	}
+
+	@AutoRefCommand(name={"autoref", "protectall"}, argmax=0)
+	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
+
+	public boolean protectAll(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		if (match == null) return false;
+		for (Entity e : match.getWorld().getEntitiesByClasses(NPC.class))
+		{
+			match.protect(e.getUniqueId());
+			match.broadcast(ChatColor.DARK_GRAY + "Protecting " + e.getType().name() +
+				" @ " + LocationUtil.toBlockCoords(e.getLocation()));
+		}
 		return true;
 	}
 
