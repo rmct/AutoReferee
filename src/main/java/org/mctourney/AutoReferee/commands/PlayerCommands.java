@@ -173,7 +173,7 @@ public class PlayerCommands
 	public boolean setAccess(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
 		// if the plugin is running in auto-mode, quit
-		if (plugin.isAutoMode()) return false;
+		if (match == null || plugin.isAutoMode()) return false;
 		AutoRefMatch.AccessType access = match.access;
 
 		try { access = AutoRefMatch.AccessType.valueOf(args[0].toUpperCase()); }
