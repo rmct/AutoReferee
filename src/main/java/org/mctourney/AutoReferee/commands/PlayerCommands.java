@@ -229,7 +229,8 @@ public class PlayerCommands
 	public boolean getVersion(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
 		sender.sendMessage(ChatColor.DARK_GRAY + "This server is running " +
-			ChatColor.BLUE + plugin.getDescription().getFullName());
+			ChatColor.BLUE + plugin.getDescription().getFullName() +
+			ChatColor.GRAY + " (" + plugin.getMD5sum() + ")");
 		return true;
 	}
 
