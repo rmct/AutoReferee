@@ -914,7 +914,7 @@ public class AutoRefMatch
 		{ return this.ordinal(); }
 
 		public boolean atLeast(Role other)
-		{ return getRank() > other.getRank(); }
+		{ return getRank() >= other.getRank(); }
 	}
 
 	/**
