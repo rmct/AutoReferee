@@ -66,7 +66,12 @@ public class TeamListener implements Listener
 		AutoRefTeam speakerTeam = match.getPlayerTeam(speaker);
 		Role speakerRole = match.getRole(speaker);
 
-		event.setFormat("<" + match.getDisplayName(speaker) + "> " + event.getMessage());
+		if (speakerTeam != null)
+		{
+			ChatColor teamColor = speakerTeam.getColor();
+			event.setFormat("<" + teamColor + "%s" + ChatColor.RESET + "> %s");
+		}
+		else event.setFormat("<%s> %s");
 
 		iter = event.getRecipients().iterator();
 		if (!match.getCurrentState().isBeforeMatch()) while (iter.hasNext())
