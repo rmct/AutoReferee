@@ -53,7 +53,7 @@ public class CuboidRegion extends AutoRefRegion
 
 	@Override
 	public int hashCode()
-	{ return getMinimumPoint().hashCode() ^ getMaximumPoint().hashCode(); }
+	{ return getMinimumPoint().hashCode() ^ Integer.rotateLeft(getMaximumPoint().hashCode(), 16); }
 
 	@Override
 	public boolean equals(Object o)
