@@ -31,7 +31,11 @@ public class SurvivalGoal extends AutoRefGoal
 	}
 
 	@Override
-	public void updateReferee(Player ref) {  }
+	public void updateReferee(Player ref)
+	{
+		AutoRefMatch match = getOwner().getMatch();
+		match.messageReferee(ref, "team", getOwner().getName(), "goal", "survive");
+	}
 
 	@Override
 	public BlockData getItem() { return null; }
