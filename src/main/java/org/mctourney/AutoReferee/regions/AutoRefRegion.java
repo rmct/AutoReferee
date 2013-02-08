@@ -100,7 +100,7 @@ public abstract class AutoRefRegion
 		if (pitch != null) loc.setPitch(pitch);
 		if (yaw != null) loc.setYaw(yaw);
 
-		return loc.add(0.0, 0.75, 0.0);
+		return loc.add(0.0, 0.5, 0.0);
 	}
 
 	public boolean contains(Location loc)
