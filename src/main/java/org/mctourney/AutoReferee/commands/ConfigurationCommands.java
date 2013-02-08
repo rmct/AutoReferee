@@ -27,9 +27,9 @@ import org.mctourney.AutoReferee.util.commands.AutoRefCommand;
 import org.mctourney.AutoReferee.util.commands.AutoRefPermission;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
 
 import com.google.common.collect.Sets;
+
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 import com.sk89q.worldedit.bukkit.selections.Selection;

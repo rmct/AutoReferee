@@ -10,7 +10,6 @@ import org.jdom2.Element;
 
 import org.mctourney.AutoReferee.AutoRefMatch;
 import org.mctourney.AutoReferee.AutoRefTeam;
-import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.util.BlockData;
 
 import com.google.common.collect.Maps;
