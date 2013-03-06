@@ -25,6 +25,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
@@ -309,6 +310,24 @@ public class ZoneListener implements Listener
 				player.openInventory(newinv);
 				event.setCancelled(true); return;
 			}
+		}
+	}
+
+	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
+	public void foreignInventoryEvent(InventoryClickEvent event)
+	{
+		Player player = (Player) event.getWhoClicked();
+		AutoRefMatch match = plugin.getMatch(player.getWorld());
+		if (match == null) return;
+
+		if (!match.isPlayer(player))
+			switch (event.getInventory().getType())
+		{
+			case PLAYER:
+			case CREATIVE:
+				break;
+
+			default: event.setCancelled(true);
 		}
 	}
 
