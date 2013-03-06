@@ -1,5 +1,5 @@
 name: AutoReferee
-main: org.mctourney.AutoReferee.AutoReferee
+main: org.mctourney.autoreferee.AutoReferee
 version: 2.0
 author: authorblues
 load: startup
