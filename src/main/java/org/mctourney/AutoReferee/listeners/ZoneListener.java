@@ -44,12 +44,12 @@ import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.AutoReferee.AutoRefMatch;
-import org.mctourney.AutoReferee.AutoRefMatch.Role;
 import org.mctourney.AutoReferee.AutoRefPlayer;
 import org.mctourney.AutoReferee.AutoRefTeam;
 import org.mctourney.AutoReferee.AutoReferee;
-import org.mctourney.AutoReferee.AutoRefMatch.StartMechanism;
 import org.mctourney.AutoReferee.AutoRefMatch.MatchStatus;
+import org.mctourney.AutoReferee.AutoRefMatch.Role;
+import org.mctourney.AutoReferee.AutoRefMatch.StartMechanism;
 import org.mctourney.AutoReferee.goals.BlockGoal;
 import org.mctourney.AutoReferee.regions.AutoRefRegion;
 import org.mctourney.AutoReferee.util.BlockData;

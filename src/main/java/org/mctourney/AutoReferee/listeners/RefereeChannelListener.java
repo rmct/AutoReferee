@@ -10,9 +10,9 @@ import org.bukkit.event.player.PlayerRegisterChannelEvent;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.ChatColor;
 
-import org.mctourney.AutoReferee.AutoReferee;
 import org.mctourney.AutoReferee.AutoRefMatch;
 import org.mctourney.AutoReferee.AutoRefPlayer;
+import org.mctourney.AutoReferee.AutoReferee;
 
 public class RefereeChannelListener implements PluginMessageListener, Listener
 {

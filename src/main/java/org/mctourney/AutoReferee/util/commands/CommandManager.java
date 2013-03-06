@@ -26,8 +26,8 @@ import org.bukkit.entity.Player;
 
 import org.bukkit.plugin.java.JavaPlugin;
 import org.mctourney.AutoReferee.AutoRefMatch;
-import org.mctourney.AutoReferee.AutoRefMatch.Role;
 import org.mctourney.AutoReferee.AutoReferee;
+import org.mctourney.AutoReferee.AutoRefMatch.Role;
 
 import com.google.common.collect.Maps;
 

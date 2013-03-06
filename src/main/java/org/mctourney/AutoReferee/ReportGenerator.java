@@ -25,9 +25,9 @@ import org.bukkit.material.Colorable;
 import org.mctourney.AutoReferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.AutoReferee.goals.AutoRefGoal;
 import org.mctourney.AutoReferee.util.BlockData;
+import org.mctourney.AutoReferee.util.ColorConverter;
 import org.mctourney.AutoReferee.util.LocationUtil;
 import org.mctourney.AutoReferee.util.MapImageGenerator;
-import org.mctourney.AutoReferee.util.ColorConverter;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
