@@ -295,17 +295,12 @@ public class ZoneListener implements Listener
 				&& event.getAction() == Action.RIGHT_CLICK_BLOCK && match.getCurrentState().inProgress())
 			{
 				InventoryHolder invh = (InventoryHolder) event.getClickedBlock().getState();
-				Inventory inv = invh.getInventory();
+				Inventory inv = invh.getInventory(), newinv;
 
-				ItemStack[] contents = inv.getContents();
-				for (int i = 0; i < contents.length; ++i)
-					if (contents[i] != null) contents[i] = contents[i].clone();
-
-				Inventory newinv;
 				if (inv instanceof DoubleChestInventory)
-					newinv = Bukkit.getServer().createInventory(null, 54, "Large Chest");
-				else newinv = Bukkit.getServer().createInventory(null, inv.getType());
-				newinv.setContents(contents);
+					newinv = Bukkit.getServer().createInventory(player, 54, "Large Chest");
+				else newinv = Bukkit.getServer().createInventory(player, inv.getType());
+				newinv.setContents(inv.getContents());
 
 				player.openInventory(newinv);
 				event.setCancelled(true); return;
