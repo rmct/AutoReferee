@@ -52,7 +52,6 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.material.*;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
@@ -1864,9 +1863,17 @@ public class AutoRefMatch
 	 */
 	public void clearEntities()
 	{
-		for (Entity e : primaryWorld.getEntitiesByClasses(Monster.class,
-			Animals.class, Item.class, ExperienceOrb.class, Arrow.class))
-			if (!protectedEntities.contains(e.getUniqueId())) e.remove();
+		// wait to do it on a future tick
+		new BukkitRunnable()
+		{
+			@Override
+			public void run()
+			{
+				for (Entity e : primaryWorld.getEntitiesByClasses(Monster.class,
+					Animals.class, Item.class, ExperienceOrb.class, Arrow.class))
+					if (!protectedEntities.contains(e.getUniqueId())) e.remove();
+			}
+		}.runTask(AutoReferee.getInstance());
 	}
 
 	/**
