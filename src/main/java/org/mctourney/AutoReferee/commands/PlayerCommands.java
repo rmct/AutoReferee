@@ -11,6 +11,7 @@ import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.Prompt;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import org.mctourney.AutoReferee.AutoRefMatch;
 import org.mctourney.AutoReferee.AutoRefTeam;
@@ -289,10 +290,15 @@ class InvitationPrompt extends BooleanPrompt
 	}
 
 	@Override
-	protected Prompt acceptValidatedInput(ConversationContext context, boolean response)
+	protected Prompt acceptValidatedInput(final ConversationContext context, boolean response)
 	{
 		if (response && context.getForWhom() instanceof Player)
-			match.joinMatch((Player) context.getForWhom());
+			new BukkitRunnable()
+			{
+				@Override public void run()
+				{ match.joinMatch((Player) context.getForWhom()); }
+
+			}.runTask(AutoReferee.getInstance());
 		return Prompt.END_OF_CONVERSATION;
 	}
 }
