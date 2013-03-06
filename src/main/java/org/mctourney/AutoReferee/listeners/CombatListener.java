@@ -109,7 +109,7 @@ public class CombatListener implements Listener
 					if (((EnderPearl) e).getShooter() == victim) e.remove();
 
 			// handle respawn modes
-			if (vapl != null)
+			if (vapl != null && match.getCurrentState().inProgress())
 			{
 				respawn: switch (match.getRespawnMode())
 				{
