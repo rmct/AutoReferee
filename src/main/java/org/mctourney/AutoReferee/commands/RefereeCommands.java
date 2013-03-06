@@ -57,7 +57,7 @@ public class RefereeCommands
 	}
 
 	@AutoRefCommand(name={"viewinventory"}, argmax=1, options="p")
-	@AutoRefPermission(console=false, role=AutoRefMatch.Role.REFEREE)
+	@AutoRefPermission(console=false, role=AutoRefMatch.Role.SPECTATOR)
 
 	public boolean viewInventory(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
@@ -80,7 +80,7 @@ public class RefereeCommands
 	}
 
 	@AutoRefCommand(name={"artp"}, argmax=1, options="b*d*l*t*s*o*v*r")
-	@AutoRefPermission(console=false, role=AutoRefMatch.Role.REFEREE)
+	@AutoRefPermission(console=false, role=AutoRefMatch.Role.SPECTATOR)
 
 	public boolean teleport(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
