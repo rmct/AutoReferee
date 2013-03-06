@@ -73,7 +73,7 @@ public class QueryServer
 
 		// just drop out
 		catch (Exception e)
-		{ return null; }
+		{ e.printStackTrace(); return null; }
 
 		finally
 		{

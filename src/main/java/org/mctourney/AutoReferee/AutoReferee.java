@@ -36,12 +36,12 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import org.mcstats.Metrics;
 import org.mcstats.Metrics.Graph;
 
+import org.mctourney.AutoReferee.commands.AdminCommands;
 import org.mctourney.AutoReferee.commands.ConfigurationCommands;
 import org.mctourney.AutoReferee.commands.PlayerCommands;
-import org.mctourney.AutoReferee.commands.AdminCommands;
 import org.mctourney.AutoReferee.commands.RefereeCommands;
-import org.mctourney.AutoReferee.listeners.ObjectiveTracker;
 import org.mctourney.AutoReferee.listeners.CombatListener;
+import org.mctourney.AutoReferee.listeners.ObjectiveTracker;
 import org.mctourney.AutoReferee.listeners.RefereeChannelListener;
 import org.mctourney.AutoReferee.listeners.TeamListener;
 import org.mctourney.AutoReferee.listeners.WorldListener;
