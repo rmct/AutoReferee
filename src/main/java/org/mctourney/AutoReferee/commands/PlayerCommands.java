@@ -231,7 +231,7 @@ public class PlayerCommands
 	{
 		sender.sendMessage(ChatColor.DARK_GRAY + "This server is running " +
 			ChatColor.BLUE + plugin.getDescription().getFullName() +
-			ChatColor.GRAY + " (" + plugin.getMD5sum() + ")");
+			ChatColor.GRAY + " (" + plugin.getMD5sum().substring(0, 8) + ")");
 		return true;
 	}
 
