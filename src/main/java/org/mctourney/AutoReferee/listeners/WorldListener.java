@@ -106,6 +106,10 @@ public class WorldListener implements Listener
 			if (!player.hasPlayedBefore())
 				player.teleport(match.getWorldSpawn());
 		}
+
+		// moving to lobby world, set player to creative
+		if (player.getWorld() == plugin.getLobbyWorld())
+			player.setGameMode(GameMode.CREATIVE);
 	}
 
 	@EventHandler
@@ -169,5 +173,9 @@ public class WorldListener implements Listener
 			GameMode dgm = getDefaultGamemode(player.getWorld());
 			matchFm.setSpectatorMode(player, false, dgm);
 		}
+
+		// moving to lobby world, set player to creative
+		if (player.getWorld() == plugin.getLobbyWorld())
+			player.setGameMode(GameMode.CREATIVE);
 	}
 }
