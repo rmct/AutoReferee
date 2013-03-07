@@ -115,8 +115,6 @@ public class AutoRefPlayer
 	public void setTeam(AutoRefTeam team)
 	{ this.team = team; }
 
-	private String capeURL = null;
-
 	/**
 	 * Sets the URL for this player's cape. This cape can be shown by a modified
 	 * client only, as Minecraft does not permit custom capes.
@@ -125,7 +123,7 @@ public class AutoRefPlayer
 	 */
 	public void setCape(String url)
 	{
-		capeURL = url;
+		getTeam().getMatch().addCape(this.getName(), url);
 		getTeam().getMatch().messageReferees("player", this.getName(), "cape", getCape());
 	}
 
@@ -136,8 +134,8 @@ public class AutoRefPlayer
 	 */
 	public String getCape()
 	{
-		if (capeURL == null) return "";
-		return capeURL.replaceFirst("^https?://", "");
+		String cape = getTeam().getMatch().playerCapes.get(this.getName());
+		return cape == null ? "" : cape.replaceFirst("^https?://", "");
 	}
 
 	private int shotsFired = 0, shotsHit = 0;

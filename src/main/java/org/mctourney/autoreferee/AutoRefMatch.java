@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -72,6 +73,7 @@ import org.mctourney.autoreferee.util.MapImageGenerator;
 import org.mctourney.autoreferee.util.PlayerUtil;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /**
@@ -2223,11 +2225,22 @@ public class AutoRefMatch
 		return eps;
 	}
 
+	protected Map<String, String> playerCapes = Maps.newHashMap();
+
+	public void addCape(String name, String cape)
+	{ playerCapes.put(name, cape); }
+
+	public void addCape(OfflinePlayer opl, String cape)
+	{ addCape(opl.getName(), cape); }
+
 	/**
 	 * Adds a player to the list of expected players, without a team affiliation.
 	 */
 	public void addExpectedPlayer(OfflinePlayer opl)
 	{ expectedPlayers.add(opl); }
+
+	public void addExpectedPlayer(OfflinePlayer opl, String cape)
+	{ addExpectedPlayer(opl); addCape(opl, cape); }
 
 	/**
 	 * Gets the team the specified player is expected to join.
