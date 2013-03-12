@@ -4,6 +4,8 @@ import java.lang.reflect.Method;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 
@@ -15,6 +17,7 @@ public class SportBukkitUtil
 	private static Method mAffectsSpawning = null;
 	private static Method mCollidesWithEntities = null;
 	private static Method mSetOverheadName = null;
+	private static Method mOfflinePlayerLocation = null;
 
 	static
 	{
@@ -32,6 +35,9 @@ public class SportBukkitUtil
 
 			// anxuiz's set-overhead-name API from SportBukkit
 			mSetOverheadName = Player.class.getDeclaredMethod("setOverheadName", String.class);
+
+			// md_5's offlineUtil API from SportBukkit
+			mOfflinePlayerLocation = OfflinePlayer.class.getDeclaredMethod("getLocation");
 		}
 		catch (Exception e) { isSportBukkit = false; }
 	}
@@ -86,5 +92,18 @@ public class SportBukkitUtil
 		{ mSetOverheadName.invoke(player, overheadName.trim()
 			.replaceAll(ChatColor.RESET.toString(), "")); }
 		catch (Exception e) {  }
+	}
+
+	/**
+	 * Gets the logged-out location of an OfflinePlayer
+	 * Uses md_5's offlineUtil API from SportBukkit
+	 *
+	 * @see <a href="http://www.github.com/ProjectAres/SportBukkit">SportBukkit</a>
+	 */
+	public static Location getOfflinePlayerLocation(OfflinePlayer player)
+	{
+		if (mOfflinePlayerLocation != null) try
+		{ return (Location) mOfflinePlayerLocation.invoke(player); }
+		catch (Exception e) {  } return null;
 	}
 }

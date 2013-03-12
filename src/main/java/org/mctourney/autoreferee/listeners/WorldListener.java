@@ -1,9 +1,13 @@
 package org.mctourney.autoreferee.listeners;
 
 import java.util.Map;
+import java.util.Set;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.BlockCommandSender;
@@ -11,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -26,6 +31,8 @@ import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.util.PlayerUtil;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
+
+import com.google.common.collect.Sets;
 
 public class WorldListener implements Listener
 {
@@ -66,10 +73,35 @@ public class WorldListener implements Listener
 		}
 	}
 
+	// set of players to be processed who have logged into a non-existent world
+	Set<String> playerLimboLogin = Sets.newHashSet();
+
+	@EventHandler
+	public void playerPreLogin(AsyncPlayerPreLoginEvent event)
+	{
+		OfflinePlayer opl = Bukkit.getOfflinePlayer(event.getName());
+		Location oloc = SportBukkitUtil.getOfflinePlayerLocation(opl);
+
+		// either there is no offline player utility, or check the world like normal
+		if (opl.hasPlayedBefore() && (oloc == null || oloc.getWorld() == null))
+		{
+			if (!opl.isOnline()) playerLimboLogin.add(opl.getName());
+			// TODO deferred teleportation back on the sync server thread if online
+		}
+	}
+
 	@EventHandler
 	public void playerJoin(PlayerJoinEvent event)
 	{
 		Player player = event.getPlayer();
+
+		// if this player is "in limbo" (logged into an unloaded world)
+		if (player.hasPlayedBefore() && playerLimboLogin.remove(player.getName()))
+		{
+			World newWorld = plugin.getLobbyWorld();
+			if (newWorld == null) newWorld = Bukkit.getWorlds().get(0);
+			player.teleport(newWorld.getSpawnLocation());
+		}
 
 		// get the match for the world the player is logging into
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
