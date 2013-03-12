@@ -1,4 +1,4 @@
-import static org.junit.Assert.*;
+package org.mctourney.autoreferee;
 
 import java.util.Set;
 

@@ -25,6 +25,7 @@ import org.apache.commons.collections.map.DefaultedMap;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.util.PlayerUtil;
+import org.mctourney.autoreferee.util.SportBukkitUtil;
 
 public class WorldListener implements Listener
 {
@@ -84,7 +85,7 @@ public class WorldListener implements Listener
 			// if we are logging in to the wrong world, teleport to the correct world
 			if (player.getWorld() != match.getWorld()) match.joinMatch(player);
 
-			AutoReferee.setOverheadName(player, match.getDisplayName(player));
+			SportBukkitUtil.setOverheadName(player, match.getDisplayName(player));
 			if (!match.getCurrentState().inProgress() || match.isPlayer(player))
 				match.broadcast(match.colorMessage(event.getJoinMessage()));
 			event.setJoinMessage(null);
@@ -150,7 +151,7 @@ public class WorldListener implements Listener
 
 		if (matchTo != null)
 		{
-			AutoReferee.setOverheadName(player, matchTo.getDisplayName(player));
+			SportBukkitUtil.setOverheadName(player, matchTo.getDisplayName(player));
 
 			matchTo.checkTeamsReady();
 			matchTo.sendMatchInfo(player);
@@ -165,7 +166,7 @@ public class WorldListener implements Listener
 
 			player.teleport(matchTo.getWorldSpawn());
 		}
-		else AutoReferee.setOverheadName(player, player.getName());
+		else SportBukkitUtil.setOverheadName(player, player.getName());
 
 		// if they are leaving AutoReferee-managed worlds
 		if (matchFm != null && matchTo == null)

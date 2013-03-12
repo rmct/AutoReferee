@@ -32,6 +32,7 @@ import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.util.AchievementPoints;
+import org.mctourney.autoreferee.util.SportBukkitUtil;
 
 import com.google.common.collect.Maps;
 
@@ -265,7 +266,7 @@ public class CombatListener implements Listener
 	public void explosionPrime(ExplosionPrimeEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
-		if (!AutoReferee.hasSportBukkitApi() || match == null) return;
+		if (!SportBukkitUtil.hasSportBukkitApi() || match == null) return;
 
 		if (event.getEntityType() == EntityType.PRIMED_TNT)
 		{

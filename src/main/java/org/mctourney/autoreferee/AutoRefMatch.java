@@ -71,6 +71,7 @@ import org.mctourney.autoreferee.util.BookUtil;
 import org.mctourney.autoreferee.util.LocationUtil;
 import org.mctourney.autoreferee.util.MapImageGenerator;
 import org.mctourney.autoreferee.util.PlayerUtil;
+import org.mctourney.autoreferee.util.SportBukkitUtil;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -1708,7 +1709,7 @@ public class AutoRefMatch
 		this.clearEntities();
 
 		// loop through all the redstone mechanisms required to start / FIXME BUKKIT-1858
-		if (AutoReferee.getInstance().isAutoMode() || AutoReferee.hasSportBukkitApi())
+		if (AutoReferee.getInstance().isAutoMode() || SportBukkitUtil.hasSportBukkitApi())
 			for (StartMechanism sm : startMechanisms)
 		{
 			MaterialData mdata = sm.getBlockState().getData();
@@ -1854,10 +1855,10 @@ public class AutoRefMatch
 	{
 		player.setGameMode(gamemode);
 		if (!player.getAllowFlight()) player.setFallDistance(0.0f);
-		AutoReferee.setAffectsSpawning(player, !b);
+		SportBukkitUtil.setAffectsSpawning(player, !b);
 
 		boolean noEntityCollide = b && getCurrentState().inProgress();
-		AutoReferee.setCollidesWithEntities(player, !noEntityCollide);
+		SportBukkitUtil.setCollidesWithEntities(player, !noEntityCollide);
 	}
 
 	/**
