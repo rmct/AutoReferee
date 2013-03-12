@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
@@ -25,6 +26,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -336,6 +338,17 @@ public class ZoneListener implements Listener
 		if (match == null) return;
 
 		if (!validPlayer(player))
+		{ event.setCancelled(true); return; }
+	}
+
+	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
+	public void projectileLaunch(ProjectileLaunchEvent event)
+	{
+		LivingEntity entity = event.getEntity().getShooter();
+		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
+		if (!(entity instanceof Player) || match == null) return;
+
+		if (!match.isPlayer((Player) entity))
 		{ event.setCancelled(true); return; }
 	}
 
