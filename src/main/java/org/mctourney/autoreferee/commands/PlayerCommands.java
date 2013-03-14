@@ -2,6 +2,7 @@ package org.mctourney.autoreferee.commands;
 
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -230,8 +231,8 @@ public class PlayerCommands
 	public boolean getVersion(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
 		sender.sendMessage(ChatColor.DARK_GRAY + "This server is running " +
-			ChatColor.BLUE + plugin.getDescription().getFullName() +
-			ChatColor.GRAY + " (" + plugin.getMD5sum().substring(0, 8) + ")");
+			ChatColor.BLUE + plugin.getDescription().getFullName() + ChatColor.GRAY +
+			" (" + plugin.getMD5sum().substring(0, 8) + ") on " + Bukkit.getName());
 		return true;
 	}
 

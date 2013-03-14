@@ -304,7 +304,7 @@ public class AutoReferee extends JavaPlugin
 		catch (IOException e) { getLogger().severe("Plugin Metrics not enabled."); }
 
 		// wrap up, debug to follow this message
-		getLogger().info(this.getName() + " loaded successfully" +
+		getLogger().info(this.getName() + " (" + Bukkit.getName() + ") loaded successfully" +
 			(SportBukkitUtil.hasSportBukkitApi() ? " with SportBukkit API" : "") + ".");
 
 		// connect to server, or let the server operator know to set up the match manually
