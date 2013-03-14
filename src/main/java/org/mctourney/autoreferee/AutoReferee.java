@@ -473,7 +473,10 @@ public class AutoReferee extends JavaPlugin
 	 */
 	public void sendMessageSync(CommandSender sender, String msg)
 	{
-		messageQueue.cancel();
+		// attempt to cancel the task (if its scheduled)
+		try { messageQueue.cancel(); }
+		catch (IllegalStateException e) {  }
+
 		messageQueue.addMessage(sender, msg);
 		messageQueue.runTask(this);
 	}

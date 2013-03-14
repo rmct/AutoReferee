@@ -1286,7 +1286,10 @@ public class AutoRefMatch
 	 */
 	public void broadcastSync(String msg)
 	{
-		broadcastTask.cancel();
+		// attempt to cancel the task (if its scheduled)
+		try { broadcastTask.cancel(); }
+		catch (IllegalStateException e) {  }
+
 		broadcastTask.addMessage(msg);
 		broadcastTask.runTask(AutoReferee.getInstance());
 	}
