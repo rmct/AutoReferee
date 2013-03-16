@@ -11,14 +11,22 @@
         <meta name="viewport" content="width=device-width">
 
         <link rel="stylesheet" href="css/bootstrap.min.css">
+        
+        <!-- fonts -->
+        <link href='http://fonts.googleapis.com/css?family=Archivo+Narrow:400,700' rel='stylesheet' />
+
         <style>
             body {
                 padding-top: 60px;
                 padding-bottom: 40px;
             }
+            .navbar {
+                font-family: 'Archivo Narrow', sans-serif;
+            }
         </style>
         <link rel="stylesheet" href="css/bootstrap-responsive.min.css">
         <link rel="stylesheet" href="css/commands.css">
+        <link rel="stylesheet" href="css/tablesorter/style.css">
 
         <script src="js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
     </head>
@@ -54,9 +62,9 @@
 
         <div class="container">
 
-            <p></p>
+            <p class="well">The following commands are available via AutoReferee. Hover over any command to get a description of what the command does. Any argument passed to a command containing spaces needs to be <strong>"quoted"</strong>. If a permissions node is specified, players must have any listed permissions to execute the command. Likewise, If a role is mentioned, the user must have that role or higher to execute the command. Click any column header to sort the table by that column.</p>
 
-            <table class="table table-striped table-hover">
+            <table class="table table-hover table-corner tablesorter">
                 <thead>
                     <tr>
                         <th>Command</th>
@@ -368,6 +376,7 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
 
+        <script src="js/vendor/jquery.tablesorter.min.js"></script>
         <script src="js/vendor/bootstrap.min.js"></script>
 
         <script src="js/plugins.js"></script>
