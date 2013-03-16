@@ -166,6 +166,7 @@ public class AutoRefMatch
 	{ return tmp; }
 
 	private long startTime = 0L;
+	private boolean lockTime = false;
 
 	/**
 	 * Gets the time to set the world to at the start of the match.
@@ -1051,7 +1052,10 @@ public class AutoRefMatch
 	{
 		// get the time the match is set to start
 		if (gameplay.getChild("clockstart") != null)
+		{
 			startTime = AutoReferee.parseTimeString(gameplay.getChildText("clockstart"));
+			lockTime = gameplay.getChild("clockstart").getAttributeValue("lock") != null;
+		}
 
 		// allow or disallow friendly fire
 		if (gameplay.getChild("friendlyfire") != null)
@@ -1769,21 +1773,23 @@ public class AutoRefMatch
 		public void run()
 		{
 			AutoRefMatch match = AutoRefMatch.this;
-			long minutesRemaining = match.getTimeRemaining() / 60L;
 
-			// drop out just in case
-			if (!match.hasTimeLimit()) return;
-
-			if (minutesRemaining == 0L)
+			if (match.hasTimeLimit())
 			{
-				String timelimit = (match.getTimeLimit() / 60L) + " min";
-				match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.MATCH_END,
-					"Match time limit reached: " + timelimit, null, null, null));
-				match.matchComplete();
+				long minutesRemaining = match.getTimeRemaining() / 60L;
+				if (minutesRemaining == 0L)
+				{
+					String timelimit = (match.getTimeLimit() / 60L) + " min";
+					match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.MATCH_END,
+						"Match time limit reached: " + timelimit, null, null, null));
+					match.matchComplete();
+				}
+				else if (AutoRefMatch.announceMinutes.contains(minutesRemaining))
+					match.broadcast(">>> " + ChatColor.GREEN +
+						"Match ends in " + minutesRemaining + "m");
 			}
-			else if (AutoRefMatch.announceMinutes.contains(minutesRemaining))
-				match.broadcast(">>> " + ChatColor.GREEN +
-					"Match ends in " + minutesRemaining + "m");
+
+			if (lockTime) primaryWorld.setTime(startTime);
 		}
 	}
 
