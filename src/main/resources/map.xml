@@ -24,5 +24,8 @@
   <regions />
   <goals />
   <mechanisms />
-  <gameplay />
+
+  <gameplay>
+    <clockstart>8am</clockstart>
+  </gameplay>
 </map>
