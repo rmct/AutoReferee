@@ -16,12 +16,13 @@ import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
+import org.mctourney.autoreferee.util.commands.CommandHandler;
 
 import org.apache.commons.cli.CommandLine;
 
 import com.google.common.collect.Lists;
 
-public class AdminCommands
+public class AdminCommands implements CommandHandler
 {
 	AutoReferee plugin;
 
@@ -44,7 +45,7 @@ public class AdminCommands
 	}
 
 	@AutoRefCommand(name={"autoref", "load"}, argmin=1, argmax=2,
-		description="Loads a map by name.")
+		description="Loads a map by name, case insensitive.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean loadMap(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -91,7 +92,7 @@ public class AdminCommands
 	}
 
 	@AutoRefCommand(name={"autoref", "reload"}, argmin=0, argmax=0,
-		description="Reloads the current map to its original, unmodified state.")
+		description="Reloads the current map to its original, unmodified state. Players are migrated to the new copy.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean reloadMap(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)

@@ -15,13 +15,14 @@ import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.util.TeleportationUtil;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
+import org.mctourney.autoreferee.util.commands.CommandHandler;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Maps;
 
-public class RefereeCommands
+public class RefereeCommands implements CommandHandler
 {
 	AutoReferee plugin;
 
@@ -34,7 +35,8 @@ public class RefereeCommands
 		prevLocation = Maps.newHashMap();
 	}
 
-	@AutoRefCommand(name={"announce"})
+	@AutoRefCommand(name={"announce"},
+		description="Announce a message to your current match. Your name will be shown.")
 	@AutoRefPermission(console=true)
 
 	public boolean announce(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -45,7 +47,8 @@ public class RefereeCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"broadcast"})
+	@AutoRefCommand(name={"broadcast"},
+		description="Broadcast a message to your current match. No name will be shown.")
 	@AutoRefPermission(console=true)
 
 	public boolean broadcast(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -56,7 +59,8 @@ public class RefereeCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"viewinventory"}, argmax=1, options="p")
+	@AutoRefCommand(name={"viewinventory"}, argmax=1, options="p",
+		description="View the inventory of the nearest player. Specify a name to show that player's inventory.")
 	@AutoRefPermission(console=false, role=AutoRefMatch.Role.SPECTATOR)
 
 	public boolean viewInventory(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -79,7 +83,8 @@ public class RefereeCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"artp"}, argmax=1, options="b*d*l*t*s*o*v*r")
+	@AutoRefCommand(name={"artp"}, argmax=1, options="b*d*l*t*s*o*v*r",
+		description="AutoReferee teleportation tools.")
 	@AutoRefPermission(console=false, role=AutoRefMatch.Role.SPECTATOR)
 
 	public boolean teleport(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -167,7 +172,8 @@ public class RefereeCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "teamname"}, argmin=2, argmax=2)
+	@AutoRefCommand(name={"autoref", "teamname"}, argmin=2, argmax=2,
+		description="Rename a team.")
 	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
 
 	public boolean setTeamName(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -186,7 +192,8 @@ public class RefereeCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "swapteams"}, argmin=2, argmax=2)
+	@AutoRefCommand(name={"autoref", "swapteams"}, argmin=2, argmax=2,
+		description="Swaps the players and custom names of both teams.")
 	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
 
 	public boolean swapTeams(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -212,7 +219,8 @@ public class RefereeCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "countdown"}, argmax=0)
+	@AutoRefCommand(name={"autoref", "countdown"}, argmax=1,
+		description="Begin a generic countdown.")
 	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
 
 	public boolean countdown(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -226,7 +234,8 @@ public class RefereeCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "timelimit"}, argmin=1, argmax=1)
+	@AutoRefCommand(name={"autoref", "timelimit"}, argmin=1, argmax=1,
+		description="Specify the total time allowed for this match, in minutes.")
 	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
 
 	public boolean setTimeLimit(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -241,7 +250,9 @@ public class RefereeCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "endmatch"}, argmax=1)
+	@AutoRefCommand(name={"autoref", "endmatch"}, argmax=1,
+		description="Ends the current match by decision. Specify a team name to declare them " +
+			"the winner, or 'tie' to announce a tie.")
 	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
 
 	public boolean endMatch(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -256,7 +267,8 @@ public class RefereeCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "hud", "swap"}, argmax=0)
+	@AutoRefCommand(name={"autoref", "hud", "swap"}, argmax=0,
+		description="If using the AutoReferee client mod, swaps sides for the two team listings.")
 	@AutoRefPermission(console=false, role=AutoRefMatch.Role.REFEREE)
 
 	public boolean swapHUD(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)

@@ -25,6 +25,7 @@ import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.LocationUtil;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
+import org.mctourney.autoreferee.util.commands.CommandHandler;
 
 import org.apache.commons.cli.CommandLine;
 
@@ -34,7 +35,7 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 
-public class ConfigurationCommands
+public class ConfigurationCommands implements CommandHandler
 {
 	AutoReferee plugin;
 
@@ -43,7 +44,8 @@ public class ConfigurationCommands
 		this.plugin = (AutoReferee) plugin;
 	}
 
-	@AutoRefCommand(name={"autoref", "archive"}, argmax=0, options="z")
+	@AutoRefCommand(name={"autoref", "archive"}, argmax=0, options="z",
+		description="Package the map and configuration into the maps/ directory.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.configure"})
 
 	public boolean archive(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -71,7 +73,8 @@ public class ConfigurationCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "tool", "wincond"}, argmax=0)
+	@AutoRefCommand(name={"autoref", "tool", "wincond"}, argmax=0,
+		description="Get the tool used to configure win conditions.")
 	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
 
 	public boolean toolWinCondition(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -92,7 +95,8 @@ public class ConfigurationCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "tool", "startmech"}, argmax=0)
+	@AutoRefCommand(name={"autoref", "tool", "startmech"}, argmax=0,
+		description="Get the tool used to configure start mechanisms.")
 	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
 
 	public boolean toolStartMechanism(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -113,7 +117,8 @@ public class ConfigurationCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "tool", "protect"}, argmax=0)
+	@AutoRefCommand(name={"autoref", "tool", "protect"}, argmax=0,
+		description="Get the tool used to configure protected entities (will not be butchered before match).")
 	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
 
 	public boolean toolProtectEntities(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -134,19 +139,8 @@ public class ConfigurationCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "nocraft"}, argmax=0)
-	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
-
-	public boolean setNoCraft(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
-	{
-		if (match == null) return false;
-
-		ItemStack item = ((Player) sender).getItemInHand();
-		if (item != null) match.addIllegalCraft(BlockData.fromItemStack(item));
-		return true;
-	}
-
-	@AutoRefCommand(name={"autoref", "protectall"}, argmax=0)
+	@AutoRefCommand(name={"autoref", "protectall"}, argmax=0,
+		description="Protect all entities currently on the map.")
 	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
 
 	public boolean protectAll(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -161,7 +155,21 @@ public class ConfigurationCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "setspawn"}, argmin=0, argmax=1)
+	@AutoRefCommand(name={"autoref", "nocraft"}, argmax=0,
+		description="Prohibit the item in hand from being crafted during a match.")
+	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
+
+	public boolean setNoCraft(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		if (match == null) return false;
+
+		ItemStack item = ((Player) sender).getItemInHand();
+		if (item != null) match.addIllegalCraft(BlockData.fromItemStack(item));
+		return true;
+	}
+
+	@AutoRefCommand(name={"autoref", "setspawn"}, argmin=0, argmax=1,
+		description="Set the current location as the global spawn. If a team name is provided, sets team spawn.")
 	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
 
 	public boolean setSpawn(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -196,7 +204,8 @@ public class ConfigurationCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"zones"}, argmax=1)
+	@AutoRefCommand(name={"zones"}, argmax=1,
+		description="List all configured regions on the map.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.configure"})
 
 	public boolean getZones(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -245,7 +254,8 @@ public class ConfigurationCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"zone"}, argmin=0, options=AutoRefRegion.Flag.OPTIONS + "XS")
+	@AutoRefCommand(name={"zone"}, argmin=0, options=AutoRefRegion.Flag.OPTIONS + "XS",
+		description="Set the currently selected WorldEdit region to be a team's zone.")
 	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
 
 	public boolean setupZone(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -301,7 +311,8 @@ public class ConfigurationCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "cfg", "init"}, argmax=0)
+	@AutoRefCommand(name={"autoref", "cfg", "init"}, argmax=0,
+		description="Initialize a blank configuration file for this map.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.configure"})
 
 	public boolean configInit(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -323,7 +334,8 @@ public class ConfigurationCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "cfg", "save"}, argmax=0)
+	@AutoRefCommand(name={"autoref", "cfg", "save"}, argmax=0,
+		description="Save the configuration file for this map.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.configure"})
 
 	public boolean configSave(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -333,7 +345,8 @@ public class ConfigurationCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "cfg", "reload"}, argmax=0)
+	@AutoRefCommand(name={"autoref", "cfg", "reload"}, argmax=0,
+		description="Reload the configuration file from disk for this map.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.configure"})
 
 	public boolean configReload(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -343,7 +356,8 @@ public class ConfigurationCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "debug"}, argmax=0, options="c")
+	@AutoRefCommand(name={"autoref", "debug"}, argmax=0, options="c",
+		description="Turn on debugging mode.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.configure"})
 
 	public boolean debug(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)

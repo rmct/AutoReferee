@@ -19,13 +19,14 @@ import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
+import org.mctourney.autoreferee.util.commands.CommandHandler;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Lists;
 
-public class PlayerCommands
+public class PlayerCommands implements CommandHandler
 {
 	AutoReferee plugin;
 
@@ -34,7 +35,8 @@ public class PlayerCommands
 		this.plugin = (AutoReferee) plugin;
 	}
 
-	@AutoRefCommand(name={"matchinfo"}, argmax=0)
+	@AutoRefCommand(name={"matchinfo"}, argmax=0,
+		description="Get info regarding the current match.")
 	@AutoRefPermission(console=true)
 
 	public boolean matchInfo(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -46,7 +48,8 @@ public class PlayerCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"jointeam"})
+	@AutoRefCommand(name={"jointeam"},
+		description="Join a random team. If a team name is specified, that team will be joined.")
 	@AutoRefPermission(console=false)
 
 	public boolean joinTeam(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -84,7 +87,8 @@ public class PlayerCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"leaveteam"})
+	@AutoRefCommand(name={"leaveteam"},
+		description="Leave a team.")
 	@AutoRefPermission(console=false)
 
 	public boolean leaveTeam(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -106,7 +110,8 @@ public class PlayerCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"joinmatch"}, argmin=0, argmax=1)
+	@AutoRefCommand(name={"joinmatch"}, argmin=0, argmax=1,
+		description="Join the match of the named player. If no player is named, lists available matches.")
 	@AutoRefPermission(console=false)
 
 	public boolean joinMatch(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -153,7 +158,8 @@ public class PlayerCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"leavematch"}, argmax=1)
+	@AutoRefCommand(name={"leavematch"}, argmax=1,
+		description="Leave the current match.")
 	@AutoRefPermission(console=true)
 
 	public boolean leaveMatch(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -169,7 +175,8 @@ public class PlayerCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"setaccess"}, argmin=1, argmax=1, options="q")
+	@AutoRefCommand(name={"setaccess"}, argmin=1, argmax=1, options="q",
+		description="Changes access type of the current match: PUBLIC or PRIVATE.")
 	@AutoRefPermission(console=true)
 
 	public boolean setAccess(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -195,7 +202,8 @@ public class PlayerCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"ready"}, argmax=1, options="tfyns+")
+	@AutoRefCommand(name={"ready"}, argmax=1, options="tfyns+",
+		description="Mark your team as ready. Referees may use this command to begin a match.")
 	@AutoRefPermission(console=true)
 
 	public boolean ready(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -225,7 +233,8 @@ public class PlayerCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "version"}, argmax=0)
+	@AutoRefCommand(name={"autoref", "version"}, argmax=0,
+		description="Returns the version information for the plugin.")
 	@AutoRefPermission(console=true)
 
 	public boolean getVersion(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -236,7 +245,8 @@ public class PlayerCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"notify"})
+	@AutoRefCommand(name={"notify"},
+		description="Notifies spectators of your location. Follow this command with a message to provide further info.")
 	@AutoRefPermission(console=false)
 
 	public boolean notify(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -246,7 +256,8 @@ public class PlayerCommands
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "invite"}, argmin=1)
+	@AutoRefCommand(name={"autoref", "invite"}, argmin=1,
+		description="Invite players to your current match.")
 	@AutoRefPermission(console=true)
 
 	public boolean invitePlayers(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)

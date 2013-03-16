@@ -17,4 +17,5 @@ public @interface AutoRefCommand
 
 	// options
 	public String options() default "";
+	public String optionsHelp() default "";
 }
