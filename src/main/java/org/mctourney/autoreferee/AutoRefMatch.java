@@ -41,13 +41,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Animals;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.ExperienceOrb;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Monster;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.material.*;
@@ -1881,8 +1875,8 @@ public class AutoRefMatch
 			@Override
 			public void run()
 			{
-				for (Entity e : primaryWorld.getEntitiesByClasses(Monster.class,
-					Animals.class, Item.class, ExperienceOrb.class, Arrow.class))
+				for (Entity e : primaryWorld.getEntitiesByClasses(Arrow.class, Item.class,
+						Monster.class, Animals.class, Ambient.class, ExperienceOrb.class))
 					if (!protectedEntities.contains(e.getUniqueId())) e.remove();
 			}
 		}.runTask(AutoReferee.getInstance());
