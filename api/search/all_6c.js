@@ -1,8 +1,8 @@
 var searchData=
 [
-  ['leave',['leave',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#aa22c06cfee17fcfd759b4263c6973523',1,'org.mctourney.AutoReferee.AutoRefTeam.leave(Player player)'],['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#a8adfd4e8830f5f7a605b04d679038d93',1,'org.mctourney.AutoReferee.AutoRefTeam.leave(Player player, boolean force)']]],
-  ['leavequietly',['leaveQuietly',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#ac1a0006102e6d4929d4758184dcee693',1,'org::mctourney::AutoReferee::AutoRefTeam']]],
-  ['leaveteam',['leaveTeam',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a7c3bb8f1b7d454473b9cc15dfc493d75',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
-  ['loadmap',['loadMap',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a5a72395c195d92fc8ff47a643019fc4f',1,'org::mctourney::AutoReferee::AutoRefMap']]],
-  ['loadmapfromurl',['loadMapFromURL',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#a3ec519f49fe60b2dd605b127ff50838b',1,'org::mctourney::AutoReferee::AutoRefMap']]]
+  ['leave',['leave',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_team.html#a1edbcf464ec11a8e8790203dde802b10',1,'org.mctourney.autoreferee.AutoRefTeam.leave(Player player)'],['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_team.html#aea74c70e855e7b5c55d434112006a1e8',1,'org.mctourney.autoreferee.AutoRefTeam.leave(Player player, boolean force)']]],
+  ['leavequietly',['leaveQuietly',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_team.html#acbc7330e2e73842a544848cc4b2a6931',1,'org::mctourney::autoreferee::AutoRefTeam']]],
+  ['leaveteam',['leaveTeam',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_match.html#aad442cda50ac61deb295ef428df1e570',1,'org::mctourney::autoreferee::AutoRefMatch']]],
+  ['loadmap',['loadMap',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_map.html#a5dde5eba157583d64e8e1c26af8050e6',1,'org::mctourney::autoreferee::AutoRefMap']]],
+  ['loadmapfromurl',['loadMapFromURL',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_map.html#a4ae4745e9f3f4fbf8d28c734f9c7832a',1,'org::mctourney::autoreferee::AutoRefMap']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['waiting',['WAITING',['../enumorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match_1_1_match_status.html#a5f4aa92aa6d542e78f7c5f624f248377',1,'org::mctourney::AutoReferee::AutoRefMatch::MatchStatus']]]
+  ['waiting',['WAITING',['../enumorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_match_1_1_match_status.html#a3dba3dc395206494471bbb1573ed4d5e',1,'org::mctourney::autoreferee::AutoRefMatch::MatchStatus']]]
 ];

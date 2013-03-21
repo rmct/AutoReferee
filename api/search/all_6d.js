@@ -1,8 +1,13 @@
 var searchData=
 [
-  ['matchcomplete',['matchComplete',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a2e1765a2cd3cef8cc248ca93156c903c',1,'org.mctourney.AutoReferee.AutoRefMatch.matchComplete()'],['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a33b602fd5ef0fb3a2699d3f922938257',1,'org.mctourney.AutoReferee.AutoRefMatch.matchComplete(AutoRefTeam team)']]],
-  ['matchesblock',['matchesBlock',['../classorg_1_1mctourney_1_1_auto_referee_1_1util_1_1_block_data.html#a0b2d0c506440ede0ee4027cda016e3e1',1,'org::mctourney::AutoReferee::util::BlockData']]],
-  ['matchstatus',['MatchStatus',['../enumorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match_1_1_match_status.html',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
-  ['messagereferee',['messageReferee',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a855b16995d108106c57d8dd56b37f474',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
-  ['messagereferees',['messageReferees',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a5db38e809ac51b6b8ff74f233b1968b4',1,'org::mctourney::AutoReferee::AutoRefMatch']]]
+  ['matchcompleteevent',['MatchCompleteEvent',['../classorg_1_1mctourney_1_1autoreferee_1_1event_1_1match_1_1_match_complete_event.html',1,'org::mctourney::autoreferee::event::match']]],
+  ['matchesblock',['matchesBlock',['../classorg_1_1mctourney_1_1autoreferee_1_1util_1_1_block_data.html#a1e003ba6abda4d6d62d275ebdc4d7483',1,'org::mctourney::autoreferee::util::BlockData']]],
+  ['matchevent',['MatchEvent',['../classorg_1_1mctourney_1_1autoreferee_1_1event_1_1match_1_1_match_event.html',1,'org::mctourney::autoreferee::event::match']]],
+  ['matchloadevent',['MatchLoadEvent',['../classorg_1_1mctourney_1_1autoreferee_1_1event_1_1match_1_1_match_load_event.html',1,'org::mctourney::autoreferee::event::match']]],
+  ['matchstartevent',['MatchStartEvent',['../classorg_1_1mctourney_1_1autoreferee_1_1event_1_1match_1_1_match_start_event.html',1,'org::mctourney::autoreferee::event::match']]],
+  ['matchstatus',['MatchStatus',['../enumorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_match_1_1_match_status.html',1,'org::mctourney::autoreferee::AutoRefMatch']]],
+  ['matchunloadevent',['MatchUnloadEvent',['../classorg_1_1mctourney_1_1autoreferee_1_1event_1_1match_1_1_match_unload_event.html',1,'org::mctourney::autoreferee::event::match']]],
+  ['matchuploadstatsevent',['MatchUploadStatsEvent',['../classorg_1_1mctourney_1_1autoreferee_1_1event_1_1match_1_1_match_upload_stats_event.html',1,'org::mctourney::autoreferee::event::match']]],
+  ['messagereferee',['messageReferee',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_match.html#a80c294cbd834dc8717a2ede8cc6f0309',1,'org::mctourney::autoreferee::AutoRefMatch']]],
+  ['messagereferees',['messageReferees',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_match.html#a2b0f30b5940e54287dc285d8f2bb5ed9',1,'org::mctourney::autoreferee::AutoRefMatch']]]
 ];

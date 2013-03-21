@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['join',['join',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#aa3d267b3e4b50d78dec210bad28ad49e',1,'org.mctourney.AutoReferee.AutoRefTeam.join(Player player)'],['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#ad104ab9b362d2df9c8b3310dc5eaf062',1,'org.mctourney.AutoReferee.AutoRefTeam.join(Player player, boolean force)']]],
-  ['joinmatch',['joinMatch',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a01b09b61bdbf5be0dcdac460c3c89128',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
-  ['jointeam',['joinTeam',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a12c45c3df873463fe35000c1873a7462',1,'org::mctourney::AutoReferee::AutoRefMatch']]]
+  ['join',['join',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_team.html#a5633549279044fc02d7cdcbecdf9fc6e',1,'org.mctourney.autoreferee.AutoRefTeam.join(Player player)'],['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_team.html#afb16f70d079be5f539dae1db7f7c9854',1,'org.mctourney.autoreferee.AutoRefTeam.join(Player player, boolean force)']]],
+  ['joinmatch',['joinMatch',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_match.html#ac8692e766d07f3547b8439dd9ab37834',1,'org::mctourney::autoreferee::AutoRefMatch']]],
+  ['jointeam',['joinTeam',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_match.html#aceff8e7d9ff7e7f9db78e863eb658b55',1,'org::mctourney::autoreferee::AutoRefMatch']]]
 ];

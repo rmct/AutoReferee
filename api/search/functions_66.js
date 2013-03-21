@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['fromblock',['fromBlock',['../classorg_1_1mctourney_1_1_auto_referee_1_1util_1_1_block_data.html#accfdf2099c619506d3da27a40f1c8ba0',1,'org::mctourney::AutoReferee::util::BlockData']]],
-  ['frominventory',['fromInventory',['../classorg_1_1mctourney_1_1_auto_referee_1_1util_1_1_block_data.html#a75908f19ee5cea4fe3cde4be60a71357',1,'org::mctourney::AutoReferee::util::BlockData']]],
-  ['fromitemstack',['fromItemStack',['../classorg_1_1mctourney_1_1_auto_referee_1_1util_1_1_block_data.html#a1326fa89669dff0c3d6fc43f0e6e604c',1,'org::mctourney::AutoReferee::util::BlockData']]]
+  ['fromblock',['fromBlock',['../classorg_1_1mctourney_1_1autoreferee_1_1util_1_1_block_data.html#a18ccec2c5b8506da912a63ca8e26d840',1,'org::mctourney::autoreferee::util::BlockData']]],
+  ['frominventory',['fromInventory',['../classorg_1_1mctourney_1_1autoreferee_1_1util_1_1_block_data.html#ae8f6a9ed66cadd75ceaa1f98f5518306',1,'org::mctourney::autoreferee::util::BlockData']]],
+  ['fromitemstack',['fromItemStack',['../classorg_1_1mctourney_1_1autoreferee_1_1util_1_1_block_data.html#a6fe6e4fafc782b605f4bcc22e4b09172',1,'org::mctourney::autoreferee::util::BlockData']]]
 ];

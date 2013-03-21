@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['parsematchinitialization',['parseMatchInitialization',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_map.html#ab8b952bfd2510f087e1a4cc3601ef71b',1,'org::mctourney::AutoReferee::AutoRefMap']]],
-  ['parsetimestring',['parseTimeString',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#a37c9e6ea6b9d9c076b76cc78a2c79cbd',1,'org::mctourney::AutoReferee::AutoReferee']]],
-  ['playerwhitelisted',['playerWhitelisted',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#a2192c5efe9024e1421bc73bcf01af049',1,'org::mctourney::AutoReferee::AutoReferee']]]
+  ['parsematchinitialization',['parseMatchInitialization',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_map.html#afd2d8e26a8c3f62a7585fab3595372c4',1,'org::mctourney::autoreferee::AutoRefMap']]],
+  ['parsetimestring',['parseTimeString',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_referee.html#a1f997b1da348bf8a10feb8dc153e2fd4',1,'org::mctourney::autoreferee::AutoReferee']]],
+  ['playerwhitelisted',['playerWhitelisted',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_referee.html#a6bc20ed78f42c8fd5528451d6c980c6e',1,'org::mctourney::autoreferee::AutoReferee']]]
 ];

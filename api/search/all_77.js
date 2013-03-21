@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['waiting',['WAITING',['../enumorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match_1_1_match_status.html#a5f4aa92aa6d542e78f7c5f624f248377',1,'org::mctourney::AutoReferee::AutoRefMatch::MatchStatus']]],
-  ['wasdamagedrecently',['wasDamagedRecently',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a1d58e786ec38e191ba33d266e4a988ce',1,'org::mctourney::AutoReferee::AutoRefPlayer']]]
+  ['waiting',['WAITING',['../enumorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_match_1_1_match_status.html#a3dba3dc395206494471bbb1573ed4d5e',1,'org::mctourney::autoreferee::AutoRefMatch::MatchStatus']]],
+  ['wasdamagedrecently',['wasDamagedRecently',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_player.html#ac2358091591687ba6d402855a39729b9',1,'org::mctourney::autoreferee::AutoRefPlayer']]]
 ];

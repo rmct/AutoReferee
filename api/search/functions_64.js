@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['damagecooldownlength',['damageCooldownLength',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a2be0ea3077010049ca46a7a054924ee4',1,'org::mctourney::AutoReferee::AutoRefPlayer']]],
-  ['debug',['debug',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a273f251562617b26af4324f4a90b5874',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
-  ['destroy',['destroy',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a076e518f510da9cdae919857c0a6e202',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
-  ['die',['die',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a2c90eecd94f94704c822dcb975dd467e',1,'org::mctourney::AutoReferee::AutoRefPlayer']]],
-  ['distancetoclosestregion',['distanceToClosestRegion',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a1a35e3ccdb6dacb286e78e032ba5f36d',1,'org.mctourney.AutoReferee.AutoRefMatch.distanceToClosestRegion()'],['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#a9b6a4e6e80a4fc46c4c198f4757c5194',1,'org.mctourney.AutoReferee.AutoRefTeam.distanceToClosestRegion()']]],
-  ['distributemap',['distributeMap',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#ae210f411106b65550ec53be44266ecfb',1,'org::mctourney::AutoReferee::AutoRefMatch']]]
+  ['damagecooldownlength',['damageCooldownLength',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_player.html#a200189d3e14cb04c45e920cabde33a5c',1,'org::mctourney::autoreferee::AutoRefPlayer']]],
+  ['debug',['debug',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_match.html#a5bd43475db6ab263acd2cf0301bc002c',1,'org::mctourney::autoreferee::AutoRefMatch']]],
+  ['destroy',['destroy',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_match.html#a663873643c0c05329afa18a9e0d07387',1,'org::mctourney::autoreferee::AutoRefMatch']]],
+  ['die',['die',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_player.html#a195668028e389cfe375f67b89c1374a8',1,'org::mctourney::autoreferee::AutoRefPlayer']]],
+  ['distancetoclosestregion',['distanceToClosestRegion',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_match.html#a054f08d7e152308086bfe458920fedc0',1,'org.mctourney.autoreferee.AutoRefMatch.distanceToClosestRegion()'],['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_team.html#a52f75883c74763123f8433d5901f5a28',1,'org.mctourney.autoreferee.AutoRefTeam.distanceToClosestRegion()']]],
+  ['distributemap',['distributeMap',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_match.html#a2514b201c942dad0e4e5ab0580fed1a5',1,'org::mctourney::autoreferee::AutoRefMatch']]]
 ];

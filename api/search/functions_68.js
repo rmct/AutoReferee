@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['hasflag',['hasFlag',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#a98ea206877d4138604203ae0762f1dce',1,'org.mctourney.AutoReferee.AutoRefMatch.hasFlag()'],['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_team.html#a6f64f61a2aecd6ce1a437bfe3ec233a3',1,'org.mctourney.AutoReferee.AutoRefTeam.hasFlag()']]],
-  ['hassportbukkitapi',['hasSportBukkitApi',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_referee.html#ac8eff409b14745ff05fbca560fab4c79',1,'org::mctourney::AutoReferee::AutoReferee']]],
-  ['hastimelimit',['hasTimeLimit',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_match.html#ae23f7358d5d3d987bee6e3c39c9ccd6a',1,'org::mctourney::AutoReferee::AutoRefMatch']]],
-  ['heal',['heal',['../classorg_1_1mctourney_1_1_auto_referee_1_1_auto_ref_player.html#a6e24aa43bbd98c280bc47dc5a6dd5fd2',1,'org::mctourney::AutoReferee::AutoRefPlayer']]]
+  ['hasflag',['hasFlag',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_match.html#acd3d2a659fce88385852d4f3a859d5b6',1,'org.mctourney.autoreferee.AutoRefMatch.hasFlag()'],['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_team.html#aa0c7fa208777e9e568f33c735129bfdb',1,'org.mctourney.autoreferee.AutoRefTeam.hasFlag()']]],
+  ['hastimelimit',['hasTimeLimit',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_match.html#a0c52cc16a9bee28cbd85983a9537cac3',1,'org::mctourney::autoreferee::AutoRefMatch']]],
+  ['heal',['heal',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_player.html#a7d903ea3b45a6f674208052f698e356e',1,'org::mctourney::autoreferee::AutoRefPlayer']]]
 ];
