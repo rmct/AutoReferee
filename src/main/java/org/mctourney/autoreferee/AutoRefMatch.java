@@ -889,7 +889,7 @@ public class AutoRefMatch
 	/**
 	 * Checks if the specified player is a streamer for this match.
 	 *
-	 * @return true if player is a referee and not on a team, otherwise false
+	 * @return true if player is a streamer and not on a team, otherwise false
 	 */
 	public boolean isStreamer(Player player)
 	{

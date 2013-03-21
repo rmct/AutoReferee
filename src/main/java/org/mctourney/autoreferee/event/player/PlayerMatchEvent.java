@@ -4,7 +4,12 @@ import org.bukkit.entity.Player;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.event.Cancellable;
 
-public abstract class PlayerMatchEvent extends PlayerEvent implements Cancellable
+/**
+ * Represents an event related to an {@link org.mctourney.autoreferee.AutoRefMatch}
+ *
+ * @author authorblues
+ */
+public abstract class PlayerMatchEvent extends PlayerEvent
 {
 	private AutoRefMatch match;
 	private boolean cancelled = false;
@@ -15,14 +20,10 @@ public abstract class PlayerMatchEvent extends PlayerEvent implements Cancellabl
 		this.match = match;
 	}
 
+	/**
+	 * Gets the match for this event.
+	 * @return match
+	 */
 	public AutoRefMatch getMatch()
 	{ return this.match; }
-
-	@Override
-	public boolean isCancelled()
-	{ return this.cancelled; }
-
-	@Override
-	public void setCancelled(boolean cancel)
-	{ this.cancelled = cancel; }
 }
