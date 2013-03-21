@@ -260,10 +260,10 @@ public class RefereeCommands implements CommandHandler
 		if (args.length >= 1)
 		{
 			if ("none".equalsIgnoreCase(args[0]) || "tie".equalsIgnoreCase(args[0]))
-				match.matchComplete(null);
-			else match.matchComplete(match.teamNameLookup(args[0]));
+				match.endMatch(null);
+			else match.endMatch(match.teamNameLookup(args[0]));
 		}
-		else match.matchComplete();
+		else match.endMatch();
 		return true;
 	}
 

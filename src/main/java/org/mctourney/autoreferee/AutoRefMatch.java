@@ -1776,7 +1776,7 @@ public class AutoRefMatch
 					String timelimit = (match.getTimeLimit() / 60L) + " min";
 					match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.MATCH_END,
 						"Match time limit reached: " + timelimit, null, null, null));
-					match.matchComplete();
+					match.endMatch();
 				}
 				else if (AutoRefMatch.announceMinutes.contains(minutesRemaining))
 					match.broadcast(">>> " + ChatColor.GREEN +
@@ -2098,7 +2098,7 @@ public class AutoRefMatch
 			team.updateObjectives();
 
 			// if the team won, mark the match as completed
-			if (win) matchComplete(team);
+			if (win) endMatch(team);
 		}
 	}
 
@@ -2122,7 +2122,7 @@ public class AutoRefMatch
 	/**
 	 * Ends match, allowing AutoReferee to break ties according to its own policies.
 	 */
-	public void matchComplete()
+	public void endMatch()
 	{
 		TiebreakerComparator cmp = new TiebreakerComparator();
 		List<AutoRefTeam> sortedTeams = Lists.newArrayList(getTeams());
@@ -2131,9 +2131,9 @@ public class AutoRefMatch
 		Collections.sort(sortedTeams, cmp);
 
 		if (0 != cmp.compare(sortedTeams.get(0), sortedTeams.get(1)))
-		{ matchComplete(sortedTeams.get(0)); return; }
+		{ endMatch(sortedTeams.get(0)); return; }
 
-		if (AutoRefMatch.areTiesAllowed()) { matchComplete(null); return; }
+		if (AutoRefMatch.areTiesAllowed()) { endMatch(null); return; }
 		for (Player ref : getReferees())
 		{
 			ref.sendMessage(ChatColor.DARK_GRAY + "This match is currently tied.");
@@ -2150,7 +2150,7 @@ public class AutoRefMatch
 	 *
 	 * @param team winning team, or null for no winner
 	 */
-	public void matchComplete(AutoRefTeam team)
+	public void endMatch(AutoRefTeam team)
 	{
 		// announce the victory and set the match to completed
 		if (team != null) this.broadcast(team.getDisplayName() + " Wins!");
