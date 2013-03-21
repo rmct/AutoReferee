@@ -601,7 +601,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	{
 		objloop: for (AutoRefGoal goal : goals) if (goal.hasItem())
 		{
-			if (goal instanceof BlockGoal && getMatch().blockInRange((BlockGoal) goal) != null)
+			if (goal instanceof BlockGoal && ((BlockGoal) goal).isSatisfied(getMatch()))
 			{ changeObjectiveStatus(goal, AutoRefGoal.ItemStatus.TARGET); continue objloop; }
 
 			for (AutoRefPlayer apl : getPlayers())
@@ -611,7 +611,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 			}
 
 			if (goal.getItemStatus() != AutoRefGoal.ItemStatus.NONE)
-			{ changeObjectiveStatus(goal, AutoRefGoal.ItemStatus.SEEN); continue; }
+			{ changeObjectiveStatus(goal, AutoRefGoal.ItemStatus.SEEN); continue objloop; }
 		}
 	}
 

@@ -2038,37 +2038,6 @@ public class AutoRefMatch
 	}
 
 	/**
-	 * Checks if a given block type exists within a cube centered around a location.
-	 *
-	 * @param blockdata block type being searched for
-	 * @param loc center point of searchable cube
-	 * @param radius radius of searchable cube
-	 * @return location of a matching block within the region if one exists, otherwise null
-	 */
-	public Location blockInRange(BlockData blockdata, Location loc, int radius)
-	{
-		Block b = getWorld().getBlockAt(loc);
-		for (int x = -radius; x <= radius; ++x)
-		for (int y = -radius; y <= radius; ++y)
-		for (int z = -radius; z <= radius; ++z)
-		{
-			Block rel = b.getRelative(x, y, z);
-			if (blockdata.matchesBlock(rel)) return rel.getLocation();
-		}
-
-		return null;
-	}
-
-	/**
-	 * Checks if a given block type exists within a cube centered around a location.
-	 *
-	 * @param goal win condition object
-	 * @return location of a matching block within the region if one exists, otherwise null
-	 */
-	public Location blockInRange(org.mctourney.autoreferee.goals.BlockGoal goal)
-	{ return blockInRange(goal.getItem(), goal.getTarget(), goal.getInexactRange()); }
-
-	/**
 	 * Checks if any team has satisfied the win conditions.
 	 */
 	public void checkWinConditions()

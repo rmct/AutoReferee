@@ -61,7 +61,6 @@ public class BlockGoal extends AutoRefGoal
 	 *
 	 * @param team owner of this win condition
 	 * @param block block to construct win condition from
-	 * @param range maximum allowed distance from target
 	 */
 	public BlockGoal(AutoRefTeam team, Block block)
 	{ this(team, block, team.getMatch().getInexactRange()); }
@@ -109,7 +108,38 @@ public class BlockGoal extends AutoRefGoal
 
 	@Override
 	public boolean isSatisfied(AutoRefMatch match)
-	{ return null != match.blockInRange(blockdata, loc, range); }
+	{ return null != blockInRange(blockdata, loc, range); }
+
+	/**
+	 * Checks if a given block type exists within a cube centered around a location.
+	 *
+	 * @param blockdata block type being searched for
+	 * @param loc center point of searchable cube
+	 * @param radius radius of searchable cube
+	 * @return location of a matching block within the region if one exists, otherwise null
+	 */
+	public static Location blockInRange(BlockData blockdata, Location loc, int radius)
+	{
+		Block b = loc.getBlock();
+		for (int x = -radius; x <= radius; ++x)
+		for (int y = -radius; y <= radius; ++y)
+		for (int z = -radius; z <= radius; ++z)
+		{
+			Block rel = b.getRelative(x, y, z);
+			if (blockdata.matchesBlock(rel)) return rel.getLocation();
+		}
+
+		return null;
+	}
+
+	/**
+	 * Checks if a given block type exists within a cube centered around a location.
+	 *
+	 * @param goal win condition object
+	 * @return location of a matching block within the region if one exists, otherwise null
+	 */
+	public static Location blockInRange(BlockGoal goal)
+	{ return blockInRange(goal.getItem(), goal.getTarget(), goal.getInexactRange()); }
 
 	@Override
 	public void updateReferee(Player ref)

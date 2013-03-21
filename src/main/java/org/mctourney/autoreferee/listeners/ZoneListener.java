@@ -551,7 +551,7 @@ public class ZoneListener implements Listener
 		apl.setLastTeleportLocation(to);
 
 		// generate message regarding the teleport event
-		String bedrock = match.blockInRange(BlockData.BEDROCK, to, 5) != null ? " (near bedrock)" : "";
+		String bedrock = BlockGoal.blockInRange(BlockData.BEDROCK, to, 5) != null ? " (near bedrock)" : "";
 		String message = apl.getDisplayName() + ChatColor.GRAY + " has teleported @ " +
 			LocationUtil.toBlockCoords(to) + bedrock;
 

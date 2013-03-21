@@ -56,7 +56,7 @@ public class ObjectiveTracker implements Listener
 			for (AutoRefGoal goal : apl.getTeam().getTeamGoals()) if (goal.hasItem())
 			{
 				BlockData b = goal.getItem();
-				if (goal instanceof BlockGoal && match.blockInRange((BlockGoal) goal) != null &&
+				if (goal instanceof BlockGoal && ((BlockGoal) goal).isSatisfied(match) &&
 					b.matchesBlock(block) && goal.getItemStatus() != AutoRefGoal.ItemStatus.TARGET)
 				{
 					match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.OBJECTIVE_PLACED,
