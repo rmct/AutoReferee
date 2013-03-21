@@ -1,9 +1,9 @@
 package org.mctourney.autoreferee.event.match;
 
 import org.mctourney.autoreferee.AutoRefMatch;
-import org.mctourney.autoreferee.event.Event;
+import org.mctourney.autoreferee.event.AutoRefereeEvent;
 
-public abstract class MatchEvent extends Event
+public abstract class MatchEvent extends AutoRefereeEvent
 {
 	protected AutoRefMatch match;
 

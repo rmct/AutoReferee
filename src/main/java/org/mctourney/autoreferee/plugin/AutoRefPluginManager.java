@@ -1,13 +1,12 @@
 package org.mctourney.autoreferee.plugin;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import org.bukkit.plugin.Plugin;
 import org.mctourney.autoreferee.AutoReferee;
-import org.mctourney.autoreferee.event.Event;
-import org.mctourney.autoreferee.event.EventHandler;
-import org.mctourney.autoreferee.event.Listener;
+import org.mctourney.autoreferee.event.AutoRefereeEvent;
+import org.mctourney.autoreferee.event.AutoRefereeEventHandler;
+import org.mctourney.autoreferee.event.AutoRefereeListener;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -17,34 +16,34 @@ import java.util.Map;
 
 public class AutoRefPluginManager
 {
-	Map<Class<? extends Event>, List<EventHandlerMethod>> eventMap = Maps.newHashMap();
+	Map<Class<? extends AutoRefereeEvent>, List<EventHandlerMethod>> eventMap = Maps.newHashMap();
 
 	public AutoRefPluginManager()
 	{
 	}
 
-	public void registerListener(Listener listener, Plugin plugin)
+	public void registerListener(AutoRefereeListener listener, Plugin plugin)
 	{
 		for (Method method : listener.getClass().getDeclaredMethods())
-			if (method.getAnnotation(EventHandler.class) != null)
+			if (method.getAnnotation(AutoRefereeEventHandler.class) != null)
 		{
 			AutoReferee.log("Found something: " + method.getName());
 			Class<?> types[] = method.getParameterTypes();
-			if (types.length == 1 && Event.class.isAssignableFrom(types[0]))
+			if (types.length == 1 && AutoRefereeEvent.class.isAssignableFrom(types[0]))
 			{
 				AutoReferee.log("Right types!");
 				if ((types[0].getModifiers() & Modifier.ABSTRACT) == 0)
-					registerListenerMethod(plugin, listener, method, (Class<? extends Event>) types[0]);
-				else throw new IllegalArgumentException("May not apply EventHandler to abstract event types.");
+					registerListenerMethod(plugin, listener, method, (Class<? extends AutoRefereeEvent>) types[0]);
+				else throw new IllegalArgumentException("May not apply AutoRefereeEventHandler to abstract event types.");
 			}
-			else throw new IllegalArgumentException("EventHandler requires an event-type parameter.");
+			else throw new IllegalArgumentException("AutoRefereeEventHandler requires an event-type parameter.");
 		}
 	}
 
-	private void registerListenerMethod(Plugin plugin, Listener listener,
-		Method method, Class<? extends Event> eventType)
+	private void registerListenerMethod(Plugin plugin, AutoRefereeListener listener,
+		Method method, Class<? extends AutoRefereeEvent> eventType)
 	{
-		EventHandler annotation = method.getAnnotation(EventHandler.class);
+		AutoRefereeEventHandler annotation = method.getAnnotation(AutoRefereeEventHandler.class);
 		List<EventHandlerMethod> mlist = eventMap.get(eventType);
 		if (mlist == null) eventMap.put(eventType, mlist = new ArrayList<EventHandlerMethod>());
 
@@ -53,7 +52,7 @@ public class AutoRefPluginManager
 			plugin.getName(), eventType.getSimpleName(), mlist.size()));
 	}
 
-	public void fireEvent(Event event)
+	public void fireEvent(AutoRefereeEvent event)
 	{
 		List<EventHandlerMethod> methods = eventMap.get(event.getClass());
 		if (methods != null) for (EventHandlerMethod handler : methods)

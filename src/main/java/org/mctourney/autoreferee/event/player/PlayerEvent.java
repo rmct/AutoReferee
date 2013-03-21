@@ -1,9 +1,9 @@
 package org.mctourney.autoreferee.event.player;
 
 import org.bukkit.entity.Player;
-import org.mctourney.autoreferee.event.Event;
+import org.mctourney.autoreferee.event.AutoRefereeEvent;
 
-public abstract class PlayerEvent extends Event
+public abstract class PlayerEvent extends AutoRefereeEvent
 {
 	protected Player player;
 

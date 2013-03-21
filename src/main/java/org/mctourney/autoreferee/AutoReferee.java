@@ -37,7 +37,7 @@ import org.mctourney.autoreferee.commands.AdminCommands;
 import org.mctourney.autoreferee.commands.ConfigurationCommands;
 import org.mctourney.autoreferee.commands.PlayerCommands;
 import org.mctourney.autoreferee.commands.RefereeCommands;
-import org.mctourney.autoreferee.event.Event;
+import org.mctourney.autoreferee.event.AutoRefereeEvent;
 import org.mctourney.autoreferee.listeners.CombatListener;
 import org.mctourney.autoreferee.listeners.ObjectiveTracker;
 import org.mctourney.autoreferee.listeners.RefereeChannelListener;
@@ -121,7 +121,7 @@ public class AutoReferee extends JavaPlugin
 	public AutoRefPluginManager getPluginManager()
 	{ return subpluginManager; }
 
-	public static void fireEvent(Event event)
+	public static void fireEvent(AutoRefereeEvent event)
 	{ getInstance().getPluginManager().fireEvent(event); }
 
 	private World lobby = null;

@@ -1,9 +1,9 @@
 package org.mctourney.autoreferee.event.team;
 
-import org.mctourney.autoreferee.event.Event;
+import org.mctourney.autoreferee.event.AutoRefereeEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
 
-public abstract class ObjectiveEvent extends Event
+public abstract class ObjectiveEvent extends AutoRefereeEvent
 {
 	private AutoRefGoal goal;
 

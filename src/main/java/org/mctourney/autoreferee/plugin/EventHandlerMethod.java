@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 
 import org.bukkit.plugin.Plugin;
 
-import org.mctourney.autoreferee.event.Event;
+import org.mctourney.autoreferee.event.AutoRefereeEvent;
 
 public class EventHandlerMethod
 {
@@ -23,7 +23,7 @@ public class EventHandlerMethod
 	public Plugin getPlugin()
 	{ return plugin; }
 
-	public void triggerEvent(Event event)
+	public void triggerEvent(AutoRefereeEvent event)
 	{
 		try
 		{
