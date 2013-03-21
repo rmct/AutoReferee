@@ -473,12 +473,10 @@ public class AutoReferee extends JavaPlugin
 	 */
 	public void sendMessageSync(CommandSender sender, String msg)
 	{
-		// attempt to cancel the task (if its scheduled)
-		try { messageQueue.cancel(); }
-		catch (IllegalStateException e) {  }
-
 		messageQueue.addMessage(sender, msg);
-		messageQueue.runTask(this);
+
+		try { messageQueue.runTask(this); }
+		catch (IllegalStateException e) {  }
 	}
 
 	private class SyncMessageTask extends BukkitRunnable
@@ -499,6 +497,7 @@ public class AutoReferee extends JavaPlugin
 
 		@Override public void run()
 		{
+			AutoReferee.this.messageQueue = new SyncMessageTask();
 			for (RoutedMessage msg : msgQueue)
 				msg.sender.sendMessage(msg.message);
 			msgQueue.clear();

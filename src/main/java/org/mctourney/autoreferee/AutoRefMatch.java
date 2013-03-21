@@ -1284,12 +1284,12 @@ public class AutoRefMatch
 	 */
 	public void broadcastSync(String msg)
 	{
-		// attempt to cancel the task (if its scheduled)
-		try { broadcastTask.cancel(); }
-		catch (IllegalStateException e) {  }
-
+		if (AutoReferee.getInstance().isConsoleLoggingEnabled())
+			AutoReferee.log(ChatColor.stripColor(msg));
 		broadcastTask.addMessage(msg);
-		broadcastTask.runTask(AutoReferee.getInstance());
+
+		try { broadcastTask.runTask(AutoReferee.getInstance()); }
+		catch (IllegalStateException e) {  }
 	}
 
 	private class SyncBroadcastTask extends BukkitRunnable
@@ -1301,8 +1301,8 @@ public class AutoRefMatch
 
 		@Override public void run()
 		{
-			for (String msg : msgQueue)
-				AutoRefMatch.this.broadcast(msg);
+			AutoRefMatch.this.broadcastTask = new SyncBroadcastTask();
+			for (String msg : msgQueue) AutoRefMatch.this.broadcast(msg);
 			msgQueue.clear();
 		}
 	}
