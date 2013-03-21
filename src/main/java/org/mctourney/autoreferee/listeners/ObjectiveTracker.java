@@ -149,7 +149,7 @@ public class ObjectiveTracker implements Listener
 		if (match != null) match.checkWinConditions();
 
 		if (entity.getType() == EntityType.PLAYER && match != null
-			&& match.isReferee(pl) && match.isPlayer((Player) entity))
+			&& match.isSpectator(pl) && match.isPlayer((Player) entity))
 		{
 			AutoRefPlayer a = match.getPlayer((Player) entity);
 			a.showInventory(pl);
