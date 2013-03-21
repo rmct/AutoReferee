@@ -17,6 +17,9 @@
 .*.sw[a-p]
 *~
 
+# AWS map repository
+/s3
+
 # various other potential build files
 /build
 /bin
