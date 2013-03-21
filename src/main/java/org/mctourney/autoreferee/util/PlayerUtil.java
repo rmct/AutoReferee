@@ -9,7 +9,7 @@ import org.bukkit.potion.PotionEffectType;
 
 import com.google.common.collect.Maps;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
 
 public class PlayerUtil
 {
@@ -101,7 +101,7 @@ public class PlayerUtil
 		int amp = effect.getAmplifier();
 
 		String name = statusNames.containsKey(type) ? statusNames.get(type) :
-			StringUtils.capitalize(type.getName().toLowerCase().replace('_', ' '));
+			WordUtils.capitalizeFully(type.getName().toLowerCase().replace('_', ' '));
 		if (amp >= 0) name += " " + (amp < roman.length ? roman[amp] : (1 + amp));
 
 		return String.format("%s (%d:%02d)", name, time/60, time%60);
