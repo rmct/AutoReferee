@@ -20,7 +20,7 @@ public class TimeGoal extends AutoRefGoal
 
 	@Override
 	public boolean isSatisfied(AutoRefMatch match)
-	{ return match.getMatchTime() > this.ticks; }
+	{ return match.getElapsedSeconds() > this.ticks; }
 
 	@Override
 	public void updateReferee(Player ref)

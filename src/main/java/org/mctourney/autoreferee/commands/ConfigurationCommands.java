@@ -56,7 +56,7 @@ public class ConfigurationCommands implements CommandHandler
 
 		// LAST MINUTE CLEANUP!!!
 		match.clearEntities();
-		world.setTime(match.getStartTime());
+		world.setTime(match.getStartClock());
 
 		// save the world and configuration first
 		world.save();

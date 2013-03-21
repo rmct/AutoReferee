@@ -165,7 +165,7 @@ public class AutoRefMatch
 	private boolean isTemporaryWorld()
 	{ return tmp; }
 
-	private long startTime = 0L;
+	private long startClock = 0L;
 	private boolean lockTime = false;
 
 	/**
@@ -173,16 +173,16 @@ public class AutoRefMatch
 	 *
 	 * @return world time in ticks to be set at start of the match
 	 */
-	public long getStartTime()
-	{ return startTime; }
+	public long getStartClock()
+	{ return startClock; }
 
 	/**
 	 * Sets the time that will be set at the start of the match.
 	 *
 	 * @param time world time in ticks to set at start of the match
 	 */
-	public void setStartTime(long time)
-	{ this.startTime = time; }
+	public void setStartClock(long time)
+	{ this.startClock = time; }
 
 	/**
 	 * Represents the status of a match.
@@ -437,23 +437,23 @@ public class AutoRefMatch
 		return "??";
 	}
 
-	private long startTicks = 0;
+	private long startTime = 0;
 
-	private long getStartTicks()
-	{ return startTicks; }
+	private long getStartTime()
+	{ return startTime; }
 
-	private void setStartTicks(long startTicks)
-	{ this.startTicks = startTicks; }
+	private void setStartTime(long time)
+	{ this.startTime = time; }
 
 	/**
 	 * Gets the number of seconds elapsed in this match.
 	 *
 	 * @return current elapsed seconds if match in progress, otherwise 0L
 	 */
-	public long getMatchTime()
+	public long getElapsedSeconds()
 	{
 		if (!getCurrentState().inProgress()) return 0L;
-		return (getWorld().getFullTime() - getStartTicks()) / 20L;
+		return (System.currentTimeMillis() - getStartTime()) / 1000L;
 	}
 
 	private long timeLimit = -1L;
@@ -480,7 +480,7 @@ public class AutoRefMatch
 	 * @return time remaining in seconds
 	 */
 	public long getTimeRemaining()
-	{ return timeLimit - getMatchTime(); }
+	{ return timeLimit - getElapsedSeconds(); }
 
 	/**
 	 * Sets match time limit in seconds.
@@ -506,7 +506,7 @@ public class AutoRefMatch
 	 */
 	public String getTimestamp(String sep)
 	{
-		long timestamp = this.getMatchTime();
+		long timestamp = this.getElapsedSeconds();
 		return String.format("%02d%s%02d%s%02d", timestamp/3600L,
 			sep, (timestamp/60L)%60L, sep, timestamp%60L);
 	}
@@ -1053,7 +1053,7 @@ public class AutoRefMatch
 		// get the time the match is set to start
 		if (gameplay.getChild("clockstart") != null)
 		{
-			startTime = AutoReferee.parseTimeString(gameplay.getChildText("clockstart"));
+			startClock = AutoReferee.parseTimeString(gameplay.getChildText("clockstart"));
 			lockTime = gameplay.getChild("clockstart").getAttributeValue("lock") != null;
 		}
 
@@ -1703,8 +1703,8 @@ public class AutoRefMatch
 	public void start()
 	{
 		// set up the world time one last time
-		primaryWorld.setTime(startTime);
-		this.setStartTicks(primaryWorld.getFullTime());
+		primaryWorld.setTime(startClock);
+		this.setStartTime(System.currentTimeMillis());
 
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_START,
 			"Match began.", null, null, null));
@@ -1789,7 +1789,7 @@ public class AutoRefMatch
 						"Match ends in " + minutesRemaining + "m");
 			}
 
-			if (lockTime) primaryWorld.setTime(startTime);
+			if (lockTime) primaryWorld.setTime(startClock);
 		}
 	}
 
@@ -1955,7 +1955,7 @@ public class AutoRefMatch
 		if (isCountdownRunning()) return;
 
 		// set the current time to the start time
-		primaryWorld.setTime(this.startTime);
+		primaryWorld.setTime(this.startClock);
 
 		// remove all mobs, animals, and items
 		this.clearEntities();
@@ -2671,12 +2671,12 @@ public class AutoRefMatch
 			this.icon1 = icon1;
 			this.icon2 = icon2;
 
-			this.timestamp = match.getMatchTime();
+			this.timestamp = match.getElapsedSeconds();
 		}
 
 		public String getTimestamp()
 		{
-			long t = getTimestampTick();
+			long t = getSeconds();
 			return String.format("%02d:%02d:%02d",
 				t/3600L, (t/60L)%60L, t%60L);
 		}
@@ -2688,7 +2688,7 @@ public class AutoRefMatch
 		public Location getLocation()
 		{ return location; }
 
-		public long getTimestampTick()
+		public long getSeconds()
 		{ return timestamp; }
 	}
 
@@ -2848,9 +2848,9 @@ public class AutoRefMatch
 			(this.getCurrentState().isBeforeMatch() ? (" [" + this.access.name() + "]") : ""));
 		sender.sendMessage("Map difficulty is set to: " + ChatColor.GRAY + getWorld().getDifficulty().name());
 
-		long timestamp = (getWorld().getFullTime() - getStartTicks()) / 20L;
-		if (getCurrentState().inProgress())
-			sender.sendMessage(String.format(ChatColor.GRAY + "The current match time is: %02d:%02d:%02d",
+		long timestamp = this.getElapsedSeconds();
+		if (getCurrentState().inProgress()) sender.sendMessage(String.format(
+			ChatColor.GRAY + "The current match time is: %02d:%02d:%02d",
 				timestamp/3600L, (timestamp/60L)%60L, timestamp%60L));
 	}
 }
