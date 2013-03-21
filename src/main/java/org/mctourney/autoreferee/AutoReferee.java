@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -16,13 +15,11 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.Plugin;
@@ -40,12 +37,14 @@ import org.mctourney.autoreferee.commands.AdminCommands;
 import org.mctourney.autoreferee.commands.ConfigurationCommands;
 import org.mctourney.autoreferee.commands.PlayerCommands;
 import org.mctourney.autoreferee.commands.RefereeCommands;
+import org.mctourney.autoreferee.event.Event;
 import org.mctourney.autoreferee.listeners.CombatListener;
 import org.mctourney.autoreferee.listeners.ObjectiveTracker;
 import org.mctourney.autoreferee.listeners.RefereeChannelListener;
 import org.mctourney.autoreferee.listeners.TeamListener;
 import org.mctourney.autoreferee.listeners.WorldListener;
 import org.mctourney.autoreferee.listeners.ZoneListener;
+import org.mctourney.autoreferee.plugin.AutoRefPluginManager;
 import org.mctourney.autoreferee.util.NullChunkGenerator;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
 import org.mctourney.autoreferee.util.commands.CommandManager;
@@ -115,6 +114,15 @@ public class AutoReferee extends JavaPlugin
 
 	// command manager
 	protected CommandManager commandManager = null;
+
+	// AutoReferee subplugin manager
+	protected AutoRefPluginManager subpluginManager = new AutoRefPluginManager();
+
+	public AutoRefPluginManager getPluginManager()
+	{ return subpluginManager; }
+
+	public static void fireEvent(Event event)
+	{ getInstance().getPluginManager().fireEvent(event); }
 
 	private World lobby = null;
 

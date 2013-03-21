@@ -28,6 +28,7 @@ import org.bukkit.entity.Player;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 
+import org.mctourney.autoreferee.event.match.MatchLoadEvent;
 import org.mctourney.autoreferee.util.NullChunkGenerator;
 
 import com.google.common.collect.Maps;
@@ -567,7 +568,10 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		{
 			AutoRefMatch match = null;
 			try { match = AutoRefMap.createMatch(this.map, this.custom); }
-			catch (IOException e) {  }
+			catch (IOException e) { e.printStackTrace(); return; }
+
+			MatchLoadEvent event = new MatchLoadEvent(match);
+			AutoReferee.fireEvent(event);
 
 			AutoReferee plugin = AutoReferee.getInstance();
 			plugin.getLogger().info(String.format("%s loaded %s (%s)", sender.getName(),

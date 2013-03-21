@@ -53,6 +53,12 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
+import org.mctourney.autoreferee.event.match.MatchCompleteEvent;
+import org.mctourney.autoreferee.event.match.MatchStartEvent;
+import org.mctourney.autoreferee.event.match.MatchUnloadEvent;
+import org.mctourney.autoreferee.event.match.MatchUploadStatsEvent;
+import org.mctourney.autoreferee.event.player.PlayerMatchJoinEvent;
+import org.mctourney.autoreferee.event.player.PlayerMatchLeaveEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
 import org.mctourney.autoreferee.listeners.RefereeChannelListener;
 import org.mctourney.autoreferee.listeners.WorldListener;
@@ -1426,6 +1432,10 @@ public class AutoRefMatch
 
 	public void ejectPlayer(Player player)
 	{
+		PlayerMatchLeaveEvent event = new PlayerMatchLeaveEvent(player, this);
+		AutoReferee.fireEvent(event);
+		if (event.isCancelled()) return;
+
 		// resets the player to default state
 		PlayerUtil.reset(player);
 
@@ -1447,6 +1457,11 @@ public class AutoRefMatch
 	 */
 	public void destroy()
 	{
+		// fire match unload event
+		MatchUnloadEvent event = new MatchUnloadEvent(this);
+		AutoReferee.fireEvent(event);
+		if (event.isCancelled()) return;
+
 		// first, handle all the players
 		for (Player p : primaryWorld.getPlayers()) this.ejectPlayer(p);
 
@@ -2034,7 +2049,12 @@ public class AutoRefMatch
 			p.sendMessage(ChatColor.GRAY + "Teams are ready. Type /ready to begin the match.");
 
 		// everyone is ready, let's go!
-		if (ready) this.prepareMatch();
+		if (ready)
+		{
+			MatchStartEvent event = new MatchStartEvent(this);
+			AutoReferee.getInstance().getPluginManager().fireEvent(event);
+			if (!event.isCancelled()) this.prepareMatch();
+		}
 	}
 
 	/**
@@ -2121,6 +2141,13 @@ public class AutoRefMatch
 	 */
 	public void endMatch(AutoRefTeam team)
 	{
+		MatchCompleteEvent event = new MatchCompleteEvent(this, team);
+		AutoReferee.fireEvent(event);
+		if (event.isCancelled()) return;
+
+		// update winner from the match complete event
+		team = event.getWinner();
+
 		// announce the victory and set the match to completed
 		if (team != null) this.broadcast(team.getDisplayName() + " Wins!");
 		else this.broadcast("Match terminated!");
@@ -2250,6 +2277,10 @@ public class AutoRefMatch
 	 */
 	public void joinMatch(Player player)
 	{
+		PlayerMatchJoinEvent event = new PlayerMatchJoinEvent(player, this);
+		AutoReferee.fireEvent(event);
+		if (!event.isCancelled()) return;
+
 		// if already here, skip this
 		if (this.isPlayer(player)) return;
 
@@ -2458,16 +2489,27 @@ public class AutoRefMatch
 			broadcastSync(ChatColor.RED + "Generating Match Summary...");
 			String report = matchReportGenerator.generate(AutoRefMatch.this);
 
+			MatchUploadStatsEvent event = new MatchUploadStatsEvent(AutoRefMatch.this, report);
+			AutoReferee.fireEvent(event);
+			report = event.getWebstats();
+
 			String webstats = null;
-			if (this.localStorage == null) webstats = uploadReport(report);
+			if (!event.isCancelled())
 			{
-				String localFileID = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss").format(new Date()) + ".html";
-				File localReport = new File(this.localStorage, localFileID);
+				if (this.localStorage != null)
+				{
+					String localFileID = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss").format(new Date()) + ".html";
+					File localReport = new File(this.localStorage, localFileID);
 
-				try { FileUtils.writeStringToFile(localReport, report); }
-				catch (IOException e) { e.printStackTrace(); }
-
-				webstats = serveLocally() ? (webDirectory + localFileID) : uploadReport(report);
+					try
+					{
+						FileUtils.writeStringToFile(localReport, report);
+						localReport.setReadable(true);
+					}
+					catch (IOException e) { e.printStackTrace(); }
+					webstats = serveLocally() ? (webDirectory + localFileID) : uploadReport(report);
+				}
+				else webstats = uploadReport(report);
 			}
 
 			if (webstats == null) broadcastSync(ChatColor.RED + AutoReferee.NO_WEBSTATS_MESSAGE);

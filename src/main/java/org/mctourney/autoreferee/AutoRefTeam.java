@@ -13,6 +13,9 @@ import org.bukkit.util.Vector;
 
 import org.jdom2.Element;
 
+import org.mctourney.autoreferee.event.player.PlayerTeamJoinEvent;
+import org.mctourney.autoreferee.event.player.PlayerTeamLeaveEvent;
+import org.mctourney.autoreferee.event.team.ObjectiveUpdateEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
 import org.mctourney.autoreferee.goals.BlockGoal;
 import org.mctourney.autoreferee.listeners.ZoneListener;
@@ -391,6 +394,10 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	 */
 	public boolean join(Player player, boolean force)
 	{
+		PlayerTeamJoinEvent event = new PlayerTeamJoinEvent(player, this);
+		AutoReferee.fireEvent(event);
+		if (event.isCancelled()) return false;
+
 		// if this player is using the client mod, they may not join
 		if (player.getListeningPluginChannels().contains(AutoReferee.REFEREE_PLUGIN_CHANNEL))
 		{
@@ -449,6 +456,10 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	 */
 	public boolean leave(Player player, boolean force)
 	{
+		PlayerTeamLeaveEvent event = new PlayerTeamLeaveEvent(player, this);
+		AutoReferee.fireEvent(event);
+		if (event.isCancelled()) return false;
+
 		// if the match is in progress, no one may leave their team
 		if (!match.getCurrentState().isBeforeMatch() && !force &&
 			match.getReferees().size() > 0) return false;
@@ -595,6 +606,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		getMatch().messageReferees("team", this.getName(), "state",
 			goal.getItem().serialize(), status.toString());
 		goal.setItemStatus(status);
+
+		ObjectiveUpdateEvent event = new ObjectiveUpdateEvent(goal);
+		AutoReferee.fireEvent(event);
 	}
 
 	protected void updateObjectives()
