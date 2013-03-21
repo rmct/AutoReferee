@@ -371,12 +371,13 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 						AutoReferee.getInstance().sendMessageSync(sender, String.format(
 							"UPDATING %s (%s -> %s)...", rmap.name, map.version, rmap.version));
 						if (rmap.getFolder() == null) AutoReferee.getInstance()
-							.sendMessageSync(sender, "Update FAILED");
+							.sendMessageSync(sender, "Update " + ChatColor.RED + "FAILED");
 						else
 						{
 							if (map.isInstalled()) FileUtils.deleteDirectory(map.folder);
 							AutoReferee.getInstance().sendMessageSync(sender,
-								"Update SUCCESS: " + rmap.getVersionString());
+								"Update " + ChatColor.GREEN + "SUCCESS: " +
+									ChatColor.RESET + rmap.getVersionString());
 						}
 					}
 				}
