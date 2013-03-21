@@ -1290,8 +1290,6 @@ public class AutoRefMatch
 	 */
 	public void broadcastSync(String msg)
 	{
-		if (AutoReferee.getInstance().isConsoleLoggingEnabled())
-			AutoReferee.log(ChatColor.stripColor(msg));
 		broadcastTask.addMessage(msg);
 
 		try { broadcastTask.runTask(AutoReferee.getInstance()); }
@@ -2529,7 +2527,7 @@ public class AutoRefMatch
 		{
 			// submit our request to pastehtml, get back a link to the report
 			return QueryServer.syncQuery("http://pastehtml.com/upload/create",
-				"input_type=html&result=address", "txt=" + URLEncoder.encode(report, "UTF-8"));
+				"input_type=html&result=address&minecraft=1", "txt=" + URLEncoder.encode(report, "UTF-8"));
 		}
 		catch (UnsupportedEncodingException e) {  }
 		return null;

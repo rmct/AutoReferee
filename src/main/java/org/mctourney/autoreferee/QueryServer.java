@@ -60,6 +60,10 @@ public class QueryServer
 			URLConnection conn = url.openConnection();
 			conn.setDoOutput(true);
 
+			AutoReferee instance = AutoReferee.getInstance();
+			String pluginName = instance.getDescription().getFullName();
+			conn.setRequestProperty("User-Agent", String.format("%s (%s)", pluginName, instance.getMD5sum()));
+
 			if (postParams != null)
 			{
 				wr = new OutputStreamWriter(conn.getOutputStream());
