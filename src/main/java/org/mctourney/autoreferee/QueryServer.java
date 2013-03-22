@@ -62,7 +62,7 @@ public class QueryServer
 
 			AutoReferee instance = AutoReferee.getInstance();
 			String pluginName = instance.getDescription().getFullName();
-			conn.setRequestProperty("User-Agent", String.format("%s (%s)", pluginName, instance.getMD5sum()));
+			conn.setRequestProperty("User-Agent", String.format("%s (%s)", pluginName, instance.getCommit()));
 
 			if (postParams != null)
 			{

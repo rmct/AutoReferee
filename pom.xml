@@ -137,6 +137,7 @@
         <includes>
           <include>plugin.yml</include>
           <include>colors.csv</include>
+          <include>autoreferee.properties</include>
         </includes>
       </resource>
       <resource>
@@ -156,6 +157,20 @@
     </resources>
 
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <version>1.1</version>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>create</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>

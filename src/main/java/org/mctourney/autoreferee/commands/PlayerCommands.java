@@ -241,7 +241,7 @@ public class PlayerCommands implements CommandHandler
 	{
 		sender.sendMessage(ChatColor.DARK_GRAY + "This server is running " +
 			ChatColor.BLUE + plugin.getDescription().getFullName() + ChatColor.GRAY +
-			" (" + plugin.getMD5sum().substring(0, 8) + ") on " + Bukkit.getName());
+			" (" + plugin.getCommit().substring(0, 8) + ") on " + Bukkit.getName());
 		return true;
 	}
 

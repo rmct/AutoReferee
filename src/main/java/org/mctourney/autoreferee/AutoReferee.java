@@ -1,19 +1,18 @@
 package org.mctourney.autoreferee;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
@@ -65,6 +64,9 @@ public class AutoReferee extends JavaPlugin
 	// singleton instance
 	private static AutoReferee instance = null;
 
+	// AutoReferee internal properties
+	private static Properties properties = null;
+
 	/**
 	 * Gets the singleton instance of AutoReferee
 	 *
@@ -79,11 +81,8 @@ public class AutoReferee extends JavaPlugin
 	public static void log(String msg)
 	{ log(msg, Level.INFO); }
 
-	public String getMD5sum()
-	{
-		try { return DigestUtils.md5Hex(new FileInputStream(getFile())); }
-		catch (Exception e) { return "??"; }
-	}
+	public String getCommit()
+	{ return properties == null ? "??" : properties.getProperty("git-sha-1"); }
 
 	// expected configuration version number
 	private static final int PLUGIN_CFG_VERSION = 2;
@@ -263,6 +262,16 @@ public class AutoReferee extends JavaPlugin
 	{
 		// store the singleton instance
 		instance = this;
+
+		// get properties file data
+		InputStream propStream = getResource("autoreferee.properties");
+		if (propStream != null) try
+		{
+			properties = new Properties();
+			properties.load(propStream);
+		}
+		catch (IOException e)
+		{ AutoReferee.log("Failed to load properties file.", Level.SEVERE); }
 
 		PluginManager pm = getServer().getPluginManager();
 
