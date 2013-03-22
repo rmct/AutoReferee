@@ -2277,7 +2277,7 @@ public class AutoRefMatch
 	{
 		PlayerMatchJoinEvent event = new PlayerMatchJoinEvent(player, this);
 		AutoReferee.fireEvent(event);
-		if (!event.isCancelled()) return;
+		if (event.isCancelled()) return;
 
 		// if already here, skip this
 		if (this.isPlayer(player)) return;
