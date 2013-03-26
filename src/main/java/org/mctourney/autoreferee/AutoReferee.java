@@ -20,6 +20,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -36,14 +37,12 @@ import org.mctourney.autoreferee.commands.AdminCommands;
 import org.mctourney.autoreferee.commands.ConfigurationCommands;
 import org.mctourney.autoreferee.commands.PlayerCommands;
 import org.mctourney.autoreferee.commands.RefereeCommands;
-import org.mctourney.autoreferee.event.AutoRefereeEvent;
 import org.mctourney.autoreferee.listeners.CombatListener;
 import org.mctourney.autoreferee.listeners.ObjectiveTracker;
 import org.mctourney.autoreferee.listeners.RefereeChannelListener;
 import org.mctourney.autoreferee.listeners.TeamListener;
 import org.mctourney.autoreferee.listeners.WorldListener;
 import org.mctourney.autoreferee.listeners.ZoneListener;
-import org.mctourney.autoreferee.plugin.AutoRefPluginManager;
 import org.mctourney.autoreferee.util.NullChunkGenerator;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
 import org.mctourney.autoreferee.util.commands.CommandManager;
@@ -114,14 +113,8 @@ public class AutoReferee extends JavaPlugin
 	// command manager
 	protected CommandManager commandManager = null;
 
-	// AutoReferee subplugin manager
-	protected AutoRefPluginManager subpluginManager = new AutoRefPluginManager();
-
-	public AutoRefPluginManager getPluginManager()
-	{ return subpluginManager; }
-
-	public static void fireEvent(AutoRefereeEvent event)
-	{ getInstance().getPluginManager().fireEvent(event); }
+	public static void callEvent(Event event)
+	{ Bukkit.getServer().getPluginManager().callEvent(event); }
 
 	private World lobby = null;
 

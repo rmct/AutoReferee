@@ -571,7 +571,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 			catch (IOException e) { e.printStackTrace(); return; }
 
 			MatchLoadEvent event = new MatchLoadEvent(match);
-			AutoReferee.fireEvent(event);
+			AutoReferee.callEvent(event);
 
 			AutoReferee plugin = AutoReferee.getInstance();
 			plugin.getLogger().info(String.format("%s loaded %s (%s)", sender.getName(),

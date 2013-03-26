@@ -1,8 +1,10 @@
 package org.mctourney.autoreferee.event.player;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.player.PlayerEvent;
+
 import org.mctourney.autoreferee.AutoRefTeam;
-import org.mctourney.autoreferee.event.Cancellable;
 
 /**
  * Represents an event related to an {@link org.mctourney.autoreferee.AutoRefTeam}
@@ -11,8 +13,8 @@ import org.mctourney.autoreferee.event.Cancellable;
  */
 public abstract class PlayerTeamEvent extends PlayerEvent
 {
+	private static final HandlerList handlers = new HandlerList();
 	private AutoRefTeam team;
-	private boolean cancelled = false;
 
 	public PlayerTeamEvent(Player player, AutoRefTeam team)
 	{
@@ -26,4 +28,8 @@ public abstract class PlayerTeamEvent extends PlayerEvent
 	 */
 	public AutoRefTeam getTeam()
 	{ return this.team; }
+
+	@Override
+	public HandlerList getHandlers()
+	{ return handlers; }
 }

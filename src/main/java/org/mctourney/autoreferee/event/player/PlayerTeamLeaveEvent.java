@@ -1,8 +1,10 @@
 package org.mctourney.autoreferee.event.player;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.HandlerList;
+
 import org.mctourney.autoreferee.AutoRefTeam;
-import org.mctourney.autoreferee.event.Cancellable;
 
 /**
  * Called when a player leaves a team.
@@ -11,6 +13,7 @@ import org.mctourney.autoreferee.event.Cancellable;
  */
 public class PlayerTeamLeaveEvent extends PlayerTeamEvent implements Cancellable
 {
+	private static final HandlerList handlers = new HandlerList();
 	private boolean cancelled = false;
 
 	public PlayerTeamLeaveEvent(Player player, AutoRefTeam team)
@@ -31,4 +34,8 @@ public class PlayerTeamLeaveEvent extends PlayerTeamEvent implements Cancellable
 	 */
 	public void setCancelled(boolean cancel)
 	{ this.cancelled = cancel; }
+
+	@Override
+	public HandlerList getHandlers()
+	{ return handlers; }
 }

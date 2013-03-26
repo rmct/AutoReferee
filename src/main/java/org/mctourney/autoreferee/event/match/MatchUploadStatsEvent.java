@@ -1,7 +1,9 @@
 package org.mctourney.autoreferee.event.match;
 
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.HandlerList;
+
 import org.mctourney.autoreferee.AutoRefMatch;
-import org.mctourney.autoreferee.event.Cancellable;
 
 /**
  * Called when match statistics are generated and uploaded.
@@ -10,6 +12,7 @@ import org.mctourney.autoreferee.event.Cancellable;
  */
 public class MatchUploadStatsEvent extends MatchEvent implements Cancellable
 {
+	private static final HandlerList handlers = new HandlerList();
 	private boolean cancelled = false;
 	private String webstats = null;
 
@@ -46,4 +49,8 @@ public class MatchUploadStatsEvent extends MatchEvent implements Cancellable
 	 */
 	public void setCancelled(boolean cancel)
 	{ this.cancelled = cancel; }
+
+	@Override
+	public HandlerList getHandlers()
+	{ return handlers; }
 }

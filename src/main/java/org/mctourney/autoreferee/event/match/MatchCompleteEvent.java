@@ -1,8 +1,10 @@
 package org.mctourney.autoreferee.event.match;
 
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.HandlerList;
+
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefTeam;
-import org.mctourney.autoreferee.event.Cancellable;
 
 /**
  * Called when a match is ending.
@@ -11,6 +13,7 @@ import org.mctourney.autoreferee.event.Cancellable;
  */
 public class MatchCompleteEvent extends MatchEvent implements Cancellable
 {
+	private static final HandlerList handlers = new HandlerList();
 	private boolean cancelled = false;
 	private AutoRefTeam winner = null;
 
@@ -47,4 +50,8 @@ public class MatchCompleteEvent extends MatchEvent implements Cancellable
 	 */
 	public void setCancelled(boolean cancel)
 	{ this.cancelled = cancel; }
+
+	@Override
+	public HandlerList getHandlers()
+	{ return handlers; }
 }

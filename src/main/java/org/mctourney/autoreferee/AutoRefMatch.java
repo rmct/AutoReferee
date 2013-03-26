@@ -1443,7 +1443,7 @@ public class AutoRefMatch
 	public void ejectPlayer(Player player)
 	{
 		PlayerMatchLeaveEvent event = new PlayerMatchLeaveEvent(player, this);
-		AutoReferee.fireEvent(event);
+		AutoReferee.callEvent(event);
 		if (event.isCancelled()) return;
 
 		// resets the player to default state
@@ -1469,7 +1469,7 @@ public class AutoRefMatch
 	{
 		// fire match unload event
 		MatchUnloadEvent event = new MatchUnloadEvent(this);
-		AutoReferee.fireEvent(event);
+		AutoReferee.callEvent(event);
 		if (event.isCancelled()) return;
 
 		// first, handle all the players
@@ -2062,7 +2062,7 @@ public class AutoRefMatch
 		if (ready)
 		{
 			MatchStartEvent event = new MatchStartEvent(this);
-			AutoReferee.getInstance().getPluginManager().fireEvent(event);
+			AutoReferee.callEvent(event);
 			if (!event.isCancelled()) this.prepareMatch();
 		}
 	}
@@ -2152,7 +2152,7 @@ public class AutoRefMatch
 	public void endMatch(AutoRefTeam team)
 	{
 		MatchCompleteEvent event = new MatchCompleteEvent(this, team);
-		AutoReferee.fireEvent(event);
+		AutoReferee.callEvent(event);
 		if (event.isCancelled()) return;
 
 		// update winner from the match complete event
@@ -2288,7 +2288,7 @@ public class AutoRefMatch
 	public void joinMatch(Player player)
 	{
 		PlayerMatchJoinEvent event = new PlayerMatchJoinEvent(player, this);
-		AutoReferee.fireEvent(event);
+		AutoReferee.callEvent(event);
 		if (event.isCancelled()) return;
 
 		// if already here, skip this
@@ -2500,7 +2500,7 @@ public class AutoRefMatch
 			String report = matchReportGenerator.generate(AutoRefMatch.this);
 
 			MatchUploadStatsEvent event = new MatchUploadStatsEvent(AutoRefMatch.this, report);
-			AutoReferee.fireEvent(event);
+			AutoReferee.callEvent(event);
 			report = event.getWebstats();
 
 			String webstats = null;

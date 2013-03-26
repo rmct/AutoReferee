@@ -1,5 +1,6 @@
 package org.mctourney.autoreferee.event.match;
 
+import org.bukkit.event.world.WorldEvent;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.event.AutoRefereeEvent;
 
@@ -8,12 +9,13 @@ import org.mctourney.autoreferee.event.AutoRefereeEvent;
  *
  * @author authorblues
  */
-public abstract class MatchEvent extends AutoRefereeEvent
+public abstract class MatchEvent extends WorldEvent
 {
 	protected AutoRefMatch match;
 
 	public MatchEvent(AutoRefMatch match)
 	{
+		super(match.getWorld());
 		this.match = match;
 	}
 

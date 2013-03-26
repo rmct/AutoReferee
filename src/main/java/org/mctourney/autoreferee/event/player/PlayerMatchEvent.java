@@ -1,8 +1,9 @@
 package org.mctourney.autoreferee.event.player;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerEvent;
+
 import org.mctourney.autoreferee.AutoRefMatch;
-import org.mctourney.autoreferee.event.Cancellable;
 
 /**
  * Represents an event related to an {@link org.mctourney.autoreferee.AutoRefMatch}
@@ -12,7 +13,6 @@ import org.mctourney.autoreferee.event.Cancellable;
 public abstract class PlayerMatchEvent extends PlayerEvent
 {
 	private AutoRefMatch match;
-	private boolean cancelled = false;
 
 	public PlayerMatchEvent(Player player, AutoRefMatch match)
 	{

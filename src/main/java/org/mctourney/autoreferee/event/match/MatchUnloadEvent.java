@@ -1,7 +1,9 @@
 package org.mctourney.autoreferee.event.match;
 
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.HandlerList;
+
 import org.mctourney.autoreferee.AutoRefMatch;
-import org.mctourney.autoreferee.event.Cancellable;
 
 /**
  * Called when a map is unloaded from the server.
@@ -10,6 +12,7 @@ import org.mctourney.autoreferee.event.Cancellable;
  */
 public class MatchUnloadEvent extends MatchEvent implements Cancellable
 {
+	private static final HandlerList handlers = new HandlerList();
 	private boolean cancelled = false;
 
 	public MatchUnloadEvent(AutoRefMatch match)
@@ -30,4 +33,8 @@ public class MatchUnloadEvent extends MatchEvent implements Cancellable
 	 */
 	public void setCancelled(boolean cancel)
 	{ this.cancelled = cancel; }
+
+	@Override
+	public HandlerList getHandlers()
+	{ return handlers; }
 }

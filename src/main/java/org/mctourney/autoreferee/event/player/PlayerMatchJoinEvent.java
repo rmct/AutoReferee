@@ -1,8 +1,10 @@
 package org.mctourney.autoreferee.event.player;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.HandlerList;
+
 import org.mctourney.autoreferee.AutoRefMatch;
-import org.mctourney.autoreferee.event.Cancellable;
 
 /**
  * Called when a player joins a match.
@@ -11,6 +13,7 @@ import org.mctourney.autoreferee.event.Cancellable;
  */
 public class PlayerMatchJoinEvent extends PlayerMatchEvent implements Cancellable
 {
+	private static final HandlerList handlers = new HandlerList();
 	private boolean cancelled = false;
 
 	public PlayerMatchJoinEvent(Player player, AutoRefMatch match)
@@ -31,4 +34,8 @@ public class PlayerMatchJoinEvent extends PlayerMatchEvent implements Cancellabl
 	 */
 	public void setCancelled(boolean cancel)
 	{ this.cancelled = cancel; }
+
+	@Override
+	public HandlerList getHandlers()
+	{ return handlers; }
 }

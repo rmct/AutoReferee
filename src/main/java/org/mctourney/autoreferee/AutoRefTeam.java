@@ -395,7 +395,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	public boolean join(Player player, boolean force)
 	{
 		PlayerTeamJoinEvent event = new PlayerTeamJoinEvent(player, this);
-		AutoReferee.fireEvent(event);
+		AutoReferee.callEvent(event);
 		if (event.isCancelled()) return false;
 
 		// if this player is using the client mod, they may not join
@@ -457,7 +457,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	public boolean leave(Player player, boolean force)
 	{
 		PlayerTeamLeaveEvent event = new PlayerTeamLeaveEvent(player, this);
-		AutoReferee.fireEvent(event);
+		AutoReferee.callEvent(event);
 		if (event.isCancelled()) return false;
 
 		// if the match is in progress, no one may leave their team
@@ -608,7 +608,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		goal.setItemStatus(status);
 
 		ObjectiveUpdateEvent event = new ObjectiveUpdateEvent(goal);
-		AutoReferee.fireEvent(event);
+		AutoReferee.callEvent(event);
 	}
 
 	protected void updateObjectives()
