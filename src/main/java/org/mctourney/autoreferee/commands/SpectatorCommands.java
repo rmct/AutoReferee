@@ -22,14 +22,14 @@ import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Maps;
 
-public class RefereeCommands implements CommandHandler
+public class SpectatorCommands implements CommandHandler
 {
 	AutoReferee plugin;
 
 	// save previous location before teleport
 	private Map<String, Location> prevLocation;
 
-	public RefereeCommands(Plugin plugin)
+	public SpectatorCommands(Plugin plugin)
 	{
 		this.plugin = (AutoReferee) plugin;
 		prevLocation = Maps.newHashMap();
@@ -37,7 +37,7 @@ public class RefereeCommands implements CommandHandler
 
 	@AutoRefCommand(name={"announce"},
 		description="Announce a message to your current match. Your name will be shown.")
-	@AutoRefPermission(console=true)
+	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
 
 	public boolean announce(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
@@ -49,7 +49,7 @@ public class RefereeCommands implements CommandHandler
 
 	@AutoRefCommand(name={"broadcast"},
 		description="Broadcast a message to your current match. No name will be shown.")
-	@AutoRefPermission(console=true)
+	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
 
 	public boolean broadcast(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
@@ -194,7 +194,7 @@ public class RefereeCommands implements CommandHandler
 
 	@AutoRefCommand(name={"autoref", "swapteams"}, argmin=2, argmax=2,
 		description="Swaps the players and custom names of both teams.")
-	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
+	@AutoRefPermission(console=true, role=AutoRefMatch.Role.SPECTATOR)
 
 	public boolean swapTeams(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{

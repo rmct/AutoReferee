@@ -36,7 +36,7 @@ import org.mcstats.Metrics.Graph;
 import org.mctourney.autoreferee.commands.AdminCommands;
 import org.mctourney.autoreferee.commands.ConfigurationCommands;
 import org.mctourney.autoreferee.commands.PlayerCommands;
-import org.mctourney.autoreferee.commands.RefereeCommands;
+import org.mctourney.autoreferee.commands.SpectatorCommands;
 import org.mctourney.autoreferee.listeners.CombatListener;
 import org.mctourney.autoreferee.listeners.ObjectiveTracker;
 import org.mctourney.autoreferee.listeners.RefereeChannelListener;
@@ -282,7 +282,7 @@ public class AutoReferee extends JavaPlugin
 		commandManager = new CommandManager();
 		commandManager.registerCommands(new PlayerCommands(this), this);
 		commandManager.registerCommands(new AdminCommands(this), this);
-		commandManager.registerCommands(new RefereeCommands(this), this);
+		commandManager.registerCommands(new SpectatorCommands(this), this);
 		commandManager.registerCommands(new ConfigurationCommands(this), this);
 
 		// global configuration object (can't be changed, so don't save onDisable)

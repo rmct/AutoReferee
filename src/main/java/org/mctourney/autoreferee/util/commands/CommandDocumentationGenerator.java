@@ -15,7 +15,7 @@ public class CommandDocumentationGenerator
 	@SuppressWarnings("unchecked")
 	private static Set<Class<? extends CommandHandler>> commandHandlers = Sets.newHashSet
 	(	org.mctourney.autoreferee.commands.PlayerCommands.class
-	,	org.mctourney.autoreferee.commands.RefereeCommands.class
+	,	org.mctourney.autoreferee.commands.SpectatorCommands.class
 	,	org.mctourney.autoreferee.commands.AdminCommands.class
 	,	org.mctourney.autoreferee.commands.ConfigurationCommands.class
 	);
