@@ -116,6 +116,14 @@ public class AutoRefPlayer
 	{ this.team = team; }
 
 	/**
+	 * Gets the match this player is in.
+	 *
+	 * @return match object
+	 */
+	public AutoRefMatch getMatch()
+	{ return this.team == null ? null : this.team.getMatch(); }
+
+	/**
 	 * Sets the URL for this player's cape. This cape can be shown by a modified
 	 * client only, as Minecraft does not permit custom capes.
 	 *
@@ -123,8 +131,8 @@ public class AutoRefPlayer
 	 */
 	public void setCape(String url)
 	{
-		getTeam().getMatch().addCape(this.getName(), url);
-		getTeam().getMatch().messageReferees("player", this.getName(), "cape", getCape());
+		getMatch().addCape(this.getName(), url);
+		getMatch().messageReferees("player", this.getName(), "cape", getCape());
 	}
 
 	/**
@@ -134,7 +142,7 @@ public class AutoRefPlayer
 	 */
 	public String getCape()
 	{
-		String cape = getTeam().getMatch().playerCapes.get(this.getName());
+		String cape = getMatch().playerCapes.get(this.getName());
 		return cape == null ? "" : cape.replaceFirst("^https?://", "");
 	}
 
@@ -381,7 +389,7 @@ public class AutoRefPlayer
 	public void setLastDeathLocation(Location loc)
 	{
 		lastDeathLocation = loc;
-		this.getTeam().getMatch().setLastDeathLocation(loc);
+		this.getMatch().setLastDeathLocation(loc);
 	}
 
 	private Location lastLogoutLocation = null;
@@ -395,7 +403,7 @@ public class AutoRefPlayer
 	public void setLastLogoutLocation(Location loc)
 	{
 		lastLogoutLocation = loc;
-		this.getTeam().getMatch().setLastLogoutLocation(loc);
+		this.getMatch().setLastLogoutLocation(loc);
 	}
 
 	private Location lastTeleportLocation = null;
@@ -409,7 +417,7 @@ public class AutoRefPlayer
 	public void setLastTeleportLocation(Location loc)
 	{
 		lastTeleportLocation = loc;
-		this.getTeam().getMatch().setLastTeleportLocation(loc);
+		this.getMatch().setLastTeleportLocation(loc);
 	}
 
 	/**
@@ -516,7 +524,7 @@ public class AutoRefPlayer
 		if (cleardrops) this.clearInventory();
 
 		// "die" when the match isn't in progress just means a teleport
-		if (!getTeam().getMatch().getCurrentState().inProgress())
+		if (!getMatch().getCurrentState().inProgress())
 		{
 			player.teleport(getTeam().getSpawnLocation());
 			player.setFallDistance(0.0f);
@@ -590,7 +598,7 @@ public class AutoRefPlayer
 		if (e.getEntity() != getPlayer()) return;
 		this.saveInventoryView();
 
-		AutoRefMatch match = getTeam().getMatch();
+		AutoRefMatch match = getMatch();
 		AutoRefPlayer apl = match.getPlayer(e.getEntity().getKiller());
 		deaths.put(apl, 1 + deaths.get(apl)); ++totalDeaths;
 
@@ -617,11 +625,8 @@ public class AutoRefPlayer
 	{
 		// if it meets the requirements, report it
 		if (totalStreak >= MIN_KILLSTREAK)
-		{
-			AutoRefMatch match = getTeam().getMatch();
-			match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_STREAK,
+			getMatch().addEvent(new TranscriptEvent(getMatch(), TranscriptEvent.EventType.PLAYER_STREAK,
 				String.format("%s had a %d-kill streak!", this.getName(), totalStreak), null, this, null));
-		}
 
 		// reset to zero
 		this.totalStreak = 0;
@@ -634,10 +639,10 @@ public class AutoRefPlayer
 		if (e.getEntity().getKiller() != getPlayer()) return;
 
 		// get the name of the player who died, record one kill against them
-		AutoRefPlayer apl = getTeam().getMatch().getPlayer(e.getEntity());
+		AutoRefPlayer apl = getMatch().getPlayer(e.getEntity());
 		kills.put(apl, 1 + kills.get(apl)); ++totalKills;
 
-		AutoRefMatch match = getTeam().getMatch();
+		AutoRefMatch match = getMatch();
 		Location loc = e.getEntity().getLocation();
 
 		// one more kill for kill streak
@@ -681,7 +686,7 @@ public class AutoRefPlayer
 	 * @return true if player is in correct world, otherwise false
 	 */
 	public boolean isPresent()
-	{ return getPlayer().getWorld() == getTeam().getMatch().getWorld(); }
+	{ return getPlayer().getWorld() == getMatch().getWorld(); }
 
 	/**
 	 * Gets the kill-death difference.
@@ -698,12 +703,12 @@ public class AutoRefPlayer
 	{ return shotsFired == 0 ? "N/A" : (Integer.toString(100 * shotsHit / shotsFired) + "%"); }
 
 	public void sendAccuracyUpdate()
-	{ for (Player ref : getTeam().getMatch().getReferees(false)) sendAccuracyUpdate(ref); }
+	{ for (Player ref : getMatch().getReferees(false)) sendAccuracyUpdate(ref); }
 
 	public void sendAccuracyUpdate(Player ref)
 	{
 		String acc = Integer.toString(shotsFired == 0 ? 0 : (100 * shotsHit / shotsFired));
-		getTeam().getMatch().messageReferee(ref, "player", getName(), "accuracy", acc);
+		getMatch().messageReferee(ref, "player", getName(), "accuracy", acc);
 	}
 
 	/**
@@ -757,7 +762,7 @@ public class AutoRefPlayer
 					{
 						// generate a transcript event for seeing the box
 						String m = String.format("%s is carrying %s", getName(), bgoal.getItem().getDisplayName());
-						getTeam().getMatch().addEvent(new TranscriptEvent(getTeam().getMatch(),
+						getMatch().addEvent(new TranscriptEvent(getMatch(),
 							TranscriptEvent.EventType.OBJECTIVE_FOUND, m, getLocation(), this, bgoal.getItem()));
 						this.addPoints(AchievementPoints.OBJECTIVE_FOUND);
 
