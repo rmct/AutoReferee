@@ -1,6 +1,7 @@
 package org.mctourney.autoreferee.event.match;
 
 import org.bukkit.event.world.WorldEvent;
+
 import org.mctourney.autoreferee.AutoRefMatch;
 
 /**

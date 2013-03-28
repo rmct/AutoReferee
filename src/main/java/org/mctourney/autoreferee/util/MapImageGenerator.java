@@ -36,8 +36,10 @@ public class MapImageGenerator
 				String[] parts = line.split("\\s+");
 				if (parts.length == 5) try
 				{
-					BlockData blockdata = new BlockData(Material.getMaterial(Integer.parseInt(parts[0])), Integer.valueOf(parts[1]).byteValue());
-					blockColors.put(blockdata, new int[]{ Integer.parseInt(parts[2]), Integer.parseInt(parts[3]), Integer.parseInt(parts[4]), 255 });
+					BlockData blockdata = new BlockData(Material.getMaterial(Integer.parseInt(parts[0])),
+						Integer.valueOf(parts[1]).byteValue());
+					blockColors.put(blockdata, new int[]{ Integer.parseInt(parts[2]),
+						Integer.parseInt(parts[3]), Integer.parseInt(parts[4]), 255 });
 				}
 				catch (NumberFormatException e)
 				{ e.printStackTrace(); }

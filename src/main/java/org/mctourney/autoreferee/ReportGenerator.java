@@ -355,11 +355,11 @@ public class ReportGenerator
 			if (nms != null && nms.getTeam() == apl.getTeam()) nms = null;
 
 			playerstats.write(String.format("<tr><td>%d</td><td>%s</td>",
-					++rank, playerHTML(apl)));
+				++rank, playerHTML(apl)));
 			playerstats.write(String.format("<td>%d</td><td>%d</td><td>%s</td>",
-					apl.getKills(), apl.getDeaths(), apl.getExtendedAccuracyInfo()));
+				apl.getKills(), apl.getDeaths(), apl.getExtendedAccuracyInfo()));
 			playerstats.write(String.format("<td>%s</td></tr>\n",
-					nms == null ? "none" : playerHTML(nms)));
+				nms == null ? "none" : playerHTML(nms)));
 		}
 
 		return playerstats.toString();
