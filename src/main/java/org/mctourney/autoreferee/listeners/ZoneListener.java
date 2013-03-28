@@ -11,8 +11,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
@@ -533,7 +535,7 @@ public class ZoneListener implements Listener
 		{ event.setCancelled(true); return; }
 	}
 
-	public void teleportEvent(Player pl, Location fm, Location to)
+	public void teleportEvent(Player pl, Location fm, Location to, String reason)
 	{
 		// cannot compare locations in different worlds
 		if (fm.getWorld() != to.getWorld()) return;
@@ -553,7 +555,7 @@ public class ZoneListener implements Listener
 		// generate message regarding the teleport event
 		String bedrock = BlockGoal.blockInRange(BlockData.BEDROCK, to, 5) != null ? " (near bedrock)" : "";
 		String message = apl.getDisplayName() + ChatColor.GRAY + " has teleported @ " +
-			LocationUtil.toBlockCoords(to) + bedrock;
+			LocationUtil.toBlockCoords(to) + bedrock + (reason != null ? " " + reason : "");
 
 		boolean excludeStreamers = dsq <= LONG_TELE_DISTANCE * LONG_TELE_DISTANCE;
 		for (Player ref : match.getReferees(excludeStreamers)) ref.sendMessage(message);
@@ -570,19 +572,41 @@ public class ZoneListener implements Listener
 			case COMMAND: // or a vanilla command of some sort, do nothing
 				break;
 
+			case UNKNOWN: // not meaningful data
+				break;
+
 			default: // otherwise, fire a teleport event (to notify)
-				teleportEvent(event.getPlayer(), event.getFrom(), event.getTo());
-				return;
+				String reason = "by " + event.getCause().name().toLowerCase().replaceAll("_", " ");
+				teleportEvent(event.getPlayer(), event.getFrom(), event.getTo(), reason);
+				break;
 		}
+	}
+
+	private static Map<Class<? extends Entity>, String> entityRenames = Maps.newHashMap();
+	static
+	{
+		entityRenames.put(Minecart.class, "minecart");
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void playerVehicleEnter(VehicleEnterEvent event)
-	{ teleportEvent((Player) event.getEntered(), event.getEntered().getLocation(), event.getVehicle().getLocation()); }
+	{
+		String vehicleType = event.getVehicle().getType().getName().toLowerCase();
+
+		Class<? extends Entity> clazz = event.getVehicle().getType().getEntityClass();
+		for (Map.Entry<Class<? extends Entity>, String> e : entityRenames.entrySet())
+			if (e.getKey().isAssignableFrom(clazz)) vehicleType = e.getValue();
+
+		teleportEvent((Player) event.getEntered(), event.getEntered().getLocation(),
+			event.getVehicle().getLocation(), "into a " + vehicleType);
+	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void playerBedEnter(PlayerBedEnterEvent event)
-	{ teleportEvent(event.getPlayer(), event.getPlayer().getLocation(), event.getBed().getLocation()); }
+	{
+		teleportEvent(event.getPlayer(), event.getPlayer().getLocation(),
+			event.getBed().getLocation(), "into a bed");
+	}
 
 	@EventHandler
 	public void creatureTarget(EntityTargetEvent event)
