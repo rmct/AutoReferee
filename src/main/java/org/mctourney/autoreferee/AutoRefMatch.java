@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -1065,7 +1067,7 @@ public class AutoRefMatch
 		// get the time the match is set to start
 		if (gameplay.getChild("clockstart") != null)
 		{
-			startClock = AutoReferee.parseTimeString(gameplay.getChildText("clockstart"));
+			startClock = AutoRefMatch.parseTimeString(gameplay.getChildText("clockstart"));
 			lockTime = gameplay.getChild("clockstart").getAttributeValue("lock") != null;
 		}
 
@@ -2759,6 +2761,45 @@ public class AutoRefMatch
 		for (AutoRefPlayer apl : getPlayers()) if (apl != null)
 			message = message.replaceAll(apl.getName(), apl.getDisplayName());
 		return ChatColor.RESET + message;
+	}
+
+	// ABANDON HOPE, ALL YE WHO ENTER HERE!
+	/**
+	 * Converts a human-readable time to a clock tick in Minecraft. Converts times such as "8am",
+	 * "1600", or "3:45p" to a valid clock tick setting that can be used to change the world time.
+	 *
+	 * @param time A string representing a human-readable time.
+	 * @return Equivalent clock tick
+	 */
+	public static long parseTimeString(String time)
+	{
+		// "Some people, when confronted with a problem, think 'I know, I'll use
+		// regular expressions.' Now they have two problems." -- Jamie Zawinski
+		Pattern pattern = Pattern.compile("(\\d{1,5})(:(\\d{2}))?((a|p)m?)?", Pattern.CASE_INSENSITIVE);
+		Matcher match = pattern.matcher(time);
+
+		// if the time matches something sensible
+		if (match.matches()) try
+		{
+			// get the primary value (could be hour, could be entire time in ticks)
+			long prim = Long.parseLong(match.group(1));
+			if (match.group(1).length() > 2 || prim > 24) return prim;
+
+			// parse am/pm distinction (12am == midnight, 12pm == noon)
+			if (match.group(5) != null)
+				prim = ("p".equals(match.group(5)) ? 12 : 0) + (prim % 12L);
+
+			// ticks are 1000/hour, group(3) is the minutes portion
+			long ticks = prim * 1000L + (match.group(3) == null ? 0L :
+					(Long.parseLong(match.group(3)) * 1000L / 60L));
+
+			// ticks (18000 == midnight, 6000 == noon)
+			return (ticks + 18000L) % 24000L;
+		}
+		catch (NumberFormatException e) {  }
+
+		// default time: 6am
+		return 0L;
 	}
 
 	private ItemStack customMatchInfoBook = null;
