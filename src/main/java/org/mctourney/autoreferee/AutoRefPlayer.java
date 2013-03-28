@@ -370,6 +370,14 @@ public class AutoRefPlayer
 	{ return AchievementPoints.ticksToPoints(points); }
 
 	/**
+	 * Returns whether or not the player has the AutoReferee client mod installed.
+	 *
+	 * @return true if using client mod, otherwise false
+	 */
+	public boolean hasClientMod()
+	{ return getPlayer().getListeningPluginChannels().contains(AutoReferee.REFEREE_PLUGIN_CHANNEL); }
+
+	/**
 	 * Gets location of this player's bed.
 	 */
 	public Location getBedLocation()

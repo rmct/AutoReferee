@@ -10,6 +10,7 @@ import org.bukkit.plugin.Plugin;
 
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefPlayer;
+import org.mctourney.autoreferee.AutoRefSpectator;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.util.TeleportationUtil;
@@ -275,6 +276,24 @@ public class SpectatorCommands implements CommandHandler
 	{
 		if (match != null && sender instanceof Player)
 			match.messageReferee((Player) sender, "match", match.getWorld().getName(), "swap");
+		return true;
+	}
+
+	@AutoRefCommand(name={"autoref", "nightvis"}, argmax=1, options="01",
+			description="Toggles permanent night vision for a spectator.")
+	@AutoRefPermission(console=false, role=AutoRefMatch.Role.SPECTATOR)
+
+	public boolean nightVision(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		if (match != null)
+		{
+			AutoRefSpectator spectator = match.getSpectator((Player) sender);
+			boolean nightvis = !spectator.hasNightVision();
+
+			if (options.hasOption('0')) nightvis = false;
+			if (options.hasOption('1')) nightvis = true;
+			spectator.setNightVision(nightvis);
+		}
 		return true;
 	}
 }

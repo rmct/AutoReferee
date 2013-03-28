@@ -922,6 +922,19 @@ public class AutoRefMatch
 		return !getCurrentState().isBeforeMatch() && !isPlayer(player);
 	}
 
+	Map<String, AutoRefSpectator> spectators = Maps.newHashMap();
+
+	public AutoRefSpectator getSpectator(Player player)
+	{
+		if (!isSpectator(player)) return null;
+		String name = player.getName();
+
+		AutoRefSpectator spectator = this.spectators.get(name);
+		if (spectator == null) this.spectators.put(name,
+			spectator = new AutoRefSpectator(name, this));
+		return spectator;
+	}
+
 	public enum Role
 	{
 		// this list provides an ordering of roles. do not permute.
@@ -1811,6 +1824,11 @@ public class AutoRefMatch
 			}
 
 			if (lockTime) primaryWorld.setTime(startClock);
+			AutoRefMatch.this.checkWinConditions();
+
+			// re-apply night vision to all spectators during recovery
+			for (AutoRefSpectator spec : AutoRefMatch.this.spectators.values())
+				if (spec.hasNightVision()) spec.applyNightVision();
 		}
 	}
 
@@ -1859,6 +1877,14 @@ public class AutoRefMatch
 			// setup vanish in both directions
 			setupVanish(player, x);
 			setupVanish(x, player);
+		}
+
+		// if this player is a spectator
+		if (isSpectator(player))
+		{
+			// apply night vision if necessary
+			AutoRefSpectator s = getSpectator(player);
+			if (s.hasNightVision()) s.applyNightVision();
 		}
 	}
 
