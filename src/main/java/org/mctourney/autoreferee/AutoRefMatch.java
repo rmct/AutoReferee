@@ -211,30 +211,30 @@ public class AutoRefMatch
 		/**
 		 * Waiting for players to join.
 		 */
-		WAITING(5*60*20L),
+		WAITING(5*60*1000L),
 
 		/**
 		 * Players joined, waiting for match start.
 		 */
-		READY(5*60*20L),
+		READY(5*60*1000L),
 
 		/**
 		 * Match in progress.
 		 */
-		PLAYING(30*60*20L),
+		PLAYING(30*60*1000L),
 
 		/**
 		 * Match completed.
 		 */
-		COMPLETED(5*60*20L);
+		COMPLETED(5*60*1000L);
 
-		public long inactiveTicks;
+		public long inactiveMillis;
 
 		private MatchStatus()
 		{ this(Long.MAX_VALUE); }
 
-		private MatchStatus(long ticks)
-		{ this.inactiveTicks = ticks; }
+		private MatchStatus(long ms)
+		{ this.inactiveMillis = ms; }
 
 		/**
 		 * Checks if the match has not yet started.
@@ -785,20 +785,20 @@ public class AutoRefMatch
 
 	private class PlayerCountTask extends BukkitRunnable
 	{
-		private long lastOccupiedTick = 0;
+		private long lastOccupiedTime = 0;
 
 		public PlayerCountTask()
-		{ lastOccupiedTick = getWorld().getFullTime(); }
+		{ lastOccupiedTime = System.currentTimeMillis(); }
 
 		public void run()
 		{
-			long tick = getWorld().getFullTime();
+			long tick = System.currentTimeMillis();
 
 			// if there are people in this world/match, reset last-occupied
-			if (getUserCount() != 0) lastOccupiedTick = tick;
+			if (getUserCount() != 0) lastOccupiedTime = tick;
 
 			// if this world has been inactive for long enough, just unload it
-			if (tick - lastOccupiedTick >= getCurrentState().inactiveTicks) destroy();
+			if (tick - lastOccupiedTime >= getCurrentState().inactiveMillis) destroy();
 		}
 	}
 

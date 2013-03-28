@@ -2,7 +2,6 @@ package org.mctourney.autoreferee.event.match;
 
 import org.bukkit.event.world.WorldEvent;
 import org.mctourney.autoreferee.AutoRefMatch;
-import org.mctourney.autoreferee.event.AutoRefereeEvent;
 
 /**
  * Represents an event related to an {@link org.mctourney.autoreferee.AutoRefMatch}

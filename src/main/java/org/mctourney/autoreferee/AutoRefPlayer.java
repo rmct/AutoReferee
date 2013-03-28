@@ -198,9 +198,9 @@ public class AutoRefPlayer
 	public int getKills()
 	{ return totalKills; }
 
-	private Map<AutoRefPlayer, Long> lastPlayerDamageTick = null;
-	private static final long KILLER_TICKS = 20L * 3;
-	private static final long ASSIST_TICKS = 20L * 5;
+	private Map<AutoRefPlayer, Long> lastPlayerDamageMillis = null;
+	private static final long KILLER_MS = 1000L * 3;
+	private static final long ASSIST_MS = 1000L * 5;
 
 	/**
 	 * Gets the player responsible for killing this player.
@@ -213,10 +213,10 @@ public class AutoRefPlayer
 		if (this.isOnline() && !getPlayer().isDead()) return null;
 
 		// the cutoff before which the player will not be credited with the kill
-		long threshold = getTeam().getMatch().getWorld().getFullTime() - KILLER_TICKS;
+		long threshold = System.currentTimeMillis() - KILLER_MS;
 
 		AutoRefPlayer killer = null;
-		for (Map.Entry<AutoRefPlayer, Long> e : lastPlayerDamageTick.entrySet())
+		for (Map.Entry<AutoRefPlayer, Long> e : lastPlayerDamageMillis.entrySet())
 			if (e.getValue() > threshold) { threshold = e.getValue(); killer = e.getKey(); }
 		return killer;
 	}
@@ -232,10 +232,10 @@ public class AutoRefPlayer
 		if (this.isOnline() && !getPlayer().isDead()) return Sets.newHashSet();
 
 		// the cutoff before which the player will not be credited with the kill
-		long threshold = getTeam().getMatch().getWorld().getFullTime() - ASSIST_TICKS;
+		long threshold = System.currentTimeMillis() - ASSIST_MS;
 
 		Set<AutoRefPlayer> killers = Sets.newHashSet();
-		for (Map.Entry<AutoRefPlayer, Long> e : lastPlayerDamageTick.entrySet())
+		for (Map.Entry<AutoRefPlayer, Long> e : lastPlayerDamageMillis.entrySet())
 			if (e.getValue() > threshold) killers.add(e.getKey());
 		return killers;
 	}
@@ -298,7 +298,7 @@ public class AutoRefPlayer
 	{ return totalStreak; }
 
 	// last damage tick
-	private long lastDamageTick;
+	private long lastDamageMillis;
 
 	/**
 	 * Gets the number of world ticks since this player was last damaged.
@@ -306,7 +306,7 @@ public class AutoRefPlayer
 	 * @return ticks since last damage
 	 */
 	public long damageCooldownLength()
-	{ return this.getTeam().getMatch().getWorld().getFullTime() - lastDamageTick; }
+	{ return System.currentTimeMillis() - lastDamageMillis; }
 
 	/**
 	 * Checks if the player has been damaged recently.
@@ -317,13 +317,13 @@ public class AutoRefPlayer
 	{ return damageCooldownLength() < DAMAGE_COOLDOWN_TICKS; }
 
 	// amount of time the saved inventory is valid
-	private long SAVED_INVENTORY_LIFESPAN = 20L * 60 * 3;
+	private long SAVED_INVENTORY_LIFESPAN = 1000L * 60 * 3;
 
 	private Inventory lastInventoryView = null;
-	private long lastInventoryViewSavedTick = -1L;
+	private long lastInventoryViewSavedMillis = -1L;
 
 	private boolean savedInventoryStale()
-	{ return getPlayer().getWorld().getFullTime() > lastInventoryViewSavedTick + SAVED_INVENTORY_LIFESPAN; }
+	{ return System.currentTimeMillis() > lastInventoryViewSavedMillis + SAVED_INVENTORY_LIFESPAN; }
 
 	private int points = 0;
 
@@ -438,7 +438,7 @@ public class AutoRefPlayer
 		deaths = new DefaultedMap(0);
 
 		// damage information
-		lastPlayerDamageTick = new DefaultedMap(0L);
+		lastPlayerDamageMillis = new DefaultedMap(0L);
 
 		// accuracy information
 		this.resetArrowFire();
@@ -576,11 +576,11 @@ public class AutoRefPlayer
 		if (e.getEntity() != getPlayer()) return;
 
 		// reset the damage tick
-		lastDamageTick = this.getTeam().getMatch().getWorld().getFullTime();
+		lastDamageMillis = System.currentTimeMillis();
 
 		// if the damage was caused by a player, set their last damage tick
-		AutoRefPlayer apl = getTeam().getMatch().getPlayer(damager);
-		if (apl != null) lastPlayerDamageTick.put(apl, lastDamageTick);
+		AutoRefPlayer apl = getMatch().getPlayer(damager);
+		if (apl != null) lastPlayerDamageMillis.put(apl, lastDamageMillis);
 	}
 
 	// register that we just died
@@ -788,7 +788,7 @@ public class AutoRefPlayer
 	private void saveInventoryView()
 	{
 		this.lastInventoryView = getInventoryView();
-		this.lastInventoryViewSavedTick = getPlayer().getWorld().getFullTime();
+		this.lastInventoryViewSavedMillis = System.currentTimeMillis();
 	}
 
 	/**

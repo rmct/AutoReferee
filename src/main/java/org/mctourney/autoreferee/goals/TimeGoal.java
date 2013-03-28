@@ -9,25 +9,29 @@ import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.util.BlockData;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class TimeGoal extends AutoRefGoal
 {
-	private long ticks = Long.MAX_VALUE;
+	private long seconds = Long.MAX_VALUE;
 
 	public TimeGoal(AutoRefTeam team, Element elt)
 	{
 		super(team);
+		this.seconds = parseTime(elt.getTextTrim());
 	}
 
 	@Override
 	public boolean isSatisfied(AutoRefMatch match)
-	{ return match.getElapsedSeconds() > this.ticks; }
+	{ return match.getElapsedSeconds() > this.seconds; }
 
 	@Override
 	public void updateReferee(Player ref)
 	{
 		AutoRefMatch match = getOwner().getMatch();
 		match.messageReferee(ref, "team", getOwner().getName(),
-			"goal", "time," + Long.toString(ticks));
+			"goal", "time," + Long.toString(seconds));
 	}
 
 	@Override
@@ -38,16 +42,30 @@ public class TimeGoal extends AutoRefGoal
 
 	@Override
 	public Element toElement()
-	{ return new Element("time").setText(printTime(ticks)); }
+	{ return new Element("time").setText(printTime(seconds)); }
 
-	public static String printTime(long ticks)
+	public static String printTime(long sec)
 	{
-		long sec = ticks / 20L, min = sec / 60L, hrs = min / 60L;
+		long min = sec / 60L, hrs = min / 60L;
 		return String.format("%d:%02d:%02d", hrs, min%60L, sec%60L);
 	}
 
 	public static long parseTime(String time)
 	{
-		return 0L;
+		Pattern pattern = Pattern.compile("(((\\d*):)?(\\d{1,2}):)?(\\d{1,2})", Pattern.CASE_INSENSITIVE);
+		Matcher match = pattern.matcher(time);
+
+		// if the time matches the format
+		if (match.matches()) try
+		{
+			int hrs = match.group(3) == null ? 0 : Integer.parseInt(match.group(3));
+			int min = match.group(4) == null ? 0 : Integer.parseInt(match.group(4));
+			int sec = match.group(5) == null ? 0 : Integer.parseInt(match.group(5));
+			return sec + 60L*(min + 60L*hrs);
+		}
+		catch (NumberFormatException e) {  }
+
+		// fallback: return an impossibly large time value
+		return Long.MAX_VALUE;
 	}
 }
