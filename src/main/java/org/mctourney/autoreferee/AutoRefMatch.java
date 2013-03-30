@@ -607,7 +607,7 @@ public class AutoRefMatch
 	// range of inexact placement
 	private int inexactRange = 2;
 
-	/**
+	/**what 
 	 * Gets the distance an objective may be placed from its target location.
 	 *
 	 * @return range of inexact objective placement
@@ -820,9 +820,6 @@ public class AutoRefMatch
 		setPrimaryWorld(world);
 		loadWorldConfiguration();
 
-		// setup player count task (after assigning the world)
-		countTask = new PlayerCountTask();
-
 		// is this world a temporary world?
 		this.tmp = tmp;
 
@@ -832,8 +829,14 @@ public class AutoRefMatch
 		// fix vanish
 		this.setupSpectators();
 
+		// setup player count task (after assigning the world)
+		countTask = new PlayerCountTask();
+
 		// startup the player count timer (for automatic unloading)
 		countTask.runTaskTimer(AutoReferee.getInstance(), 0L, 60*20L);
+
+		// save a copy of the map image quickly before the match starts...
+		saveMapImage();
 	}
 
 	/**
@@ -2024,9 +2027,6 @@ public class AutoRefMatch
 		// turn off weather forever (or for a long time)
 		primaryWorld.setStorm(false);
 		primaryWorld.setWeatherDuration(Integer.MAX_VALUE);
-
-		// save a copy of the map image quickly before the match starts...
-		saveMapImage();
 
 		// prepare all players for the match
 		for (AutoRefPlayer apl : getPlayers()) apl.heal();
