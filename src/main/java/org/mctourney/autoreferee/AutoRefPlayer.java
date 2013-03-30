@@ -26,6 +26,7 @@ import org.mctourney.autoreferee.util.AchievementPoints;
 import org.mctourney.autoreferee.util.ArmorPoints;
 import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.LocationUtil;
+import org.mctourney.autoreferee.util.PlayerKit;
 import org.mctourney.autoreferee.util.PlayerUtil;
 
 import org.apache.commons.collections.map.DefaultedMap;
@@ -584,6 +585,9 @@ public class AutoRefPlayer
 	{
 		Player p = getPlayer();
 		if (p != null) PlayerUtil.reset(p);
+
+		PlayerKit kit = getTeam().getKit();
+		if (kit != null) kit.giveTo(this);
 	}
 
 	public void registerDamage(EntityDamageEvent e, Player damager)

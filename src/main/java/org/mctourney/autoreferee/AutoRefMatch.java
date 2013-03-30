@@ -84,6 +84,7 @@ import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.BookUtil;
 import org.mctourney.autoreferee.util.LocationUtil;
 import org.mctourney.autoreferee.util.MapImageGenerator;
+import org.mctourney.autoreferee.util.PlayerKit;
 import org.mctourney.autoreferee.util.PlayerUtil;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
 
@@ -323,6 +324,11 @@ public class AutoRefMatch
 	 */
 	public void setWinningTeam(AutoRefTeam team)
 	{ winningTeam = team; }
+
+	private Map<String, PlayerKit> kits = Maps.newHashMap();
+
+	public PlayerKit getKit(String name)
+	{ return kits.get(name); }
 
 	// region defined as the "start" region (safe zone)
 	private Set<AutoRefRegion> startRegions = Sets.newHashSet();
@@ -1004,6 +1010,14 @@ public class AutoRefMatch
 			mapAuthors = Lists.newLinkedList();
 			for (Element e : meta.getChild("creators").getChildren("creator"))
 				mapAuthors.add(e.getText());
+		}
+
+		// parse kits before parsing teams
+		Element kitsElt = worldConfig.getChild("kits");
+		if (kitsElt != null) for (Element kitElt : kitsElt.getChildren("kit"))
+		{
+			PlayerKit kit = new PlayerKit(kitElt);
+			kits.put(kit.getName(), kit);
 		}
 
 		for (Element e : worldConfig.getChild("teams").getChildren("team"))

@@ -22,6 +22,7 @@ import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
 import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.LocationUtil;
+import org.mctourney.autoreferee.util.PlayerKit;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
 
 import org.apache.commons.lang.StringUtils;
@@ -315,6 +316,9 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		// get the max size from the map
 		if (msz != null) newTeam.maxSize = Integer.parseInt(msz);
 
+		if (elt.getAttributeValue("kit") != null)
+			newTeam.setKit(match.getKit(elt.getAttributeValue("kit")));
+
 		Element spawn = elt.getChild("spawn");
 		newTeam.spawn = spawn == null ? null :
 			AutoRefRegion.fromElement(match, spawn.getChildren().get(0));
@@ -338,6 +342,14 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		return elt;
 	}
+
+	private PlayerKit startKit = null;
+
+	public PlayerKit getKit()
+	{ return startKit; }
+
+	public void setKit(PlayerKit kit)
+	{ this.startKit = kit; }
 
 	/**
 	 * Gets a player from this team by name.

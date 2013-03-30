@@ -1,7 +1,9 @@
 package org.mctourney.autoreferee.commands;
 
 import java.util.Map;
+import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
@@ -13,6 +15,7 @@ import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoRefSpectator;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
+import org.mctourney.autoreferee.util.PlayerKit;
 import org.mctourney.autoreferee.util.TeleportationUtil;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
@@ -232,6 +235,33 @@ public class SpectatorCommands implements CommandHandler
 			catch (NumberFormatException e) {  }
 
 		match.startCountdown(sec, false);
+		return true;
+	}
+
+	@AutoRefCommand(name={"autoref", "givekit"}, argmin=2, argmax=2,
+		description="Give a kit to the specified player.")
+	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
+
+	public boolean giveKit(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		Player target = Bukkit.getPlayer(args[1]);
+		if (target != null && match == null)
+			match = AutoReferee.getInstance().getMatch(target.getWorld());
+
+		// if there is no match, quit
+		if (match == null) return false;
+
+		// get the kit with this name (case sensitive)
+		PlayerKit kit = match.getKit(args[0]);
+		if (kit == null) { sender.sendMessage("Not a valid kit: " + args[0]); return true; }
+
+		// get the receiver
+		AutoRefPlayer apl = match.getPlayer(args[1]);
+		if (apl == null) { sender.sendMessage("Not a valid player: " + args[1]); return true; }
+
+		kit.giveTo(apl);
+		sender.sendMessage("Gave kit " + ChatColor.GOLD + kit.getName() +
+			ChatColor.RESET + " to player " + apl.getDisplayName());
 		return true;
 	}
 

@@ -3,6 +3,7 @@ package org.mctourney.autoreferee.util;
 import java.util.Map;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.DyeColor;
 
 import com.google.common.collect.Maps;
@@ -94,6 +95,32 @@ public abstract class ColorConverter
 		if (dyeHexMap.containsKey(clr))
 			return dyeHexMap.get(clr);
 		return "#000";
+	}
+
+	public static Color hexToColor(String hex)
+	{
+		// get rid of typical hex color cruft
+		if (hex.startsWith("#")) hex = hex.substring(1);
+		if (hex.indexOf("x") != -1) hex = hex.substring(hex.indexOf("x"));
+
+		// if the length isn't the standard 0xRRGGBB or 0xRGB, just quit
+		if (hex.length() != 6 && hex.length() != 3) return null;
+
+		// construct and return color object
+		int sz = hex.length() / 3, mult = 1 << ((2 - sz)*4), x = 0;
+		for (int i = 0, z = 0; z < hex.length(); ++i, z += sz)
+			x |= (mult * Integer.parseInt(hex.substring(z, z+sz), 16)) << (i*8);
+		return Color.fromBGR(x & 0xffffff);
+	}
+
+	public static Color rgbToColor(String rgb)
+	{
+		String parts[] = rgb.split("[^0-9]+");
+		if (parts.length < 3) return null;
+
+		int x = 0, i; for (i = 0; i < 3; ++i)
+			x |= Integer.parseInt(parts[i]) << (i*8);
+		return Color.fromBGR(x & 0xffffff);
 	}
 
 	public static String generateColorTable()
