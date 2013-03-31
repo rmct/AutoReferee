@@ -607,7 +607,7 @@ public class AutoRefMatch
 	// range of inexact placement
 	private int inexactRange = 2;
 
-	/**what 
+	/**
 	 * Gets the distance an objective may be placed from its target location.
 	 *
 	 * @return range of inexact objective placement
