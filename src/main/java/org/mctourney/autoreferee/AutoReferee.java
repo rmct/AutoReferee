@@ -111,6 +111,9 @@ public class AutoReferee extends JavaPlugin
 	// command manager
 	protected CommandManager commandManager = null;
 
+	public CommandManager getCommandManager()
+	{ return this.commandManager; }
+
 	public static void callEvent(Event event)
 	{ Bukkit.getServer().getPluginManager().callEvent(event); }
 
