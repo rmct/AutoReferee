@@ -163,7 +163,8 @@ public class CombatListener implements Listener
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
 		if (match == null || !match.getCurrentState().inProgress()) return;
 
-		if ((event instanceof EntityDamageByEntityEvent))
+		if (match.getCurrentState().inProgress() &&
+			event instanceof EntityDamageByEntityEvent)
 		{
 			EntityDamageByEntityEvent ed = (EntityDamageByEntityEvent) event;
 			Player damaged = entityToPlayer(ed.getEntity());
@@ -206,6 +207,11 @@ public class CombatListener implements Listener
 			if (d2team == null || (d1team == d2team && !match.allowFriendlyFire()))
 			{ event.setCancelled(true); return; }
 		}
+
+		// only allow damage before a match if it is a direct attack
+		if (match.getCurrentState().isBeforeMatch() &&
+			event.getCause() != DamageCause.ENTITY_ATTACK)
+		{ event.setCancelled(true); return; }
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
