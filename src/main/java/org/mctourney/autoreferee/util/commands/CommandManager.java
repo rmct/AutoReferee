@@ -35,33 +35,31 @@ public class CommandManager implements CommandExecutor
 {
 	Map<String, HandlerNode> cmap = Maps.newHashMap();
 
-	protected class CommandHandler
+	protected class CommandDelegator
 	{
 		public Object handler;
 		public Method method;
 
 		Options commandOptions;
 
-		public CommandHandler(Object handler, Method method, PluginCommand command)
+		public CommandDelegator(Object handler, Method method, PluginCommand command)
 		{
 			this.method = method; this.handler = handler;
 			AutoRefCommand cAnnotation = method.getAnnotation(AutoRefCommand.class);
 
 			commandOptions = new Options();
-			if (!"".equals(cAnnotation.options()))
-			{
-				char options[] = cAnnotation.options().toCharArray();
-				for (int i = 0; i < options.length; )
-				{
-					char arg = options[i++];
-					if (i < options.length)
-					{
-						if (options[i] == '*') { OptionBuilder.hasOptionalArg(); ++i; }
-						else if (options[i] == '+') { OptionBuilder.hasArg(); ++i; }
-					}
+			char options[] = cAnnotation.options().toCharArray();
 
-					commandOptions.addOption(OptionBuilder.create(arg));
+			for (int i = 0; i < options.length; )
+			{
+				char arg = options[i++];
+				if (i < options.length)
+				{
+					if (options[i] == '*') { OptionBuilder.hasOptionalArg(); ++i; }
+					else if (options[i] == '+') { OptionBuilder.hasArg(); ++i; }
 				}
+
+				commandOptions.addOption(OptionBuilder.create(arg));
 			}
 		}
 
@@ -119,7 +117,7 @@ public class CommandManager implements CommandExecutor
 				throw new CommandRegistrationException(method, "Command method must return type boolean");
 
 			if (pcommand.getExecutor() != this) pcommand.setExecutor(this);
-			this.setHandler(new CommandHandler(commands, method, pcommand), command.name());
+			this.setHandler(new CommandDelegator(commands, method, pcommand), command.name());
 		}
 	}
 
@@ -137,7 +135,7 @@ public class CommandManager implements CommandExecutor
 
 		try
 		{
-			CommandHandler handler = this.getHandler(command.getName(), args);
+			CommandDelegator handler = this.getHandler(command.getName(), args);
 			return handler == null ? false : handler.execute(sender, match, args);
 		}
 		catch (CommandPermissionException e)
@@ -146,7 +144,7 @@ public class CommandManager implements CommandExecutor
 		{ sender.sendMessage(ChatColor.DARK_GRAY + e.getMessage()); return true; }
 	}
 
-	private CommandHandler getHandler(String cmd, String[] args)
+	private CommandDelegator getHandler(String cmd, String[] args)
 	{
 		HandlerNode node = cmap.get(cmd);
 		if (node == null) return null;
@@ -168,7 +166,7 @@ public class CommandManager implements CommandExecutor
 		return node.handler;
 	}
 
-	private void setHandler(CommandHandler handler, String[] cmd)
+	private void setHandler(CommandDelegator handler, String[] cmd)
 	{
 		Map<String, HandlerNode> curr = cmap;
 		HandlerNode node = null;
@@ -192,9 +190,9 @@ public class CommandManager implements CommandExecutor
 class HandlerNode
 {
 	protected Map<String, HandlerNode> cmap;
-	protected CommandManager.CommandHandler handler;
+	protected CommandManager.CommandDelegator handler;
 
-	public HandlerNode(CommandManager.CommandHandler handler)
+	public HandlerNode(CommandManager.CommandDelegator handler)
 	{
 		this.handler = handler;
 		this.cmap = Maps.newHashMap();
