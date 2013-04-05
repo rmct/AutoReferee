@@ -452,7 +452,16 @@ public class AutoReferee extends JavaPlugin
 	 * Sets the world that the console user has selected.
 	 */
 	public void setConsoleWorld(String name)
-	{ this.setConsoleWorld(getServer().getWorld(name)); }
+	{
+		World world = getServer().getWorld(name);
+		if (world == null)
+		{
+			Player player = getServer().getPlayer(name);
+			if (player != null) world = player.getWorld();
+		}
+
+		this.setConsoleWorld(world);
+	}
 
 	/**
 	 * Gets the world associated with a command sender.

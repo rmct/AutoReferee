@@ -40,7 +40,7 @@ public class AdminCommands implements CommandHandler
 		plugin.setConsoleWorld(args[0]);
 		World world = plugin.getConsoleWorld();
 
-		sender.sendMessage("Selected world: " + world.getName());
+		sender.sendMessage("Selected world: " + (world == null ? "<none>" : world.getName()));
 		return world != null;
 	}
 
