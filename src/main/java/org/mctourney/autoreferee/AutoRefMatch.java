@@ -687,9 +687,11 @@ public class AutoRefMatch
 		catch (IOException e) { e.printStackTrace(); }
 	}
 
-	public RenderedImage getMapImage()
+	public RenderedImage getMapImage() throws IOException
 	{
 		CuboidRegion cube = getMapCuboid();
+		if (cube == null) throw new IOException("No start regions defined.");
+
 		Location min = cube.getMinimumPoint(),
 			max = cube.getMaximumPoint();
 
@@ -834,9 +836,6 @@ public class AutoRefMatch
 
 		// startup the player count timer (for automatic unloading)
 		countTask.runTaskTimer(AutoReferee.getInstance(), 0L, 60*20L);
-
-		// save a copy of the map image quickly before the match starts...
-		saveMapImage();
 	}
 
 	/**
@@ -2039,6 +2038,9 @@ public class AutoRefMatch
 		// send referees countdown notification
 		messageReferees("match", getWorld().getName(), "countdown", Integer.toString(readyDelay));
 		startCountdown(readyDelay, true);
+
+		// save a copy of the map image quickly before the match starts...
+		saveMapImage();
 	}
 
 	/**
