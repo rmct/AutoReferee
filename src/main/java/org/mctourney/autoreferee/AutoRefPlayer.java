@@ -535,7 +535,7 @@ public class AutoRefPlayer
 		// "die" when the match isn't in progress just means a teleport
 		if (!getMatch().getCurrentState().inProgress())
 		{
-			player.teleport(getTeam().getSpawnLocation());
+			player.teleport(getSpawnLocation());
 			player.setFallDistance(0.0f);
 		}
 
@@ -548,6 +548,22 @@ public class AutoRefPlayer
 			player.setHealth(0);
 		}
 	}
+
+	private Location spawn = null;
+
+	/**
+	 * Gets the spawn location for this player.
+	 *
+	 * @return custom spawn if not on team, otherwise team spawn
+	 */
+	public Location getSpawnLocation()
+	{ return getTeam() == null ? spawn : getTeam().getSpawnLocation(); }
+
+	/**
+	 * Sets custom spawn location.
+	 */
+	public void setSpawnLocation(Location spawn)
+	{ this.spawn = spawn; }
 
 	private boolean active = false;
 
@@ -586,8 +602,11 @@ public class AutoRefPlayer
 		Player p = getPlayer();
 		if (p != null) PlayerUtil.reset(p);
 
-		PlayerKit kit = getTeam().getKit();
-		if (kit != null) kit.giveTo(this);
+		if (getTeam() != null)
+		{
+			PlayerKit kit = getTeam().getKit();
+			if (kit != null) kit.giveTo(this);
+		}
 	}
 
 	public void registerDamage(EntityDamageEvent e, Player damager)
@@ -795,7 +814,7 @@ public class AutoRefPlayer
 		int newHealth = Math.max(0, player.getHealth());
 		int newArmor = ArmorPoints.fromPlayerInventory(player.getInventory());
 
-		getTeam().updateHealthArmor(this,
+		if (getTeam() != null) getTeam().updateHealthArmor(this,
 			currentHealth, currentArmor, newHealth, newArmor);
 
 		currentHealth = newHealth;

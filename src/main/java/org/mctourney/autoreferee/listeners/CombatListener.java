@@ -116,8 +116,10 @@ public class CombatListener implements Listener
 				{
 					case BEDSONLY:
 						// INTENTIONAL FALL-THROUGH HERE!
-						for (AutoRefPlayer mate : vapl.getTeam().getPlayers()) if (mate != vapl)
+						if (vapl.getTeam() != null)
+							for (AutoRefPlayer mate : vapl.getTeam().getPlayers())
 						{
+							if (mate == vapl) continue;
 							boolean couldRespawn = mate.isOnline() &&
 								mate.getPlayer().getBedSpawnLocation() != null;
 							if (!mate.isDead() || couldRespawn) break respawn;

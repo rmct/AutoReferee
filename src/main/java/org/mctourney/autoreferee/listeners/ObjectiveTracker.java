@@ -53,7 +53,8 @@ public class ObjectiveTracker implements Listener
 
 		if (match != null && apl != null)
 		{
-			for (AutoRefGoal goal : apl.getTeam().getTeamGoals()) if (goal.hasItem())
+			if (apl.getTeam() != null)
+				for (AutoRefGoal goal : apl.getTeam().getTeamGoals()) if (goal.hasItem())
 			{
 				BlockData b = goal.getItem();
 				if (goal instanceof BlockGoal && ((BlockGoal) goal).isSatisfied(match) &&

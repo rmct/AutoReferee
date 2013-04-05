@@ -352,7 +352,7 @@ public class ReportGenerator
 		{
 			// get nemesis of this player
 			AutoRefPlayer nms = Collections.max(players, new NemesisComparator(apl));
-			if (nms != null && nms.getTeam() == apl.getTeam()) nms = null;
+			if (nms != null && nms.getTeam() != null && nms.getTeam() == apl.getTeam()) nms = null;
 
 			playerstats.write(String.format("<tr><td>%d</td><td>%s</td>",
 				++rank, playerHTML(apl)));
@@ -369,10 +369,10 @@ public class ReportGenerator
 	{ return s.toLowerCase().replaceAll("[^a-z0-9]+", ""); }
 
 	private static String getTag(AutoRefPlayer apl)
-	{ return getTag(apl.getName()); }
+	{ return apl == null ? "none" : getTag(apl.getName()); }
 
 	private static String getTag(AutoRefTeam team)
-	{ return getTag(team.getName()); }
+	{ return team == null ? "none" : getTag(team.getName()); }
 
 	private static String playerHTML(AutoRefPlayer apl)
 	{
