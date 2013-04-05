@@ -233,10 +233,10 @@ public class AutoRefMatch
 
 		public long inactiveMillis;
 
-		private MatchStatus()
+		MatchStatus()
 		{ this(Long.MAX_VALUE); }
 
-		private MatchStatus(long ms)
+		MatchStatus(long ms)
 		{ this.inactiveMillis = ms; }
 
 		/**
@@ -987,7 +987,7 @@ public class AutoRefMatch
 	public void reload()
 	{ this.loadWorldConfiguration(); }
 
-	private void loadWorldConfiguration()
+	protected void loadWorldConfiguration()
 	{
 		try
 		{
@@ -1864,7 +1864,7 @@ public class AutoRefMatch
 	}
 
 	// either vanish or show the player `subj` from perspective of `view`
-	private void setupVanish(Player view, Player subj)
+	protected void setupVanish(Player view, Player subj)
 	{
 		if (getVanishLevel(view) >= getVanishLevel(subj) ||
 			!this.getCurrentState().inProgress()) view.showPlayer(subj);
@@ -2012,7 +2012,7 @@ public class AutoRefMatch
 	}
 
 	// prepare this world to start
-	private void prepareMatch()
+	protected void prepareMatch()
 	{
 		// nothing to do if the countdown is running
 		if (isCountdownRunning()) return;
@@ -2670,10 +2670,10 @@ public class AutoRefMatch
 			private ChatColor color;
 			private boolean supportsFiltering;
 
-			private EventType(String eventClass, boolean hasFilter, EventVisibility visibility)
+			EventType(String eventClass, boolean hasFilter, EventVisibility visibility)
 			{ this(eventClass, hasFilter, visibility, null); }
 
-			private EventType(String eventClass, boolean hasFilter,
+			EventType(String eventClass, boolean hasFilter,
 				EventVisibility visibility, ChatColor color)
 			{
 				this.eventClass = eventClass;
@@ -2933,7 +2933,8 @@ public class AutoRefMatch
 			AutoRefPlayer apl = getPlayer(player);
 			String tmpflag = tmp ? "*" : "";
 
-			if (apl != null) player.sendMessage("You are on team: " + apl.getTeam().getDisplayName());
+			if (apl != null && apl.getTeam() != null)
+				player.sendMessage("You are on team: " + apl.getTeam().getDisplayName());
 			else if (isReferee(player)) player.sendMessage(ChatColor.GRAY + "You are a referee! " + tmpflag);
 			else player.sendMessage("You are not on a team! Type " + ChatColor.GRAY + "/jointeam");
 		}
