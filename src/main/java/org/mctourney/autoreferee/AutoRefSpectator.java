@@ -33,6 +33,7 @@ public class AutoRefSpectator extends AutoRefPlayer
 	public void applyNightVision()
 	{
 		if (!isOnline() || this.hasClientMod()) return;
+		getPlayer().removePotionEffect(PotionEffectType.NIGHT_VISION);
 		getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 90 * 20, 0));
 	}
 }
