@@ -491,9 +491,10 @@ public class AutoReferee extends JavaPlugin
 	 *
 	 * @param msg message to be sent
 	 */
-	public void sendMessageSync(CommandSender sender, String msg)
+	public void sendMessageSync(CommandSender recipient, String msg)
 	{
-		messageQueue.addMessage(sender, msg);
+		if (recipient != null)
+			messageQueue.addMessage(recipient, msg);
 
 		try { messageQueue.runTask(this); }
 		catch (IllegalStateException e) {  }
@@ -503,23 +504,23 @@ public class AutoReferee extends JavaPlugin
 	{
 		private class RoutedMessage
 		{
-			public CommandSender sender;
+			public CommandSender recipient;
 			public String message;
 
-			public RoutedMessage(CommandSender s, String m)
-			{ sender = s; message = m; }
+			public RoutedMessage(CommandSender r, String m)
+			{ recipient = r; message = m; }
 		}
 
 		private List<RoutedMessage> msgQueue = Lists.newLinkedList();
 
-		public SyncMessageTask addMessage(CommandSender sender, String message)
-		{ msgQueue.add(new RoutedMessage(sender, message)); return this; }
+		public SyncMessageTask addMessage(CommandSender recipient, String message)
+		{ msgQueue.add(new RoutedMessage(recipient, message)); return this; }
 
 		@Override public void run()
 		{
 			AutoReferee.this.messageQueue = new SyncMessageTask();
-			for (RoutedMessage msg : msgQueue)
-				msg.sender.sendMessage(msg.message);
+			for (RoutedMessage msg : msgQueue) if (msg.recipient != null)
+				msg.recipient.sendMessage(msg.message);
 			msgQueue.clear();
 		}
 	}
