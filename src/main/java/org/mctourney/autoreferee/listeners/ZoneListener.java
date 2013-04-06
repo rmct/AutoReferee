@@ -296,7 +296,8 @@ public class ZoneListener implements Listener
 				&& match.getCurrentState().inProgress()) { event.setCancelled(true); return; }
 
 			if (event.getClickedBlock().getState() instanceof InventoryHolder
-				&& event.getAction() == Action.RIGHT_CLICK_BLOCK && match.getCurrentState().inProgress())
+				&& event.getAction() == Action.RIGHT_CLICK_BLOCK && match.getCurrentState().inProgress()
+				&& !event.getPlayer().isSneaking())
 			{
 				InventoryHolder invh = (InventoryHolder) event.getClickedBlock().getState();
 				Inventory inv = invh.getInventory(), newinv;
