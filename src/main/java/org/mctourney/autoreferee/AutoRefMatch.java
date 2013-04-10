@@ -69,6 +69,7 @@ import org.jdom2.output.XMLOutputter;
 
 import org.mctourney.autoreferee.event.match.MatchCompleteEvent;
 import org.mctourney.autoreferee.event.match.MatchStartEvent;
+import org.mctourney.autoreferee.event.match.MatchTranscriptEvent;
 import org.mctourney.autoreferee.event.match.MatchUnloadEvent;
 import org.mctourney.autoreferee.event.match.MatchUploadStatsEvent;
 import org.mctourney.autoreferee.event.player.PlayerMatchJoinEvent;
@@ -2759,6 +2760,7 @@ public class AutoRefMatch
 	public void addEvent(TranscriptEvent event)
 	{
 		AutoReferee plugin = AutoReferee.getInstance();
+		AutoReferee.callEvent(new MatchTranscriptEvent(this, event));
 		transcript.add(event);
 
 		Collection<Player> recipients = null;
