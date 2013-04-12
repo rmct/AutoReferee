@@ -184,6 +184,13 @@ public class CombatListener implements Listener
 				null != damager && match.isSpectator(damager))
 			{ event.setCancelled(true); return; }
 
+			if (null != damager && (ed.getEntityType() == EntityType.PIG_ZOMBIE) && ((PigZombie) ed.getEntity()).isAngry())
+			{
+				AutoRefPlayer apl = match.getPlayer(damager);
+				for (Player ref : match.getReferees(false)) 
+					ref.sendMessage(apl.getDisplayName() + " has aggravated the pigmen!");
+			}
+			
 			// if either of these aren't players, nothing to do here
 			if (null == damager || null == damaged) return;
 
