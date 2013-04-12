@@ -11,6 +11,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.entity.PigZombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -24,6 +25,7 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
@@ -39,11 +41,14 @@ import com.google.common.collect.Maps;
 public class CombatListener implements Listener
 {
 	private static final int TNT_PRIME_RANGE = 10;
+	private static final long PIGMEN_COOLDOWN_MS = 300000;
 
 	AutoReferee plugin = null;
 
 	public Map<UUID, AutoRefPlayer> tntOwner;
 	public Map<Location, AutoRefPlayer> tntPropagation;
+
+	private Map<AutoRefPlayer, Long> lastPigmenAggro = Maps.newHashMap();
 
 	public CombatListener(Plugin p)
 	{
@@ -183,6 +188,20 @@ public class CombatListener implements Listener
 			if (match.getCurrentState().inProgress() &&
 				null != damager && match.isSpectator(damager))
 			{ event.setCancelled(true); return; }
+
+			if (null != damager && ed.getEntityType() == EntityType.PIG_ZOMBIE)
+			{
+				AutoRefPlayer apl = match.getPlayer(damager);
+				Long lastAggro = lastPigmenAggro.get(apl);
+
+				long currentTime = System.currentTimeMillis();
+				if (lastAggro == null || currentTime > PIGMEN_COOLDOWN_MS + lastAggro)
+				{
+					for (Player ref : match.getReferees(false))
+						ref.sendMessage(apl.getDisplayName() + ChatColor.GRAY + " has angered the Zombie Pigmen");
+					lastPigmenAggro.put(apl, currentTime);
+				}
+			}
 
 			// if either of these aren't players, nothing to do here
 			if (null == damager || null == damaged) return;
