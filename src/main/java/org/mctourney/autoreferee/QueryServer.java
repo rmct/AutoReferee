@@ -13,7 +13,7 @@ import com.google.gson.Gson;
 
 public class QueryServer
 {
-	private static final String encoding = "UTF-8";
+	private static final String ENCODING = "UTF-8";
 
 	private String qurl = null;
 	private String key = null;
@@ -25,7 +25,7 @@ public class QueryServer
 	{
 		try
 		{
-			String params = String.format("key=%s", URLEncoder.encode(key, encoding));
+			String params = String.format("key=%s", URLEncoder.encode(key, ENCODING));
 			String json = syncPostQuery(qurl + "/ack.php", params);
 			return json != null && new Gson().fromJson(json, boolean.class);
 		}
@@ -36,7 +36,7 @@ public class QueryServer
 	{
 		try
 		{
-			String params = String.format("key=%s", URLEncoder.encode(key, encoding));
+			String params = String.format("key=%s", URLEncoder.encode(key, ENCODING));
 			String json = syncPostQuery(qurl + "/match.php", params);
 			return json == null ? null : new Gson().fromJson(json, AutoRefMatch.MatchParams.class);
 		}
