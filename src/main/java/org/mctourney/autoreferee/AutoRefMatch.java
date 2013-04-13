@@ -32,6 +32,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Difficulty;
 import org.bukkit.GameMode;
@@ -1483,6 +1484,9 @@ public class AutoRefMatch
 
 		// if there is a lobby to teleport them, do so
 		World target = AutoReferee.getInstance().getLobbyWorld();
+		if (target == null) for (World w : Bukkit.getWorlds())
+			if (!AutoRefMatch.isCompatible(w)) { target = w; break; }
+
 		if (target != null)
 		{
 			player.setGameMode(WorldListener.getDefaultGamemode(target));
