@@ -8,6 +8,7 @@ import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,6 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -99,6 +101,17 @@ public class TeamListener implements Listener
 			deadSpectators.put(event.getEntity().getName(), match);
 			event.getDrops().clear();
 		}
+	}
+
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void potionSplash(PotionSplashEvent event)
+	{
+		World world = event.getEntity().getWorld();
+		AutoRefMatch match = plugin.getMatch(world);
+
+		for (LivingEntity living : event.getAffectedEntities())
+			if (living.getType() == EntityType.PLAYER)
+				if (!match.isPlayer((Player) living)) event.setIntensity(living, 0.0);
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
