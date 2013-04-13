@@ -17,6 +17,7 @@ import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.util.PlayerKit;
 import org.mctourney.autoreferee.util.TeleportationUtil;
+import org.mctourney.autoreferee.util.LocationUtil;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
 import org.mctourney.autoreferee.util.commands.CommandHandler;
@@ -99,6 +100,7 @@ public class SpectatorCommands implements CommandHandler
 
 		// just dump location into this for teleporting later
 		Location tplocation = null;
+		String targetcoords = "";
 
 		if (options.hasOption('b'))
 		{
@@ -116,6 +118,7 @@ public class SpectatorCommands implements CommandHandler
 			AutoRefPlayer apl = match.getPlayer(options.getOptionValue('d'));
 			if (apl != null) tplocation = apl.getLastDeathLocation();
 			else tplocation = match.getLastDeathLocation();
+			targetcoords = "(" + LocationUtil.toBlockCoords(tplocation) + ")";
 			tplocation = TeleportationUtil.locationTeleport(tplocation);
 		}
 		else if (options.hasOption('l'))
@@ -172,7 +175,7 @@ public class SpectatorCommands implements CommandHandler
 			prevLocation.put(player.getName(), player.getLocation());
 			player.setFlying(true); player.teleport(tplocation);
 		}
-		else player.sendMessage(ChatColor.DARK_GRAY + "You cannot teleport to this location: invalid or unsafe.");
+		else player.sendMessage(ChatColor.DARK_GRAY + "You cannot teleport to this location: invalid or unsafe. " + ChatColor.GRAY + targetcoords);
 		return true;
 	}
 
