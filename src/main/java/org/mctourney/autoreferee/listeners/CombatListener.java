@@ -18,6 +18,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
@@ -233,6 +234,25 @@ public class CombatListener implements Listener
 		{ event.setCancelled(true); return; }
 	}
 
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void vehicleDamageDealt(VehicleDamageEvent event)
+	{
+		AutoRefMatch match = plugin.getMatch(event.getAttacker().getWorld());
+		if (match == null || !match.getCurrentState().inProgress()) return;
+
+		if (match.getCurrentState().inProgress() &&
+			event instanceof VehicleDamageEvent)
+		{
+			VehicleDamageEvent ed = (VehicleDamageEvent) event;
+			Player damager = entityToPlayer(ed.getAttacker());
+			
+			// spectators cannot cause damage to any vehicle
+			if (match.getCurrentState().inProgress() &&
+				null != damager && match.isSpectator(damager))
+			{ event.setCancelled(true); return; }
+		}
+	}
+	
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void damageDealtMonitor(EntityDamageEvent event)
 	{
