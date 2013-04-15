@@ -387,6 +387,12 @@ public class AutoRefPlayer
 		return pl == null ? null : pl.getBedSpawnLocation();
 	}
 
+	/**
+	 * Gets whether or not the player has a bed spawn set.
+	 */
+	public boolean hasBed()
+	{ return this.getBedLocation() != null; }
+
 	private Location lastDeathLocation = null;
 
 	/**

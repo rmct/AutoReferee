@@ -1,5 +1,6 @@
 package org.mctourney.autoreferee.listeners;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
@@ -67,6 +68,22 @@ public class ObjectiveTracker implements Listener
 			}
 			match.checkWinConditions();
 		}
+	}
+
+	/* TRACKING OBJECTIVES/BED */
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void bedBreak(BlockBreakEvent event)
+	{
+		Player pl = event.getPlayer();
+		Block block = event.getBlock();
+
+		AutoRefMatch match = plugin.getMatch(block.getWorld());
+		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
+
+		if (match != null && apl != null && match.getCurrentState().inProgress()
+			&& match.getRespawnMode() == RespawnMode.BEDSONLY && block.getType() == Material.BED_BLOCK)
+				match.new BedUpdateTask(apl).runTask(plugin);
 	}
 
 	// ----------------- START WINCONDITION -----------------------
