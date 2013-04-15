@@ -817,7 +817,7 @@ public class AutoRefMatch
 			String bedBreakNotification;
 
 			for (AutoRefPlayer apl : getPlayers())
-				if (hasBed.get(apl) == apl.hasBed()) lostBed.add(apl);
+				if (hasBed.get(apl) != apl.hasBed()) lostBed.add(apl);
 
 			// if no one's bed changed, quit here
 			if (lostBed.isEmpty()) return;
