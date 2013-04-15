@@ -795,6 +795,55 @@ public class AutoRefMatch
 		setLastNotificationLocation(loc);
 	}
 
+	public class BedUpdateTask extends BukkitRunnable
+	{
+		private Map<AutoRefPlayer, Boolean> hasBed = Maps.newHashMap();
+		private String breakerName;
+		private AutoRefPlayer breaker;
+
+		public BedUpdateTask(AutoRefPlayer breaker)
+		{ this(breaker.getDisplayName()); this.breaker = breaker; }
+
+		public BedUpdateTask(String breakerName)
+		{
+			this.breakerName = breakerName;
+			for (AutoRefPlayer apl : getPlayers())
+				hasBed.put(apl, apl.hasBed());
+		}
+
+		public void run()
+		{
+			Set<AutoRefPlayer> lostBed = Sets.newHashSet();
+			String bedBreakNotification;
+
+			for (AutoRefPlayer apl : getPlayers())
+				if (hasBed.get(apl) == apl.hasBed()) lostBed.add(apl);
+
+			// if no one's bed changed, quit here
+			if (lostBed.isEmpty()) return;
+
+			// don't print or do anything if the bed's owner breaks it himself
+			if (breaker != null && lostBed.contains(breaker)) return;
+
+			if (lostBed.size() == 1)
+				bedBreakNotification = String.format("%s's bed has been broken by %s.",
+					((AutoRefPlayer) lostBed.toArray()[0]).getDisplayName(), breakerName);
+			else
+			{
+				// get the team that owns this bed (null if owned by more than one team)
+				AutoRefTeam teamOwner = ((AutoRefPlayer) lostBed.toArray()[0]).getTeam();
+				for (AutoRefPlayer apl : lostBed) if (apl.getTeam() != teamOwner) teamOwner = null;
+
+				bedBreakNotification = teamOwner != null
+					? String.format("%s's bed has been broken by %s.", teamOwner.getDisplayName(), breakerName)
+					: String.format("%s has broken a bed.", breakerName);
+			}
+
+			for (Player ref : getReferees(false))
+				ref.sendMessage(bedBreakNotification);
+		}
+	}
+
 	private class PlayerCountTask extends BukkitRunnable
 	{
 		private long lastOccupiedTime = 0;
