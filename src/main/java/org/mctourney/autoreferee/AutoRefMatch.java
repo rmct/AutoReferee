@@ -1500,6 +1500,7 @@ public class AutoRefMatch
 	private class WorldFolderDeleter extends BukkitRunnable
 	{
 		private File worldFolder;
+		private int deleteAttempts = 5;
 
 		WorldFolderDeleter(World w)
 		{ this.worldFolder = w.getWorldFolder(); }
@@ -1515,7 +1516,7 @@ public class AutoRefMatch
 				AutoReferee.log(worldFolder.getName() + " deleted!");
 			}
 			catch (IOException e)
-			{ AutoReferee.log("File lock held on " + worldFolder.getName()); }
+			{ if (deleteAttempts-- > 0) AutoReferee.log("File lock held on " + worldFolder.getName()); }
 
 			// stop the repeating task if the file is gone
 			if (!worldFolder.exists()) this.cancel();
