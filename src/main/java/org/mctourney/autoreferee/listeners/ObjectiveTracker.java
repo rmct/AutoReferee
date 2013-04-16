@@ -1,8 +1,5 @@
 package org.mctourney.autoreferee.listeners;
 
-import java.util.Set;
-
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -34,8 +31,6 @@ import org.mctourney.autoreferee.goals.AutoRefGoal;
 import org.mctourney.autoreferee.goals.BlockGoal;
 import org.mctourney.autoreferee.util.AchievementPoints;
 import org.mctourney.autoreferee.util.BlockData;
-
-import com.google.common.collect.Sets;
 
 public class ObjectiveTracker implements Listener
 {
@@ -82,34 +77,12 @@ public class ObjectiveTracker implements Listener
 	{
 		Player pl = event.getPlayer();
 		Block block = event.getBlock();
-		Set<AutoRefPlayer> bedOwners = Sets.newHashSet();
-		String bedBreakNotification = "";
 
 		AutoRefMatch match = plugin.getMatch(block.getWorld());
-		AutoRefPlayer breaker = match.getPlayer(pl);
+		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
 		
-		if ((match.getRespawnMode() == RespawnMode.BEDSONLY && match != null && pl != null) &&
-				!event.isCancelled() && (event.getBlock().getType() == Material.BED || 
-				event.getBlock().getType() == Material.BED_BLOCK))
-		{
-				for (AutoRefPlayer apl : match.getPlayers())
-					if (block.getLocation().distanceSquared(apl.getBedLocation()) <= 2.0) // does having it as "2.0" introduce a problem with beds placed side by side?
-						bedOwners.add(apl);
-				
-				if (bedOwners.size() == 1)
-					bedBreakNotification = String.format("%s\'s bed has been broken by %s.", 
-							((AutoRefPlayer) bedOwners.toArray()[0]).getDisplayName(), breaker.getDisplayName());
-				else if (bedOwners.size() > 1)
-					for (AutoRefPlayer apl : bedOwners)
-						if (((AutoRefPlayer) bedOwners.toArray()[0]).getTeam() == apl.getTeam())
-							bedBreakNotification = String.format("%s\'s bed has been broken by %s.", 
-									apl.getTeam().getDisplayName(), breaker.getDisplayName());
-						else
-							bedBreakNotification = String.format("%s has broken a bed.", breaker.getDisplayName());
-						
-				for (Player ref : match.getReferees(false))
-					ref.sendMessage(ChatColor.GRAY + bedBreakNotification);
-		}
+		if(match != null && match.getCurrentState().inProgress() && block.getType() == Material.BED_BLOCK && pl != null && apl != null)
+			match.new BedUpdateTask(apl).runTask(plugin);
 	}
 
 	// ----------------- START WINCONDITION -----------------------

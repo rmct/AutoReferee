@@ -794,6 +794,48 @@ public class AutoRefMatch
 		setLastNotificationLocation(loc);
 	}
 
+	public class BedUpdateTask extends BukkitRunnable
+	{
+		private Map<AutoRefPlayer, Boolean> hasBed = Maps.newHashMap();
+		private AutoRefPlayer breaker;
+		
+		public BedUpdateTask(AutoRefPlayer pl)
+		{
+			breaker = pl;
+			for (AutoRefPlayer apl : getPlayers())
+				hasBed.put(apl, apl.getBedLocation() != null);
+		}
+		public void run()
+		{
+			Set<AutoRefPlayer> lostBed = Sets.newHashSet();
+			String bedBreakNotification = "";
+			
+			for (AutoRefPlayer apl : getPlayers())
+				if (hasBed.get(apl) != (apl.getBedLocation() != null))
+					lostBed.add(apl);
+			
+			if (getRespawnMode() == RespawnMode.BEDSONLY)
+			{
+				if (lostBed.size() == 1)
+					bedBreakNotification = String.format("%s\'s bed has been broken by %s.", 
+							((AutoRefPlayer) lostBed.toArray()[0]).getDisplayName(), breaker.getDisplayName());
+				
+				else if (lostBed.size() > 1)
+					for (AutoRefPlayer apl : lostBed)
+					{
+						if (((AutoRefPlayer) lostBed.toArray()[0]).getTeam() == apl.getTeam())
+							bedBreakNotification = String.format("%s\'s bed has been broken by %s.", 
+									apl.getTeam().getDisplayName(), breaker.getDisplayName());
+						else
+							bedBreakNotification = String.format("%s has broken a bed.", breaker.getDisplayName());
+					}
+				if (!lostBed.isEmpty())
+					for (Player ref : getReferees(false))
+						ref.sendMessage(ChatColor.GRAY + bedBreakNotification);
+			}
+		}
+	}
+	
 	private class PlayerCountTask extends BukkitRunnable
 	{
 		private long lastOccupiedTime = 0;
