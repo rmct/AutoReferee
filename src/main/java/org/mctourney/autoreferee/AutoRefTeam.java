@@ -260,6 +260,19 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	public Set<AutoRefGoal> getTeamGoals()
 	{ return Collections.unmodifiableSet(goals); }
 
+	/**
+	 * Get this team's win conditions by type.
+	 *
+	 * @return collection of win conditions
+	 */
+	public <T extends AutoRefGoal> Set<T> getTeamGoals(Class<T> clazz)
+	{
+		Set<T> typedGoals = Sets.newHashSet();
+		for (AutoRefGoal goal : goals)
+			if (clazz.isInstance(goal)) typedGoals.add((T) goal);
+		return typedGoals;
+	}
+
 	// does a provided search string match this team?
 	public boolean matches(String needle)
 	{

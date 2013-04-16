@@ -31,7 +31,7 @@ public class TimeGoal extends AutoRefGoal
 	{
 		AutoRefMatch match = getOwner().getMatch();
 		match.messageReferee(ref, "team", getOwner().getName(),
-			"goal", "time," + Long.toString(seconds));
+			"goal", "time", Long.toString(seconds));
 	}
 
 	@Override

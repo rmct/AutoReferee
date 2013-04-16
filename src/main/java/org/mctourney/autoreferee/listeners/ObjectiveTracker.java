@@ -29,6 +29,7 @@ import org.mctourney.autoreferee.AutoRefMatch.RespawnMode;
 import org.mctourney.autoreferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
 import org.mctourney.autoreferee.goals.BlockGoal;
+import org.mctourney.autoreferee.goals.CoreGoal;
 import org.mctourney.autoreferee.util.AchievementPoints;
 import org.mctourney.autoreferee.util.BlockData;
 
@@ -88,7 +89,7 @@ public class ObjectiveTracker implements Listener
 
 	// ----------------- START WINCONDITION -----------------------
 
-	private void delayCheckWinConditions(BlockEvent event)
+	private void _checkWinConditions(BlockEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
 		if (match != null) match.checkWinConditions();
@@ -96,47 +97,55 @@ public class ObjectiveTracker implements Listener
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void checkWinConditions(BlockBreakEvent event)
-	{ delayCheckWinConditions(event); }
+	{ _checkWinConditions(event); }
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void checkWinConditions(BlockBurnEvent event)
-	{ delayCheckWinConditions(event); }
+	{ _checkWinConditions(event); }
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void checkWinConditions(BlockFadeEvent event)
-	{ delayCheckWinConditions(event); }
+	{ _checkWinConditions(event); }
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void checkWinConditions(BlockFromToEvent event)
-	{ delayCheckWinConditions(event); }
+	{
+		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
+		for (AutoRefTeam team : match.getTeams())
+			for (CoreGoal goal : team.getTeamGoals(CoreGoal.class))
+				goal.checkSatisfied(event);
+
+		// typical win condition check as well
+		_checkWinConditions(event);
+	}
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void checkWinConditions(BlockGrowEvent event)
-	{ delayCheckWinConditions(event); }
+	{ _checkWinConditions(event); }
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void checkWinConditions(BlockIgniteEvent event)
-	{ delayCheckWinConditions(event); }
+	{ _checkWinConditions(event); }
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void checkWinConditions(BlockPhysicsEvent event)
-	{ delayCheckWinConditions(event); }
+	{ _checkWinConditions(event); }
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void checkWinConditions(BlockPistonExtendEvent event)
-	{ delayCheckWinConditions(event); }
+	{ _checkWinConditions(event); }
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void checkWinConditions(BlockPistonRetractEvent event)
-	{ delayCheckWinConditions(event); }
+	{ _checkWinConditions(event); }
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void checkWinConditions(BlockRedstoneEvent event)
-	{ delayCheckWinConditions(event); }
+	{ _checkWinConditions(event); }
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void checkWinConditions(LeavesDecayEvent event)
-	{ delayCheckWinConditions(event); }
+	{ _checkWinConditions(event); }
 
 	// ------------------ END WINCONDITION ------------------------
 
