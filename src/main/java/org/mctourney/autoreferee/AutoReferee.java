@@ -298,10 +298,7 @@ public class AutoReferee extends JavaPlugin
 			getLogger().severe(String.format("!!! Incorrect config-version (expected %d, got %d)",
 				PLUGIN_CFG_VERSION, configVersion));
 
-		// get server list, and attempt to determine whether we are in online mode
-		String qurl = getConfig().getString("server-mode.query-server", null);
-		setAutoMode(getServer().getOnlineMode() && qurl != null &&
-			this.getConfig().getBoolean("server-mode.online", true));
+		setAutoMode(false);
 
 		// setup a possible alternate map repository
 		String mrepo = this.getConfig().getString("server-mode.map-repo", null);
@@ -317,10 +314,7 @@ public class AutoReferee extends JavaPlugin
 		// wrap up, debug to follow this message
 		getLogger().info(this.getName() + " (" + Bukkit.getName() + ") loaded successfully" +
 			(SportBukkitUtil.hasSportBukkitApi() ? " with SportBukkit API" : "") + ".");
-
-		// connect to server, or let the server operator know to set up the match manually
-		if (!makeServerConnection(qurl))
-			getLogger().info(this.getName() + " is running in OFFLINE mode. All setup must be done manually.");
+		getLogger().info(this.getName() + " Git: " + this.getCommit());
 
 		// update online mode to represent whether or not we have a connection
 		if (isAutoMode()) setAutoMode(checkPlugins(pm));
@@ -352,29 +346,6 @@ public class AutoReferee extends JavaPlugin
 				if (lobby != null) setLobbyWorld(getServer().getWorld(lobby));
 			}
 		});
-	}
-
-	private boolean makeServerConnection(String qurl)
-	{
-		// if we are not in online mode, stop right here
-		if (!isAutoMode()) return false;
-
-		// get default key and server key
-		String defkey = getConfig().getDefaults().getString("server-mode.key");
-		String key = getConfig().getString("server-mode.key", null);
-
-		// if there is no server key listed, or it is set to the default key
-		if (key == null || key.equals(defkey))
-		{
-			// reference the keyserver to remind operator to get a server key
-			getLogger().severe("Please get a server key from " +
-				getConfig().getString("server-mode.keyserver"));
-			return setAutoMode(false);
-		}
-
-		// setup query server and return response from ACK
-		qserv = new QueryServer(qurl, key);
-		return setAutoMode(qserv.ack());
 	}
 
 	public void onDisable()
