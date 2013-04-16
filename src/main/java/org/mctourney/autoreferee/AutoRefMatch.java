@@ -2172,10 +2172,10 @@ public class AutoRefMatch
 	{
 		Plugin plugin = AutoReferee.getInstance();
 		plugin.getServer().getScheduler().runTask(plugin,
-			new Runnable(){ public void run(){ delayedCheckWinConditions(); } });
+			new Runnable(){ public void run(){ _checkWinConditions(); } });
 	}
 
-	private void delayedCheckWinConditions()
+	private void _checkWinConditions()
 	{
 		// this code is only called in BlockPlaceEvent and BlockBreakEvent when
 		// we have confirmed that the state is PLAYING, so we know we are definitely

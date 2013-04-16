@@ -89,7 +89,9 @@ public abstract class AutoRefGoal
 	static
 	{
 		goalNames.put("block", BlockGoal.class);
+		goalNames.put("core", CoreGoal.class);
 		goalNames.put("survive", SurvivalGoal.class);
+		goalNames.put("time", TimeGoal.class);
 	}
 
 	public static void addGoalType(String tag, Class<? extends AutoRefGoal> cls)

@@ -34,7 +34,8 @@ public class SurvivalGoal extends AutoRefGoal
 	public void updateReferee(Player ref)
 	{
 		AutoRefMatch match = getOwner().getMatch();
-		match.messageReferee(ref, "team", getOwner().getName(), "goal", "survive");
+		match.messageReferee(ref, "team", getOwner().getName(),
+			"goal", "survive", Integer.toString(getOwner().getPlayers().size()));
 	}
 
 	@Override
