@@ -158,6 +158,14 @@ public class AutoRefMatch
 		loc.getWorld().setSpawnLocation(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 	}
 
+	private boolean practiceMode = false;
+
+	public boolean isPracticeMode()
+	{ return this.getCurrentState().inProgress() && this.practiceMode; }
+
+	public void setPracticeMode(boolean practice)
+	{ this.practiceMode = practice; }
+
 	/**
 	 * Gets the world associated with this match.
 	 *
