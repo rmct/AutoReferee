@@ -16,9 +16,25 @@ public class PlayerUtil
 	/**
 	 * Heals the player and resets hunger, saturation, and exhaustion.
 	 */
+	public static void restore(Player player)
+	{
+		PlayerUtil.heal(player);
+		PlayerUtil.feed(player);
+	}
+
+	/**
+	 * Heals the player and resets hunger, saturation, and exhaustion.
+	 */
 	public static void heal(Player player)
 	{
-		player.setHealth    ( 20 ); // 10 hearts
+		player.setHealth( 20 ); // 10 hearts
+	}
+
+	/**
+	 * Heals the player and resets hunger, saturation, and exhaustion.
+	 */
+	public static void feed(Player player)
+	{
 		player.setFoodLevel ( 20 ); // full food
 		player.setSaturation(  5 ); // saturation depletes hunger
 		player.setExhaustion(  0 ); // exhaustion depletes saturation
@@ -65,8 +81,8 @@ public class PlayerUtil
 	 */
 	public static void reset(Player player)
 	{
-		// heal the player to full health, hunger, etc
-		heal(player);
+		// restore the player to full health, hunger, etc
+		restore(player);
 
 		// clear their entire inventory
 		clearInventory(player);

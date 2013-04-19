@@ -44,7 +44,6 @@ import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 
@@ -205,6 +204,9 @@ public class ZoneListener implements Listener
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
 		if (match == null || match.getCurrentState() == MatchStatus.NONE) return true;
 
+		// if we are in practice mode, whatever...
+		if (match.isPracticeMode()) return true;
+
 		Role role = match.getRole(player);
 
 		// if the player is a referee or is flying, nothing is off-limits
@@ -318,9 +320,8 @@ public class ZoneListener implements Listener
 	{
 		Player player = (Player) event.getWhoClicked();
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
-		if (match == null) return;
 
-		if (!match.isPlayer(player))
+		if (match != null && !match.isPlayer(player))
 			switch (event.getInventory().getType())
 		{
 			case PLAYER:

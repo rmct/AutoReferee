@@ -34,6 +34,7 @@ import org.mcstats.Metrics.Graph;
 import org.mctourney.autoreferee.commands.AdminCommands;
 import org.mctourney.autoreferee.commands.ConfigurationCommands;
 import org.mctourney.autoreferee.commands.PlayerCommands;
+import org.mctourney.autoreferee.commands.PracticeCommands;
 import org.mctourney.autoreferee.commands.SpectatorCommands;
 import org.mctourney.autoreferee.listeners.CombatListener;
 import org.mctourney.autoreferee.listeners.ObjectiveTracker;
@@ -268,6 +269,7 @@ public class AutoReferee extends JavaPlugin
 		{ AutoReferee.log("Failed to load properties file.", Level.SEVERE); }
 
 		PluginManager pm = getServer().getPluginManager();
+		PracticeCommands practice = new PracticeCommands(this);
 
 		// listener utility classes, subdivided for organization
 		pm.registerEvents(new TeamListener(this), this);
@@ -275,6 +277,7 @@ public class AutoReferee extends JavaPlugin
 		pm.registerEvents(new ZoneListener(this), this);
 		pm.registerEvents(new WorldListener(this), this);
 		pm.registerEvents(new ObjectiveTracker(this), this);
+		pm.registerEvents(practice, this);
 
 		// save this reference to use for setting up the referee channel later
 		pm.registerEvents(refChannelListener = new RefereeChannelListener(this), this);
@@ -285,6 +288,7 @@ public class AutoReferee extends JavaPlugin
 		commandManager.registerCommands(new AdminCommands(this), this);
 		commandManager.registerCommands(new SpectatorCommands(this), this);
 		commandManager.registerCommands(new ConfigurationCommands(this), this);
+		commandManager.registerCommands(practice, this);
 
 		// global configuration object (can't be changed, so don't save onDisable)
 		InputStream configInputStream = getResource("defaults/config.yml");

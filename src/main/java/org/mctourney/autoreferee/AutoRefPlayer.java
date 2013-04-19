@@ -555,6 +555,14 @@ public class AutoRefPlayer
 		}
 	}
 
+	private boolean godmode = false;
+
+	public void setGodMode(boolean godmode)
+	{ this.godmode = godmode; }
+
+	public boolean isGodMode()
+	{ return this.godmode && getMatch().isPracticeMode(); }
+
 	private Location spawn = null;
 
 	/**
@@ -600,7 +608,7 @@ public class AutoRefPlayer
 	public void heal()
 	{
 		Player p = getPlayer();
-		if (p != null) PlayerUtil.heal(p);
+		if (p != null) PlayerUtil.restore(p);
 	}
 
 	public void reset()

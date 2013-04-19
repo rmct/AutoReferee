@@ -18,6 +18,7 @@ public class CommandDocumentationGenerator
 	,	org.mctourney.autoreferee.commands.SpectatorCommands.class
 	,	org.mctourney.autoreferee.commands.AdminCommands.class
 	,	org.mctourney.autoreferee.commands.ConfigurationCommands.class
+	,	org.mctourney.autoreferee.commands.PracticeCommands.class
 	);
 
 	public static void generateDocumentationFile(File file)

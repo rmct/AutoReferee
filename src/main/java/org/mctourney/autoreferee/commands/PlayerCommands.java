@@ -83,7 +83,7 @@ public class PlayerCommands implements CommandHandler
 
 		// otherwise, add yourself
 		else if (sender instanceof Player)
-			match.joinTeam((Player) sender, team, isref);
+			match.joinTeam((Player) sender, team, isref || match.isPracticeMode());
 		return true;
 	}
 
@@ -106,7 +106,7 @@ public class PlayerCommands implements CommandHandler
 
 		// otherwise, remove yourself
 		else if (sender instanceof Player)
-			match.leaveTeam((Player) sender, isref);
+			match.leaveTeam((Player) sender, isref || match.isPracticeMode());
 		return true;
 	}
 

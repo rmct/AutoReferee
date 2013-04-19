@@ -11,7 +11,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
-import org.bukkit.entity.PigZombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -168,6 +167,12 @@ public class CombatListener implements Listener
 	{
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
 		if (match == null || !match.getCurrentState().inProgress()) return;
+
+		if (event.getEntityType() == EntityType.PLAYER)
+		{
+			AutoRefPlayer apl = match.getPlayer((Player) event.getEntity());
+			if (apl != null && apl.isGodMode()) { event.setDamage(0); return; }
+		}
 
 		if (match.getCurrentState().inProgress() &&
 			event instanceof EntityDamageByEntityEvent)
