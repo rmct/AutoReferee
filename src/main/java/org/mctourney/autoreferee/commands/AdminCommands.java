@@ -11,6 +11,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
 
+import org.apache.commons.lang.StringUtils;
+
 import org.mctourney.autoreferee.AutoRefMap;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoReferee;
@@ -44,17 +46,17 @@ public class AdminCommands implements CommandHandler
 		return world != null;
 	}
 
-	@AutoRefCommand(name={"autoref", "load"}, argmin=1, argmax=2,
+	@AutoRefCommand(name={"autoref", "load"}, argmin=1, options="c+x",
 		description="Loads a map by name, case insensitive.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean loadMap(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
-		// get generate a map name from the args
-		String mapName = args[0];
+		// generate a map name from the args
+		String mapName = StringUtils.join(args, " ");
 
-		// may specify a custom world name as the 3rd argument
-		String customName = args.length < 2 ? null : args[1];
+		// may specify a custom world name
+		String customName = options.getOptionValue('c');
 
 		// get world setup for match
 		sender.sendMessage(ChatColor.GREEN + "Please wait...");
@@ -63,14 +65,14 @@ public class AdminCommands implements CommandHandler
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "loadurl"}, argmin=1, argmax=2,
+	@AutoRefCommand(name={"autoref", "loadurl"}, argmin=1, argmax=1, options="c+x",
 		description="Loads a map from a remote zip file, taking the URL as a parameter.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean loadMapFromURL(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
 		// may specify a custom world name
-		String customName = args.length < 2 ? null : args[1];
+		String customName = options.getOptionValue('c');
 
 		// get world setup for match
 		sender.sendMessage(ChatColor.GREEN + "Please wait...");
