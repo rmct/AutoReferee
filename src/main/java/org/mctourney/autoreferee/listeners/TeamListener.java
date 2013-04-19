@@ -112,7 +112,8 @@ public class TeamListener implements Listener
 
 		for (LivingEntity living : event.getAffectedEntities())
 			if (living.getType() == EntityType.PLAYER)
-				if (!match.isPlayer((Player) living)) event.setIntensity(living, 0.0);
+				if (match != null && !match.isPlayer((Player) living))
+					event.setIntensity(living, 0.0);
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
