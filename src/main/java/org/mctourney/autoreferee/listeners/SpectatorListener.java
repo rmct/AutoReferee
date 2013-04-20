@@ -61,12 +61,27 @@ public class SpectatorListener implements PluginMessageListener, Listener
 	// convenience for changing defaults
 	enum ToolAction
 	{
-		TOOL_WINCOND,
-		TOOL_STARTMECH,
-		TOOL_PROTECT,
-	}
+		TOOL_WINCOND(Material.GOLD_SPADE),
+		TOOL_STARTMECH(Material.GOLD_AXE),
+		TOOL_PROTECT(Material.GOLD_SWORD),
+		;
 
-	private Map<Integer, ToolAction> toolMap;
+		public final Material tooltype;
+
+		ToolAction(Material type)
+		{ this.tooltype = type; }
+
+		private static Map<Material, ToolAction> _map;
+		static
+		{
+			_map = Maps.newHashMap();
+			for (ToolAction tool : ToolAction.values())
+				_map.put(tool.tooltype, tool);
+		}
+
+		public static ToolAction fromMaterial(Material material)
+		{ return _map.get(material); }
+	}
 
 	public static int parseTool(String s, Material def)
 	{
@@ -83,25 +98,7 @@ public class SpectatorListener implements PluginMessageListener, Listener
 	}
 
 	public SpectatorListener(Plugin p)
-	{
-		plugin = (AutoReferee) p;
-		toolMap = Maps.newHashMap();
-
-		// tools.win-condition: golden shovel
-		toolMap.put(parseTool(plugin.getConfig().getString(
-			"config-mode.tools.win-condition", null), Material.GOLD_SPADE),
-			ToolAction.TOOL_WINCOND);
-
-		// tools.start-mechanism: golden axe
-		toolMap.put(parseTool(plugin.getConfig().getString(
-			"config-mode.tools.start-mechanism", null), Material.GOLD_AXE),
-			ToolAction.TOOL_STARTMECH);
-
-		// tools.protect-entities: golden sword
-		toolMap.put(parseTool(plugin.getConfig().getString(
-			"config-mode.tools.protect-entities", null), Material.GOLD_SWORD),
-			ToolAction.TOOL_PROTECT);
-	}
+	{ plugin = (AutoReferee) p; }
 
 	public void onPluginMessageReceived(String channel, Player player, byte[] mbytes)
 	{
@@ -317,11 +314,11 @@ public class SpectatorListener implements PluginMessageListener, Listener
 		if (!event.hasItem()) return;
 
 		// get type id of the event and check if its one of our tools
-		int typeID = event.getItem().getTypeId();
-		if (!toolMap.containsKey(typeID)) return;
+		ToolAction action = ToolAction.fromMaterial(event.getMaterial());
+		if (action != null) return;
 
 		// get which action to perform
-		switch (toolMap.get(typeID))
+		switch (action)
 		{
 			// this is the tool built for setting win conditions
 			case TOOL_WINCOND:
@@ -384,14 +381,15 @@ public class SpectatorListener implements PluginMessageListener, Listener
 		if (match == null || match.getCurrentState().inProgress()) return;
 
 		// this event is not an "item" event
-		if (event.getPlayer().getItemInHand() == null) return;
+		ItemStack item = event.getPlayer().getItemInHand();
+		if (item == null) return;
 
 		// get type id of the event and check if its one of our tools
-		int typeID = event.getPlayer().getItemInHand().getTypeId();
-		if (!toolMap.containsKey(typeID)) return;
+		ToolAction action = ToolAction.fromMaterial(item.getType());
+		if (action != null) return;
 
 		// get which action to perform
-		switch (toolMap.get(typeID))
+		switch (action)
 		{
 			// this is the tool built for protecting entities
 			case TOOL_PROTECT:
