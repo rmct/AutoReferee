@@ -1,23 +1,16 @@
 package org.mctourney.autoreferee.listeners;
 
 import java.util.Iterator;
-import java.util.Map;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.World;
-import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Sign;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -33,14 +26,9 @@ import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.AutoRefMatch.Role;
 
-import com.google.common.collect.Maps;
-
 public class TeamListener implements Listener
 {
 	AutoReferee plugin = null;
-
-	// mapping spectators to the matches they died in
-	Map<String, AutoRefMatch> deadSpectators = Maps.newHashMap();
 
 	public TeamListener(Plugin p)
 	{ plugin = (AutoReferee) p; }
@@ -91,61 +79,9 @@ public class TeamListener implements Listener
 		}
 	}
 
-	@EventHandler(priority=EventPriority.MONITOR)
-	public void spectatorDeath(PlayerDeathEvent event)
-	{
-		World world = event.getEntity().getWorld();
-		AutoRefMatch match = plugin.getMatch(world);
-
-		if (match != null && !match.isPlayer(event.getEntity()))
-		{
-			deadSpectators.put(event.getEntity().getName(), match);
-			event.getDrops().clear();
-		}
-	}
-
-	@EventHandler(priority=EventPriority.HIGHEST)
-	public void potionSplash(PotionSplashEvent event)
-	{
-		World world = event.getEntity().getWorld();
-		AutoRefMatch match = plugin.getMatch(world);
-
-		for (LivingEntity living : event.getAffectedEntities())
-			if (living.getType() == EntityType.PLAYER)
-				if (match != null && !match.isPlayer((Player) living))
-					event.setIntensity(living, 0.0);
-	}
-
-	@EventHandler(priority=EventPriority.MONITOR)
-	public void spectatorDeath(EntityDamageEvent event)
-	{
-		World world = event.getEntity().getWorld();
-		AutoRefMatch match = plugin.getMatch(world);
-
-		if (event.getEntityType() != EntityType.PLAYER) return;
-		Player player = (Player) event.getEntity();
-
-		if (match != null && match.getCurrentState().inProgress() &&
-			!match.isPlayer(player))
-		{
-			event.setCancelled(true);
-			if (player.getLocation().getY() < -64)
-				player.teleport(match.getPlayerSpawn(player));
-			player.setFallDistance(0);
-		}
-	}
-
 	@EventHandler
 	public void playerRespawn(PlayerRespawnEvent event)
 	{
-		String name = event.getPlayer().getName();
-		if (deadSpectators.containsKey(name))
-		{
-			AutoRefMatch match = deadSpectators.get(name);
-			if (match != null) event.setRespawnLocation(match.getWorldSpawn());
-			deadSpectators.remove(name); return;
-		}
-
 		World world = event.getPlayer().getWorld();
 		AutoRefMatch match = plugin.getMatch(world);
 
@@ -245,33 +181,6 @@ public class TeamListener implements Listener
 					AutoRefMap.loadMap(player, mapName.trim(), null);
 				}
 			}
-		}
-	}
-
-	@EventHandler(priority=EventPriority.HIGHEST)
-	public void spectatorInfo(PlayerInteractEvent event)
-	{
-		Player player = event.getPlayer();
-		AutoRefMatch match = plugin.getMatch(player.getWorld());
-
-		// if this is a match and the person is just a spectator
-		if (match == null || !match.isSpectator(player)) return;
-
-		// spawners
-		if (event.hasBlock() && event.getClickedBlock().getState() instanceof CreatureSpawner)
-		{
-			CreatureSpawner spawner = (CreatureSpawner) event.getClickedBlock().getState();
-			String spawnerType = spawner.getCreatureTypeName();
-
-			switch (spawner.getSpawnedType())
-			{
-				case DROPPED_ITEM:
-					// TODO - Not implemented in CraftBukkit:
-					// a method to determine the data for the dropped item
-					break;
-			}
-
-			player.sendMessage(ChatColor.DARK_GRAY + String.format("%s Spawner", spawnerType));
 		}
 	}
 

@@ -76,7 +76,7 @@ import org.mctourney.autoreferee.event.match.MatchUploadStatsEvent;
 import org.mctourney.autoreferee.event.player.PlayerMatchJoinEvent;
 import org.mctourney.autoreferee.event.player.PlayerMatchLeaveEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
-import org.mctourney.autoreferee.listeners.RefereeChannelListener;
+import org.mctourney.autoreferee.listeners.SpectatorListener;
 import org.mctourney.autoreferee.listeners.WorldListener;
 import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
@@ -1300,7 +1300,7 @@ public class AutoRefMatch
 	 */
 	public void messageReferees(String ...parts)
 	{
-		if (this.isDebugMode()) this.debug(StringUtils.join(parts, RefereeChannelListener.DELIMITER));
+		if (this.isDebugMode()) this.debug(StringUtils.join(parts, SpectatorListener.DELIMITER));
 		for (Player ref : getReferees(false)) messageReferee(ref, parts);
 	}
 
@@ -1313,7 +1313,7 @@ public class AutoRefMatch
 	{
 		try
 		{
-			String msg = StringUtils.join(parts, RefereeChannelListener.DELIMITER);
+			String msg = StringUtils.join(parts, SpectatorListener.DELIMITER);
 			ref.sendPluginMessage(AutoReferee.getInstance(), AutoReferee.REFEREE_PLUGIN_CHANNEL,
 				msg.getBytes(AutoReferee.PLUGIN_CHANNEL_ENC));
 		}

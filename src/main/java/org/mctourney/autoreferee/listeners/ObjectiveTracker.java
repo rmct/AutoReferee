@@ -15,7 +15,6 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -163,23 +162,6 @@ public class ObjectiveTracker implements Listener
 		{
 			AutoRefMatch match = plugin.getMatch(event.getClickedBlock().getWorld());
 			if (match != null) match.checkWinConditions();
-		}
-	}
-
-	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
-	public void entityInteract(PlayerInteractEntityEvent event)
-	{
-		Player pl = event.getPlayer();
-		Entity entity = event.getRightClicked();
-
-		AutoRefMatch match = plugin.getMatch(pl.getWorld());
-		if (match != null) match.checkWinConditions();
-
-		if (entity.getType() == EntityType.PLAYER && match != null
-			&& match.isSpectator(pl) && match.isPlayer((Player) entity))
-		{
-			AutoRefPlayer a = match.getPlayer((Player) entity);
-			a.showInventory(pl);
 		}
 	}
 
