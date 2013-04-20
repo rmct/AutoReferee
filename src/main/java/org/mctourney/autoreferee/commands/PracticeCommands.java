@@ -13,17 +13,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 
-import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.potion.PotionType;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoRefTeam;
@@ -44,7 +40,6 @@ public class PracticeCommands implements CommandHandler, Listener
 	private Inventory practiceMenu;
 	private static final String PRACTICE_MENU_IDENTIFIER =
 		"" + ChatColor.MAGIC + ChatColor.BOLD + ChatColor.MAGIC + ChatColor.MAGIC;
-	private Map<Integer, PracticeMenuOption> menuOptionSlots;
 
 	// map of players to their custom warp points
 	private Map<String, Location> warpPoints;
@@ -219,8 +214,6 @@ public class PracticeCommands implements CommandHandler, Listener
 		),
 		;
 
-		private static Map<Integer, PracticeMenuOption> option = Maps.newHashMap();
-
 		public int slot;
 		public ItemStack item;
 
@@ -242,6 +235,17 @@ public class PracticeCommands implements CommandHandler, Listener
 			item.setItemMeta(meta);
 			return item;
 		}
+
+		private static Map<Integer, PracticeMenuOption> _map;
+		static
+		{
+			_map = Maps.newHashMap();
+			for (PracticeMenuOption option : PracticeMenuOption.values())
+				_map.put(option.slot, option);
+		}
+
+		public static PracticeMenuOption fromSlot(int slot)
+		{ return _map.get(slot); }
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=false)
@@ -257,7 +261,7 @@ public class PracticeCommands implements CommandHandler, Listener
 		event.setCancelled(true);
 
 		AutoRefPlayer apl = match.getPlayer(player);
-		if (apl != null) switch (menuOptionSlots.get(event.getSlot()))
+		if (apl != null) switch (PracticeMenuOption.fromSlot(event.getSlot()))
 		{
 			case ADVANCE_TIME:
 				player.getWorld().setFullTime(player.getWorld().getFullTime() + 1000L);
@@ -327,12 +331,8 @@ public class PracticeCommands implements CommandHandler, Listener
 		practiceMenu = Bukkit.createInventory(null, 9 * 2,
 			ChatColor.BOLD + "AutoReferee Practice" + PRACTICE_MENU_IDENTIFIER);
 
-		menuOptionSlots = Maps.newHashMap();
 		for (PracticeMenuOption option : PracticeMenuOption.values())
-		{
 			practiceMenu.setItem(option.slot, option.item);
-			menuOptionSlots.put(option.slot, option);
-		}
 	}
 
 	private void showPlayerTeleportMenu(Player viewer)
