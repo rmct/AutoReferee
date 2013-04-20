@@ -303,7 +303,7 @@ public class SpectatorListener implements PluginMessageListener, Listener
 
 		// get type id of the event and check if its one of our tools
 		ToolAction action = ToolAction.fromMaterial(event.getMaterial());
-		if (action != null) return;
+		if (action == null) return;
 
 		// get which action to perform
 		switch (action)
@@ -399,7 +399,7 @@ public class SpectatorListener implements PluginMessageListener, Listener
 
 		// get type id of the event and check if its one of our tools
 		ToolAction action = ToolAction.fromMaterial(item.getType());
-		if (action != null) return;
+		if (action == null) return;
 
 		// get which action to perform
 		switch (action)
