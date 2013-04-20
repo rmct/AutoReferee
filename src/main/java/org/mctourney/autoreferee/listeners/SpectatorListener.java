@@ -59,11 +59,13 @@ public class SpectatorListener implements PluginMessageListener, Listener
 	Map<String, AutoRefMatch> deadSpectators = Maps.newHashMap();
 
 	// convenience for changing defaults
-	enum ToolAction
+	public enum ToolAction
 	{
 		TOOL_WINCOND(Material.GOLD_SPADE),
 		TOOL_STARTMECH(Material.GOLD_AXE),
 		TOOL_PROTECT(Material.GOLD_SWORD),
+
+		SPECTATOR_CYCLE(Material.FEATHER),
 		;
 
 		public final Material tooltype;
@@ -81,20 +83,6 @@ public class SpectatorListener implements PluginMessageListener, Listener
 
 		public static ToolAction fromMaterial(Material material)
 		{ return _map.get(material); }
-	}
-
-	public static int parseTool(String s, Material def)
-	{
-		// if no string was passed, return default
-		if (s == null) return def.getId();
-
-		// check to see if this is a material name
-		Material mat = Material.getMaterial(s);
-		if (mat != null) return mat.getId();
-
-		// try to parse as an integer
-		try { return Integer.parseInt(s); }
-		catch (Exception e) { return def.getId(); }
 	}
 
 	public SpectatorListener(Plugin p)
@@ -143,7 +131,7 @@ public class SpectatorListener implements PluginMessageListener, Listener
 		if (match != null) match.checkWinConditions();
 
 		if (entity.getType() == EntityType.PLAYER && match != null
-				&& match.isSpectator(pl) && match.isPlayer((Player) entity))
+			&& match.isSpectator(pl) && match.isPlayer((Player) entity))
 		{
 			AutoRefPlayer a = match.getPlayer((Player) entity);
 			a.showInventory(pl);
@@ -197,7 +185,7 @@ public class SpectatorListener implements PluginMessageListener, Listener
 		Player player = (Player) event.getEntity();
 
 		if (match != null && match.getCurrentState().inProgress() &&
-				!match.isPlayer(player))
+			!match.isPlayer(player))
 		{
 			event.setCancelled(true);
 			if (player.getLocation().getY() < -64)
@@ -286,7 +274,7 @@ public class SpectatorListener implements PluginMessageListener, Listener
 	{
 		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
 		if (match != null && match.getCurrentState().inProgress()
-				&& !match.isPlayer(event.getPlayer())) event.setCancelled(true);
+			&& !match.isPlayer(event.getPlayer())) event.setCancelled(true);
 	}
 
 	// restrict item pickup by referees
@@ -295,17 +283,17 @@ public class SpectatorListener implements PluginMessageListener, Listener
 	{
 		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
 		if (match != null && match.getCurrentState().inProgress()
-				&& !match.isPlayer(event.getPlayer())) event.setCancelled(true);
+			&& !match.isPlayer(event.getPlayer())) event.setCancelled(true);
 
 		if (event.getPlayer().getListeningPluginChannels().contains(
-				AutoReferee.REFEREE_PLUGIN_CHANNEL)) event.setCancelled(true);
+			AutoReferee.REFEREE_PLUGIN_CHANNEL)) event.setCancelled(true);
 	}
 
 	@EventHandler
 	public void toolUsage(PlayerInteractEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
-		if (match == null || match.getCurrentState().inProgress()) return;
+		if (match == null) return;
 
 		Block block;
 		BlockState blockState;
@@ -323,6 +311,8 @@ public class SpectatorListener implements PluginMessageListener, Listener
 			// this is the tool built for setting win conditions
 			case TOOL_WINCOND:
 
+				if (match.getCurrentState().inProgress()) return;
+
 				// if there is no block involved in this event, nothing
 				if (!event.hasBlock()) return;
 				block = event.getClickedBlock();
@@ -339,6 +329,8 @@ public class SpectatorListener implements PluginMessageListener, Listener
 			// this is the tool built for setting start mechanisms
 			case TOOL_STARTMECH:
 
+				if (match.getCurrentState().inProgress()) return;
+
 				// if there is no block involved in this event, nothing
 				if (!event.hasBlock()) return;
 
@@ -353,17 +345,38 @@ public class SpectatorListener implements PluginMessageListener, Listener
 				{
 					// get the start mechanism
 					AutoRefMatch.StartMechanism sm = match.addStartMech(block,
-							((Redstone) blockState.getData()).isPowered());
+						((Redstone) blockState.getData()).isPowered());
 
 					if (sm != null)
 					{
 						// announce it...
 						String m = ChatColor.RED + sm.toString() +
-								ChatColor.RESET + " is a start mechanism.";
+							ChatColor.RESET + " is a start mechanism.";
 						event.getPlayer().sendMessage(m);
 					}
 				}
 
+				break;
+
+			case SPECTATOR_CYCLE:
+
+				// this tool only valid for spectators
+				if (!match.isSpectator(event.getPlayer())) return;
+
+				switch (event.getAction())
+				{
+					case LEFT_CLICK_AIR:
+					case LEFT_CLICK_BLOCK:
+						match.getSpectator(event.getPlayer()).cyclePrevPlayer();
+						break;
+
+					case RIGHT_CLICK_AIR:
+					case RIGHT_CLICK_BLOCK:
+						match.getSpectator(event.getPlayer()).cycleNextPlayer();
+						break;
+
+					default: break;
+				}
 				break;
 
 			// this isn't one of our tools...
@@ -378,7 +391,7 @@ public class SpectatorListener implements PluginMessageListener, Listener
 	public void toolUsage(PlayerInteractEntityEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
-		if (match == null || match.getCurrentState().inProgress()) return;
+		if (match == null) return;
 
 		// this event is not an "item" event
 		ItemStack item = event.getPlayer().getItemInHand();
@@ -394,6 +407,8 @@ public class SpectatorListener implements PluginMessageListener, Listener
 			// this is the tool built for protecting entities
 			case TOOL_PROTECT:
 
+				if (match.getCurrentState().inProgress()) return;
+
 				// if there is no entity involved in this event, nothing
 				if (event.getRightClicked() == null) return;
 
@@ -402,12 +417,12 @@ public class SpectatorListener implements PluginMessageListener, Listener
 
 				// entity name
 				String ename = String.format("%s @ %s", event.getRightClicked().getType().getName(),
-						LocationUtil.toBlockCoords(event.getRightClicked().getLocation()));
+					LocationUtil.toBlockCoords(event.getRightClicked().getLocation()));
 
 				// save the entity's unique id
 				UUID uid; match.toggleProtection(uid = event.getRightClicked().getUniqueId());
 				match.broadcast(ChatColor.RED + ename + ChatColor.RESET + " is " +
-						(match.isProtected(uid) ? "" : "not ") + "a protected entity");
+					(match.isProtected(uid) ? "" : "not ") + "a protected entity");
 
 
 				break;
@@ -436,11 +451,11 @@ public class SpectatorListener implements PluginMessageListener, Listener
 
 			Material type = event.getClickedBlock().getType();
 			if (event.getClickedBlock().getState() instanceof PressureSensor
-					&& match.getCurrentState().inProgress()) { event.setCancelled(true); return; }
+				&& match.getCurrentState().inProgress()) { event.setCancelled(true); return; }
 
 			if (event.getClickedBlock().getState() instanceof InventoryHolder
-					&& event.getAction() == Action.RIGHT_CLICK_BLOCK && match.getCurrentState().inProgress()
-					&& !event.getPlayer().isSneaking())
+				&& event.getAction() == Action.RIGHT_CLICK_BLOCK && match.getCurrentState().inProgress()
+				&& !event.getPlayer().isSneaking())
 			{
 				InventoryHolder invh = (InventoryHolder) event.getClickedBlock().getState();
 				Inventory inv = invh.getInventory(), newinv;

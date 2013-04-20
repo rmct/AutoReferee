@@ -2440,6 +2440,31 @@ public class AutoRefMatch
 	public void leaveTeam(Player player, boolean force)
 	{ for (AutoRefTeam team : teams) team.leave(player, force); }
 
+	private List<String> sortedPlayers;
+
+	protected void updatePlayerList()
+	{
+		sortedPlayers = Lists.newLinkedList();
+		for (AutoRefPlayer apl : getPlayers())
+			sortedPlayers.add(apl.getName());
+		Collections.sort(sortedPlayers);
+	}
+
+	protected String getCycleNextPlayer(String name)
+	{ return getCycleRelativePlayer(name, +1); }
+
+	protected String getCyclePrevPlayer(String name)
+	{ return getCycleRelativePlayer(name, -1); }
+
+	private String getCycleRelativePlayer(String name, int z)
+	{
+		if (name == null) return sortedPlayers.get(0);
+		int k = Collections.binarySearch(sortedPlayers, name);
+
+		int len = sortedPlayers.size();
+		return sortedPlayers.get((k + len + z) % len);
+	}
+
 	public enum RespawnMode
 	{ ALLOW, BEDSONLY, DISALLOW; }
 

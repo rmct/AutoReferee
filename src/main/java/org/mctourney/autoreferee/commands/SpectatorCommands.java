@@ -179,6 +179,22 @@ public class SpectatorCommands implements CommandHandler
 		return true;
 	}
 
+	@AutoRefCommand(name={"autoref", "cycle"}, argmax=0, options="np",
+			description="Cycle through players.")
+	@AutoRefPermission(console=false, role=AutoRefMatch.Role.SPECTATOR)
+
+	public boolean playerCycle(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		if (match == null) return false;
+		Player player = (Player) sender;
+
+		if (options.hasOption('p'))
+			match.getSpectator(player).cyclePrevPlayer();
+		else match.getSpectator(player).cycleNextPlayer();
+
+		return true;
+	}
+
 	@AutoRefCommand(name={"autoref", "teamname"}, argmin=2, argmax=2,
 		description="Rename a team.")
 	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)

@@ -18,7 +18,7 @@ import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.AutoRefMatch.MatchStatus;
-import org.mctourney.autoreferee.listeners.ZoneListener;
+import org.mctourney.autoreferee.listeners.SpectatorListener;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
 import org.mctourney.autoreferee.regions.CuboidRegion;
 import org.mctourney.autoreferee.util.BlockData;
@@ -82,9 +82,8 @@ public class ConfigurationCommands implements CommandHandler
 		if (match == null) return false;
 
 		// get the tool used to set the win conditions
-		int toolID = ZoneListener.parseTool(plugin.getConfig().getString(
-			"config-mode.tools.win-condition", null), Material.GOLD_SPADE);
-		ItemStack toolitem = new ItemStack(toolID);
+		Material tooltype = SpectatorListener.ToolAction.TOOL_WINCOND.tooltype;
+		ItemStack toolitem = new ItemStack(tooltype);
 
 		// add to the inventory and switch to holding it
 		((Player) sender).getInventory().addItem(toolitem);
@@ -104,9 +103,8 @@ public class ConfigurationCommands implements CommandHandler
 		if (match == null) return false;
 
 		// get the tool used to set the starting mechanisms
-		int toolID = ZoneListener.parseTool(plugin.getConfig().getString(
-			"config-mode.tools.start-mechanism", null), Material.GOLD_AXE);
-		ItemStack toolitem = new ItemStack(toolID);
+		Material tooltype = SpectatorListener.ToolAction.TOOL_STARTMECH.tooltype;
+		ItemStack toolitem = new ItemStack(tooltype);
 
 		// add to the inventory and switch to holding it
 		((Player) sender).getInventory().addItem(toolitem);
@@ -126,9 +124,8 @@ public class ConfigurationCommands implements CommandHandler
 		if (match == null) return false;
 
 		// get the tool used to set the starting mechanisms
-		int toolID = ZoneListener.parseTool(plugin.getConfig().getString(
-			"config-mode.tools.protect-entities", null), Material.GOLD_SWORD);
-		ItemStack toolitem = new ItemStack(toolID);
+		Material tooltype = SpectatorListener.ToolAction.TOOL_PROTECT.tooltype;
+		ItemStack toolitem = new ItemStack(tooltype);
 
 		// add to the inventory and switch to holding it
 		((Player) sender).getInventory().addItem(toolitem);

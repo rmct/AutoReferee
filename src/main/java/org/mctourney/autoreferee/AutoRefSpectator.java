@@ -4,10 +4,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import org.mctourney.autoreferee.util.TeleportationUtil;
+
 public class AutoRefSpectator extends AutoRefPlayer
 {
 	private AutoRefMatch match = null;
 	private boolean nightVision = false;
+	private String cyclePlayer = null;
 
 	public AutoRefSpectator(String name, AutoRefMatch match)
 	{ super(name, null); this.match = match; }
@@ -35,5 +38,19 @@ public class AutoRefSpectator extends AutoRefPlayer
 		if (!isOnline() || this.hasClientMod()) return;
 		getPlayer().removePotionEffect(PotionEffectType.NIGHT_VISION);
 		getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 90 * 20, 0));
+	}
+
+	public void cycleNextPlayer()
+	{
+		this.cyclePlayer = getMatch().getCycleNextPlayer(this.cyclePlayer);
+		AutoRefPlayer apl = getMatch().getPlayer(this.cyclePlayer);
+		if (apl != null) getPlayer().teleport(TeleportationUtil.playerTeleport(apl));
+	}
+
+	public void cyclePrevPlayer()
+	{
+		this.cyclePlayer = getMatch().getCyclePrevPlayer(this.cyclePlayer);
+		AutoRefPlayer apl = getMatch().getPlayer(this.cyclePlayer);
+		if (apl != null) getPlayer().teleport(TeleportationUtil.playerTeleport(apl));
 	}
 }
