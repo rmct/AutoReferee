@@ -111,7 +111,7 @@ public class ObjectiveTracker implements Listener
 	public void checkWinConditions(BlockFromToEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
-		for (AutoRefTeam team : match.getTeams())
+		if (match != null) for (AutoRefTeam team : match.getTeams())
 			for (CoreGoal goal : team.getTeamGoals(CoreGoal.class))
 				goal.checkSatisfied(event);
 
