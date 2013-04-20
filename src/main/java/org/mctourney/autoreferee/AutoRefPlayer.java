@@ -39,7 +39,7 @@ import com.google.common.collect.Sets;
  *
  * @author authorblues
  */
-public class AutoRefPlayer
+public class AutoRefPlayer implements Comparable<AutoRefPlayer>
 {
 	public static final EntityDamageEvent VOID_DEATH =
 		new EntityDamageEvent(null, EntityDamageEvent.DamageCause.VOID, 0);
@@ -511,6 +511,10 @@ public class AutoRefPlayer
 		if (!(o instanceof AutoRefPlayer)) return false;
 		return getName().equals(((AutoRefPlayer) o).getName());
 	}
+
+	@Override
+	public int compareTo(AutoRefPlayer other)
+	{ return this.pname.compareTo(other.pname); }
 
 	/**
 	 * Gets name of this player, colored with team colors.

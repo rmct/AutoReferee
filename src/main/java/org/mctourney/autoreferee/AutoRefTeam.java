@@ -455,6 +455,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		this.addPlayer(apl);
 		match.messageReferees("team", getName(), "player", "+" + apl.getName());
 		match.messageReferees("player", apl.getName(), "login");
+		match.updatePlayerList();
 
 		match.broadcast(apl.getDisplayName() + " has joined " + getDisplayName());
 		SportBukkitUtil.setOverheadName(player, apl.getDisplayName());
@@ -506,6 +507,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		// create an APL object for this player.
 		AutoRefPlayer apl = new AutoRefPlayer(player);
 		if (!this.removePlayer(apl)) return false;
+		match.updatePlayerList();
 
 		// by the time this is actually called, they may have left the world to join
 		// a different match. this teleport shouldn't occur if they aren't in this world
