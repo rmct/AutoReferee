@@ -38,7 +38,7 @@ import org.mctourney.autoreferee.commands.PracticeCommands;
 import org.mctourney.autoreferee.commands.SpectatorCommands;
 import org.mctourney.autoreferee.listeners.CombatListener;
 import org.mctourney.autoreferee.listeners.ObjectiveTracker;
-import org.mctourney.autoreferee.listeners.RefereeChannelListener;
+import org.mctourney.autoreferee.listeners.SpectatorListener;
 import org.mctourney.autoreferee.listeners.TeamListener;
 import org.mctourney.autoreferee.listeners.WorldListener;
 import org.mctourney.autoreferee.listeners.ZoneListener;
@@ -93,7 +93,7 @@ public class AutoReferee extends JavaPlugin
 
 	// plugin channels (referee)
 	public static final String REFEREE_PLUGIN_CHANNEL = PLUGIN_CHANNEL_PREFIX + "referee";
-	private RefereeChannelListener refChannelListener = null;
+	private SpectatorListener refChannelListener = null;
 
 	// name of the stored map configuration file
 	public static final String CFG_FILENAME = "autoreferee.xml";
@@ -280,7 +280,7 @@ public class AutoReferee extends JavaPlugin
 		pm.registerEvents(practice, this);
 
 		// save this reference to use for setting up the referee channel later
-		pm.registerEvents(refChannelListener = new RefereeChannelListener(this), this);
+		pm.registerEvents(refChannelListener = new SpectatorListener(this), this);
 
 		// user interface commands in a custom command manager
 		commandManager = new CommandManager();

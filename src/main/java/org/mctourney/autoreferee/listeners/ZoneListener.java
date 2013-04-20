@@ -2,25 +2,20 @@ package org.mctourney.autoreferee.listeners;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -28,23 +23,15 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
-import org.bukkit.inventory.DoubleChestInventory;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.autoreferee.AutoRefMatch;
@@ -53,7 +40,6 @@ import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.AutoRefMatch.MatchStatus;
 import org.mctourney.autoreferee.AutoRefMatch.Role;
-import org.mctourney.autoreferee.AutoRefMatch.StartMechanism;
 import org.mctourney.autoreferee.goals.BlockGoal;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
 import org.mctourney.autoreferee.util.BlockData;
@@ -74,50 +60,8 @@ public class ZoneListener implements Listener
 	public static final double SNEAK_DISTANCE = 0.301;
 	public static final double FREEFALL_THRESHOLD = 0.350;
 
-	// convenience for changing defaults
-	enum ToolAction
-	{
-		TOOL_WINCOND,
-		TOOL_STARTMECH,
-		TOOL_PROTECT,
-	}
-
-	private Map<Integer, ToolAction> toolMap;
-
-	public static int parseTool(String s, Material def)
-	{
-		// if no string was passed, return default
-		if (s == null) return def.getId();
-
-		// check to see if this is a material name
-		Material mat = Material.getMaterial(s);
-		if (mat != null) return mat.getId();
-
-		// try to parse as an integer
-		try { return Integer.parseInt(s); }
-		catch (Exception e) { return def.getId(); }
-	}
-
 	public ZoneListener(Plugin p)
-	{
-		plugin = (AutoReferee) p;
-		toolMap = Maps.newHashMap();
-
-		// tools.win-condition: golden shovel
-		toolMap.put(parseTool(plugin.getConfig().getString(
-			"config-mode.tools.win-condition", null), Material.GOLD_SPADE),
-			ToolAction.TOOL_WINCOND);
-
-		// tools.start-mechanism: golden axe
-		toolMap.put(parseTool(plugin.getConfig().getString(
-			"config-mode.tools.start-mechanism", null), Material.GOLD_AXE),
-			ToolAction.TOOL_STARTMECH);
-
-		// tools.protect-entities: golden sword
-		toolMap.put(parseTool(plugin.getConfig().getString(
-			"config-mode.tools.protect-entities", null), Material.GOLD_SWORD),
-			ToolAction.TOOL_PROTECT);
-	}
+	{ plugin = (AutoReferee) p; }
 
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void playerMove(PlayerMoveEvent event)
@@ -288,48 +232,6 @@ public class ZoneListener implements Listener
 			if (!validPlayer(player))
 			{ event.setCancelled(true); return; }
 		}
-		else // is spectator
-		{
-			if (!match.isReferee(player) && match.getCurrentState().inProgress())
-				event.setCancelled(true);
-
-			Material type = event.getClickedBlock().getType();
-			if ((type == Material.WOOD_PLATE || type == Material.STONE_PLATE)
-				&& match.getCurrentState().inProgress()) { event.setCancelled(true); return; }
-
-			if (event.getClickedBlock().getState() instanceof InventoryHolder
-				&& event.getAction() == Action.RIGHT_CLICK_BLOCK && match.getCurrentState().inProgress()
-				&& !event.getPlayer().isSneaking())
-			{
-				InventoryHolder invh = (InventoryHolder) event.getClickedBlock().getState();
-				Inventory inv = invh.getInventory(), newinv;
-
-				if (inv instanceof DoubleChestInventory)
-					newinv = Bukkit.getServer().createInventory(player, 54, "Large Chest");
-				else newinv = Bukkit.getServer().createInventory(player, inv.getType());
-				newinv.setContents(inv.getContents());
-
-				player.openInventory(newinv);
-				event.setCancelled(true); return;
-			}
-		}
-	}
-
-	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
-	public void foreignInventoryEvent(InventoryClickEvent event)
-	{
-		Player player = (Player) event.getWhoClicked();
-		AutoRefMatch match = plugin.getMatch(player.getWorld());
-
-		if (match != null && !match.isPlayer(player))
-			switch (event.getInventory().getType())
-		{
-			case PLAYER:
-			case CREATIVE:
-				break;
-
-			default: event.setCancelled(true);
-		}
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
@@ -343,156 +245,6 @@ public class ZoneListener implements Listener
 
 		if (!validPlayer(player))
 		{ event.setCancelled(true); return; }
-	}
-
-	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
-	public void projectileLaunch(ProjectileLaunchEvent event)
-	{
-		LivingEntity entity = event.getEntity().getShooter();
-		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
-		if (!(entity instanceof Player) || match == null) return;
-
-		if (!match.isPlayer((Player) entity))
-		{ event.setCancelled(true); return; }
-	}
-
-	// restrict item pickup by referees
-	@EventHandler(priority=EventPriority.HIGHEST)
-	public void refereePickup(PlayerPickupItemEvent event)
-	{
-		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
-		if (match != null && match.getCurrentState().inProgress()
-			&& !match.isPlayer(event.getPlayer())) event.setCancelled(true);
-	}
-
-	// restrict item pickup by referees
-	@EventHandler(priority=EventPriority.HIGHEST)
-	public void refereeDrop(PlayerDropItemEvent event)
-	{
-		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
-		if (match != null && match.getCurrentState().inProgress()
-			&& !match.isPlayer(event.getPlayer())) event.setCancelled(true);
-
-		if (event.getPlayer().getListeningPluginChannels().contains(
-			AutoReferee.REFEREE_PLUGIN_CHANNEL)) event.setCancelled(true);
-	}
-
-	@EventHandler
-	public void toolUsage(PlayerInteractEvent event)
-	{
-		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
-		if (match == null || match.getCurrentState().inProgress()) return;
-
-		Block block;
-		BlockState blockState;
-
-		// this event is not an "item" event
-		if (!event.hasItem()) return;
-
-		// get type id of the event and check if its one of our tools
-		int typeID = event.getItem().getTypeId();
-		if (!toolMap.containsKey(typeID)) return;
-
-		// get which action to perform
-		switch (toolMap.get(typeID))
-		{
-			// this is the tool built for setting win conditions
-			case TOOL_WINCOND:
-
-				// if there is no block involved in this event, nothing
-				if (!event.hasBlock()) return;
-				block = event.getClickedBlock();
-
-				// if the player doesn't have configure permissions, nothing
-				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
-
-				for (AutoRefTeam team : match.getTeams())
-					if (!team.hasFlag(block.getLocation(), AutoRefRegion.Flag.NO_BUILD))
-						team.addGoal(new BlockGoal(team, block));
-
-				break;
-
-			// this is the tool built for setting start mechanisms
-			case TOOL_STARTMECH:
-
-				// if there is no block involved in this event, nothing
-				if (!event.hasBlock()) return;
-
-				// if the player doesn't have configure permissions, nothing
-				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
-
-				// determine who owns the region that the clicked block is in
-				block = event.getClickedBlock();
-				blockState = block.getState();
-
-				if (blockState.getData() instanceof Redstone)
-				{
-					// get the start mechanism
-					StartMechanism sm = match.addStartMech(block,
-						((Redstone) blockState.getData()).isPowered());
-
-					if (sm != null)
-					{
-						// announce it...
-						String m = ChatColor.RED + sm.toString() +
-							ChatColor.RESET + " is a start mechanism.";
-						event.getPlayer().sendMessage(m);
-					}
-				}
-
-				break;
-
-			// this isn't one of our tools...
-			default: return;
-		}
-
-		// cancel the event, since it was one of our tools being used properly
-		event.setCancelled(true);
-	}
-
-	@EventHandler
-	public void toolUsage(PlayerInteractEntityEvent event)
-	{
-		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
-		if (match == null || match.getCurrentState().inProgress()) return;
-
-		// this event is not an "item" event
-		if (event.getPlayer().getItemInHand() == null) return;
-
-		// get type id of the event and check if its one of our tools
-		int typeID = event.getPlayer().getItemInHand().getTypeId();
-		if (!toolMap.containsKey(typeID)) return;
-
-		// get which action to perform
-		switch (toolMap.get(typeID))
-		{
-			// this is the tool built for protecting entities
-			case TOOL_PROTECT:
-
-				// if there is no entity involved in this event, nothing
-				if (event.getRightClicked() == null) return;
-
-				// if the player doesn't have configure permissions, nothing
-				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
-
-				// entity name
-				String ename = String.format("%s @ %s", event.getRightClicked().getType().getName(),
-					LocationUtil.toBlockCoords(event.getRightClicked().getLocation()));
-
-				// save the entity's unique id
-				UUID uid; match.toggleProtection(uid = event.getRightClicked().getUniqueId());
-				match.broadcast(ChatColor.RED + ename + ChatColor.RESET + " is " +
-					(match.isProtected(uid) ? "" : "not ") + "a protected entity");
-
-
-				break;
-
-			// this isn't one of our tools...
-			default: return;
-		}
-
-		// cancel the event, since it was one of our tools being used properly
-		event.setCancelled(true);
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST)
