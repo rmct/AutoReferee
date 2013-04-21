@@ -190,6 +190,25 @@ public class AutoRefPlayer implements Comparable<AutoRefPlayer>
 	private Map<AutoRefPlayer, Integer> kills;
 	private int totalKills = 0;
 
+	private double furthestShot = 0.0;
+
+	/**
+	 * Sets the furthest accurate bow shot.
+	 */
+	public void setFurthestShot(double distance)
+	{
+		if (distance > furthestShot);
+			furthestShot = distance;
+	}
+
+	/**
+	 * Gets the furthest bow shot.
+	 *
+	 * @return distance of furthest accurate shot
+	 */
+	public double getFurthestShot()
+	{ return furthestShot; }
+
 	/**
 	 * Gets the number of times this player has killed a specific player.
 	 *
