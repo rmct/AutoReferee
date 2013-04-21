@@ -684,9 +684,6 @@ public class AutoRefPlayer implements Comparable<AutoRefPlayer>
 	// register that we killed the Player who fired this event
 	public void registerKill(PlayerDeathEvent e)
 	{
-		// sanity check...
-		if (e.getEntity().getKiller() != getPlayer()) return;
-
 		// get the name of the player who died, record one kill against them
 		AutoRefPlayer apl = getMatch().getPlayer(e.getEntity());
 		kills.put(apl, 1 + kills.get(apl)); ++totalKills;
