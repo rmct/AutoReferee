@@ -801,21 +801,18 @@ public class AutoRefPlayer implements Comparable<AutoRefPlayer>
 
 			if (newCarrying != oldCarrying)
 			{
-				for (AutoRefGoal goal : getTeam().getTeamGoals()) if (goal instanceof BlockGoal)
-				{
-					BlockGoal bgoal = (BlockGoal) goal;
-					if (bgoal.getItemStatus() == AutoRefGoal.ItemStatus.NONE && newCarrying.contains(bgoal.getItem()))
+				for (BlockGoal goal : getTeam().getTeamGoals(BlockGoal.class))
+					if (goal.getItemStatus() == AutoRefGoal.ItemStatus.NONE && newCarrying.contains(goal.getItem()))
 					{
 						// generate a transcript event for seeing the box
-						String m = String.format("%s is carrying %s", getName(), bgoal.getItem().getDisplayName());
+						String m = String.format("%s is carrying %s", getName(), goal.getItem().getDisplayName());
 						getMatch().addEvent(new TranscriptEvent(getMatch(),
-							TranscriptEvent.EventType.OBJECTIVE_FOUND, m, getLocation(), this, bgoal.getItem()));
+							TranscriptEvent.EventType.OBJECTIVE_FOUND, m, getLocation(), this, goal.getItem()));
 						this.addPoints(AchievementPoints.OBJECTIVE_FOUND);
 
 						// store the player's location as the last objective location
 						getTeam().setLastObjectiveLocation(getLocation());
 					}
-				}
 				getTeam().updateCarrying(this, oldCarrying, newCarrying);
 			}
 		}
