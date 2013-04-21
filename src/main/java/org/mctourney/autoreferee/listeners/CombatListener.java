@@ -17,6 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
@@ -25,6 +26,7 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -48,6 +50,7 @@ public class CombatListener implements Listener
 	public Map<UUID, AutoRefPlayer> tntOwner;
 	public Map<Location, AutoRefPlayer> tntPropagation;
 
+	private Map<UUID, Location> shotArrows = Maps.newHashMap();
 	private Map<AutoRefPlayer, Long> lastPigmenAggro = Maps.newHashMap();
 
 	public CombatListener(Plugin p)
@@ -188,6 +191,16 @@ public class CombatListener implements Listener
 			{
 				AutoRefPlayer apl = match.getPlayer(damager);
 				if (apl != null) apl.incrementShotsHit();
+
+				Arrow arrow = (Arrow) ed.getDamager();
+				if (arrow.getShooter().getType() == EntityType.PLAYER)
+				{
+					AutoRefPlayer shooter = match.getPlayer((Player) arrow.getShooter());
+					Location shotFrom = shotArrows.get(arrow.getUniqueId());
+
+					if (shooter != null && shotFrom != null)
+						shooter.setFurthestShot(arrow.getLocation().distance(shotFrom));
+				}
 			}
 
 			// spectators cannot cause damage to any entity
@@ -290,6 +303,18 @@ public class CombatListener implements Listener
 		}
 	}
 
+	public class ArrowClearTask extends BukkitRunnable
+	{
+		private UUID uuid;
+
+		public ArrowClearTask (UUID uuid)
+		{ this.uuid = uuid; }
+
+		@Override
+		public void run()
+		{ shotArrows.remove(uuid); }
+	}
+
 	@EventHandler
 	public void playerBowFire(EntityShootBowEvent event)
 	{
@@ -302,6 +327,16 @@ public class CombatListener implements Listener
 
 		AutoRefPlayer apl = match.getPlayer(player);
 		if (apl != null) apl.incrementShotsFired();
+
+		shotArrows.put(event.getProjectile().getUniqueId(),
+			event.getEntity().getLocation().clone());
+	}
+
+	@EventHandler
+	public void arrowLand(ProjectileHitEvent event)
+	{
+		if (event.getEntityType() == EntityType.ARROW)
+			new ArrowClearTask(event.getEntity().getUniqueId()).runTask(plugin);
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST)
