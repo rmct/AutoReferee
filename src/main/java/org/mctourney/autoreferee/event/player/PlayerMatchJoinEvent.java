@@ -38,4 +38,7 @@ public class PlayerMatchJoinEvent extends PlayerMatchEvent implements Cancellabl
 	@Override
 	public HandlerList getHandlers()
 	{ return handlers; }
+
+	public static HandlerList getHandlerList()
+	{ return handlers; }
 }

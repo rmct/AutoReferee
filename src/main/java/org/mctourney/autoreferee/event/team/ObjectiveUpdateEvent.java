@@ -16,4 +16,7 @@ public class ObjectiveUpdateEvent extends ObjectiveEvent
 	@Override
 	public HandlerList getHandlers()
 	{ return handlers; }
+
+	public static HandlerList getHandlerList()
+	{ return handlers; }
 }

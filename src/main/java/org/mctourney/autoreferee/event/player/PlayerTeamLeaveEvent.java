@@ -38,4 +38,7 @@ public class PlayerTeamLeaveEvent extends PlayerTeamEvent implements Cancellable
 	@Override
 	public HandlerList getHandlers()
 	{ return handlers; }
+
+	public static HandlerList getHandlerList()
+	{ return handlers; }
 }
