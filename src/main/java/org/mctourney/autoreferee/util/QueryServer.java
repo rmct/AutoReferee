@@ -1,4 +1,4 @@
-package org.mctourney.autoreferee;
+package org.mctourney.autoreferee.util;
 
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -15,6 +15,8 @@ import org.apache.commons.io.IOUtils;
 
 import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
+import org.mctourney.autoreferee.AutoRefMatch;
+import org.mctourney.autoreferee.AutoReferee;
 
 public class QueryServer
 {
