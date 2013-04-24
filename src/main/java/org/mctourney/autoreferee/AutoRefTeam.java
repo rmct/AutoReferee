@@ -158,7 +158,14 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	{ this.color = color; }
 
 	// maximum size of a team (for manual mode only)
-	private int maxSize = 0;
+	private int maxSize = 4;
+	private int minSize = -1;
+
+	public int getMaxSize()
+	{ return maxSize; }
+
+	public int getMinSize()
+	{ return minSize == -1 ? (3 * maxSize / 4) : minSize; }
 
 	// is this team ready to play?
 	private boolean ready = false;
@@ -322,8 +329,6 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		AutoRefTeam newTeam = new AutoRefTeam();
 		newTeam.color = ChatColor.RESET;
-		newTeam.maxSize = 0;
-
 		newTeam.match = match;
 
 		// get name from map
