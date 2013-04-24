@@ -51,6 +51,20 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	private Set<AutoRefPlayer> players = Sets.newHashSet();
 	private Set<AutoRefPlayer> playersCache = Sets.newHashSet();
 
+	public String toString()
+	{ return "AutoRefTeam[" + this.getName() + "]"; }
+
+	public boolean equals(Object o)
+	{
+		return o instanceof AutoRefTeam
+			&& this.getMatch().equals(((AutoRefTeam) o).getMatch())
+			&& this.getPlayers().equals(((AutoRefTeam) o).getPlayers())
+			&& this.getName().equals(((AutoRefTeam) o).getName());
+	}
+
+	public int hashCode()
+	{ return this.getPlayers().hashCode() ^ (17 * this.getMatch().hashCode()); }
+
 	/**
 	 * Gets the members of this team.
 	 *

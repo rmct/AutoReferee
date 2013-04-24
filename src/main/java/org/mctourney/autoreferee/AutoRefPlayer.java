@@ -88,7 +88,7 @@ public class AutoRefPlayer implements Comparable<AutoRefPlayer>
 	{ return pname; }
 
 	@Override public String toString()
-	{ return getName(); }
+	{ return "AutoRefPlayer[" + getName() + ", team=" + getTeam() + "]"; }
 
 	/**
 	 * Sets raw player name.
