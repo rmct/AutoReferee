@@ -58,12 +58,11 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	{
 		return o instanceof AutoRefTeam
 			&& this.getMatch().equals(((AutoRefTeam) o).getMatch())
-			&& this.getPlayers().equals(((AutoRefTeam) o).getPlayers())
-			&& this.getName().equals(((AutoRefTeam) o).getName());
+			&& this.name.equals(((AutoRefTeam) o).name);
 	}
 
 	public int hashCode()
-	{ return this.getPlayers().hashCode() ^ (17 * this.getMatch().hashCode()); }
+	{ return this.name.hashCode() ^ (17 * this.getMatch().hashCode()); }
 
 	/**
 	 * Gets the members of this team.
