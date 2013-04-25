@@ -43,6 +43,7 @@ import org.mctourney.autoreferee.listeners.TeamListener;
 import org.mctourney.autoreferee.listeners.WorldListener;
 import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.util.NullChunkGenerator;
+import org.mctourney.autoreferee.util.QueryServer;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
 import org.mctourney.autoreferee.util.commands.CommandManager;
 import org.mctourney.autoreferee.util.metrics.IncrementPlotter;

@@ -54,4 +54,7 @@ public class MatchCompleteEvent extends MatchEvent implements Cancellable
 	@Override
 	public HandlerList getHandlers()
 	{ return handlers; }
+
+	public static HandlerList getHandlerList()
+	{ return handlers; }
 }

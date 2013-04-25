@@ -35,6 +35,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.mctourney.autoreferee.util.QueryServer;
 
 /**
  * Represents a map object, available to be loaded by AutoReferee.

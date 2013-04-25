@@ -88,6 +88,7 @@ import org.mctourney.autoreferee.util.LocationUtil;
 import org.mctourney.autoreferee.util.MapImageGenerator;
 import org.mctourney.autoreferee.util.PlayerKit;
 import org.mctourney.autoreferee.util.PlayerUtil;
+import org.mctourney.autoreferee.util.QueryServer;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
 
 import com.google.common.collect.Lists;
@@ -2671,7 +2672,8 @@ public class AutoRefMatch
 		{
 			// submit our request to pastehtml, get back a link to the report
 			return QueryServer.syncQuery("http://pastehtml.com/upload/create",
-				"input_type=html&result=address&minecraft=1", "txt=" + URLEncoder.encode(report, "UTF-8"));
+				"input_type=html&result=address&minecraft=1",
+				"txt=" + URLEncoder.encode(report, "UTF-8"));
 		}
 		catch (UnsupportedEncodingException e) {  }
 		return null;

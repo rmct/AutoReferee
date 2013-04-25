@@ -51,6 +51,20 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	private Set<AutoRefPlayer> players = Sets.newHashSet();
 	private Set<AutoRefPlayer> playersCache = Sets.newHashSet();
 
+	public String toString()
+	{ return "AutoRefTeam[" + this.getName() + "]"; }
+
+	public boolean equals(Object o)
+	{
+		return o instanceof AutoRefTeam
+			&& this.getMatch().equals(((AutoRefTeam) o).getMatch())
+			&& this.getPlayers().equals(((AutoRefTeam) o).getPlayers())
+			&& this.getName().equals(((AutoRefTeam) o).getName());
+	}
+
+	public int hashCode()
+	{ return this.getPlayers().hashCode() ^ (17 * this.getMatch().hashCode()); }
+
 	/**
 	 * Gets the members of this team.
 	 *
@@ -144,7 +158,14 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	{ this.color = color; }
 
 	// maximum size of a team (for manual mode only)
-	private int maxSize = 0;
+	private int maxSize = 4;
+	private int minSize = -1;
+
+	public int getMaxSize()
+	{ return maxSize; }
+
+	public int getMinSize()
+	{ return minSize == -1 ? (3 * maxSize / 4) : minSize; }
 
 	// is this team ready to play?
 	private boolean ready = false;
@@ -308,8 +329,6 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 		AutoRefTeam newTeam = new AutoRefTeam();
 		newTeam.color = ChatColor.RESET;
-		newTeam.maxSize = 0;
-
 		newTeam.match = match;
 
 		// get name from map

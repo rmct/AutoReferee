@@ -1,15 +1,22 @@
-package org.mctourney.autoreferee;
+package org.mctourney.autoreferee.util;
 
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.Map;
+import java.util.Set;
 
+import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 
 import com.google.gson.Gson;
+import org.apache.commons.lang.StringUtils;
+import org.mctourney.autoreferee.AutoRefMatch;
+import org.mctourney.autoreferee.AutoReferee;
 
 public class QueryServer
 {
@@ -56,7 +63,7 @@ public class QueryServer
 
 		try
 		{
-			URL url = new URL(String.format("%s?%s", path, getParams));
+			URL url = new URL(getParams == null ? path : String.format("%s?%s", path, getParams));
 			URLConnection conn = url.openConnection();
 			conn.setDoOutput(true);
 
@@ -90,5 +97,19 @@ public class QueryServer
 			// meh. don't bother, if something goes wrong here.
 			catch (Exception e) {  }
 		}
+	}
+
+	public static String prepareParams(Map<String, String> paramMap)
+	{
+		Set<String> params = Sets.newHashSet();
+		for (Map.Entry<String, String> entry : paramMap.entrySet()) try
+		{
+			String val = URLEncoder.encode(entry.getValue(), ENCODING);
+			params.add(String.format("%s=%s", entry.getKey(), val));
+		}
+		catch (UnsupportedEncodingException e)
+		{ e.printStackTrace(); }
+
+		return StringUtils.join(params, "&");
 	}
 }
