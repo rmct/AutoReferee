@@ -142,7 +142,10 @@ public class WorldListener implements Listener
 
 		// moving to lobby world, set player to creative
 		if (player.getWorld() == plugin.getLobbyWorld())
-			player.setGameMode(GameMode.CREATIVE);
+		{
+			player.setGameMode(GameMode.ADVENTURE);
+			player.setAllowFlight(true);
+		}
 	}
 
 	@EventHandler
