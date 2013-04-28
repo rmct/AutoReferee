@@ -1,8 +1,10 @@
 package org.mctourney.autoreferee;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Maps;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -22,6 +24,7 @@ import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
 import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.LocationUtil;
+import org.mctourney.autoreferee.util.Metadatable;
 import org.mctourney.autoreferee.util.PlayerKit;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
 
@@ -34,7 +37,7 @@ import com.google.common.collect.Sets;
  *
  * @author authorblues
  */
-public class AutoRefTeam implements Comparable<AutoRefTeam>
+public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 {
 	// reference to the match
 	private AutoRefMatch match = null;
@@ -63,6 +66,23 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 
 	public int hashCode()
 	{ return this.name.hashCode() ^ (17 * this.getMatch().hashCode()); }
+
+	protected Map<String, Object> metadata = Maps.newHashMap();
+
+	public void addMetadata(String key, Object value)
+	{ this.metadata.put(key, value); }
+
+	public Object getMetadata(String key)
+	{ return this.metadata.get(key); }
+
+	public boolean hasMetadata(String key)
+	{ return this.metadata.containsKey(key); }
+
+	public Object removeMetadata(String key)
+	{ return this.metadata.remove(key); }
+
+	public void clearMetadata()
+	{ this.metadata.clear(); }
 
 	/**
 	 * Gets the members of this team.

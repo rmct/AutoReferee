@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -26,6 +27,7 @@ import org.mctourney.autoreferee.util.AchievementPoints;
 import org.mctourney.autoreferee.util.ArmorPoints;
 import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.LocationUtil;
+import org.mctourney.autoreferee.util.Metadatable;
 import org.mctourney.autoreferee.util.PlayerKit;
 import org.mctourney.autoreferee.util.PlayerUtil;
 
@@ -39,7 +41,7 @@ import com.google.common.collect.Sets;
  *
  * @author authorblues
  */
-public class AutoRefPlayer implements Comparable<AutoRefPlayer>
+public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 {
 	public static final EntityDamageEvent VOID_DEATH =
 		new EntityDamageEvent(null, EntityDamageEvent.DamageCause.VOID, 0);
@@ -115,6 +117,23 @@ public class AutoRefPlayer implements Comparable<AutoRefPlayer>
 	 */
 	public void setTeam(AutoRefTeam team)
 	{ this.team = team; }
+
+	protected Map<String, Object> metadata = Maps.newHashMap();
+
+	public void addMetadata(String key, Object value)
+	{ this.metadata.put(key, value); }
+
+	public Object getMetadata(String key)
+	{ return this.metadata.get(key); }
+
+	public boolean hasMetadata(String key)
+	{ return this.metadata.containsKey(key); }
+
+	public Object removeMetadata(String key)
+	{ return this.metadata.remove(key); }
+
+	public void clearMetadata()
+	{ this.metadata.clear(); }
 
 	/**
 	 * Gets the match this player is in.

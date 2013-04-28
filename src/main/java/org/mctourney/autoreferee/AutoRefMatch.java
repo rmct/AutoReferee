@@ -86,6 +86,7 @@ import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.BookUtil;
 import org.mctourney.autoreferee.util.LocationUtil;
 import org.mctourney.autoreferee.util.MapImageGenerator;
+import org.mctourney.autoreferee.util.Metadatable;
 import org.mctourney.autoreferee.util.PlayerKit;
 import org.mctourney.autoreferee.util.PlayerUtil;
 import org.mctourney.autoreferee.util.QueryServer;
@@ -100,7 +101,7 @@ import com.google.common.collect.Sets;
  *
  * @author authorblues
  */
-public class AutoRefMatch
+public class AutoRefMatch implements Metadatable
 {
 	private static final String GENERIC_NOTIFICATION_MESSAGE =
 		"A notification has been sent. Type /artp to teleport.";
@@ -135,6 +136,23 @@ public class AutoRefMatch
 		// if the folder doesnt exist, create it...
 		if (!matchSummaryDirectory.exists()) matchSummaryDirectory.mkdir();
 	}
+
+	protected Map<String, Object> metadata = Maps.newHashMap();
+
+	public void addMetadata(String key, Object value)
+	{ this.metadata.put(key, value); }
+
+	public Object getMetadata(String key)
+	{ return this.metadata.get(key); }
+
+	public boolean hasMetadata(String key)
+	{ return this.metadata.containsKey(key); }
+
+	public Object removeMetadata(String key)
+	{ return this.metadata.remove(key); }
+
+	public void clearMetadata()
+	{ this.metadata.clear(); }
 
 	public enum AccessType
 	{ PRIVATE, PUBLIC; }
