@@ -37,6 +37,7 @@ import org.mctourney.autoreferee.commands.PlayerCommands;
 import org.mctourney.autoreferee.commands.PracticeCommands;
 import org.mctourney.autoreferee.commands.SpectatorCommands;
 import org.mctourney.autoreferee.listeners.CombatListener;
+import org.mctourney.autoreferee.listeners.LobbyListener;
 import org.mctourney.autoreferee.listeners.ObjectiveTracker;
 import org.mctourney.autoreferee.listeners.SpectatorListener;
 import org.mctourney.autoreferee.listeners.TeamListener;
@@ -276,6 +277,7 @@ public class AutoReferee extends JavaPlugin
 		pm.registerEvents(new TeamListener(this), this);
 		pm.registerEvents(new CombatListener(this), this);
 		pm.registerEvents(new ZoneListener(this), this);
+		pm.registerEvents(new LobbyListener(this), this);
 		pm.registerEvents(new WorldListener(this), this);
 		pm.registerEvents(new ObjectiveTracker(this), this);
 		pm.registerEvents(practice, this);

@@ -1548,7 +1548,8 @@ public class AutoRefMatch
 
 		if (target != null)
 		{
-			player.setGameMode(WorldListener.getDefaultGamemode(target));
+			player.setGameMode(GameMode.ADVENTURE);
+			player.setAllowFlight(true);
 			player.teleport(target.getSpawnLocation());
 		}
 
