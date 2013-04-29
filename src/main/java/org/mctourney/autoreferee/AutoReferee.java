@@ -467,9 +467,9 @@ public class AutoReferee extends JavaPlugin
 	 *
 	 * @param msg message to be sent
 	 */
-	public void sendMessageSync(CommandSender recipient, String msg)
+	public void sendMessageSync(CommandSender recipient, String ...msgs)
 	{
-		if (recipient != null)
+		if (recipient != null) for (String msg : msgs)
 			messageQueue.addMessage(recipient, msg);
 
 		try { messageQueue.runTask(this); }

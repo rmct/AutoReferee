@@ -1395,11 +1395,14 @@ public class AutoRefMatch implements Metadatable
 	 *
 	 * @param msg message to be sent
 	 */
-	public void broadcast(String msg)
+	public void broadcast(String ...msgs)
 	{
-		if (AutoReferee.getInstance().isConsoleLoggingEnabled())
-			AutoReferee.log(ChatColor.stripColor(msg));
-		for (Player p : primaryWorld.getPlayers()) p.sendMessage(msg);
+		for (String msg : msgs)
+		{
+			if (AutoReferee.getInstance().isConsoleLoggingEnabled())
+				AutoReferee.log(ChatColor.stripColor(msg));
+			for (Player p : primaryWorld.getPlayers()) p.sendMessage(msg);
+		}
 	}
 
 	private SyncBroadcastTask broadcastTask = new SyncBroadcastTask();
@@ -1409,9 +1412,10 @@ public class AutoRefMatch implements Metadatable
 	 *
 	 * @param msg message to be sent
 	 */
-	public void broadcastSync(String msg)
+	public void broadcastSync(String ...msgs)
 	{
-		broadcastTask.addMessage(msg);
+		for (String msg : msgs)
+			broadcastTask.addMessage(msg);
 
 		try { broadcastTask.runTask(AutoReferee.getInstance()); }
 		catch (IllegalStateException e) {  }
@@ -1427,7 +1431,7 @@ public class AutoRefMatch implements Metadatable
 		@Override public void run()
 		{
 			AutoRefMatch.this.broadcastTask = new SyncBroadcastTask();
-			for (String msg : msgQueue) AutoRefMatch.this.broadcast(msg);
+			AutoRefMatch.this.broadcast(msgQueue.toArray(new String[]{ }));
 			msgQueue.clear();
 		}
 	}
