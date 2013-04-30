@@ -255,7 +255,7 @@ public class CombatListener implements Listener
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void vehicleDamageDealt(VehicleDamageEvent event)
 	{
-		AutoRefMatch match = plugin.getMatch(event.getAttacker().getWorld());
+		AutoRefMatch match = plugin.getMatch(event.getVehicle().getWorld());
 		if (match == null || !match.getCurrentState().inProgress()) return;
 
 		if (match.getCurrentState().inProgress())
