@@ -47,8 +47,7 @@ public class CombatListener implements Listener
 
 	AutoReferee plugin = null;
 
-	public Map<UUID, AutoRefPlayer> tntOwner;
-	public Map<Location, AutoRefPlayer> tntPropagation;
+	private Map<Location, AutoRefPlayer> tntPropagation = Maps.newHashMap();
 
 	private Map<UUID, Location> shotArrows = Maps.newHashMap();
 	private Map<AutoRefPlayer, Long> lastPigmenAggro = Maps.newHashMap();
@@ -56,9 +55,6 @@ public class CombatListener implements Listener
 	public CombatListener(Plugin p)
 	{
 		plugin = (AutoReferee) p;
-
-		tntOwner = Maps.newHashMap();
-		tntPropagation = Maps.newHashMap();
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST)
@@ -93,9 +89,9 @@ public class CombatListener implements Listener
 					case CREEPER: dmsg = victim.getName() + " was blown up by Creeper"; break;
 					case PRIMED_TNT:
 						dmsg = victim.getName() + " was blown up by TNT";
-						if (tntOwner.get(ed.getDamager().getUniqueId()) != vapl)
+						if (plugin.getTNTOwner(ed.getDamager()) != vapl)
 						{
-							kapl = tntOwner.get(ed.getDamager().getUniqueId());
+							kapl = plugin.getTNTOwner(ed.getDamager());
 							if (kapl != null) dmsg = victim.getName() + " was blown up by " + kapl.getName();
 						}
 					break;
@@ -369,7 +365,7 @@ public class CombatListener implements Listener
 			}
 
 			// add an owner for this tnt object
-			if (apl != null) tntOwner.put(event.getEntity().getUniqueId(), apl);
+			if (apl != null) plugin.setTNTOwner(event.getEntity(), apl);
 		}
 	}
 
@@ -377,7 +373,7 @@ public class CombatListener implements Listener
 	public void entityExplode(EntityExplodeEvent event)
 	{
 		// remove this entity from the table if present
-		AutoRefPlayer apl = tntOwner.remove(event.getEntity().getUniqueId());
+		AutoRefPlayer apl = plugin.clearTNTOwner(event.getEntity());
 
 		if (apl != null) for (Block b : event.blockList())
 			if (b.getType() == Material.TNT) tntPropagation.put(b.getLocation(), apl);
