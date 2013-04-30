@@ -465,7 +465,7 @@ public class AutoReferee extends JavaPlugin
 	/**
 	 * Force a message to be sent synchronously. Safe to use from an asynchronous task.
 	 *
-	 * @param msg message to be sent
+	 * @param msgs messages to be sent
 	 */
 	public void sendMessageSync(CommandSender recipient, String ...msgs)
 	{

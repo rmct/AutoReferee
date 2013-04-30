@@ -1393,7 +1393,7 @@ public class AutoRefMatch implements Metadatable
 	/**
 	 * Sends a message to all players in this match, including referees and streamers.
 	 *
-	 * @param msg message to be sent
+	 * @param msgs messages to be sent
 	 */
 	public void broadcast(String ...msgs)
 	{
@@ -1410,7 +1410,7 @@ public class AutoRefMatch implements Metadatable
 	/**
 	 * Force a broadcast to be sent synchronously. Safe to use from an asynchronous task.
 	 *
-	 * @param msg message to be sent
+	 * @param msgs messages to be sent
 	 */
 	public void broadcastSync(String ...msgs)
 	{
