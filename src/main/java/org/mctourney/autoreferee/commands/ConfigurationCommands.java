@@ -317,6 +317,23 @@ public class ConfigurationCommands implements CommandHandler
 		return true;
 	}
 
+	@AutoRefCommand(name={"autoref", "setheight"}, argmin=1, argmax=1,
+			description="Restrict all team zones to be within a given height.")
+	@AutoRefPermission(console=true, nodes={"autoreferee.configure"})
+
+	public boolean setHeight(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		try
+		{
+			double newHeight = Double.parseDouble(args[0]);
+			for (CuboidRegion creg : match.getRegions(CuboidRegion.class))
+				if (creg.y2 > newHeight) creg.y2 = newHeight;
+		}
+		catch (NumberFormatException e)
+		{ sender.sendMessage(ChatColor.RED + args[0] + " is not a valid height."); }
+		return true;
+	}
+
 	@AutoRefCommand(name={"autoref", "cfg", "init"}, argmax=0,
 		description="Initialize a blank configuration file for this map.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.configure"})

@@ -1662,6 +1662,15 @@ public class AutoRefMatch implements Metadatable
 	public Set<AutoRefRegion> getRegions()
 	{ return regions; }
 
+	public <T extends AutoRefRegion> Set<T> getRegions(Class<T> clazz)
+	{
+		Set<T> typedRegions = Sets.newHashSet();
+		for (AutoRefRegion reg : regions)
+			if (clazz.isInstance(reg))
+				typedRegions.add((T) reg);
+		return typedRegions;
+	}
+
 	public Set<AutoRefRegion> getRegions(AutoRefTeam team)
 	{
 		Set<AutoRefRegion> teamRegions = Sets.newHashSet();
