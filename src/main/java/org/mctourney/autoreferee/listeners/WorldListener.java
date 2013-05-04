@@ -206,8 +206,8 @@ public class WorldListener implements Listener
 		// if they are leaving AutoReferee-managed worlds
 		if (matchFm != null && matchTo == null)
 		{
-			GameMode dgm = getDefaultGamemode(player.getWorld());
-			matchFm.setSpectatorMode(player, false, dgm);
+			matchFm.setSpectatorMode(player, false);
+			PlayerUtil.setGameMode(player, GameMode.SURVIVAL);
 		}
 
 		// moving to lobby world, set player to creative

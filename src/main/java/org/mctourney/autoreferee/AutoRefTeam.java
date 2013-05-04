@@ -26,6 +26,7 @@ import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.LocationUtil;
 import org.mctourney.autoreferee.util.Metadatable;
 import org.mctourney.autoreferee.util.PlayerKit;
+import org.mctourney.autoreferee.util.PlayerUtil;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
 
 import org.apache.commons.lang.StringUtils;
@@ -478,13 +479,15 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		// quit if they are already on this team
 		if (players.contains(apl)) return true;
 
+		// if there is no match object, drop out here
+		if (match == null) return false;
+
 		// if the match is in progress, no one may join
 		if (!match.getCurrentState().isBeforeMatch() && !force) return false;
 
 		// prepare the player
-		if (match != null && !match.getCurrentState().inProgress())
+		if (!match.getCurrentState().inProgress())
 			player.teleport(this.getSpawnLocation());
-		player.setGameMode(GameMode.SURVIVAL);
 
 		Location bed = player.getBedSpawnLocation();
 		if (bed != null && bed.getWorld() != match.getWorld())
@@ -498,7 +501,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		match.broadcast(apl.getDisplayName() + " has joined " + getDisplayName());
 		SportBukkitUtil.setOverheadName(player, apl.getDisplayName());
 
-		match.setupSpectators();
+		match.setupSpectators(player);
 		match.checkTeamsReady();
 		return true;
 	}
@@ -555,9 +558,8 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		match.messageReferees("team", getName(), "player", "-" + apl.getName());
 		SportBukkitUtil.setOverheadName(player, player.getName());
 
-		match.setupSpectators();
+		match.setupSpectators(player);
 		match.checkTeamsReady();
-
 		return true;
 	}
 

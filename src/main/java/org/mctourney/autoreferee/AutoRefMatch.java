@@ -1570,7 +1570,7 @@ public class AutoRefMatch implements Metadatable
 
 		if (target != null)
 		{
-			player.setGameMode(WorldListener.getDefaultGamemode(target));
+			PlayerUtil.setGameMode(player, GameMode.SURVIVAL);
 			player.teleport(target.getSpawnLocation());
 		}
 
@@ -2000,31 +2000,18 @@ public class AutoRefMatch implements Metadatable
 	}
 
 	/**
-	 * Sets whether a specified player is in spectator mode.
-	 *
-	 * @param player player to set spectator mode for
-	 * @param b true to set spectator mode on, false to set spectator mode off
-	 */
-	public void setSpectatorMode(Player player, boolean b)
-	{
-		GameMode gm = b ? GameMode.CREATIVE : GameMode.SURVIVAL;
-		this.setSpectatorMode(player, b, gm);
-	}
-
-	/**
 	 * Sets whether a specified player is in spectator mode, explicitly setting gamemode.
 	 *
 	 * @param player player to set spectator mode for
-	 * @param b true to set spectator mode on, false to set spectator mode off
-	 * @param gamemode player's new gamemode
+	 * @param spec true to set spectator mode on, false to set spectator mode off
 	 */
-	public void setSpectatorMode(Player player, boolean b, GameMode gamemode)
+	public void setSpectatorMode(Player player, boolean spec)
 	{
-		player.setGameMode(gamemode);
+		PlayerUtil.setSpectatorSettings(player, spec);
 		if (!player.getAllowFlight()) player.setFallDistance(0.0f);
-		SportBukkitUtil.setAffectsSpawning(player, !b);
+		SportBukkitUtil.setAffectsSpawning(player, !spec);
 
-		boolean noEntityCollide = b && getCurrentState().inProgress();
+		boolean noEntityCollide = spec && getCurrentState().inProgress();
 		SportBukkitUtil.setCollidesWithEntities(player, !noEntityCollide);
 	}
 
@@ -2506,7 +2493,6 @@ public class AutoRefMatch implements Metadatable
 
 	public void setRespawnMode(RespawnMode mode)
 	{ this.respawnMode = mode; }
-
 
 	/**
 	 * Eliminates player from the match.
