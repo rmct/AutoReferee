@@ -183,7 +183,7 @@ public class ConfigurationCommands implements CommandHandler
 			return true;
 		}
 
-		AutoRefTeam team = match.teamNameLookup(args[0]);
+		AutoRefTeam team = match.getTeam(args[0]);
 		if (team == null)
 		{
 			// team name is invalid. let the player know
@@ -209,12 +209,12 @@ public class ConfigurationCommands implements CommandHandler
 	{
 		if (match == null) return false;
 
-		Set<AutoRefTeam> lookupTeams = null;
+		Set<AutoRefTeam> teams = null;
 
 		// if a team has been specified as an argument
 		if (args.length > 0)
 		{
-			AutoRefTeam t = match.teamNameLookup(args[0]);
+			AutoRefTeam t = match.getTeam(args[0]);
 			if (t == null)
 			{
 				// team name is invalid. let the player know
@@ -223,18 +223,27 @@ public class ConfigurationCommands implements CommandHandler
 				return true;
 			}
 
-			lookupTeams = Sets.newHashSet();
-			lookupTeams.add(t);
+			teams = Sets.newHashSet();
+			teams.add(t);
 		}
 
 		// otherwise, just print all the teams
-		else lookupTeams = match.getTeams();
+		else teams = match.getTeams();
 
 		// sanity check...
-		if (lookupTeams == null) return false;
+		if (teams == null) return false;
+
+		// print all the start regions
+		sender.sendMessage("Start Regions:");
+		if (match.getStartRegions().size() > 0)
+			for (AutoRefRegion reg : match.getStartRegions())
+				sender.sendMessage("  " + reg.toString());
+
+			// if there are no regions, print None
+		else sender.sendMessage("  <None>");
 
 		// for all the teams being looked up
-		for (AutoRefTeam team : lookupTeams)
+		for (AutoRefTeam team : teams)
 		{
 			// print team-name header
 			sender.sendMessage(team.getDisplayName() + "'s Regions:");
@@ -271,7 +280,7 @@ public class ConfigurationCommands implements CommandHandler
 		Set<AutoRefTeam> teams = Sets.newHashSet();
 		for (String arg : args)
 		{
-			AutoRefTeam team = match.teamNameLookup(arg);
+			AutoRefTeam team = match.getTeam(arg);
 			if (team != null) teams.add(team);
 		}
 
@@ -305,6 +314,23 @@ public class ConfigurationCommands implements CommandHandler
 			if (options.hasOption(flag.getMark())) reg.toggle(flag);
 		for (AutoRefTeam team : teams) if (team.addRegion(reg))
 			sender.sendMessage(reg.toString() + " set as " + team.getDisplayName() + "'s region.");
+		return true;
+	}
+
+	@AutoRefCommand(name={"autoref", "setheight"}, argmin=1, argmax=1,
+			description="Restrict all team zones to be within a given height.")
+	@AutoRefPermission(console=true, nodes={"autoreferee.configure"})
+
+	public boolean setHeight(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		try
+		{
+			double newHeight = Double.parseDouble(args[0]);
+			for (CuboidRegion creg : match.getRegions(CuboidRegion.class))
+				if (creg.y2 > newHeight) creg.y2 = newHeight;
+		}
+		catch (NumberFormatException e)
+		{ sender.sendMessage(ChatColor.RED + args[0] + " is not a valid height."); }
 		return true;
 	}
 

@@ -110,6 +110,10 @@ public class BlockGoal extends AutoRefGoal
 	public boolean isSatisfied(AutoRefMatch match)
 	{ return null != blockInRange(blockdata, loc, range); }
 
+	@Override
+	public double getScore(AutoRefMatch match)
+	{ return getItemStatus().value; }
+
 	/**
 	 * Checks if a given block type exists within a cube centered around a location.
 	 *

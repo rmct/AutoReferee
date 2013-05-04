@@ -31,6 +31,10 @@ public class SurvivalGoal extends AutoRefGoal
 	}
 
 	@Override
+	public double getScore(AutoRefMatch match)
+	{ return this.getOwner().getPlayers().size() * 250.0; }
+
+	@Override
 	public void updateReferee(Player ref)
 	{
 		AutoRefMatch match = getOwner().getMatch();

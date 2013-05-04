@@ -59,7 +59,7 @@ public class PlayerCommands implements CommandHandler
 		boolean isref = sender.hasPermission("autoreferee.referee");
 
 		// get the target team
-		AutoRefTeam team = args.length > 0 ? match.teamNameLookup(args[0]) :
+		AutoRefTeam team = args.length > 0 ? match.getTeam(args[0]) :
 			match.getArbitraryTeam();
 
 		if (team == null)

@@ -2,6 +2,7 @@ package org.mctourney.autoreferee.util;
 
 import java.util.Map;
 
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
@@ -10,6 +11,9 @@ import org.bukkit.potion.PotionEffectType;
 import com.google.common.collect.Maps;
 
 import org.apache.commons.lang.WordUtils;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.mctourney.autoreferee.AutoRefMatch;
+import org.mctourney.autoreferee.AutoReferee;
 
 public class PlayerUtil
 {
@@ -92,6 +96,57 @@ public class PlayerUtil
 
 		// remove potion and beacon effects
 		removeStatusEffects(player);
+	}
+
+	private static class BufferedGameModeChangeTask extends BukkitRunnable
+	{
+		private static Map<String, BufferedGameModeChangeTask> players = Maps.newHashMap();
+
+		private Player player;
+		private GameMode gamemode;
+
+		private BufferedGameModeChangeTask(Player player)
+		{ this.player = player; this.gamemode = null; }
+
+		public static BufferedGameModeChangeTask change(Player player, GameMode gm)
+		{
+			BufferedGameModeChangeTask task = players.get(player.getName());
+			if (task == null)
+			{
+				players.put(player.getName(),
+					task = new BufferedGameModeChangeTask(player));
+				task.runTaskLater(AutoReferee.getInstance(), 2L);
+			}
+
+			task.gamemode = gm;
+			return task;
+		}
+
+		@Override
+		public void run()
+		{
+			if (this.gamemode != null)
+				player.setGameMode(this.gamemode);
+			players.remove(player.getName());
+		}
+	}
+
+	/**
+	 * Changes the players gamemode on the next server tick. Buffers gamemode changes.
+	 * @param player player
+	 * @param gamemode new gamemode
+	 */
+	public static void setGameMode(Player player, GameMode gamemode)
+	{ BufferedGameModeChangeTask.change(player, gamemode); }
+
+	public static void setSpectatorSettings(Player player, boolean spec)
+	{
+		// gamemode is the obvious issue
+		PlayerUtil.setGameMode(player, spec ? GameMode.CREATIVE : GameMode.SURVIVAL);
+
+		// basic player settings depending on role
+		player.setAllowFlight(spec);
+		player.setCanPickupItems(!spec);
 	}
 
 	private static Map<PotionEffectType, String> statusNames = Maps.newHashMap();

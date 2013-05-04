@@ -17,6 +17,8 @@ import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.generator.ChunkGenerator;
@@ -187,6 +189,34 @@ public class AutoReferee extends JavaPlugin
 	 */
 	public void clearMatch(AutoRefMatch match)
 	{ matches.remove(match.getWorld().getUID()); }
+
+	// track owner of a piece of tnt (perhaps with propagation)
+	private Map<UUID, AutoRefPlayer> tntOwner = Maps.newHashMap();
+
+	/**
+	 * Gets the player responsible for a primed TNT.
+	 * @param entity primed tnt entity
+	 */
+	public AutoRefPlayer getTNTOwner(Entity entity)
+	{ return tntOwner.get(entity.getUniqueId()); }
+
+	/**
+	 * Sets the player responsible for a primed TNT.
+	 * @param entity primed tnt entity
+	 * @param apl player responsible for tnt
+	 */
+	public void setTNTOwner(Entity entity, AutoRefPlayer apl)
+	{
+		if (entity.getType() == EntityType.PRIMED_TNT)
+			tntOwner.put(entity.getUniqueId(), apl);
+	}
+
+	/**
+	 * Clears out a primed TNT from the tracked list.
+	 * @param entity primed tnt entity
+	 */
+	public AutoRefPlayer clearTNTOwner(Entity entity)
+	{ return tntOwner.remove(entity.getUniqueId()); }
 
 	/**
 	 * Gets team object associated with a player. Searches all matches for this player,
@@ -465,11 +495,11 @@ public class AutoReferee extends JavaPlugin
 	/**
 	 * Force a message to be sent synchronously. Safe to use from an asynchronous task.
 	 *
-	 * @param msg message to be sent
+	 * @param msgs messages to be sent
 	 */
-	public void sendMessageSync(CommandSender recipient, String msg)
+	public void sendMessageSync(CommandSender recipient, String ...msgs)
 	{
-		if (recipient != null)
+		if (recipient != null) for (String msg : msgs)
 			messageQueue.addMessage(recipient, msg);
 
 		try { messageQueue.runTask(this); }

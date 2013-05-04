@@ -132,7 +132,7 @@ public abstract class AutoRefRegion
 	{
 		this.addFlags(e.getChild("flags"));
 		for (Element owner : e.getChildren("owner"))
-			this.addOwners(match.teamNameLookup(owner.getTextTrim()));
+			this.addOwners(match.getTeam(owner.getTextTrim()));
 
 		if (e.getAttribute("yaw") != null)
 			yaw = Integer.parseInt(e.getAttributeValue("yaw"));

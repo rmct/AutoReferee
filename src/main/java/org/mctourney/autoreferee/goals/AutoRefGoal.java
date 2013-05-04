@@ -35,18 +35,19 @@ public abstract class AutoRefGoal
 	 */
 	public static enum ItemStatus
 	{
-		NONE("none"),
+		NONE("none", 0.0),
 
-		SEEN("found"),
+		SEEN("found", 0.1),
 
-		CARRYING("carry"),
+		CARRYING("carry", 0.1),
 
-		TARGET("target");
+		TARGET("target", 1000.0);
 
 		private String msg;
+		public double value;
 
-		private ItemStatus(String m)
-		{ msg = m; }
+		private ItemStatus(String m, double v)
+		{ msg = m; value = v; }
 
 		@Override
 		public String toString()
@@ -79,6 +80,10 @@ public abstract class AutoRefGoal
 
 	public boolean hasTarget()
 	{ return getTarget() != null; }
+
+	// default definition
+	public double getScore(AutoRefMatch match)
+	{ return isSatisfied(match) ? 1000.0 : 0.0; }
 
 	protected AutoRefGoal getGoalSettings(AutoRefTeam team, Element elt)
 	{

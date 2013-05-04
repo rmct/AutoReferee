@@ -86,6 +86,7 @@ import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.BookUtil;
 import org.mctourney.autoreferee.util.LocationUtil;
 import org.mctourney.autoreferee.util.MapImageGenerator;
+import org.mctourney.autoreferee.util.Metadatable;
 import org.mctourney.autoreferee.util.PlayerKit;
 import org.mctourney.autoreferee.util.PlayerUtil;
 import org.mctourney.autoreferee.util.QueryServer;
@@ -100,7 +101,7 @@ import com.google.common.collect.Sets;
  *
  * @author authorblues
  */
-public class AutoRefMatch
+public class AutoRefMatch implements Metadatable
 {
 	private static final String GENERIC_NOTIFICATION_MESSAGE =
 		"A notification has been sent. Type /artp to teleport.";
@@ -135,6 +136,23 @@ public class AutoRefMatch
 		// if the folder doesnt exist, create it...
 		if (!matchSummaryDirectory.exists()) matchSummaryDirectory.mkdir();
 	}
+
+	protected Map<String, Object> metadata = Maps.newHashMap();
+
+	public void addMetadata(String key, Object value)
+	{ this.metadata.put(key, value); }
+
+	public Object getMetadata(String key)
+	{ return this.metadata.get(key); }
+
+	public boolean hasMetadata(String key)
+	{ return this.metadata.containsKey(key); }
+
+	public Object removeMetadata(String key)
+	{ return this.metadata.remove(key); }
+
+	public void clearMetadata()
+	{ this.metadata.clear(); }
 
 	public enum AccessType
 	{ PRIVATE, PUBLIC; }
@@ -1118,7 +1136,7 @@ public class AutoRefMatch
 		Element goals = worldConfig.getChild("goals");
 		if (goals != null) for (Element teamgoals : goals.getChildren("teamgoals"))
 		{
-			AutoRefTeam team = this.teamNameLookup(teamgoals.getAttributeValue("team"));
+			AutoRefTeam team = this.getTeam(teamgoals.getAttributeValue("team"));
 			AutoReferee.log("Loading goals for " + team.getName());
 			if (team != null) for (Element gelt : teamgoals.getChildren()) team.addGoal(gelt);
 		}
@@ -1375,13 +1393,16 @@ public class AutoRefMatch
 	/**
 	 * Sends a message to all players in this match, including referees and streamers.
 	 *
-	 * @param msg message to be sent
+	 * @param msgs messages to be sent
 	 */
-	public void broadcast(String msg)
+	public void broadcast(String ...msgs)
 	{
-		if (AutoReferee.getInstance().isConsoleLoggingEnabled())
-			AutoReferee.log(ChatColor.stripColor(msg));
-		for (Player p : primaryWorld.getPlayers()) p.sendMessage(msg);
+		for (String msg : msgs)
+		{
+			if (AutoReferee.getInstance().isConsoleLoggingEnabled())
+				AutoReferee.log(ChatColor.stripColor(msg));
+			for (Player p : primaryWorld.getPlayers()) p.sendMessage(msg);
+		}
 	}
 
 	private SyncBroadcastTask broadcastTask = new SyncBroadcastTask();
@@ -1389,11 +1410,12 @@ public class AutoRefMatch
 	/**
 	 * Force a broadcast to be sent synchronously. Safe to use from an asynchronous task.
 	 *
-	 * @param msg message to be sent
+	 * @param msgs messages to be sent
 	 */
-	public void broadcastSync(String msg)
+	public void broadcastSync(String ...msgs)
 	{
-		broadcastTask.addMessage(msg);
+		for (String msg : msgs)
+			broadcastTask.addMessage(msg);
 
 		try { broadcastTask.runTask(AutoReferee.getInstance()); }
 		catch (IllegalStateException e) {  }
@@ -1409,7 +1431,7 @@ public class AutoRefMatch
 		@Override public void run()
 		{
 			AutoRefMatch.this.broadcastTask = new SyncBroadcastTask();
-			for (String msg : msgQueue) AutoRefMatch.this.broadcast(msg);
+			AutoRefMatch.this.broadcast(msgQueue.toArray(new String[]{ }));
 			msgQueue.clear();
 		}
 	}
@@ -1548,7 +1570,7 @@ public class AutoRefMatch
 
 		if (target != null)
 		{
-			player.setGameMode(WorldListener.getDefaultGamemode(target));
+			PlayerUtil.setGameMode(player, GameMode.SURVIVAL);
 			player.teleport(target.getSpawnLocation());
 		}
 
@@ -1639,6 +1661,15 @@ public class AutoRefMatch
 
 	public Set<AutoRefRegion> getRegions()
 	{ return regions; }
+
+	public <T extends AutoRefRegion> Set<T> getRegions(Class<T> clazz)
+	{
+		Set<T> typedRegions = Sets.newHashSet();
+		for (AutoRefRegion reg : regions)
+			if (clazz.isInstance(reg))
+				typedRegions.add((T) reg);
+		return typedRegions;
+	}
 
 	public Set<AutoRefRegion> getRegions(AutoRefTeam team)
 	{
@@ -1814,7 +1845,7 @@ public class AutoRefMatch
 	/**
 	 * Starts the match.
 	 */
-	public void start()
+	public void startMatch()
 	{
 		// set up the world time one last time
 		primaryWorld.setTime(startClock);
@@ -1969,31 +2000,18 @@ public class AutoRefMatch
 	}
 
 	/**
-	 * Sets whether a specified player is in spectator mode.
-	 *
-	 * @param player player to set spectator mode for
-	 * @param b true to set spectator mode on, false to set spectator mode off
-	 */
-	public void setSpectatorMode(Player player, boolean b)
-	{
-		GameMode gm = b ? GameMode.CREATIVE : GameMode.SURVIVAL;
-		this.setSpectatorMode(player, b, gm);
-	}
-
-	/**
 	 * Sets whether a specified player is in spectator mode, explicitly setting gamemode.
 	 *
 	 * @param player player to set spectator mode for
-	 * @param b true to set spectator mode on, false to set spectator mode off
-	 * @param gamemode player's new gamemode
+	 * @param spec true to set spectator mode on, false to set spectator mode off
 	 */
-	public void setSpectatorMode(Player player, boolean b, GameMode gamemode)
+	public void setSpectatorMode(Player player, boolean spec)
 	{
-		player.setGameMode(gamemode);
+		PlayerUtil.setSpectatorSettings(player, spec);
 		if (!player.getAllowFlight()) player.setFallDistance(0.0f);
-		SportBukkitUtil.setAffectsSpawning(player, !b);
+		SportBukkitUtil.setAffectsSpawning(player, !spec);
 
-		boolean noEntityCollide = b && getCurrentState().inProgress();
+		boolean noEntityCollide = spec && getCurrentState().inProgress();
 		SportBukkitUtil.setCollidesWithEntities(player, !noEntityCollide);
 	}
 
@@ -2059,7 +2077,7 @@ public class AutoRefMatch
 			else if (remainingSeconds == 0)
 			{
 				// setup world to go!
-				if (this.start) match.start();
+				if (this.start) match.startMatch();
 				match.broadcast(">>> " + CountdownTask.COLOR + "GO!");
 
 				// cancel the task
@@ -2220,9 +2238,8 @@ public class AutoRefMatch
 	{
 		public int compare(AutoRefTeam a, AutoRefTeam b)
 		{
-			// break ties first on the number of objectives placed, then number found
-			int vmd = b.getObjectivesPlaced() - a.getObjectivesPlaced();
-			return vmd == 0 ? b.getObjectivesFound() - a.getObjectivesFound() : vmd;
+			// break ties based on goal scores (FIXME)
+			return (int) Math.signum(b.getObjectiveScore() - a.getObjectiveScore());
 		}
 	}
 
@@ -2320,7 +2337,7 @@ public class AutoRefMatch
 	 * @param name team name to look up, either custom team name or base team name
 	 * @return team object matching the name if one exists, otherwise null
 	 */
-	public AutoRefTeam teamNameLookup(String name)
+	public AutoRefTeam getTeam(String name)
 	{
 		AutoRefTeam mteam = null;
 
@@ -2476,7 +2493,6 @@ public class AutoRefMatch
 
 	public void setRespawnMode(RespawnMode mode)
 	{ this.respawnMode = mode; }
-
 
 	/**
 	 * Eliminates player from the match.

@@ -1,8 +1,10 @@
 package org.mctourney.autoreferee;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Maps;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -22,7 +24,9 @@ import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
 import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.LocationUtil;
+import org.mctourney.autoreferee.util.Metadatable;
 import org.mctourney.autoreferee.util.PlayerKit;
+import org.mctourney.autoreferee.util.PlayerUtil;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
 
 import org.apache.commons.lang.StringUtils;
@@ -34,7 +38,7 @@ import com.google.common.collect.Sets;
  *
  * @author authorblues
  */
-public class AutoRefTeam implements Comparable<AutoRefTeam>
+public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 {
 	// reference to the match
 	private AutoRefMatch match = null;
@@ -58,12 +62,28 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 	{
 		return o instanceof AutoRefTeam
 			&& this.getMatch().equals(((AutoRefTeam) o).getMatch())
-			&& this.getPlayers().equals(((AutoRefTeam) o).getPlayers())
-			&& this.getName().equals(((AutoRefTeam) o).getName());
+			&& this.name.equals(((AutoRefTeam) o).name);
 	}
 
 	public int hashCode()
-	{ return this.getPlayers().hashCode() ^ (17 * this.getMatch().hashCode()); }
+	{ return this.name.hashCode() ^ (17 * this.getMatch().hashCode()); }
+
+	protected Map<String, Object> metadata = Maps.newHashMap();
+
+	public void addMetadata(String key, Object value)
+	{ this.metadata.put(key, value); }
+
+	public Object getMetadata(String key)
+	{ return this.metadata.get(key); }
+
+	public boolean hasMetadata(String key)
+	{ return this.metadata.containsKey(key); }
+
+	public Object removeMetadata(String key)
+	{ return this.metadata.remove(key); }
+
+	public void clearMetadata()
+	{ this.metadata.clear(); }
 
 	/**
 	 * Gets the members of this team.
@@ -459,13 +479,15 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		// quit if they are already on this team
 		if (players.contains(apl)) return true;
 
+		// if there is no match object, drop out here
+		if (match == null) return false;
+
 		// if the match is in progress, no one may join
 		if (!match.getCurrentState().isBeforeMatch() && !force) return false;
 
 		// prepare the player
-		if (match != null && !match.getCurrentState().inProgress())
+		if (!match.getCurrentState().inProgress())
 			player.teleport(this.getSpawnLocation());
-		player.setGameMode(GameMode.SURVIVAL);
 
 		Location bed = player.getBedSpawnLocation();
 		if (bed != null && bed.getWorld() != match.getWorld())
@@ -479,7 +501,7 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		match.broadcast(apl.getDisplayName() + " has joined " + getDisplayName());
 		SportBukkitUtil.setOverheadName(player, apl.getDisplayName());
 
-		match.setupSpectators();
+		match.setupSpectators(player);
 		match.checkTeamsReady();
 		return true;
 	}
@@ -536,9 +558,8 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		match.messageReferees("team", getName(), "player", "-" + apl.getName());
 		SportBukkitUtil.setOverheadName(player, player.getName());
 
-		match.setupSpectators();
+		match.setupSpectators(player);
 		match.checkTeamsReady();
-
 		return true;
 	}
 
@@ -682,21 +703,13 @@ public class AutoRefTeam implements Comparable<AutoRefTeam>
 		return k;
 	}
 
-	/**
-	 * Gets the number of objectives placed at their target locations.
-	 *
-	 * @return number of placed objectives
-	 */
-	public int getObjectivesPlaced()
-	{ return objCount(AutoRefGoal.ItemStatus.TARGET); }
-
-	/**
-	 * Gets the number of objectives found by this team.
-	 *
-	 * @return number of found objectives
-	 */
-	public int getObjectivesFound()
-	{ return goals.size() - objCount(AutoRefGoal.ItemStatus.NONE); }
+	public double getObjectiveScore()
+	{
+		double score = 0.0f;
+		for (AutoRefGoal goal : getTeamGoals())
+			score += goal.getScore(this.match);
+		return score;
+	}
 
 	protected void updateCarrying(AutoRefPlayer apl, Set<BlockData> oldCarrying, Set<BlockData> newCarrying)
 	{

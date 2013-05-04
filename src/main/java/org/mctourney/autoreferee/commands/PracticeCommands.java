@@ -294,8 +294,8 @@ public class PracticeCommands implements CommandHandler, Listener
 				match.clearEntities();
 				break;
 
-			case MODE_SURVIVAL: player.setGameMode(GameMode.SURVIVAL); break;
-			case MODE_CREATIVE: player.setGameMode(GameMode.CREATIVE); break;
+			case MODE_SURVIVAL: PlayerUtil.setGameMode(player, GameMode.SURVIVAL); break;
+			case MODE_CREATIVE: PlayerUtil.setGameMode(player, GameMode.CREATIVE); break;
 
 			case SET_WARP:
 				warpPoints.put(player.getName(), player.getLocation());
