@@ -701,21 +701,13 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		return k;
 	}
 
-	/**
-	 * Gets the number of objectives placed at their target locations.
-	 *
-	 * @return number of placed objectives
-	 */
-	public int getObjectivesPlaced()
-	{ return objCount(AutoRefGoal.ItemStatus.TARGET); }
-
-	/**
-	 * Gets the number of objectives found by this team.
-	 *
-	 * @return number of found objectives
-	 */
-	public int getObjectivesFound()
-	{ return goals.size() - objCount(AutoRefGoal.ItemStatus.NONE); }
+	public double getObjectiveScore()
+	{
+		double score = 0.0f;
+		for (AutoRefGoal goal : getTeamGoals())
+			score += goal.getScore(this.match);
+		return score;
+	}
 
 	protected void updateCarrying(AutoRefPlayer apl, Set<BlockData> oldCarrying, Set<BlockData> newCarrying)
 	{

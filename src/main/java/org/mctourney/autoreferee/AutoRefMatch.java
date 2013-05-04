@@ -2251,9 +2251,8 @@ public class AutoRefMatch implements Metadatable
 	{
 		public int compare(AutoRefTeam a, AutoRefTeam b)
 		{
-			// break ties first on the number of objectives placed, then number found
-			int vmd = b.getObjectivesPlaced() - a.getObjectivesPlaced();
-			return vmd == 0 ? b.getObjectivesFound() - a.getObjectivesFound() : vmd;
+			// break ties based on goal scores (FIXME)
+			return (int) Math.signum(b.getObjectiveScore() - a.getObjectiveScore());
 		}
 	}
 
