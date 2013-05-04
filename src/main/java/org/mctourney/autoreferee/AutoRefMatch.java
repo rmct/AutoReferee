@@ -1597,7 +1597,7 @@ public class AutoRefMatch implements Metadatable
 		{
 			// if we are running in auto-mode and this is OUR world
 			AutoReferee plugin = AutoReferee.getInstance();
-			if (plugin.isAutoMode() || this.isTemporaryWorld())
+			if (this.isTemporaryWorld())
 			{
 				plugin.clearMatch(this);
 				this.countTask.cancel();
@@ -1861,8 +1861,7 @@ public class AutoRefMatch implements Metadatable
 		this.clearEntities();
 
 		// loop through all the redstone mechanisms required to start / FIXME BUKKIT-1858
-		if (AutoReferee.getInstance().isAutoMode() || SportBukkitUtil.hasSportBukkitApi())
-			for (StartMechanism sm : startMechanisms)
+		if (SportBukkitUtil.hasSportBukkitApi()) for (StartMechanism sm : startMechanisms)
 		{
 			MaterialData mdata = sm.getBlockState().getData();
 			switch (sm.getBlockState().getType())
@@ -2156,10 +2155,6 @@ public class AutoRefMatch implements Metadatable
 			for ( AutoRefTeam t : teams ) t.setReady(false);
 			setCurrentState(MatchStatus.WAITING); return;
 		}
-
-		// if we aren't in online mode, assume we are always ready
-		if (!AutoReferee.getInstance().isAutoMode())
-		{ setCurrentState(MatchStatus.READY); return; }
 
 		// check if all the players are here
 		boolean ready = true;

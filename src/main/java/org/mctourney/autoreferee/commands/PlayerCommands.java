@@ -55,7 +55,7 @@ public class PlayerCommands implements CommandHandler
 	public boolean joinTeam(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
 		// if there is no match, or the plugin is running in auto-mode, quit
-		if (match == null || plugin.isAutoMode()) return false;
+		if (match == null) return false;
 		boolean isref = sender.hasPermission("autoreferee.referee");
 
 		// get the target team
@@ -94,7 +94,7 @@ public class PlayerCommands implements CommandHandler
 	public boolean leaveTeam(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
 		// if there is no match, or the plugin is running in auto-mode, quit
-		if (match == null || plugin.isAutoMode()) return false;
+		if (match == null) return false;
 		boolean isref = sender.hasPermission("autoreferee.referee");
 
 		// if there are players specified on the command line, remove them
@@ -116,9 +116,6 @@ public class PlayerCommands implements CommandHandler
 
 	public boolean joinMatch(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
-		// if the plugin is running in auto-mode, quit
-		if (plugin.isAutoMode()) return false;
-
 		if (args.length == 0)
 		{
 			sender.sendMessage(ChatColor.DARK_GRAY + "Available matches:");
@@ -165,7 +162,6 @@ public class PlayerCommands implements CommandHandler
 	public boolean leaveMatch(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
 		// if the plugin is running in auto-mode, quit
-		if (plugin.isAutoMode()) return false;
 		Player player = sender instanceof Player ? (Player) sender : null;
 
 		if (sender.hasPermission("autoreferee.referee") && args.length > 0)
@@ -182,7 +178,7 @@ public class PlayerCommands implements CommandHandler
 	public boolean setAccess(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
 		// if the plugin is running in auto-mode, quit
-		if (match == null || plugin.isAutoMode()) return false;
+		if (match == null) return false;
 		AutoRefMatch.AccessType access = match.access;
 
 		try { access = AutoRefMatch.AccessType.valueOf(args[0].toUpperCase()); }
