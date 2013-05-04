@@ -137,21 +137,21 @@ public class SpectatorCommands implements CommandHandler
 		}
 		else if (options.hasOption('s'))
 		{
-			AutoRefTeam team = match.teamNameLookup(options.getOptionValue('s'));
+			AutoRefTeam team = match.getTeam(options.getOptionValue('s'));
 			if (team != null) tplocation = team.getSpawnLocation();
 			else tplocation = match.getWorld().getSpawnLocation();
 			tplocation = TeleportationUtil.locationTeleport(tplocation);
 		}
 		else if (options.hasOption('o'))
 		{
-			AutoRefTeam team = match.teamNameLookup(options.getOptionValue('o'));
+			AutoRefTeam team = match.getTeam(options.getOptionValue('o'));
 			if (team != null) tplocation = team.getLastObjectiveLocation();
 			else tplocation = match.getLastObjectiveLocation();
 			tplocation = TeleportationUtil.locationTeleport(tplocation);
 		}
 		else if (options.hasOption('v'))
 		{
-			AutoRefTeam team = match.teamNameLookup(options.getOptionValue('v'));
+			AutoRefTeam team = match.getTeam(options.getOptionValue('v'));
 			if (team != null) tplocation = team.getVictoryMonumentLocation();
 			tplocation = TeleportationUtil.locationTeleport(tplocation);
 		}
@@ -204,7 +204,7 @@ public class SpectatorCommands implements CommandHandler
 		if (match == null) return false;
 
 		// get the team with the specified name
-		AutoRefTeam team = match.teamNameLookup(args[0]);
+		AutoRefTeam team = match.getTeam(args[0]);
 		if (team == null)
 		{
 			sender.sendMessage(ChatColor.DARK_GRAY + args[0] +
@@ -223,8 +223,8 @@ public class SpectatorCommands implements CommandHandler
 	{
 		if (match == null) return false;
 
-		AutoRefTeam team1 = match.teamNameLookup(args[0]);
-		AutoRefTeam team2 = match.teamNameLookup(args[1]);
+		AutoRefTeam team1 = match.getTeam(args[0]);
+		AutoRefTeam team2 = match.getTeam(args[1]);
 
 		if (team1 == null)
 		{
@@ -311,7 +311,7 @@ public class SpectatorCommands implements CommandHandler
 		{
 			if ("none".equalsIgnoreCase(args[0]) || "tie".equalsIgnoreCase(args[0]))
 				match.endMatch(null);
-			else match.endMatch(match.teamNameLookup(args[0]));
+			else match.endMatch(match.getTeam(args[0]));
 		}
 		else match.endMatch();
 		return true;

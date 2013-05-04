@@ -183,7 +183,7 @@ public class ConfigurationCommands implements CommandHandler
 			return true;
 		}
 
-		AutoRefTeam team = match.teamNameLookup(args[0]);
+		AutoRefTeam team = match.getTeam(args[0]);
 		if (team == null)
 		{
 			// team name is invalid. let the player know
@@ -209,12 +209,12 @@ public class ConfigurationCommands implements CommandHandler
 	{
 		if (match == null) return false;
 
-		Set<AutoRefTeam> lookupTeams = null;
+		Set<AutoRefTeam> teams = null;
 
 		// if a team has been specified as an argument
 		if (args.length > 0)
 		{
-			AutoRefTeam t = match.teamNameLookup(args[0]);
+			AutoRefTeam t = match.getTeam(args[0]);
 			if (t == null)
 			{
 				// team name is invalid. let the player know
@@ -223,18 +223,18 @@ public class ConfigurationCommands implements CommandHandler
 				return true;
 			}
 
-			lookupTeams = Sets.newHashSet();
-			lookupTeams.add(t);
+			teams = Sets.newHashSet();
+			teams.add(t);
 		}
 
 		// otherwise, just print all the teams
-		else lookupTeams = match.getTeams();
+		else teams = match.getTeams();
 
 		// sanity check...
-		if (lookupTeams == null) return false;
+		if (teams == null) return false;
 
 		// for all the teams being looked up
-		for (AutoRefTeam team : lookupTeams)
+		for (AutoRefTeam team : teams)
 		{
 			// print team-name header
 			sender.sendMessage(team.getDisplayName() + "'s Regions:");
@@ -271,7 +271,7 @@ public class ConfigurationCommands implements CommandHandler
 		Set<AutoRefTeam> teams = Sets.newHashSet();
 		for (String arg : args)
 		{
-			AutoRefTeam team = match.teamNameLookup(arg);
+			AutoRefTeam team = match.getTeam(arg);
 			if (team != null) teams.add(team);
 		}
 

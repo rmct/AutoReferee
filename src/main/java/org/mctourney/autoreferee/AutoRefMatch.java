@@ -1136,7 +1136,7 @@ public class AutoRefMatch implements Metadatable
 		Element goals = worldConfig.getChild("goals");
 		if (goals != null) for (Element teamgoals : goals.getChildren("teamgoals"))
 		{
-			AutoRefTeam team = this.teamNameLookup(teamgoals.getAttributeValue("team"));
+			AutoRefTeam team = this.getTeam(teamgoals.getAttributeValue("team"));
 			AutoReferee.log("Loading goals for " + team.getName());
 			if (team != null) for (Element gelt : teamgoals.getChildren()) team.addGoal(gelt);
 		}
@@ -1836,7 +1836,7 @@ public class AutoRefMatch implements Metadatable
 	/**
 	 * Starts the match.
 	 */
-	public void start()
+	public void startMatch()
 	{
 		// set up the world time one last time
 		primaryWorld.setTime(startClock);
@@ -2081,7 +2081,7 @@ public class AutoRefMatch implements Metadatable
 			else if (remainingSeconds == 0)
 			{
 				// setup world to go!
-				if (this.start) match.start();
+				if (this.start) match.startMatch();
 				match.broadcast(">>> " + CountdownTask.COLOR + "GO!");
 
 				// cancel the task
@@ -2342,7 +2342,7 @@ public class AutoRefMatch implements Metadatable
 	 * @param name team name to look up, either custom team name or base team name
 	 * @return team object matching the name if one exists, otherwise null
 	 */
-	public AutoRefTeam teamNameLookup(String name)
+	public AutoRefTeam getTeam(String name)
 	{
 		AutoRefTeam mteam = null;
 
