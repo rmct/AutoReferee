@@ -233,6 +233,15 @@ public class ConfigurationCommands implements CommandHandler
 		// sanity check...
 		if (teams == null) return false;
 
+		// print all the start regions
+		sender.sendMessage("Start Regions:");
+		if (match.getStartRegions().size() > 0)
+			for (AutoRefRegion reg : match.getStartRegions())
+				sender.sendMessage("  " + reg.toString());
+
+			// if there are no regions, print None
+		else sender.sendMessage("  <None>");
+
 		// for all the teams being looked up
 		for (AutoRefTeam team : teams)
 		{
