@@ -33,37 +33,45 @@ public class LobbyListener implements Listener
 
 	@EventHandler(priority= EventPriority.HIGHEST)
 	public void projectileLaunch(ProjectileLaunchEvent event)
-	{if (event.getEntity().getWorld() == plugin.getLobbyWorld()) event.setCancelled(true);}
+	{ if (event.getEntity().getWorld() == plugin.getLobbyWorld()) event.setCancelled(true); }
 
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void blockBreak(BlockBreakEvent event)
-	{if (event.getBlock().getWorld() == plugin.getLobbyWorld())  event.setCancelled(true);}
+	{ if (event.getBlock().getWorld() == plugin.getLobbyWorld())  event.setCancelled(true); }
 
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void itemConsume(PlayerItemConsumeEvent event)
-	{if (event.getPlayer().getWorld() == plugin.getLobbyWorld()) event.setCancelled(true);}
+	{ if (event.getPlayer().getWorld() == plugin.getLobbyWorld()) event.setCancelled(true); }
 
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void dropItem(PlayerDropItemEvent event)
-	{if (event.getPlayer().getWorld() == plugin.getLobbyWorld()) event.setCancelled(true);}
+	{ if (event.getPlayer().getWorld() == plugin.getLobbyWorld()) event.setCancelled(true); }
 
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void itemInteract(PlayerInteractEvent event)
-	{if (event.getPlayer().getWorld() == plugin.getLobbyWorld() && (event.getMaterial() != Material.SIGN_POST || event.getMaterial() != Material.WALL_SIGN)) event.setCancelled(true);}
+	{ if (event.getPlayer().getWorld() == plugin.getLobbyWorld() && (event.getMaterial() != Material.SIGN_POST || event.getMaterial() != Material.WALL_SIGN)) event.setCancelled(true); }
 
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void blockPlace(BlockPlaceEvent event)
-	{if (event.getPlayer().getWorld() == plugin.getLobbyWorld()) event.setCancelled(true);}
+	{ if (event.getPlayer().getWorld() == plugin.getLobbyWorld()) event.setCancelled(true); }
 
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void bowShoot(EntityShootBowEvent event)
-	{if (event.getEntity().getWorld() == plugin.getLobbyWorld()) event.setCancelled(true);}
+	{ if (event.getEntity().getWorld() == plugin.getLobbyWorld()) event.setCancelled(true); }
 
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void bucketEmtpy(PlayerBucketEmptyEvent event)
-	{if (event.getPlayer().getWorld() == plugin.getLobbyWorld()) event.setCancelled(true);}
+	{ if (event.getPlayer().getWorld() == plugin.getLobbyWorld()) event.setCancelled(true); }
 
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void bucketFill(PlayerBucketFillEvent event)
-	{if (event.getPlayer().getWorld() == plugin.getLobbyWorld()) event.setCancelled(true);}
+	{ if (event.getPlayer().getWorld() == plugin.getLobbyWorld()) event.setCancelled(true); }
+
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void foodLose(FoodLevelChangeEvent event)
+	{ if (event.getEntity().getWorld() == plugin.getLobbyWorld()) event.setCancelled(true); }
+
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void healthLose(EntityDamageEvent event)
+	{ if (event.getEntity().getWorld() == plugin.getLobbyWorld()) event.setCancelled(true); }
 }
