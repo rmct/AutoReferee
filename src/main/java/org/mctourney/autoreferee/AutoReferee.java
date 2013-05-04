@@ -140,20 +140,6 @@ public class AutoReferee extends JavaPlugin
 	public void setLobbyWorld(World world)
 	{ if (world != null && !AutoRefMatch.isCompatible(world)) this.lobby = world; }
 
-	// is this plugin in online mode?
-	private boolean autoMode = true;
-
-	/**
-	 * Checks if the server is in fully-automated mode.
-	 *
-	 * @return true if in automated mode, otherwise false
-	 */
-	public boolean isAutoMode()
-	{ return autoMode; }
-
-	protected boolean setAutoMode(boolean auto)
-	{ return this.autoMode = auto; }
-
 	private boolean consoleLog = false;
 
 	protected boolean isConsoleLoggingEnabled()
@@ -262,28 +248,6 @@ public class AutoReferee extends JavaPlugin
 		return null;
 	}
 
-	private boolean checkPlugins(PluginManager pm)
-	{
-		boolean foundOtherPlugin = false;
-		for ( Plugin p : pm.getPlugins() ) if (p != this)
-		{
-			if (!foundOtherPlugin)
-				getLogger().severe("No other plugins may be loaded in online mode...");
-			getLogger().severe("Agressively disabling plugin: " + p.getName());
-
-			pm.disablePlugin(p);
-			String pStatus = p.isEnabled() ? "NOT disabled" : "disabled";
-			getLogger().severe(p.getName() + " is " + pStatus + ".");
-
-			foundOtherPlugin = true;
-		}
-
-		// return true if all other plugins are disabled
-		for ( Plugin p : pm.getPlugins() )
-			if (p != this && p.isEnabled()) return false;
-		return true;
-	}
-
 	public void onEnable()
 	{
 		// store the singleton instance
@@ -333,10 +297,8 @@ public class AutoReferee extends JavaPlugin
 			getLogger().severe(String.format("!!! Incorrect config-version (expected %d, got %d)",
 				PLUGIN_CFG_VERSION, configVersion));
 
-		setAutoMode(false);
-
 		// setup a possible alternate map repository
-		String mrepo = this.getConfig().getString("server-mode.map-repo", null);
+		String mrepo = this.getConfig().getString("map-repo", null);
 		if (mrepo != null) AutoRefMatch.changeMapRepo(mrepo);
 
 		// attempt to setup the plugin channels
@@ -351,11 +313,8 @@ public class AutoReferee extends JavaPlugin
 			(SportBukkitUtil.hasSportBukkitApi() ? " with SportBukkit API" : "") + ".");
 		getLogger().info(this.getName() + " Git: " + this.getCommit());
 
-		// update online mode to represent whether or not we have a connection
-		if (isAutoMode()) setAutoMode(checkPlugins(pm));
-
 		// are ties allowed? (auto-mode always allows for ties)
-		AutoRefMatch.setAllowTies(isAutoMode() || getConfig().getBoolean("allow-ties", false));
+		AutoRefMatch.setAllowTies(getConfig().getBoolean("allow-ties", false));
 
 		// log messages to console?
 		consoleLog = getConfig().getBoolean("console-log", false);

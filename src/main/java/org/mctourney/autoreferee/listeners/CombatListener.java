@@ -108,11 +108,6 @@ public class CombatListener implements Listener
 				if (kapl != null && kapl != vapl) kapl.registerKill(event);
 			}
 
-			// clear all active enderpearls for this player
-			if (AutoReferee.getInstance().isAutoMode())
-				for (Entity e : match.getWorld().getEntitiesByClass(EnderPearl.class))
-					if (((EnderPearl) e).getShooter() == victim) e.remove();
-
 			// handle respawn modes
 			if (vapl != null && match.getCurrentState().inProgress())
 			{

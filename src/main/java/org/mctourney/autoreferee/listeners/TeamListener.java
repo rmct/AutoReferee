@@ -103,16 +103,6 @@ public class TeamListener implements Listener
 	public void playerLogin(PlayerLoginEvent event)
 	{
 		Player player = event.getPlayer();
-		if (plugin.isAutoMode())
-		{
-			// if they should be whitelisted, let them in, otherwise, block them
-			if (plugin.playerWhitelisted(player)) event.allow();
-			else
-			{
-				event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, AutoReferee.NO_LOGIN_MESSAGE);
-				return;
-			}
-		}
 
 		// if this player needs to be in a specific world, put them there
 		AutoRefTeam team = plugin.getExpectedTeam(player);
@@ -191,12 +181,17 @@ public class TeamListener implements Listener
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
 
 		// if there is a match currently in progress on this world...
-		if (match != null && plugin.isAutoMode() &&
+		if (match != null && !match.isPracticeMode() &&
 			match.getCurrentState().inProgress())
 		{
 			// cancel the gamemode change if the player is a participant
 			if (event.getNewGameMode() == GameMode.CREATIVE &&
-				match.isPlayer(player)) event.setCancelled(true);
+				match.isPlayer(player) && !player.hasPermission("autoreferee.admin"))
+			{
+				player.sendMessage(ChatColor.RED +
+					"Cannot change gamemode outside of practice mode!");
+				event.setCancelled(true);
+			}
 		}
 	}
 }

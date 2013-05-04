@@ -5,12 +5,6 @@ auto-update: true
 
 allow-ties: false
 
-server-mode:
-  online: false
-  keyserver: api.majorleaguemining.net
-  key: YOUR-KEY-GOES-HERE
-  query-server: localhost
-
 delay-seconds:
   ready: 15
   completed: 180
