@@ -137,12 +137,16 @@ public class WorldListener implements Listener
 				match.updateReferee(player);
 
 			if (!player.hasPlayedBefore())
-				player.teleport(match.getWorldSpawn());
+				player.teleport(match.getPlayerSpawn(player));
 		}
 
 		// moving to lobby world, set player to creative
 		if (player.getWorld() == plugin.getLobbyWorld())
+		{
+			if (!player.hasPlayedBefore())
+				player.teleport(player.getWorld().getSpawnLocation());
 			player.setGameMode(GameMode.CREATIVE);
+		}
 	}
 
 	@EventHandler
@@ -189,14 +193,13 @@ public class WorldListener implements Listener
 			matchTo.sendMatchInfo(player);
 			matchTo.setupSpectators(player);
 
+			player.teleport(matchTo.getPlayerSpawn(player));
 			if (matchTo.isReferee(player))
 				matchTo.updateReferee(player);
 
 			// give them a book with info about the match
 			PlayerUtil.clearInventory(player);
 			player.getInventory().addItem(matchTo.getMatchInfoBook());
-
-			player.teleport(matchTo.getWorldSpawn());
 		}
 		else SportBukkitUtil.setOverheadName(player, player.getName());
 
