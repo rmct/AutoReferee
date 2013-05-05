@@ -18,6 +18,7 @@ import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.AutoRefMatch.MatchStatus;
+import org.mctourney.autoreferee.goals.CoreGoal;
 import org.mctourney.autoreferee.listeners.SpectatorListener;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
 import org.mctourney.autoreferee.regions.CuboidRegion;
@@ -314,6 +315,38 @@ public class ConfigurationCommands implements CommandHandler
 			if (options.hasOption(flag.getMark())) reg.toggle(flag);
 		for (AutoRefTeam team : teams) if (team.addRegion(reg))
 			sender.sendMessage(reg.toString() + " set as " + team.getDisplayName() + "'s region.");
+		return true;
+	}
+
+	@AutoRefCommand(name={"autoref", "core"}, argmin=1, argmax=1, options="r+",
+		description="Set the currently selected WorldEdit region to be a team's core.")
+	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
+
+	public boolean setupCore(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		if (match == null) return false;
+		Player player = (Player) sender;
+
+		WorldEditPlugin worldEdit = plugin.getWorldEdit();
+		if (worldEdit == null)
+		{
+			// world edit not installed
+			sender.sendMessage("This method requires WorldEdit installed and running.");
+			return true;
+		}
+
+		AutoRefTeam team = match.getTeam(args[0]);
+		Selection sel = worldEdit.getSelection(player);
+		AutoRefRegion reg = null;
+
+		if ((sel instanceof CuboidSelection))
+		{
+			CuboidSelection csel = (CuboidSelection) sel;
+			reg = new CuboidRegion(csel.getMinimumPoint(), csel.getMaximumPoint());
+		}
+
+		team.addGoal(new CoreGoal(team, reg));
+		sender.sendMessage(reg.toString() + " set as " + team.getDisplayName() + "'s core.");
 		return true;
 	}
 
