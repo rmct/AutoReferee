@@ -13,7 +13,7 @@ import org.mctourney.autoreferee.util.BlockData;
 
 public class CoreGoal extends AutoRefGoal
 {
-	private boolean satisfied;
+	private boolean broken;
 	private AutoRefRegion region;
 
 	public CoreGoal(AutoRefTeam team, AutoRefRegion region)
@@ -31,19 +31,34 @@ public class CoreGoal extends AutoRefGoal
 	public void checkSatisfied(BlockFromToEvent event)
 	{
 		if (region != null && region.contains(event.getBlock().getLocation()) &&
-			!region.contains(event.getToBlock().getLocation())) satisfied = true;
+			!region.contains(event.getToBlock().getLocation())) broken = true;
 	}
 
 	@Override
 	public boolean isSatisfied(AutoRefMatch match)
-	{ return satisfied; }
+	{
+		// a core goal is satisfied if our core is unbroken and
+		// all other cores are broken
+		boolean satisfied = !broken;
+		for (AutoRefTeam team : match.getTeams()) if (team != this.getOwner())
+			for (CoreGoal core : team.getTeamGoals(CoreGoal.class))
+				satisfied &= core.broken;
+
+		return satisfied;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "CORE";
+	}
 
 	@Override
 	public void updateReferee(Player ref)
 	{
 		AutoRefMatch match = getOwner().getMatch();
 		match.messageReferee(ref, "team", getOwner().getName(),
-			"goal", "core", region.toString(), Boolean.toString(satisfied));
+			"goal", "core", region.toString(), Boolean.toString(broken));
 	}
 
 	@Override
