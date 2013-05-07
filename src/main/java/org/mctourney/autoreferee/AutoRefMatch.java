@@ -48,6 +48,7 @@ import org.bukkit.entity.Ambient;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Monster;
@@ -824,17 +825,46 @@ public class AutoRefMatch implements Metadatable
 	public class BedUpdateTask extends BukkitRunnable
 	{
 		private Map<AutoRefPlayer, Boolean> hasBed = Maps.newHashMap();
-		private String breakerName;
+		private String breakerName, breakAction = "broken";
 		private AutoRefPlayer breaker;
 
 		public BedUpdateTask(AutoRefPlayer breaker)
 		{ this(breaker.getDisplayName()); this.breaker = breaker; }
+
+		public BedUpdateTask(Entity ent)
+		{
+			AutoReferee plugin = AutoReferee.getInstance();
+			switch(ent.getType())
+			{
+				case CREEPER: breakerName = "Creeper"; break;
+				case LIGHTNING: breakerName = "Lightning"; break;
+				case WITHER_SKULL: breakerName = "Wither Skull"; break;
+				case WITHER: breakerName = "Wither"; break;
+				case ENDER_CRYSTAL: breakerName = "Ender Crystal"; break;
+				case ENDER_DRAGON: breakerName = "Ender Dragon"; break;
+
+				case FIREBALL:
+				case SMALL_FIREBALL:
+					breakerName = "Fireball"; break;
+
+				case PRIMED_TNT:
+					AutoRefPlayer tntOwner = plugin.getTNTOwner(ent);
+					if (tntOwner == null) breakerName = "TNT";
+					else breakerName = String.format("%s's TNT", tntOwner.getDisplayName());
+					break;
+			}
+
+			for (AutoRefPlayer apl : getPlayers())
+				hasBed.put(apl, apl.hasBed());
+			breakAction = "blown up";
+		}
 
 		public BedUpdateTask(String breakerName)
 		{
 			this.breakerName = breakerName;
 			for (AutoRefPlayer apl : getPlayers())
 				hasBed.put(apl, apl.hasBed());
+			breakAction = "broken";
 		}
 
 		public void run()
@@ -852,8 +882,8 @@ public class AutoRefMatch implements Metadatable
 			if (breaker != null && lostBed.contains(breaker)) return;
 
 			if (lostBed.size() == 1)
-				bedBreakNotification = String.format("%s's bed has been broken by %s.",
-					((AutoRefPlayer) lostBed.toArray()[0]).getDisplayName(), breakerName);
+				bedBreakNotification = String.format("%s's bed has been %s by %s.",
+					((AutoRefPlayer) lostBed.toArray()[0]).getDisplayName(), breakAction, breakerName);
 			else
 			{
 				// get the team that owns this bed (null if owned by more than one team)
@@ -861,8 +891,8 @@ public class AutoRefMatch implements Metadatable
 				for (AutoRefPlayer apl : lostBed) if (apl.getTeam() != teamOwner) teamOwner = null;
 
 				bedBreakNotification = teamOwner != null
-					? String.format("%s's bed has been broken by %s.", teamOwner.getDisplayName(), breakerName)
-					: String.format("%s has broken a bed.", breakerName);
+					? String.format("%s's bed has been %s by %s.", teamOwner.getDisplayName(), breakAction, breakerName)
+					: String.format("%s has %s a bed.", breakerName, breakAction);
 			}
 
 			for (Player ref : getReferees(false))
