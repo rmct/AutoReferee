@@ -11,6 +11,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -84,6 +85,21 @@ public class ObjectiveTracker implements Listener
 		if (match != null && apl != null && match.getCurrentState().inProgress()
 			&& match.getRespawnMode() == RespawnMode.BEDSONLY && block.getType() == Material.BED_BLOCK)
 				match.new BedUpdateTask(apl).runTask(plugin);
+	}
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void bedExplode(EntityExplodeEvent event)
+	{
+		Entity ent = event.getEntity();
+		AutoRefMatch match = plugin.getMatch(ent.getWorld());
+		boolean bedBroke = false;
+
+		for (Block b : event.blockList())
+			if (b.getType() == Material.BED_BLOCK) bedBroke = true;
+
+		if (match != null && match.getCurrentState().inProgress()
+			&& match.getRespawnMode() == RespawnMode.BEDSONLY && bedBroke)
+				match.new BedUpdateTask(ent).runTask(plugin);
 	}
 
 	// ----------------- START WINCONDITION -----------------------
