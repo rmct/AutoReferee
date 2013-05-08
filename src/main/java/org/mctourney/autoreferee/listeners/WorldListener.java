@@ -139,14 +139,6 @@ public class WorldListener implements Listener
 			if (!player.hasPlayedBefore())
 				player.teleport(match.getPlayerSpawn(player));
 		}
-
-		// moving to lobby world, set player to creative
-		if (player.getWorld() == plugin.getLobbyWorld())
-		{
-			if (!player.hasPlayedBefore())
-				player.teleport(player.getWorld().getSpawnLocation());
-			player.setGameMode(GameMode.CREATIVE);
-		}
 	}
 
 	@EventHandler
@@ -159,20 +151,6 @@ public class WorldListener implements Listener
 				match.broadcast(match.colorMessage(event.getQuitMessage()));
 			event.setQuitMessage(null);
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public static GameMode getDefaultGamemode(World world)
-	{
-		Map<GameMode, Integer> cnt = new DefaultedMap(0); int x, max = 0;
-		GameMode best = AutoReferee.getInstance().getServer().getDefaultGameMode();
-		for (Player p : world.getPlayers()) if (!p.isOp())
-		{
-			cnt.put(p.getGameMode(), x = 1+cnt.get(p.getGameMode()));
-			if (x > max) { max = x; best = p.getGameMode(); }
-		}
-
-		return best;
 	}
 
 	@EventHandler
@@ -209,9 +187,5 @@ public class WorldListener implements Listener
 			matchFm.setSpectatorMode(player, false);
 			PlayerUtil.setGameMode(player, GameMode.SURVIVAL);
 		}
-
-		// moving to lobby world, set player to creative
-		if (player.getWorld() == plugin.getLobbyWorld())
-			player.setGameMode(GameMode.CREATIVE);
 	}
 }

@@ -38,6 +38,7 @@ import org.mctourney.autoreferee.commands.ConfigurationCommands;
 import org.mctourney.autoreferee.commands.PlayerCommands;
 import org.mctourney.autoreferee.commands.PracticeCommands;
 import org.mctourney.autoreferee.commands.SpectatorCommands;
+import org.mctourney.autoreferee.listeners.lobby.ClassicLobbyListener;
 import org.mctourney.autoreferee.listeners.CombatListener;
 import org.mctourney.autoreferee.listeners.ObjectiveTracker;
 import org.mctourney.autoreferee.listeners.SpectatorListener;
@@ -266,12 +267,16 @@ public class AutoReferee extends JavaPlugin
 		PluginManager pm = getServer().getPluginManager();
 		PracticeCommands practice = new PracticeCommands(this);
 
+		ClassicLobbyListener lobbyListener = new ClassicLobbyListener(this);
+		// TODO add other lobby types
+
 		// listener utility classes, subdivided for organization
 		pm.registerEvents(new TeamListener(this), this);
 		pm.registerEvents(new CombatListener(this), this);
 		pm.registerEvents(new ZoneListener(this), this);
 		pm.registerEvents(new WorldListener(this), this);
 		pm.registerEvents(new ObjectiveTracker(this), this);
+		pm.registerEvents(lobbyListener, this);
 		pm.registerEvents(practice, this);
 
 		// save this reference to use for setting up the referee channel later
