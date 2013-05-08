@@ -5,6 +5,7 @@ import java.util.Iterator;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.World;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -157,6 +158,33 @@ public class TeamListener implements Listener
 					player.performCommand(ChatColor.stripColor(lines[1] + " " + lines[2]).trim());
 				event.setCancelled(true);
 			}
+		}
+	}
+
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void spectatorInfo(PlayerInteractEvent event)
+	{
+		Player player = event.getPlayer();
+		AutoRefMatch match = plugin.getMatch(player.getWorld());
+
+		// if this is a match and the person is just a spectator
+		if (match == null || !match.isSpectator(player)) return;
+
+		// spawners
+		if (event.hasBlock() && event.getClickedBlock().getState() instanceof CreatureSpawner)
+		{
+			CreatureSpawner spawner = (CreatureSpawner) event.getClickedBlock().getState();
+			String spawnerType = spawner.getCreatureTypeName();
+
+			switch (spawner.getSpawnedType())
+			{
+				case DROPPED_ITEM:
+					// TODO - Not implemented in CraftBukkit:
+					// a method to determine the data for the dropped item
+					break;
+			}
+
+			player.sendMessage(ChatColor.DARK_GRAY + String.format("%s Spawner", spawnerType));
 		}
 	}
 
