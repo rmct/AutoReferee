@@ -364,7 +364,7 @@ public class CombatListener implements Listener
 		}
 	}
 
-	@EventHandler(priority=EventPriority.HIGHEST)
+	@EventHandler(priority=EventPriority.MONITOR)
 	public void entityExplode(EntityExplodeEvent event)
 	{
 		// remove this entity from the table if present
