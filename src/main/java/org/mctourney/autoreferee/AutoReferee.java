@@ -387,18 +387,6 @@ public class AutoReferee extends JavaPlugin
 		return (x != null && x instanceof WorldEditPlugin) ? (WorldEditPlugin) x : null;
 	}
 
-	/**
-	 * Checks if the player should be white-listed on this server. Only used in auto-mode.
-	 *
-	 * @return true if player should be whitelisted, otherwise false
-	 */
-	public boolean playerWhitelisted(Player player)
-	{
-		if (player.hasPermission("autoreferee.admin")) return true;
-		if (player.hasPermission("autoreferee.referee")) return true;
-		return getExpectedTeam(player) != null;
-	}
-
 	private World consoleWorld = null;
 
 	/**
@@ -449,11 +437,6 @@ public class AutoReferee extends JavaPlugin
 	public ChunkGenerator getDefaultWorldGenerator(String worldname, String id)
 	{ return new NullChunkGenerator(); }
 
-	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
-	{
-		return false;
-	}
-
 	private SyncMessageTask messageQueue = new SyncMessageTask();
 
 	/**
@@ -493,15 +476,5 @@ public class AutoReferee extends JavaPlugin
 				msg.recipient.sendMessage(msg.message);
 			msgQueue.clear();
 		}
-	}
-
-	File getLogDirectory()
-	{
-		// create the log directory if it doesn't exist
-		File logdir = new File(getDataFolder(), "logs");
-		if (!logdir.exists()) logdir.mkdir();
-
-		// return the reference to the log directory
-		return logdir;
 	}
 }
