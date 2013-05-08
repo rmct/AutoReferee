@@ -250,9 +250,6 @@ public class ZoneListener implements Listener
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void creatureSpawn(CreatureSpawnEvent event)
 	{
-		if (event.getEntity().getWorld() == plugin.getLobbyWorld())
-		{ event.setCancelled(true); return; }
-
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
 		if (match == null || match.getCurrentState() == MatchStatus.NONE) return;
 
