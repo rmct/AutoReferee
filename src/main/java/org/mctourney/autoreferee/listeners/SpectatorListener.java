@@ -17,7 +17,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -176,13 +176,13 @@ public class SpectatorListener implements PluginMessageListener, Listener
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
-	public void spectatorDeath(EntityDamageEvent event)
+	public void spectatorDeath(EntityDamageByEntityEvent event)
 	{
 		World world = event.getEntity().getWorld();
 		AutoRefMatch match = plugin.getMatch(world);
 
-		if (event.getEntityType() != EntityType.PLAYER) return;
-		Player player = (Player) event.getEntity();
+		if (event.getDamager().getType() != EntityType.PLAYER) return;
+		Player player = (Player) event.getDamager();
 
 		if (match != null && match.getCurrentState().inProgress() &&
 			!match.isPlayer(player))
