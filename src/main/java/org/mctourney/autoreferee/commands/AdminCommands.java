@@ -46,6 +46,23 @@ public class AdminCommands implements CommandHandler
 		return world != null;
 	}
 
+	@AutoRefCommand(name={"autoref", "setlobby"}, argmax=0,
+		description="Sets the current world to be the AutoReferee lobby world.")
+	@AutoRefPermission(console=false, nodes={"autoreferee.admin"})
+
+	public boolean setLobbyWorld(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		if (match != null) return false;
+		World lobby = ((Player) sender).getWorld();
+
+		plugin.setLobbyWorld(lobby);
+		plugin.getConfig().set("lobby-world", lobby.getName());
+
+		sender.sendMessage(ChatColor.GREEN + lobby.getName() +
+			" is the new AutoReferee lobby world.");
+		return true;
+	}
+
 	@AutoRefCommand(name={"autoref", "load"}, argmin=1, options="c+x",
 		description="Loads a map by name, case insensitive.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
