@@ -77,7 +77,6 @@ import org.mctourney.autoreferee.event.player.PlayerMatchJoinEvent;
 import org.mctourney.autoreferee.event.player.PlayerMatchLeaveEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
 import org.mctourney.autoreferee.listeners.SpectatorListener;
-import org.mctourney.autoreferee.listeners.WorldListener;
 import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
 import org.mctourney.autoreferee.regions.CuboidRegion;
