@@ -10,6 +10,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
@@ -34,8 +35,7 @@ public class ClassicLobbyListener extends LobbyListener
 	public void projectileLaunch(ProjectileLaunchEvent event)
 	{
 		LivingEntity shooter = event.getEntity().getShooter();
-		if (shooter != null && shooter.getType() == EntityType.PLAYER &&
-			((Player) shooter).hasPermission("autoreferee.admin")) return;
+		if (shooter != null && checkAdminPrivilege(shooter)) return;
 
 		if (event.getEntity().getWorld() == plugin.getLobbyWorld())
 			event.setCancelled(true);
@@ -44,9 +44,7 @@ public class ClassicLobbyListener extends LobbyListener
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void bowShoot(EntityShootBowEvent event)
 	{
-		if (event.getEntityType() == EntityType.PLAYER &&
-			((Player) event.getEntity()).hasPermission("autoreferee.admin")) return;
-
+		if (checkAdminPrivilege(event.getEntity())) return;
 		if (event.getEntity().getWorld() == plugin.getLobbyWorld())
 			event.setCancelled(true);
 	}
@@ -54,9 +52,7 @@ public class ClassicLobbyListener extends LobbyListener
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void itemConsume(PlayerItemConsumeEvent event)
 	{
-		if (event.getPlayer() != null &&
-			event.getPlayer().hasPermission("autoreferee.admin")) return;
-
+		if (checkAdminPrivilege(event.getPlayer())) return;
 		if (event.getPlayer().getWorld() == plugin.getLobbyWorld())
 			event.setCancelled(true);
 	}
@@ -71,9 +67,7 @@ public class ClassicLobbyListener extends LobbyListener
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void dropItem(PlayerDropItemEvent event)
 	{
-		if (event.getPlayer() != null &&
-			event.getPlayer().hasPermission("autoreferee.admin")) return;
-
+		if (checkAdminPrivilege(event.getPlayer())) return;
 		if (event.getPlayer().getWorld() == plugin.getLobbyWorld())
 			event.setCancelled(true);
 	}
@@ -81,9 +75,7 @@ public class ClassicLobbyListener extends LobbyListener
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void blockPlace(BlockPlaceEvent event)
 	{
-		if (event.getPlayer() != null &&
-			event.getPlayer().hasPermission("autoreferee.admin")) return;
-
+		if (checkAdminPrivilege(event.getPlayer())) return;
 		if (event.getPlayer().getWorld() == plugin.getLobbyWorld())
 			event.setCancelled(true);
 	}
@@ -91,9 +83,7 @@ public class ClassicLobbyListener extends LobbyListener
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void blockBreak(BlockBreakEvent event)
 	{
-		if (event.getPlayer() != null &&
-			event.getPlayer().hasPermission("autoreferee.admin")) return;
-
+		if (checkAdminPrivilege(event.getPlayer())) return;
 		if (event.getBlock().getWorld() == plugin.getLobbyWorld())
 			event.setCancelled(true);
 	}
@@ -101,9 +91,7 @@ public class ClassicLobbyListener extends LobbyListener
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void bucketEmpty(PlayerBucketEmptyEvent event)
 	{
-		if (event.getPlayer() != null &&
-			event.getPlayer().hasPermission("autoreferee.admin")) return;
-
+		if (checkAdminPrivilege(event.getPlayer())) return;
 		if (event.getPlayer().getWorld() == plugin.getLobbyWorld())
 			event.setCancelled(true);
 	}
@@ -111,11 +99,16 @@ public class ClassicLobbyListener extends LobbyListener
 	@EventHandler(priority=EventPriority.HIGHEST)
 	public void bucketFill(PlayerBucketFillEvent event)
 	{
-		if (event.getPlayer() != null &&
-			event.getPlayer().hasPermission("autoreferee.admin")) return;
-
+		if (checkAdminPrivilege(event.getPlayer())) return;
 		if (event.getPlayer().getWorld() == plugin.getLobbyWorld())
 			event.setCancelled(true);
+	}
+
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void hungerChange(FoodLevelChangeEvent event)
+	{
+		if (event.getEntity().getWorld() == plugin.getLobbyWorld())
+		{ event.setCancelled(true); event.setFoodLevel(20); }
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
