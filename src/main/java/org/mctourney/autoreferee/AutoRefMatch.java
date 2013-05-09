@@ -2625,7 +2625,7 @@ public class AutoRefMatch implements Metadatable
 	{
 		AutoRefTeam team = getPlayerTeam(player);
 		if (team != null) return team.getSpawnLocation();
-		return primaryWorld.getSpawnLocation();
+		return this.getWorldSpawn();
 	}
 
 	/**

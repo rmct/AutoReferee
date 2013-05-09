@@ -73,35 +73,10 @@ public class WorldListener implements Listener
 		}
 	}
 
-	// set of players to be processed who have logged into a non-existent world
-	Set<String> playerLimboLogin = Sets.newHashSet();
-
-	@EventHandler
-	public void playerPreLogin(AsyncPlayerPreLoginEvent event)
-	{
-		OfflinePlayer opl = Bukkit.getOfflinePlayer(event.getName());
-		Location oloc = SportBukkitUtil.getOfflinePlayerLocation(opl);
-
-		// either there is no offline player utility, or check the world like normal
-		if (opl.hasPlayedBefore() && (oloc == null || oloc.getWorld() == null))
-		{
-			if (!opl.isOnline()) playerLimboLogin.add(opl.getName());
-			// TODO deferred teleportation back on the sync server thread if online
-		}
-	}
-
 	@EventHandler
 	public void playerJoin(PlayerJoinEvent event)
 	{
 		Player player = event.getPlayer();
-
-		// if this player is "in limbo" (logged into an unloaded world)
-		if (player.hasPlayedBefore() && playerLimboLogin.remove(player.getName()))
-		{
-			World newWorld = plugin.getLobbyWorld();
-			if (newWorld == null) newWorld = Bukkit.getWorlds().get(0);
-			player.teleport(newWorld.getSpawnLocation());
-		}
 
 		// get the match for the world the player is logging into
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
