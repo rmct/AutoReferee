@@ -75,11 +75,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Announce a message to your current match. Your name will be shown. Console can can use this command.">
+                    <tr class="command-row role-4" data-toggle="tooltip" data-placement="bottom" title="Announce a message to your current match. Your name will be shown. Console can can use this command.">
                         <td class="command-usage">/announce</td>
                         <td class="command-options"></td>
                         <td class="command-perm"></td>
-                        <td class="command-role role-0">Any</td>
+                        <td class="command-role role-4">Referee</td>
                         <td class="command-console"><i class="icon-ok"></i></td>
                     </tr>
                     <tr class="command-row role-2" data-toggle="tooltip" data-placement="bottom" title="AutoReferee teleportation tools. Console can not can use this command.">
@@ -124,12 +124,26 @@
                         <td class="command-role role-0">Any</td>
                         <td class="command-console"><i class="icon-ok"></i></td>
                     </tr>
+                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Set the currently selected WorldEdit region to be a team&#x27;s core. Console can not can use this command.">
+                        <td class="command-usage">/autoref core</td>
+                        <td class="command-options">r+</td>
+                        <td class="command-perm">autoreferee.configure</td>
+                        <td class="command-role role-0">Any</td>
+                        <td class="command-console"><i class="icon-remove"></i></td>
+                    </tr>
                     <tr class="command-row role-4" data-toggle="tooltip" data-placement="bottom" title="Begin a generic countdown. Console can can use this command.">
                         <td class="command-usage">/autoref countdown</td>
                         <td class="command-options"></td>
                         <td class="command-perm"></td>
                         <td class="command-role role-4">Referee</td>
                         <td class="command-console"><i class="icon-ok"></i></td>
+                    </tr>
+                    <tr class="command-row role-2" data-toggle="tooltip" data-placement="bottom" title="Cycle through players. Console can not can use this command.">
+                        <td class="command-usage">/autoref cycle</td>
+                        <td class="command-options">np</td>
+                        <td class="command-perm"></td>
+                        <td class="command-role role-2">Spectator</td>
+                        <td class="command-console"><i class="icon-remove"></i></td>
                     </tr>
                     <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Turn on debugging mode. Console can can use this command.">
                         <td class="command-usage">/autoref debug</td>
@@ -140,6 +154,13 @@
                     </tr>
                     <tr class="command-row role-4" data-toggle="tooltip" data-placement="bottom" title="Ends the current match by decision. Specify a team name to declare them the winner, or &#x27;tie&#x27; to announce a tie. Console can can use this command.">
                         <td class="command-usage">/autoref endmatch</td>
+                        <td class="command-options"></td>
+                        <td class="command-perm"></td>
+                        <td class="command-role role-4">Referee</td>
+                        <td class="command-console"><i class="icon-ok"></i></td>
+                    </tr>
+                    <tr class="command-row role-4" data-toggle="tooltip" data-placement="bottom" title="Give a kit to the specified player. Console can can use this command.">
+                        <td class="command-usage">/autoref givekit</td>
                         <td class="command-options"></td>
                         <td class="command-perm"></td>
                         <td class="command-role role-4">Referee</td>
@@ -161,14 +182,14 @@
                     </tr>
                     <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Loads a map by name, case insensitive. Console can can use this command.">
                         <td class="command-usage">/autoref load</td>
-                        <td class="command-options"></td>
+                        <td class="command-options">c+x</td>
                         <td class="command-perm">autoreferee.admin</td>
                         <td class="command-role role-0">Any</td>
                         <td class="command-console"><i class="icon-ok"></i></td>
                     </tr>
                     <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Loads a map from a remote zip file, taking the URL as a parameter. Console can can use this command.">
                         <td class="command-usage">/autoref loadurl</td>
-                        <td class="command-options"></td>
+                        <td class="command-options">c+x</td>
                         <td class="command-perm">autoreferee.admin</td>
                         <td class="command-role role-0">Any</td>
                         <td class="command-console"><i class="icon-ok"></i></td>
@@ -180,10 +201,24 @@
                         <td class="command-role role-0">Any</td>
                         <td class="command-console"><i class="icon-ok"></i></td>
                     </tr>
+                    <tr class="command-row role-2" data-toggle="tooltip" data-placement="bottom" title="Toggles permanent night vision for a spectator. Console can not can use this command.">
+                        <td class="command-usage">/autoref nightvis</td>
+                        <td class="command-options">01</td>
+                        <td class="command-perm"></td>
+                        <td class="command-role role-2">Spectator</td>
+                        <td class="command-console"><i class="icon-remove"></i></td>
+                    </tr>
                     <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Prohibit the item in hand from being crafted during a match. Console can not can use this command.">
                         <td class="command-usage">/autoref nocraft</td>
                         <td class="command-options"></td>
                         <td class="command-perm">autoreferee.configure</td>
+                        <td class="command-role role-0">Any</td>
+                        <td class="command-console"><i class="icon-remove"></i></td>
+                    </tr>
+                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Switch to practice mode or activate practice mode menu. Console can not can use this command.">
+                        <td class="command-usage">/autoref practice</td>
+                        <td class="command-options">t*</td>
+                        <td class="command-perm"></td>
                         <td class="command-role role-0">Any</td>
                         <td class="command-console"><i class="icon-remove"></i></td>
                     </tr>
@@ -201,6 +236,20 @@
                         <td class="command-role role-0">Any</td>
                         <td class="command-console"><i class="icon-ok"></i></td>
                     </tr>
+                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Restrict all team zones to be within a given height. Console can can use this command.">
+                        <td class="command-usage">/autoref setheight</td>
+                        <td class="command-options"></td>
+                        <td class="command-perm">autoreferee.configure</td>
+                        <td class="command-role role-0">Any</td>
+                        <td class="command-console"><i class="icon-ok"></i></td>
+                    </tr>
+                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Sets the current world to be the AutoReferee lobby world. Console can not can use this command.">
+                        <td class="command-usage">/autoref setlobby</td>
+                        <td class="command-options"></td>
+                        <td class="command-perm">autoreferee.admin</td>
+                        <td class="command-role role-0">Any</td>
+                        <td class="command-console"><i class="icon-remove"></i></td>
+                    </tr>
                     <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Set the current location as the global spawn. If a team name is provided, sets team spawn. Console can not can use this command.">
                         <td class="command-usage">/autoref setspawn</td>
                         <td class="command-options"></td>
@@ -208,11 +257,11 @@
                         <td class="command-role role-0">Any</td>
                         <td class="command-console"><i class="icon-remove"></i></td>
                     </tr>
-                    <tr class="command-row role-4" data-toggle="tooltip" data-placement="bottom" title="Swaps the players and custom names of both teams. Console can can use this command.">
+                    <tr class="command-row role-2" data-toggle="tooltip" data-placement="bottom" title="Swaps the players and custom names of both teams. Console can can use this command.">
                         <td class="command-usage">/autoref swapteams</td>
                         <td class="command-options"></td>
                         <td class="command-perm"></td>
-                        <td class="command-role role-4">Referee</td>
+                        <td class="command-role role-2">Spectator</td>
                         <td class="command-console"><i class="icon-ok"></i></td>
                     </tr>
                     <tr class="command-row role-4" data-toggle="tooltip" data-placement="bottom" title="Rename a team. Console can can use this command.">
@@ -278,11 +327,11 @@
                         <td class="command-role role-0">Any</td>
                         <td class="command-console"><i class="icon-ok"></i></td>
                     </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Broadcast a message to your current match. No name will be shown. Console can can use this command.">
+                    <tr class="command-row role-4" data-toggle="tooltip" data-placement="bottom" title="Broadcast a message to your current match. No name will be shown. Console can can use this command.">
                         <td class="command-usage">/broadcast</td>
                         <td class="command-options"></td>
                         <td class="command-perm"></td>
-                        <td class="command-role role-0">Any</td>
+                        <td class="command-role role-4">Referee</td>
                         <td class="command-console"><i class="icon-ok"></i></td>
                     </tr>
                     <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Join the match of the named player. If no player is named, lists available matches. Console can not can use this command.">
