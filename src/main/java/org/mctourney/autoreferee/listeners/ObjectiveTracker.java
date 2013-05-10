@@ -11,8 +11,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -110,6 +112,12 @@ public class ObjectiveTracker implements Listener
 		if (match != null) match.checkWinConditions();
 	}
 
+	private void _checkWinConditions(EntityEvent event)
+	{
+		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
+		if (match != null) match.checkWinConditions();
+	}
+
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void checkWinConditions(BlockBreakEvent event)
 	{ _checkWinConditions(event); }
@@ -160,6 +168,10 @@ public class ObjectiveTracker implements Listener
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void checkWinConditions(LeavesDecayEvent event)
+	{ _checkWinConditions(event); }
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void checkWinConditions(PlayerDeathEvent event)
 	{ _checkWinConditions(event); }
 
 	// ------------------ END WINCONDITION ------------------------

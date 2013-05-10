@@ -209,6 +209,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	// number of times this player has killed other players
 	private Map<AutoRefPlayer, Integer> kills;
 	private int totalKills = 0;
+	private int teamKills = 0;
 
 	private double furthestShot = 0.0;
 
@@ -259,7 +260,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 * @return number of kills
 	 */
 	public int getKills()
-	{ return totalKills; }
+	{ return totalKills - teamKills; }
 
 	private Map<AutoRefPlayer, Long> lastPlayerDamageMillis = null;
 	private static final long KILLER_MS = 1000L * 3;
@@ -744,6 +745,9 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		// get the name of the player who died, record one kill against them
 		AutoRefPlayer apl = getMatch().getPlayer(e.getEntity());
 		kills.put(apl, 1 + kills.get(apl)); ++totalKills;
+
+		// if the player is on our team, register a team kill
+		if (apl.getTeam() == this.getTeam()) ++teamKills;
 
 		AutoRefMatch match = getMatch();
 		Location loc = e.getEntity().getLocation();
