@@ -294,7 +294,7 @@ class InvitationPrompt extends BooleanPrompt
 	public String getPromptText(ConversationContext context)
 	{
 		return ChatColor.GREEN + String.format(">>> %s is inviting you to %s.",
-			from, match.getMapName()) + " Do you accept?";
+			from, match.getMapName()) + " Do you accept? (type \"yes\" or \"no\")";
 	}
 
 	@Override
