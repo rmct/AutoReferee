@@ -85,6 +85,9 @@ public abstract class AutoRefGoal
 	public double getScore(AutoRefMatch match)
 	{ return isSatisfied(match) ? 1000.0 : 0.0; }
 
+	public boolean canBeCompleted(AutoRefMatch match)
+	{ return true; }
+
 	protected AutoRefGoal getGoalSettings(AutoRefTeam team, Element elt)
 	{
 		return this;

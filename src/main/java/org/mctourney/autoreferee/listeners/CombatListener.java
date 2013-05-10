@@ -64,7 +64,7 @@ public class CombatListener implements Listener
 		if (match != null)
 		{
 			// get victim, and killer (maybe null) of this player
-			Player victim = (Player) event.getEntity();
+			Player victim = event.getEntity();
 			AutoRefPlayer vapl = match.getPlayer(victim);
 
 			Player killer = victim.getKiller();
@@ -126,8 +126,9 @@ public class CombatListener implements Listener
 						if (victim.getBedSpawnLocation() != null) break respawn;
 
 					case DISALLOW:
-						if (match.getCurrentState().inProgress())
-							match.eliminatePlayer((Player) event.getEntity());
+					case ALLOW:
+						if (match.getCurrentState().inProgress() && !vapl.hasLives())
+							match.eliminatePlayer(event.getEntity());
 						break;
 
 					// typically, no action should be taken
