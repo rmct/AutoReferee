@@ -15,6 +15,7 @@ public class CoreGoal extends AutoRefGoal
 {
 	private boolean broken;
 	private AutoRefRegion region;
+	private long range = 0L;
 
 	public CoreGoal(AutoRefTeam team, AutoRefRegion region)
 	{
@@ -26,26 +27,30 @@ public class CoreGoal extends AutoRefGoal
 	{
 		super(team);
 		this.region = AutoRefRegion.fromElement(team.getMatch(), elt.getChildren().get(0));
+
+		if (elt.getAttribute("range") != null)
+			try { this.range = Long.parseLong(elt.getAttributeValue("range").trim()); }
+			catch (NumberFormatException e) { e.printStackTrace(); }
 	}
+
+	public long getRange()
+	{ return this.range; }
+
+	public void setRange(long range)
+	{ this.range = range; }
 
 	public void checkSatisfied(BlockFromToEvent event)
 	{
-		if (region != null && region.contains(event.getBlock().getLocation()) &&
-			!region.contains(event.getToBlock().getLocation())) broken = true;
+		final Location fm = event.getBlock().getLocation();
+		final Location to = event.getToBlock().getLocation();
+
+		if (region != null && region.distanceToRegion(fm) <= range &&
+			region.distanceToRegion(to) > range) broken = true;
 	}
 
 	@Override
 	public boolean isSatisfied(AutoRefMatch match)
-	{
-		// a core goal is satisfied if our core is unbroken and
-		// all other cores are broken
-		boolean satisfied = !broken;
-		for (AutoRefTeam team : match.getTeams()) if (team != this.getOwner())
-			for (CoreGoal core : team.getTeamGoals(CoreGoal.class))
-				satisfied &= core.broken;
-
-		return satisfied;
-	}
+	{ return broken; }
 
 	@Override
 	public String toString()
@@ -74,6 +79,7 @@ public class CoreGoal extends AutoRefGoal
 			throw new IllegalStateException("Not a valid CoreGoal: Requires a valid region.");
 
 		Element elt = new Element("core");
+		if (range > 0L) elt.setAttribute("range", Long.toString(range));
 		elt.addContent(region.toElement());
 		return elt;
 	}
