@@ -55,6 +55,8 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	private Set<AutoRefPlayer> players = Sets.newHashSet();
 	private Set<AutoRefPlayer> playersCache = Sets.newHashSet();
 
+	private int playerlives = -1;
+
 	public String toString()
 	{ return "AutoRefTeam[" + this.getName() + "]"; }
 
@@ -375,6 +377,10 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		newTeam.spawn = spawn == null ? null :
 			AutoRefRegion.fromElement(match, spawn.getChildren().get(0));
 
+		if (elt.getAttribute("lives") != null)
+			try { newTeam.playerlives = Integer.parseInt(elt.getAttributeValue("lives").trim()); }
+			catch (NumberFormatException e) { e.printStackTrace(); }
+
 		newTeam.players = Sets.newHashSet();
 		return newTeam;
 	}
@@ -388,6 +394,9 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 			"color", this.getColor().name());
 		if (this.maxSize != 0) elt.setAttribute(
 			"maxsize", Integer.toString(this.maxSize));
+
+		if (this.playerlives > 0)
+			elt.setAttribute("lives", Integer.toString(this.playerlives));
 
 		if (this.spawn != null) elt.addContent(
 			new Element("spawn").addContent(this.spawn.toElement()));
@@ -475,6 +484,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 
 		// create an APL object for this player.
 		AutoRefPlayer apl = new AutoRefPlayer(player, this);
+		if (this.playerlives > 0) apl.setLivesRemaining(this.playerlives);
 
 		// quit if they are already on this team
 		if (players.contains(apl)) return true;

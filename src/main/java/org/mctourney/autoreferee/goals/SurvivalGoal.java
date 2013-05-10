@@ -30,6 +30,16 @@ public class SurvivalGoal extends AutoRefGoal
 		return true;
 	}
 
+	public static boolean hasSurvived(AutoRefTeam team)
+	{
+		return team.getPlayers().size() > 0
+			|| team.getCachedPlayers().size() == 0;
+	}
+
+	@Override
+	public boolean canBeCompleted(AutoRefMatch match)
+	{ return SurvivalGoal.hasSurvived(this.getOwner()); }
+
 	@Override
 	public double getScore(AutoRefMatch match)
 	{ return this.getOwner().getPlayers().size() * 250.0; }

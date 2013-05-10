@@ -20,6 +20,7 @@ import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
 
+import org.mctourney.autoreferee.AutoRefMatch.RespawnMode;
 import org.mctourney.autoreferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
 import org.mctourney.autoreferee.goals.BlockGoal;
@@ -224,6 +225,24 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 */
 	public double getFurthestShot()
 	{ return furthestShot; }
+
+	private int livesRemaining = -1;
+
+	/**
+	 * Checks if this player has lives remaining.
+	 *
+	 * @return whether player has lives remaining, true if infinite lives
+	 */
+	public boolean hasLives()
+	{ return getMatch().getRespawnMode() != RespawnMode.DISALLOW && livesRemaining != 0; }
+
+	/**
+	 * Sets the number of lives remaining for this player.
+	 *
+	 * @param lives number of lives remaining before player is eliminated
+	 */
+	public void setLivesRemaining(int lives)
+	{ this.livesRemaining = lives; }
 
 	/**
 	 * Gets the number of times this player has killed a specific player.
@@ -681,6 +700,9 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		// sanity check...
 		if (e.getEntity() != getPlayer()) return;
 		this.saveInventoryView();
+
+		// if this player has a number of lives, reduce by one
+		if (hasLives()) --livesRemaining;
 
 		AutoRefMatch match = getMatch();
 		AutoRefPlayer apl = match.getPlayer(e.getEntity().getKiller());
