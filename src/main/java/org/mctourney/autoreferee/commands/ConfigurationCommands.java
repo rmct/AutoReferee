@@ -345,8 +345,15 @@ public class ConfigurationCommands implements CommandHandler
 			reg = new CuboidRegion(csel.getMinimumPoint(), csel.getMaximumPoint());
 		}
 
-		team.addGoal(new CoreGoal(team, reg));
-		sender.sendMessage(reg.toString() + " set as " + team.getDisplayName() + "'s core.");
+		CoreGoal core = new CoreGoal(team, reg);
+		if (options.hasOption('r'))
+			try { core.setRange(Long.parseLong(options.getOptionValue('r'))); }
+			catch (NumberFormatException e)
+			{ sender.sendMessage(ChatColor.RED + options.getOptionValue('r') + " is not a valid range."); }
+
+		team.addGoal(core);
+		sender.sendMessage(reg.toString() + " set as " + team.getDisplayName() + "'s TARGET core.");
+		sender.sendMessage(team.getDisplayName() + " will be attacking this core, not defending it.");
 		return true;
 	}
 
