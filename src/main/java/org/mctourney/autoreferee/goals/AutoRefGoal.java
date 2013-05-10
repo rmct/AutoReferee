@@ -96,10 +96,11 @@ public abstract class AutoRefGoal
 	private static Map<String, Class<? extends AutoRefGoal>> goalNames = Maps.newHashMap();
 	static
 	{
-		goalNames.put("block", BlockGoal.class);
-		goalNames.put("core", CoreGoal.class);
-		goalNames.put("survive", SurvivalGoal.class);
-		goalNames.put("time", TimeGoal.class);
+		addGoalType("block", BlockGoal.class);
+		addGoalType("core", CoreGoal.class);
+		addGoalType("survive", SurvivalGoal.class);
+		addGoalType("time", TimeGoal.class);
+		addGoalType("deathmatch", ScoreDeathmatchGoal.class);
 	}
 
 	public static void addGoalType(String tag, Class<? extends AutoRefGoal> cls)

@@ -79,6 +79,7 @@ import org.mctourney.autoreferee.event.player.PlayerMatchJoinEvent;
 import org.mctourney.autoreferee.event.player.PlayerMatchLeaveEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
 import org.mctourney.autoreferee.goals.SurvivalGoal;
+import org.mctourney.autoreferee.goals.TimeGoal;
 import org.mctourney.autoreferee.listeners.SpectatorListener;
 import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
@@ -160,6 +161,8 @@ public class AutoRefMatch implements Metadatable
 	{ PRIVATE, PUBLIC; }
 
 	public AccessType access = AccessType.PRIVATE;
+
+	private boolean currentlyTied = false;
 
 	// world this match is taking place on
 	private World primaryWorld;
@@ -1219,6 +1222,9 @@ public class AutoRefMatch implements Metadatable
 			diff = getDifficulty(gameplay.getChildText("difficulty"));
 		primaryWorld.setDifficulty(diff);
 
+		if (gameplay.getChild("maxtime") != null)
+			this.setTimeLimit(TimeGoal.parseTime(gameplay.getChildText("maxtime")));
+
 		// respawn mode
 		if (gameplay.getChild("respawn") != null)
 		{
@@ -2267,6 +2273,9 @@ public class AutoRefMatch implements Metadatable
 			// if only one team remains, they win
 			else if (remainingTeams.size() == 1)
 				endMatch(Iterables.getOnlyElement(remainingTeams));
+
+			// if we are just waiting for this match to end, check always
+			else if (currentlyTied) endMatch();
 		}
 	}
 
@@ -2301,6 +2310,10 @@ public class AutoRefMatch implements Metadatable
 		{ endMatch(sortedTeams.get(0)); return; }
 
 		if (AutoRefMatch.areTiesAllowed()) { endMatch(null); return; }
+
+		if (currentlyTied) return;
+		currentlyTied = true;
+
 		for (Player ref : getReferees())
 		{
 			ref.sendMessage(ChatColor.DARK_GRAY + "This match is currently tied.");
@@ -3097,9 +3110,12 @@ public class AutoRefMatch implements Metadatable
 			(this.getCurrentState().isBeforeMatch() ? (" [" + this.access.name() + "]") : ""));
 		sender.sendMessage("Map difficulty is set to: " + ChatColor.GRAY + getWorld().getDifficulty().name());
 
-		long timestamp = this.getElapsedSeconds();
-		if (getCurrentState().inProgress()) sender.sendMessage(String.format(
-			ChatColor.GRAY + "The current match time is: %02d:%02d:%02d",
-				timestamp/3600L, (timestamp/60L)%60L, timestamp%60L));
+		long timestamp = this.getElapsedSeconds(), timelimit = this.getTimeLimit();
+		if (getCurrentState().inProgress()) sender.sendMessage(this.hasTimeLimit()
+			? String.format(ChatColor.GRAY + "The current match time is: " +
+				"%02d:%02d:%02d / %02d:%02d:%02d", timestamp/3600L, (timestamp/60L)%60L, timestamp%60L,
+				timelimit/3600L, (timelimit/60L)%60L, timelimit%60L)
+			: String.format(ChatColor.GRAY + "The current match time is: " +
+				"%02d:%02d:%02d", timestamp/3600L, (timestamp/60L)%60L, timestamp%60L));
 	}
 }
