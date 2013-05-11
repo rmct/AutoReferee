@@ -1,0 +1,100 @@
+<map protocol="2.0.0">
+  <meta>
+    <name>Direct Fire</name>
+    <version>1.1</version>
+    <creators>
+      <creator ign="Vechs1">Vechs</creator>
+    </creators>
+  </meta>
+
+  <teams>
+    <!-- specify a kit to be given on respawn with the "kit" attribute -->
+    <team color="BLUE" kit="testkit">
+      <name>Right</name>
+      <spawn>
+        <location pos="322,72,-58" yaw="90" />
+      </spawn>
+    </team>
+    <team color="RED" kit="testkit">
+      <name>Left</name>
+      <spawn>
+        <location pos="322,72,-23" yaw="90" />
+      </spawn>
+    </team>
+  </teams>
+
+  <startregion spawn="343,72,-41,90">
+    <cuboid min="316,69,-64" max="399,79,-17" />
+  </startregion>
+
+  <regions>
+    <cuboid min="-256,0,-64" max="319,127,-49">
+      <owner>Right</owner>
+    </cuboid>
+
+    <cuboid min="-256,0,-32" max="319,127,-17">
+      <owner>Left</owner>
+    </cuboid>
+  </regions>
+
+  <goals>
+    <teamgoals team="Right">
+      <block pos="292,68,-63" id="35,13" />
+      <block pos="291,68,-63" id="35,11" />
+      <block pos="290,68,-63" id="35,14" />
+    </teamgoals>
+    <teamgoals team="Left">
+      <block pos="290,68,-18" id="35,13" />
+      <block pos="291,68,-18" id="35,11" />
+      <block pos="292,68,-18" id="35,14" />
+    </teamgoals>
+  </goals>
+
+  <mechanisms>
+    <lever pos="317,72,-53">true</lever>
+    <lever pos="317,72,-28">true</lever>
+  </mechanisms>
+
+  <kits>
+    <!-- name a kit for use with "/ar givekit" or as a team kit -->
+    <kit name="testkit">
+      <effects>
+        <!-- https://github.com/Bukkit/Bukkit/blob/master/src/main/java/org/bukkit/potion/PotionEffectType.java -->
+        <effect type="SPEED" duration="90" level="10" />
+      </effects>
+
+      <!-- specify gear to provide in this kit -->
+      <gear>
+
+        <!-- use "helmet" as the tag to specify the item is a hat -->
+        <helmet type="diamond helmet">
+          <!-- level is a number, type can be a number or name from -->
+          <!-- http://github.com/Bukkit/Bukkit/blob/master/src/main/java/org/bukkit/enchantments/Enchantment.java -->
+          <enchant type="OXYGEN" level="3" />
+        </helmet>
+
+        <!-- other allowed slots are "chest", "leggings", and "boots" -->
+        <chest type="leather chestplate">
+          <teamcolor />
+        </chest>
+
+        <!-- add a count to an item to give in stacks -->
+        <item type="torch" count="64" />
+
+        <item type="shears">
+          <!-- unsafe enchantments allowed -->
+          <enchant type="DIG_SPEED" level="10" />
+        </item>
+      </gear>
+    </kit>
+  </kits>
+
+  <gameplay>
+    <!-- match difficulty, words or numbers allowed -->
+    <difficulty>HARD</difficulty>
+
+    <!-- time of day the match should start -->
+    <clockstart>8am</clockstart>
+  </gameplay>
+  <protect />
+</map>

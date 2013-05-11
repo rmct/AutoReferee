@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -78,6 +79,7 @@ public class PlayerKit
 
 	public static PotionEffect parsePotionEffect(Element element)
 	{
+		assert "effect".equalsIgnoreCase(element.getName());
 		PotionEffectType type = getPotionEffectType(element.getAttributeValue("type"));
 		int duration = Integer.parseInt(element.getAttributeValue("duration")) * 20;
 		int amplifier = Integer.parseInt(element.getAttributeValue("level")) - 1;
@@ -85,9 +87,37 @@ public class PlayerKit
 		return new PotionEffect(type, duration, amplifier);
 	}
 
+	public static void addParsedEnchantment(ItemStack item, Element element)
+	{
+		assert "enchant".equalsIgnoreCase(element.getName());
+		String etype = element.getAttributeValue("type");
+		Enchantment enchantment = Enchantment.getByName(etype);
+
+		if (enchantment == null)
+			try { enchantment = Enchantment.getById(Integer.parseInt(etype)); }
+			catch (NumberFormatException e) {  }
+
+		if (enchantment == null)
+		{
+			etype = etype.toLowerCase();
+			int bscore = Integer.MAX_VALUE;
+			for (Enchantment ench : Enchantment.values())
+			{
+				int score = StringUtils.getLevenshteinDistance(ench.getName().toLowerCase(), etype);
+				if (score < bscore) { bscore = score; enchantment = ench; }
+			}
+		}
+
+		int elevel = 1;
+		if (element.getAttribute("level") != null)
+			try { elevel = Integer.parseInt(element.getAttributeValue("level")); }
+			catch (NumberFormatException e) { e.printStackTrace(); }
+		item.addUnsafeEnchantment(enchantment, elevel);
+	}
+
 	public PlayerKit(Element elt)
 	{
-		assert elt.getName().toLowerCase() == "kit";
+		assert "kit".equalsIgnoreCase(elt.getName());
 		this.setName(elt.getAttributeValue("name").trim());
 
 		Element effectsElement = elt.getChild("effects");
@@ -106,14 +136,13 @@ public class PlayerKit
 					try { type = Material.getMaterial(Integer.parseInt(typename)); }
 					catch (NumberFormatException e) {  }
 
-				typename = typename.toLowerCase();
 				if (type == null)
 				{
+					typename = typename.toLowerCase();
 					int bscore = Integer.MAX_VALUE;
 					for (Material mat : Material.values())
 					{
-						int score = StringUtils.getLevenshteinDistance(
-							mat.name().toLowerCase().replaceAll("_", " "), typename);
+						int score = StringUtils.getLevenshteinDistance(mat.name().toLowerCase(), typename);
 						if (score < bscore) { bscore = score; type = mat; }
 					}
 				}
@@ -160,6 +189,9 @@ public class PlayerKit
 						potionMeta.addCustomEffect(parsePotionEffect(effect), true);
 					item.setItemMeta(potionMeta);
 				}
+
+				for (Element enchant : gear.getChildren("enchant"))
+					addParsedEnchantment(item, enchant);
 
 				// TODO Books
 
