@@ -358,7 +358,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		if (null == (newTeam.name = elt.getChildTextTrim("name"))) return null;
 
 		String clr = elt.getAttributeValue("color");
-		String msz = elt.getAttributeValue("max");
+		String msz = elt.getAttributeValue("maxsize");
 
 		if (clr != null) try
 		{ newTeam.color = ChatColor.valueOf(clr.toUpperCase()); }
@@ -399,10 +399,13 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		Element elt = new Element("team");
 		elt.addContent(new Element("name").setText(getName()));
 
-		if (this.getColor() != ChatColor.RESET) elt.setAttribute(
-			"color", this.getColor().name());
-		if (this.maxSize != 0) elt.setAttribute(
-			"maxsize", Integer.toString(this.maxSize));
+		if (this.getColor() != ChatColor.RESET)
+			elt.setAttribute("color", this.getColor().name());
+		if (this.maxSize != 0)
+			elt.setAttribute("maxsize", Integer.toString(this.maxSize));
+
+		PlayerKit teamKit = this.getKit();
+		if (teamKit != null) elt.setAttribute("kit", teamKit.getName());
 
 		if (this.playerlives > 0)
 			elt.setAttribute("lives", Integer.toString(this.playerlives));

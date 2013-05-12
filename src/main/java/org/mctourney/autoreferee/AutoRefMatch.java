@@ -1315,7 +1315,7 @@ public class AutoRefMatch implements Metadatable
 
 			// get the mechanisms object
 			Element eMechanisms = worldConfig.getChild("mechanisms");
-			if (eMechanisms == null) worldConfig.addContent(eProtect = new Element("mechanisms"));
+			if (eMechanisms == null) worldConfig.addContent(eMechanisms = new Element("mechanisms"));
 
 			// reset the mechanisms to whatever has been saved
 			eMechanisms.removeContent();
