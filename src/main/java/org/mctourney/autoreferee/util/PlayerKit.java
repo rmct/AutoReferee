@@ -81,8 +81,13 @@ public class PlayerKit
 	{
 		assert "effect".equalsIgnoreCase(element.getName());
 		PotionEffectType type = getPotionEffectType(element.getAttributeValue("type"));
-		int duration = Integer.parseInt(element.getAttributeValue("duration")) * 20;
-		int amplifier = Integer.parseInt(element.getAttributeValue("level")) - 1;
+		int duration = -1, amplifier = 0;
+
+		try { duration = Integer.parseInt(element.getAttributeValue("duration")) * 20; }
+		catch (NumberFormatException e) {  }
+
+		try { amplifier = Integer.parseInt(element.getAttributeValue("level")) - 1; }
+		catch (NumberFormatException e) {  }
 
 		return new PotionEffect(type, duration, amplifier);
 	}
