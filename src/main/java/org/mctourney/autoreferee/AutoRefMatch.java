@@ -1497,6 +1497,8 @@ public class AutoRefMatch implements Metadatable
 		AutoReferee.getInstance().addMatch(new AutoRefMatch(world, tmp, MatchStatus.WAITING));
 	}
 
+	private static final File PACKAGING_DIRECTORY = FileUtils.getTempDirectory();
+
 	/**
 	 * Archives this map and stores a clean copy in the map library. Clears unnecessary
 	 * files and attempts to generate a minimal copy of the map, ready for distribution.
@@ -1507,7 +1509,7 @@ public class AutoRefMatch implements Metadatable
 	private File archiveMapData() throws IOException
 	{
 		// make sure the folder exists first
-		File archiveFolder = new File(FileUtils.getTempDirectory(), this.getVersionString());
+		File archiveFolder = new File(PACKAGING_DIRECTORY, this.getVersionString());
 		if (!archiveFolder.exists()) archiveFolder.mkdir();
 		FileUtils.cleanDirectory(archiveFolder);
 
@@ -1550,7 +1552,7 @@ public class AutoRefMatch implements Metadatable
 		ZipOutputStream zip = new ZipOutputStream(new
 			BufferedOutputStream(new FileOutputStream(outZipfile)));
 		zip.setMethod(ZipOutputStream.DEFLATED);
-		addToZip(zip, archiveFolder, AutoRefMap.getMapLibrary());
+		addToZip(zip, archiveFolder, PACKAGING_DIRECTORY);
 
 		zip.close();
 		FileUtils.deleteQuietly(archiveFolder);
