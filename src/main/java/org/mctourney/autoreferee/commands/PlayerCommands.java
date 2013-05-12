@@ -1,7 +1,9 @@
 package org.mctourney.autoreferee.commands;
 
 import java.util.List;
+import java.util.Set;
 
+import com.google.common.collect.Sets;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -17,6 +19,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
+import org.mctourney.autoreferee.listeners.TeamListener;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
 import org.mctourney.autoreferee.util.commands.CommandHandler;
@@ -249,6 +252,24 @@ public class PlayerCommands implements CommandHandler
 	{
 		if (match == null) return false;
 		match.notify(((Player) sender).getLocation(), StringUtils.join(args, ' '));
+		return true;
+	}
+
+	@AutoRefCommand(name={"autoref", "me"})
+	@AutoRefPermission(console=false)
+
+	public boolean me(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		Player speaker = (Player) sender;
+		String message = StringUtils.join(args, ' ');
+
+		Set<Player> recipients = Sets.newHashSet(speaker.getWorld().getPlayers());
+		if (match != null) TeamListener.modifyChatRecipients(match, speaker, recipients);
+
+		String dispname = match == null ? speaker.getName() : match.getDisplayName(speaker);
+		message = String.format("* %s %s", dispname, message);
+		for (Player player : recipients) player.sendMessage(message);
+
 		return true;
 	}
 
