@@ -3,6 +3,7 @@ package org.mctourney.autoreferee;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.Date;
@@ -26,6 +27,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import org.jdom2.Element;
+import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
 import org.mctourney.autoreferee.event.match.MatchLoadEvent;
@@ -47,20 +49,16 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	private String name;
 	private String version;
 
-	private File folder = null;
+	private File zip = null;
 
 	private String filename;
 	private String md5sum;
 
-	protected AutoRefMap(String name, String version, File folder)
+	protected AutoRefMap(String name, String version, File zip)
+		throws IOException
 	{
-		this.name = name; this.version = version;
-		File checksum = new File(this.folder = folder, "checksum");
-
-		this.md5sum = null;
-		if (checksum.exists())
-			try { this.md5sum = FileUtils.readFileToString(checksum); }
-			catch (IOException e) {  }
+		this.name = name; this.version = version; this.zip = zip;
+		this.md5sum = DigestUtils.md5Hex(new FileInputStream(zip));
 	}
 
 	protected AutoRefMap(String csv)
@@ -107,18 +105,18 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	 * @return true if map is installed, otherwise false
 	 */
 	public boolean isInstalled()
-	{ return folder != null; }
+	{ return this.zip != null; }
 
 	/**
-	 * Gets root folder for this map, downloading if necessary.
+	 * Gets root zip for this map, downloading if necessary.
 	 *
-	 * @return root folder for map
+	 * @return root zip for map
 	 * @throws IOException if map download fails
 	 */
-	public File getFolder() throws IOException
+	public File getZip() throws IOException
 	{
 		if (!isInstalled()) download();
-		return folder;
+		return this.zip;
 	}
 
 	private void download() throws IOException
@@ -127,10 +125,9 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		File zip = new File(AutoRefMap.getMapLibrary(), filename);
 		FileUtils.copyURLToFile(url, zip);
 
-		// if the md5s match, return the unzipped folder
+		// if the md5s match, return the zip
 		String md5comp = DigestUtils.md5Hex(new FileInputStream(zip));
-		if (md5comp.equalsIgnoreCase(md5sum))
-		{ this.folder = AutoRefMap.unzipMapFolder(zip); return; }
+		if (md5comp.equalsIgnoreCase(md5sum)) { this.zip = zip; return; }
 
 		// if the md5sum did not match, quit here
 		zip.delete(); throw new IOException(
@@ -194,18 +191,10 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		if (world == null)
 			world = AutoReferee.WORLD_PREFIX + Long.toHexString(new Date().getTime());
 
-		// get the folder associated with this world name
-		File mapFolder = map.getFolder();
-		if (mapFolder == null) return null;
-
-		// create the temporary directory where this map will be
-		File destWorld = new File(world);
-		if (!destWorld.mkdir()) throw new IOException("Could not make temporary directory.");
-
 		// copy the files over and return the loaded world
-		FileUtils.copyDirectory(mapFolder, destWorld);
+		map.unpack(new File(world));
 		return AutoReferee.getInstance().getServer().createWorld(
-			WorldCreator.name(destWorld.getName()).generateStructures(false)
+			WorldCreator.name(world).generateStructures(false)
 				.generator(new NullChunkGenerator()));
 	}
 
@@ -315,22 +304,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		File zip = new File(AutoRefMap.getMapLibrary(), filename);
 
 		FileUtils.copyURLToFile(new URL(url), zip);
-		File folder = AutoRefMap.unzipMapFolder(zip);
-
-		return AutoRefMap.getMapInfo(folder);
-	}
-
-	/**
-	 * Gets root folder of map with the given name, downloading if necessary.
-	 *
-	 * @param name name of map to load
-	 * @return root folder of map
-	 * @throws IOException if map download fails
-	 */
-	public static File getMapFolder(String name) throws IOException
-	{
-		AutoRefMap bmap = AutoRefMap.getMap(name);
-		return bmap == null ? null : bmap.getFolder();
+		return AutoRefMap.getMapInfo(zip);
 	}
 
 	/**
@@ -361,6 +335,28 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 			Map<String, AutoRefMap> remote = Maps.newHashMap();
 			for (AutoRefMap map : getRemoteMaps()) remote.put(map.name, map);
 
+			for (File folder : AutoRefMap.getMapLibrary().listFiles())
+				if (folder.isDirectory()) try
+			{
+				File arxml = new File(folder, AutoReferee.CFG_FILENAME);
+				if (!arxml.exists()) continue;
+
+				Element arcfg = new SAXBuilder().build(arxml).getRootElement();
+				Element meta = arcfg.getChild("meta");
+				if (meta != null)
+				{
+					AutoRefMap rmap = remote.get(AutoRefMatch.normalizeMapName(meta.getChildText("name")));
+					if (rmap != null && rmap.getZip() != null)
+					{
+						FileUtils.deleteQuietly(folder);
+						AutoReferee.getInstance().sendMessageSync(sender, String.format(
+							"Updated %s to new format (%s)", rmap.name, rmap.getVersionString()));
+					}
+				}
+			}
+			catch (IOException e) { e.printStackTrace(); }
+			catch (JDOMException e) { e.printStackTrace(); }
+
 			// check for updates on installed maps
 			for (AutoRefMap map : getInstalledMaps()) try
 			{
@@ -372,11 +368,10 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 					{
 						AutoReferee.getInstance().sendMessageSync(sender, String.format(
 							"UPDATING %s (%s -> %s)...", rmap.name, map.version, rmap.version));
-						if (rmap.getFolder() == null) AutoReferee.getInstance()
+						if (rmap.getZip() == null) AutoReferee.getInstance()
 							.sendMessageSync(sender, "Update " + ChatColor.RED + "FAILED");
 						else
 						{
-							if (map.isInstalled()) FileUtils.deleteDirectory(map.folder);
 							AutoReferee.getInstance().sendMessageSync(sender,
 								"Update " + ChatColor.GREEN + "SUCCESS: " +
 									ChatColor.RESET + rmap.getVersionString());
@@ -428,10 +423,6 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		// look through the zip files for what's already installed
 		for (File f : AutoRefMap.getMapLibrary().listFiles())
 		{
-			// if this is a zipfile containing the right world, unzip it
-			if (f.getName().toLowerCase().endsWith(".zip"))
-			try { f = unzipMapFolder(f); } catch (IOException e) { continue; }
-
 			AutoRefMap mapInfo = getMapInfo(f);
 			if (mapInfo != null) maps.add(mapInfo);
 		}
@@ -440,63 +431,73 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	}
 
 	/**
-	 * Get map info object associated with a folder
+	 * Get map info object associated with a zip
 	 *
-	 * @param folder folder containing a configuration file
-	 * @return map info object if folder contains a map, otherwise null
+	 * @param zip zip file containing a configuration file
+	 * @return map info object if zip contains a map, otherwise null
 	 */
-	public static AutoRefMap getMapInfo(File folder)
+	public static AutoRefMap getMapInfo(File zip)
 	{
 		// skip non-directories
-		if (!folder.isDirectory()) return null;
+		if (zip.isDirectory()) return null;
 
-		// if it doesn't have an autoreferee config file
-		File cfgFile = new File(folder, AutoReferee.CFG_FILENAME);
-		if (!cfgFile.exists()) return null;
-
-		// check the map name, if it matches, this is the one we want
 		Element worldConfig = null;
-		try { worldConfig = new SAXBuilder().build(cfgFile).getRootElement(); }
-		catch (Exception e) { e.printStackTrace(); return null; }
+		try
+		{
+			ZipFile zfile = new ZipFile(zip);
+			Enumeration<? extends ZipEntry> entries = zfile.entries();
+
+			// if it doesn't have an autoreferee config file
+			InputStream cfgFile = null;
+			while (entries.hasMoreElements() && cfgFile == null)
+			{
+				ZipEntry entry = entries.nextElement();
+				if (entry.getName().endsWith(AutoReferee.CFG_FILENAME))
+					cfgFile = zfile.getInputStream(entry);
+			}
+
+			// if we didn't find a config file, there's a problem
+			if (cfgFile == null) return null;
+			worldConfig = new SAXBuilder().build(cfgFile).getRootElement();
+		}
+		catch (IOException e) { e.printStackTrace(); return null; }
+		catch (JDOMException e) { e.printStackTrace(); return null; }
 
 		String mapName = "??", version = "1.0";
 		Element meta = worldConfig.getChild("meta");
 		if (meta != null)
 		{
-			mapName = meta.getChildText("name");
+			mapName = AutoRefMatch.normalizeMapName(meta.getChildText("name"));
 			version = meta.getChildText("version");
 		}
 
-		return new AutoRefMap(AutoRefMatch.normalizeMapName(mapName), version, folder);
+		 try { return new AutoRefMap(mapName, version, zip); }
+		 catch (IOException e) { e.printStackTrace(); return null; }
 	}
 
-	private static File unzipMapFolder(File zip) throws IOException
+	private File unpack(File dest) throws IOException
 	{
-		String md5 = DigestUtils.md5Hex(new FileInputStream(zip));
-
-		ZipFile zfile = new ZipFile(zip);
+		ZipFile zfile = new ZipFile(this.getZip());
 		Enumeration<? extends ZipEntry> entries = zfile.entries();
 
 		File f, basedir = null;
-
-		File lib = AutoRefMap.getMapLibrary();
+		File tmp = FileUtils.getTempDirectory();
 		while (entries.hasMoreElements())
 		{
 			ZipEntry entry = entries.nextElement();
 			if (!entry.isDirectory()) FileUtils.copyInputStreamToFile(
-				zfile.getInputStream(entry), f = new File(lib, entry.getName()));
-			else (f = new File(lib, entry.getName())).mkdirs();
+				zfile.getInputStream(entry), f = new File(tmp, entry.getName()));
+			else (f = new File(tmp, entry.getName())).mkdirs();
 
 			if (entry.isDirectory() && (basedir == null ||
 				basedir.getName().startsWith(f.getName()))) basedir = f;
 		}
 
 		zfile.close();
-		zip.delete();
+		if (dest.exists()) FileUtils.deleteDirectory(dest);
+		FileUtils.moveDirectory(basedir, dest);
 
-		// add the checksum to the map directory to determine if an update is needed
-		FileUtils.writeStringToFile(new File(basedir, "checksum"), md5);
-		return basedir;
+		return dest;
 	}
 
 	private static abstract class MapDownloader implements Runnable
