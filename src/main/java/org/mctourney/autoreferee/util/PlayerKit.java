@@ -8,6 +8,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
@@ -197,6 +198,13 @@ public class PlayerKit
 
 				for (Element enchant : gear.getChildren("enchant"))
 					addParsedEnchantment(item, enchant);
+
+				if (gear.getChild("name") != null)
+				{
+					ItemMeta itemMeta = item.getItemMeta();
+					itemMeta.setDisplayName(gear.getChildTextTrim("name"));
+					item.setItemMeta(itemMeta);
+				}
 
 				// TODO Books
 
