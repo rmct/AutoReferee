@@ -45,7 +45,7 @@ public class ConfigurationCommands implements CommandHandler
 		this.plugin = (AutoReferee) plugin;
 	}
 
-	@AutoRefCommand(name={"autoref", "archive"}, argmax=0, options="z",
+	@AutoRefCommand(name={"autoref", "archive"}, argmax=0,
 		description="Package the map and configuration into the maps/ directory.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.configure"})
 
@@ -59,17 +59,13 @@ public class ConfigurationCommands implements CommandHandler
 		match.clearEntities();
 		world.setTime(match.getStartClock());
 
-		// save the world and configuration first
+		// save the world and configuration first, then archive
 		world.save();
 		match.saveWorldConfiguration();
-
-		File archiveFolder = null;
-		if (options.hasOption('z'))
-			archiveFolder = match.distributeMap();
-		else archiveFolder = match.archiveMapData();
+		File zipfile = match.distributeMap();
 
 		String resp = String.format("%s %s", match.getVersionString(),
-			archiveFolder == null ? "failed to archive." : "archived!");
+			zipfile == null ? "failed to archive." : "archived!");
 		sender.sendMessage(ChatColor.GREEN + resp); plugin.getLogger().info(resp);
 		return true;
 	}

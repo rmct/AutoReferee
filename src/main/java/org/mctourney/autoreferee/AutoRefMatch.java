@@ -1504,11 +1504,12 @@ public class AutoRefMatch implements Metadatable
 	 * @return root folder of the archived map
 	 * @throws IOException if archive cannot be created
 	 */
-	public File archiveMapData() throws IOException
+	private File archiveMapData() throws IOException
 	{
 		// make sure the folder exists first
-		File archiveFolder = new File(AutoRefMap.getMapLibrary(), this.getVersionString());
+		File archiveFolder = new File(FileUtils.getTempDirectory(), this.getVersionString());
 		if (!archiveFolder.exists()) archiveFolder.mkdir();
+		FileUtils.cleanDirectory(archiveFolder);
 
 		// (1) copy the configuration file:
 		FileUtils.copyFileToDirectory(
@@ -1524,10 +1525,6 @@ public class AutoRefMatch implements Metadatable
 
 		// (4) make an empty data folder:
 		new File(archiveFolder, "data").mkdir();
-
-		// remove any existing checksum file
-		File checksum = new File(getWorld().getWorldFolder(), "checksum");
-		if (checksum.exists()) checksum.delete();
 
 		return archiveFolder;
 	}
@@ -1556,13 +1553,8 @@ public class AutoRefMatch implements Metadatable
 		addToZip(zip, archiveFolder, AutoRefMap.getMapLibrary());
 
 		zip.close();
-
-		// rewrite a checksum file for this zip
-		File checksum = new File(archiveFolder, "checksum");
-		String md5 = DigestUtils.md5Hex(new FileInputStream(outZipfile));
-		FileUtils.writeStringToFile(checksum, md5);
-
-		return archiveFolder;
+		FileUtils.deleteQuietly(archiveFolder);
+		return outZipfile;
 	}
 
 	private class WorldFolderDeleter extends BukkitRunnable
