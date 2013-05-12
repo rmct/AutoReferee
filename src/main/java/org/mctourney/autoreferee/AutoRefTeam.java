@@ -3,6 +3,7 @@ package org.mctourney.autoreferee;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
 import com.google.common.collect.Maps;
 import org.bukkit.ChatColor;
@@ -371,7 +372,15 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		if (msz != null) newTeam.maxSize = Integer.parseInt(msz);
 
 		if (elt.getAttributeValue("kit") != null)
+		{
 			newTeam.setKit(match.getKit(elt.getAttributeValue("kit")));
+			if (!Boolean.parseBoolean(match.getWorld().getGameRuleValue("keepInventory")))
+			{
+				AutoReferee.log("A kit has been specified with keepInventory=false", Level.WARNING);
+				AutoReferee.log("To turn this feature on, type '/gamerule keepInventory true'", Level.WARNING);
+				AutoReferee.log("This map should (maybe) be reconfigured with keepInventory", Level.WARNING);
+			}
+		}
 
 		Element spawn = elt.getChild("spawn");
 		newTeam.spawn = spawn == null ? null :
