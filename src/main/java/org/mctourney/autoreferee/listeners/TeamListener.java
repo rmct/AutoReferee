@@ -1,6 +1,7 @@
 package org.mctourney.autoreferee.listeners;
 
 import java.util.Iterator;
+import java.util.Set;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -12,6 +13,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
@@ -55,16 +57,29 @@ public class TeamListener implements Listener
 		if (match == null) return;
 
 		AutoRefTeam speakerTeam = match.getPlayerTeam(speaker);
-		Role speakerRole = match.getRole(speaker);
-
 		if (speakerTeam != null)
 		{
 			ChatColor teamColor = speakerTeam.getColor();
 			event.setFormat("<" + teamColor + "%s" + ChatColor.RESET + "> %s");
 		}
 		else event.setFormat("<%s> %s");
+		modifyChatRecipients(match, speaker, event.getRecipients());
+	}
 
-		iter = event.getRecipients().iterator();
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void commandPreProcess(PlayerCommandPreprocessEvent event)
+	{
+		String message = event.getMessage();
+		if (message.startsWith("/me "))
+			event.setMessage("/autoref me " + message.substring(4));
+	}
+
+	public static void modifyChatRecipients(AutoRefMatch match, Player speaker, Set<Player> recipients)
+	{
+		AutoRefTeam speakerTeam = match.getPlayerTeam(speaker);
+		Role speakerRole = match.getRole(speaker);
+
+		Iterator<Player> iter = recipients.iterator();
 		if (!match.getCurrentState().isBeforeMatch()) while (iter.hasNext())
 		{
 			Player listener = iter.next();
