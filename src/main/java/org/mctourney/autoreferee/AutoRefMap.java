@@ -15,10 +15,6 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -26,18 +22,22 @@ import org.bukkit.WorldCreator;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import org.mctourney.autoreferee.event.match.MatchLoadEvent;
+import org.mctourney.autoreferee.util.NullChunkGenerator;
+import org.mctourney.autoreferee.util.QueryServer;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
-
-import org.mctourney.autoreferee.event.match.MatchLoadEvent;
-import org.mctourney.autoreferee.util.NullChunkGenerator;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.mctourney.autoreferee.util.QueryServer;
 
 /**
  * Represents a map object, available to be loaded by AutoReferee.

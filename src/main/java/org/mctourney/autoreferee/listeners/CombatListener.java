@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
