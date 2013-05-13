@@ -1,5 +1,6 @@
 package org.mctourney.autoreferee.listeners;
 
+import java.lang.management.ManagementFactory;
 import java.util.Map;
 import java.util.UUID;
 
@@ -205,7 +206,7 @@ public class CombatListener implements Listener
 				AutoRefPlayer apl = match.getPlayer(damager);
 				Long lastAggro = lastPigmenAggro.get(apl);
 
-				long currentTime = System.currentTimeMillis();
+				long currentTime = ManagementFactory.getRuntimeMXBean().getStartTime();
 				if (lastAggro == null || currentTime > PIGMEN_COOLDOWN_MS + lastAggro)
 				{
 					for (Player ref : match.getReferees(false))
