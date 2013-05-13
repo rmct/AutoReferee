@@ -336,6 +336,10 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 
 		for (AutoRefPlayer apl : getPlayers())
 		{
+			Player player = apl.getPlayer();
+			if (!getMatch().inStartRegion(player.getLocation()))
+				player.teleport(getMatch().getPlayerSpawn(player));
+
 			apl.heal();
 			apl.updateCarrying();
 		}
