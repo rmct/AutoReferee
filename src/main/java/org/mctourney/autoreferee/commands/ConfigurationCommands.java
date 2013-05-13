@@ -257,7 +257,7 @@ public class ConfigurationCommands implements CommandHandler
 		return true;
 	}
 
-	@AutoRefCommand(name={"zone"}, argmin=0, options=AutoRefRegion.Flag.OPTIONS + "XS",
+	@AutoRefCommand(name={"zone"}, argmin=0, options=AutoRefRegion.Flag.OPTIONS + "XSN+",
 		description="Set the currently selected WorldEdit region to be a team's zone.")
 	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
 
@@ -299,6 +299,9 @@ public class ConfigurationCommands implements CommandHandler
 			reg = new CuboidRegion(csel.getMinimumPoint(), csel.getMaximumPoint());
 		}
 
+		// if we couldn't get a region from WorldEdit
+		if (reg == null) return false;
+
 		// add the selection to the start regions
 		if (isStartRegion)
 		{
@@ -306,6 +309,10 @@ public class ConfigurationCommands implements CommandHandler
 			sender.sendMessage("Region now marked as a start region!");
 			return true;
 		}
+
+		// name this region if it has a name
+		if (options.hasOption('N'))
+			reg.setName(options.getOptionValue('N', null));
 
 		for (AutoRefRegion.Flag flag : AutoRefRegion.Flag.values())
 			if (options.hasOption(flag.getMark())) reg.toggle(flag);
