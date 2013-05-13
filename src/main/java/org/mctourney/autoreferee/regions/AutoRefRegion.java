@@ -1,15 +1,20 @@
 package org.mctourney.autoreferee.regions;
 
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerMoveEvent;
 
 import org.jdom2.Element;
 
 import org.mctourney.autoreferee.AutoRefMatch;
+import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 
@@ -18,7 +23,8 @@ import com.google.common.collect.Sets;
 
 public abstract class AutoRefRegion
 {
-	private Random random = new Random();
+	private static final long NOTIFICATION_THRESHOLD_MS = 5 * 60 * 1000L;
+	private static final Random random = new Random();
 
 	public static enum Flag
 	{
@@ -53,16 +59,40 @@ public abstract class AutoRefRegion
 
 	private int flags;
 
-	// yaw = f * 90, SOUTH = 0
-	protected Integer yaw = null;
-
-	// -90 = up, 0 = level, 90 = down
-	protected Integer pitch = null;
+	protected Integer yaw = null; // yaw = f * 90, SOUTH = 0
+	protected Integer pitch = null; // -90 = up, 0 = level, 90 = down
 
 	private Set<AutoRefTeam> owners = Sets.newHashSet();
 
+	private String regionName = null;
+	private Map<AutoRefTeam, Long> lastNotification = Maps.newHashMap();
+
 	public AutoRefRegion()
 	{ flags = 0; }
+
+	public String getName()
+	{ return this.regionName; }
+
+	public void setName(String name)
+	{ this.regionName = name; }
+
+	public void announceRegion(AutoRefPlayer apl)
+	{
+		AutoRefTeam team = apl.getTeam();
+		if (this.regionName == null || !owners.contains(team)) return;
+
+		Long last = lastNotification.get(team);
+		long ctime = ManagementFactory.getRuntimeMXBean().getStartTime();
+
+		if (last == null || ctime - last > NOTIFICATION_THRESHOLD_MS)
+		{
+			String msg = apl.getDisplayName() + " has entered " +
+				team.getColor() + ChatColor.BOLD + this.getName();
+			AutoReferee.log(msg);
+			for (Player ref : apl.getMatch().getReferees(false)) ref.sendMessage(msg);
+			lastNotification.put(team, ctime);
+		}
+	}
 
 	// these methods need to be implemented
 	public abstract double distanceToRegion(Location loc);
@@ -105,6 +135,9 @@ public abstract class AutoRefRegion
 		return this;
 	}
 
+	public boolean isEnterEvent(PlayerMoveEvent event)
+	{ return !contains(event.getFrom()) && contains(event.getTo()); }
+
 	protected AutoRefRegion getRegionSettings(AutoRefMatch match, Element e)
 	{
 		this.addFlags(e.getChild("flags"));
@@ -116,6 +149,9 @@ public abstract class AutoRefRegion
 
 		if (e.getAttribute("pitch") != null)
 			pitch = Integer.parseInt(e.getAttributeValue("pitch"));
+
+		if (e.getAttribute("name") != null)
+			this.setName(e.getAttributeValue("name"));
 
 		return this;
 	}
@@ -139,6 +175,9 @@ public abstract class AutoRefRegion
 
 		if (pitch != null) e.setAttribute("pitch",
 			Integer.toString(Math.round((float)pitch/ANGLE_RND)*ANGLE_RND));
+
+		// set the custom region name if one has been specified
+		if (regionName != null) e.setAttribute("name", this.getName());
 
 		return e;
 	}

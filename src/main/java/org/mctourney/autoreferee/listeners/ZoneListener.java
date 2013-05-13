@@ -89,6 +89,10 @@ public class ZoneListener implements Listener
 		AutoRefTeam team = apl.getTeam();
 		if (team == null) return;
 
+		// announce region (for cosmetic regions)
+		for (AutoRefRegion reg : team.getRegions())
+			if (reg.getName() != null && reg.isEnterEvent(event)) reg.announceRegion(apl);
+
 		double fallspeed = event.getFrom().getY() - event.getTo().getY();
 		Location exit = apl.getExitLocation();
 
