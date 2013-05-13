@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.management.ManagementFactory;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -507,7 +508,7 @@ public class AutoRefMatch implements Metadatable
 	public long getElapsedSeconds()
 	{
 		if (!getCurrentState().inProgress()) return 0L;
-		return (System.currentTimeMillis() - getStartTime()) / 1000L;
+		return (ManagementFactory.getRuntimeMXBean().getStartTime() - getStartTime()) / 1000L;
 	}
 
 	private long timeLimit = -1L;
@@ -910,11 +911,11 @@ public class AutoRefMatch implements Metadatable
 		private long lastOccupiedTime = 0;
 
 		public PlayerCountTask()
-		{ lastOccupiedTime = System.currentTimeMillis(); }
+		{ lastOccupiedTime = ManagementFactory.getRuntimeMXBean().getStartTime(); }
 
 		public void run()
 		{
-			long tick = System.currentTimeMillis();
+			long tick = ManagementFactory.getRuntimeMXBean().getStartTime();
 
 			// if there are people in this world/match, reset last-occupied
 			if (getUserCount() != 0) lastOccupiedTime = tick;
@@ -1880,7 +1881,7 @@ public class AutoRefMatch implements Metadatable
 	{
 		// set up the world time one last time
 		primaryWorld.setTime(startClock);
-		this.setStartTime(System.currentTimeMillis());
+		this.setStartTime(ManagementFactory.getRuntimeMXBean().getStartTime());
 
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_START,
 			"Match began.", null, null, null));
