@@ -28,6 +28,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.ScoreboardManager;
 import org.mcstats.Metrics;
 import org.mcstats.Metrics.Graph;
 
@@ -35,6 +37,7 @@ import org.mctourney.autoreferee.commands.AdminCommands;
 import org.mctourney.autoreferee.commands.ConfigurationCommands;
 import org.mctourney.autoreferee.commands.PlayerCommands;
 import org.mctourney.autoreferee.commands.PracticeCommands;
+import org.mctourney.autoreferee.commands.ScoreboardCommands;
 import org.mctourney.autoreferee.commands.SpectatorCommands;
 import org.mctourney.autoreferee.listeners.lobby.ClassicLobbyListener;
 import org.mctourney.autoreferee.listeners.CombatListener;
@@ -286,6 +289,7 @@ public class AutoReferee extends JavaPlugin
 		commandManager.registerCommands(new AdminCommands(this), this);
 		commandManager.registerCommands(new SpectatorCommands(this), this);
 		commandManager.registerCommands(new ConfigurationCommands(this), this);
+		commandManager.registerCommands(new ScoreboardCommands(this), this);
 		commandManager.registerCommands(practice, this);
 
 		// global configuration object (can't be changed, so don't save onDisable)
@@ -429,6 +433,14 @@ public class AutoReferee extends JavaPlugin
 		if (sender instanceof BlockCommandSender)
 			return ((BlockCommandSender) sender).getBlock().getWorld();
 		return getConsoleWorld();
+	}
+
+	public Scoreboard getWorldScoreboard(World world)
+	{
+		AutoRefMatch match = this.getMatch(world);
+		if (match == null || match.getScoreboard() == null)
+			return Bukkit.getScoreboardManager().getMainScoreboard();
+		else return match.getScoreboard();
 	}
 
 	@Override
