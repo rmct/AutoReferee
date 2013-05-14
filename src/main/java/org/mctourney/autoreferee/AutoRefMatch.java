@@ -66,6 +66,7 @@ import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import org.bukkit.scoreboard.Scoreboard;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
@@ -317,6 +318,12 @@ public class AutoRefMatch implements Metadatable
 	 */
 	public void setCurrentState(MatchStatus status)
 	{ this.currentState = status; this.setupSpectators(); }
+
+	// custom scoreboard
+	private Scoreboard scoreboard = null;
+
+	public Scoreboard getScoreboard()
+	{ return scoreboard; }
 
 	// teams participating in the match
 	private Set<AutoRefTeam> teams = Sets.newHashSet();
@@ -949,6 +956,9 @@ public class AutoRefMatch implements Metadatable
 
 		// startup the player count timer (for automatic unloading)
 		countTask.runTaskTimer(AutoReferee.getInstance(), 0L, 60*20L);
+
+		// setup custom scoreboard
+		scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
 	}
 
 	/**
