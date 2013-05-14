@@ -301,33 +301,34 @@ public class PlayerCommands implements CommandHandler
 		}
 		return true;
 	}
-}
 
-class InvitationPrompt extends BooleanPrompt
-{
-	public InvitationPrompt(AutoRefMatch match, String from)
-	{ this.match = match; this.from = from; }
-
-	private AutoRefMatch match;
-	private String from;
-
-	@Override
-	public String getPromptText(ConversationContext context)
+	private class InvitationPrompt extends BooleanPrompt
 	{
-		return ChatColor.GREEN + String.format(">>> %s is inviting you to %s.",
-			from, match.getMapName()) + " Do you accept? (type \"yes\" or \"no\")";
+		public InvitationPrompt(AutoRefMatch match, String from)
+		{ this.match = match; this.from = from; }
+
+		private AutoRefMatch match;
+		private String from;
+
+		@Override
+		public String getPromptText(ConversationContext context)
+		{
+			return ChatColor.GREEN + String.format(">>> %s is inviting you to %s.",
+				from, match.getMapName()) + " Do you accept? (type \"yes\" or \"no\")";
+		}
+
+		@Override
+		protected Prompt acceptValidatedInput(final ConversationContext context, boolean response)
+		{
+			if (response && context.getForWhom() instanceof Player)
+				new BukkitRunnable()
+				{
+					@Override public void run()
+					{ match.joinMatch((Player) context.getForWhom()); }
+
+				}.runTask(AutoReferee.getInstance());
+			return Prompt.END_OF_CONVERSATION;
+		}
 	}
 
-	@Override
-	protected Prompt acceptValidatedInput(final ConversationContext context, boolean response)
-	{
-		if (response && context.getForWhom() instanceof Player)
-			new BukkitRunnable()
-			{
-				@Override public void run()
-				{ match.joinMatch((Player) context.getForWhom()); }
-
-			}.runTask(AutoReferee.getInstance());
-		return Prompt.END_OF_CONVERSATION;
-	}
 }
