@@ -487,6 +487,9 @@ public class AutoRefMatch implements Metadatable
 	public String getVersionString()
 	{ return String.format("%s-v%s", normalizeMapName(this.getMapName()), this.getMapVersion()); }
 
+	public AutoRefMap getMap()
+	{ return AutoRefMap.getMap(mapName); }
+
 	/**
 	 * Gets the creators of the map for this match.
 	 *
