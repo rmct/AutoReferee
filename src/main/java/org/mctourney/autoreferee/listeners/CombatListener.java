@@ -205,7 +205,7 @@ public class CombatListener implements Listener
 				AutoRefPlayer apl = match.getPlayer(damager);
 				Long lastAggro = lastPigmenAggro.get(apl);
 
-				long currentTime = ManagementFactory.getRuntimeMXBean().getStartTime();
+				long currentTime = ManagementFactory.getRuntimeMXBean().getUptime();
 				if (lastAggro == null || currentTime > PIGMEN_COOLDOWN_MS + lastAggro)
 				{
 					for (Player ref : match.getReferees(false))

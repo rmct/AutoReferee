@@ -518,7 +518,7 @@ public class AutoRefMatch implements Metadatable
 	public long getElapsedSeconds()
 	{
 		if (!getCurrentState().inProgress()) return 0L;
-		return (ManagementFactory.getRuntimeMXBean().getStartTime() - getStartTime()) / 1000L;
+		return (ManagementFactory.getRuntimeMXBean().getUptime() - getStartTime()) / 1000L;
 	}
 
 	private long timeLimit = -1L;
@@ -921,11 +921,11 @@ public class AutoRefMatch implements Metadatable
 		private long lastOccupiedTime = 0;
 
 		public PlayerCountTask()
-		{ lastOccupiedTime = ManagementFactory.getRuntimeMXBean().getStartTime(); }
+		{ lastOccupiedTime = ManagementFactory.getRuntimeMXBean().getUptime(); }
 
 		public void run()
 		{
-			long tick = ManagementFactory.getRuntimeMXBean().getStartTime();
+			long tick = ManagementFactory.getRuntimeMXBean().getUptime();
 
 			// if there are people in this world/match, reset last-occupied
 			if (getUserCount() != 0) lastOccupiedTime = tick;
@@ -1894,7 +1894,7 @@ public class AutoRefMatch implements Metadatable
 	{
 		// set up the world time one last time
 		primaryWorld.setTime(startClock);
-		this.setStartTime(ManagementFactory.getRuntimeMXBean().getStartTime());
+		this.setStartTime(ManagementFactory.getRuntimeMXBean().getUptime());
 
 		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_START,
 			"Match began.", null, null, null));

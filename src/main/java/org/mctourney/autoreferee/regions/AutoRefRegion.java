@@ -82,7 +82,7 @@ public abstract class AutoRefRegion
 		if (this.regionName == null || !owners.contains(team)) return;
 
 		Long last = lastNotification.get(team);
-		long ctime = ManagementFactory.getRuntimeMXBean().getStartTime();
+		long ctime = ManagementFactory.getRuntimeMXBean().getUptime();
 
 		if (last == null || ctime - last > NOTIFICATION_THRESHOLD_MS)
 		{

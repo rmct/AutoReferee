@@ -278,7 +278,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		if (this.isOnline() && !getPlayer().isDead()) return null;
 
 		// the cutoff before which the player will not be credited with the kill
-		long threshold = ManagementFactory.getRuntimeMXBean().getStartTime() - KILLER_MS;
+		long threshold = ManagementFactory.getRuntimeMXBean().getUptime() - KILLER_MS;
 
 		AutoRefPlayer killer = null;
 		for (Map.Entry<AutoRefPlayer, Long> e : lastPlayerDamageMillis.entrySet())
@@ -297,7 +297,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		if (this.isOnline() && !getPlayer().isDead()) return Sets.newHashSet();
 
 		// the cutoff before which the player will not be credited with the kill
-		long threshold = ManagementFactory.getRuntimeMXBean().getStartTime() - ASSIST_MS;
+		long threshold = ManagementFactory.getRuntimeMXBean().getUptime() - ASSIST_MS;
 
 		Set<AutoRefPlayer> killers = Sets.newHashSet();
 		for (Map.Entry<AutoRefPlayer, Long> e : lastPlayerDamageMillis.entrySet())
@@ -371,7 +371,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 * @return ticks since last damage
 	 */
 	public long damageCooldownLength()
-	{ return ManagementFactory.getRuntimeMXBean().getStartTime() - lastDamageMillis; }
+	{ return ManagementFactory.getRuntimeMXBean().getUptime() - lastDamageMillis; }
 
 	/**
 	 * Checks if the player has been damaged recently.
@@ -389,7 +389,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 
 	private boolean savedInventoryStale()
 	{
-		return ManagementFactory.getRuntimeMXBean().getStartTime() >
+		return ManagementFactory.getRuntimeMXBean().getUptime() >
 			lastInventoryViewSavedMillis + SAVED_INVENTORY_LIFESPAN;
 	}
 
@@ -692,7 +692,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		if (e.getEntity() != getPlayer()) return;
 
 		// reset the damage tick
-		lastDamageMillis = ManagementFactory.getRuntimeMXBean().getStartTime();
+		lastDamageMillis = ManagementFactory.getRuntimeMXBean().getUptime();
 
 		// if the damage was caused by a player, set their last damage tick
 		AutoRefPlayer apl = getMatch().getPlayer(damager);
@@ -901,7 +901,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	private void saveInventoryView()
 	{
 		this.lastInventoryView = getInventoryView();
-		this.lastInventoryViewSavedMillis = ManagementFactory.getRuntimeMXBean().getStartTime();
+		this.lastInventoryViewSavedMillis = ManagementFactory.getRuntimeMXBean().getUptime();
 	}
 
 	/**
