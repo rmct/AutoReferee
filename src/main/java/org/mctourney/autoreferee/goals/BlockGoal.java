@@ -125,8 +125,11 @@ public class BlockGoal extends AutoRefGoal
 	public static Location blockInRange(BlockData blockdata, Location loc, int radius)
 	{
 		Block b = loc.getBlock();
+		int h = loc.getWorld().getMaxHeight();
+		int by = loc.getBlockY();
+
+		for (int y = -radius; y <= radius; ++y) if (by + y >= 0 && by + y < h)
 		for (int x = -radius; x <= radius; ++x)
-		for (int y = -radius; y <= radius; ++y)
 		for (int z = -radius; z <= radius; ++z)
 		{
 			Block rel = b.getRelative(x, y, z);
