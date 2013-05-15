@@ -46,6 +46,7 @@ import org.mctourney.autoreferee.listeners.SpectatorListener;
 import org.mctourney.autoreferee.listeners.TeamListener;
 import org.mctourney.autoreferee.listeners.WorldListener;
 import org.mctourney.autoreferee.listeners.ZoneListener;
+import org.mctourney.autoreferee.listeners.lobby.LobbyListener;
 import org.mctourney.autoreferee.util.NullChunkGenerator;
 import org.mctourney.autoreferee.util.QueryServer;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
@@ -268,7 +269,7 @@ public class AutoReferee extends JavaPlugin
 		PluginManager pm = getServer().getPluginManager();
 		PracticeCommands practice = new PracticeCommands(this);
 
-		ClassicLobbyListener lobbyListener = new ClassicLobbyListener(this);
+		LobbyListener lobbyListener = new ClassicLobbyListener(this);
 		// TODO add other lobby types
 
 		// listener utility classes, subdivided for organization

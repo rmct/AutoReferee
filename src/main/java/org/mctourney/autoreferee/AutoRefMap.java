@@ -143,9 +143,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	{
 		if (!(o instanceof AutoRefMap)) return false;
 		AutoRefMap map = (AutoRefMap) o;
-
-		return name.equalsIgnoreCase(map.name)
-			&& version.equalsIgnoreCase(map.version);
+		return name.equalsIgnoreCase(map.name);
 	}
 
 	@Override
@@ -522,18 +520,24 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 
 	private static class MapRepoDownloader extends MapDownloader
 	{
-		private String mapName;
+		private AutoRefMap map;
+		private String name = null;
 
 		public MapRepoDownloader(CommandSender sender, String mapName, String custom)
-		{ super(sender, custom); this.mapName = mapName; }
+		{ this(sender, AutoRefMap.getMap(mapName), custom); this.name = mapName; }
+
+		public MapRepoDownloader(CommandSender sender, AutoRefMap map, String custom)
+		{ super(sender, custom); this.map = map; }
 
 		@Override
 		public void run()
 		{
-			AutoRefMap map = AutoRefMap.getMap(this.mapName);
-			if (map == null) AutoReferee.getInstance()
-				.sendMessageSync(sender, "No such map: " + this.mapName);
-			else this.loadMap(map);
+			if (this.map == null)
+			{
+				AutoReferee plugin = AutoReferee.getInstance();
+				plugin.sendMessageSync(sender, "No such map: " + this.name);
+			}
+			else this.loadMap(this.map);
 		}
 	}
 
@@ -596,7 +600,21 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	{
 		AutoReferee instance = AutoReferee.getInstance();
 		instance.getServer().getScheduler().runTaskAsynchronously(
-			instance, new MapRepoDownloader(sender, name, worldname));
+				instance, new MapRepoDownloader(sender, name, worldname));
+	}
+
+	/**
+	 * Loads a map by name.
+	 *
+	 * @param sender user receiving progress updates
+	 * @param map map to be loaded
+	 * @param worldname name of custom world folder, possibly null
+	 */
+	public static void loadMap(CommandSender sender, AutoRefMap map, String worldname)
+	{
+		AutoReferee instance = AutoReferee.getInstance();
+		instance.getServer().getScheduler().runTaskAsynchronously(
+			instance, new MapRepoDownloader(sender, map, worldname));
 	}
 
 	/**
