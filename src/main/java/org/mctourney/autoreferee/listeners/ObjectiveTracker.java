@@ -21,7 +21,10 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefPlayer;
@@ -290,6 +293,46 @@ public class ObjectiveTracker implements Listener
 			if (player.getBedSpawnLocation() == null) match.eliminatePlayer(player);
 	}
 
+	private class CraftCountTask extends BukkitRunnable
+	{
+		private HumanEntity player;
+		private int count;
+		private Material type;
+		private MaterialData data;
+		private int size;
+
+		public CraftCountTask(ItemStack item, HumanEntity p)
+		{
+			this.player = p;
+			this.type = item.getType();
+			this.data = item.getData();
+			this.count = countItemInInventory();
+			this.size = item.getAmount();
+		}
+
+		private int countItemInInventory()
+		{
+			int c = 0;
+			if (player.getItemOnCursor() != null)
+			{
+				ItemStack item = player.getItemOnCursor();
+				if (item.getType().equals(this.type) && item.getData().equals(this.data))
+					c += item.getAmount();
+			}
+			for (ItemStack item : player.getInventory().getContents())
+				if (item != null && item.getType().equals(this.type) && item.getData().equals(this.data))
+					c += item.getAmount();
+			return c;
+		}
+
+		@Override
+		public void run()
+		{
+			int crafted = countItemInInventory() - this.count;
+			int craftedStacks = crafted / this.size;
+		}
+	}
+
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void itemCraft(CraftItemEvent event)
 	{
@@ -304,5 +347,11 @@ public class ObjectiveTracker implements Listener
 
 		// if this is on the blacklist, cancel
 		if (!match.canCraft(recipeTarget)) event.setCancelled(true);
+	}
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void itemCraftMonitor(CraftItemEvent event)
+	{
+		new CraftCountTask(event.getRecipe().getResult(), event.getWhoClicked()).runTask(plugin);
 	}
 }
