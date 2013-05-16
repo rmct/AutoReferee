@@ -261,7 +261,8 @@ public class PracticeCommands implements CommandHandler, Listener
 		event.setCancelled(true);
 
 		AutoRefPlayer apl = match.getPlayer(player);
-		if (apl != null) switch (PracticeMenuOption.fromSlot(event.getSlot()))
+		if (apl != null && PracticeMenuOption.fromSlot(event.getSlot()) != null)
+			switch (PracticeMenuOption.fromSlot(event.getSlot()))
 		{
 			case ADVANCE_TIME:
 				player.getWorld().setFullTime(player.getWorld().getFullTime() + 1000L);
