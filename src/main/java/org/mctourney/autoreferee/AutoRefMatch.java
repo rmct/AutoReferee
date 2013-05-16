@@ -184,13 +184,15 @@ public class AutoRefMatch implements Metadatable
 		loc.getWorld().setSpawnLocation(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 	}
 
-	private boolean practiceMode = false;
-
 	public boolean isPracticeMode()
-	{ return this.getCurrentState().inProgress() && this.practiceMode; }
+	{
+		if (!this.getCurrentState().inProgress()) return false;
 
-	public void setPracticeMode(boolean practice)
-	{ this.practiceMode = practice; }
+		int existingteams = 0;
+		for (AutoRefTeam team : this.getTeams())
+			if (team.getCachedPlayers().isEmpty()) ++existingteams;
+		return existingteams < 2;
+	}
 
 	/**
 	 * Gets the world associated with this match.
@@ -2264,40 +2266,27 @@ public class AutoRefMatch implements Metadatable
 	{
 		if (getCurrentState().inProgress())
 		{
-			Set<AutoRefTeam> remainingTeams = Sets.newHashSet();
 			Set<AutoRefTeam> winningTeams = Sets.newHashSet();
-
 			for (AutoRefTeam team : this.teams)
 			{
 				// if there are no win conditions set, skip this team
 				if (team.getTeamGoals().size() == 0) continue;
 
 				// check all win condition blocks (AND together)
-				boolean win = true, possible = true, s;
+				boolean win = true;
 				for (AutoRefGoal goal : team.getTeamGoals())
-				{
-					win &= (s = goal.isSatisfied(this));
-					possible &= s || goal.canBeCompleted(this);
-				}
+					win &= goal.isSatisfied(this);
 
 				// force an update of objective status
 				team.updateObjectives();
 
 				// if the team won, mark the match as completed
 				if (win) winningTeams.add(team);
-
-				// if the goals are still possible, add them to set
-				else if (SurvivalGoal.hasSurvived(team) && possible)
-					remainingTeams.add(team);
 			}
 
 			// if there is one "winning" team, they win
 			if (winningTeams.size() == 1)
 				endMatch(Iterables.getOnlyElement(winningTeams));
-
-			// if only one team remains, they win
-			else if (remainingTeams.size() == 1)
-				endMatch(Iterables.getOnlyElement(remainingTeams));
 
 			// if we are just waiting for this match to end, check always
 			else if (currentlyTied) endMatch();
