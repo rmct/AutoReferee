@@ -60,28 +60,6 @@ public class PracticeCommands implements CommandHandler, Listener
 		// if we are not in a match in progress, quit now
 		if (match == null || !match.getCurrentState().inProgress()) return true;
 
-		// match is not in practice mode, convert
-		if (!match.isPracticeMode())
-		{
-			// get the APL object, mandatory
-			AutoRefPlayer apl = match.getPlayer((Player) sender);
-			if (apl == null) return true;
-
-			// count the number of teams that are not empty
-			int count = 0;
-			for (AutoRefTeam team : match.getTeams())
-				if (!team.getPlayers().isEmpty()) ++count;
-
-			if (count == 1)
-			{
-				match.broadcast(ChatColor.DARK_GRAY +
-					"Activating practice mode at the request of " + apl.getDisplayName());
-				match.setPracticeMode(true);
-			}
-			else sender.sendMessage(ChatColor.DARK_GRAY +
-				"Must have exactly one filled team to activate practice mode.");
-		}
-
 		// if the match is in practice mode (perhaps just activated), show menu
 		if (match.isPracticeMode())
 		{
