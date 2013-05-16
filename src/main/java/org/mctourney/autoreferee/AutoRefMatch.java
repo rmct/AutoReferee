@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -28,10 +29,10 @@ import java.util.zip.ZipOutputStream;
 import javax.imageio.ImageIO;
 
 import com.google.common.collect.Iterables;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang3.StringUtils;
 
 import org.bukkit.Bukkit;
@@ -50,7 +51,6 @@ import org.bukkit.entity.Ambient;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Monster;
@@ -1513,6 +1513,22 @@ public class AutoRefMatch implements Metadatable
 
 	private static final File PACKAGING_DIRECTORY = FileUtils.getTempDirectory();
 
+	private static class FilenameSetFilter implements FilenameFilter
+	{
+		private final Set<String> names;
+
+		public FilenameSetFilter(final Set<String> names)
+		{ this.names = names; }
+
+		@Override public boolean accept(File dir, String filename)
+		{ return names.contains(filename); }
+	}
+
+	private static final IOFileFilter DATA_FOLDER_FILTER =
+		FileFilterUtils.asFileFilter(new FilenameSetFilter(Sets.newHashSet
+		(   "scoreboard.dat"
+		)));
+
 	/**
 	 * Archives this map and stores a clean copy in the map library. Clears unnecessary
 	 * files and attempts to generate a minimal copy of the map, ready for distribution.
@@ -1540,7 +1556,8 @@ public class AutoRefMatch implements Metadatable
 			new File(archiveFolder, "region"), FileFilterUtils.suffixFileFilter(".mca"));
 
 		// (4) make an empty data folder:
-		new File(archiveFolder, "data").mkdir();
+		FileUtils.copyDirectory(new File(getWorld().getWorldFolder(), "data"),
+			new File(archiveFolder, "data"), DATA_FOLDER_FILTER);
 
 		return archiveFolder;
 	}
