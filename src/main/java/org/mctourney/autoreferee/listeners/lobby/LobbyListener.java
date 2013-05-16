@@ -20,10 +20,12 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
@@ -139,8 +141,21 @@ public abstract class LobbyListener implements Listener
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST)
-	public void entityDamage(EntityDamageEvent event)
+	public void entityDamage(EntityDamageByEntityEvent event)
 	{
+		if (checkAdminPrivilege(event.getDamager())) return;
+		if (event.getEntity().getWorld() == plugin.getLobbyWorld())
+			event.setCancelled(true);
+	}
+
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void hangingBreak(HangingBreakEvent event)
+	{
+		if (event instanceof HangingBreakByEntityEvent)
+		{
+			HangingBreakByEntityEvent e = (HangingBreakByEntityEvent) event;
+			if (checkAdminPrivilege(e.getRemover())) return;
+		}
 		if (event.getEntity().getWorld() == plugin.getLobbyWorld())
 			event.setCancelled(true);
 	}
