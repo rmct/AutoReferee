@@ -180,15 +180,15 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	public void setColor(ChatColor color)
 	{ this.color = color; }
 
-	// maximum size of a team (for manual mode only)
-	private int maxSize = 4;
-	private int minSize = -1;
+	// maximum size of a team
+	private Integer maxSize = null;
+	private Integer minSize = null;
 
 	public int getMaxSize()
-	{ return maxSize; }
+	{ return maxSize == null ? 4 : maxSize; }
 
 	public int getMinSize()
-	{ return minSize == -1 ? (3 * maxSize / 4) : minSize; }
+	{ return minSize == null ? (3 * getMaxSize() / 4) : minSize; }
 
 	// is this team ready to play?
 	private boolean ready = false;
@@ -324,8 +324,8 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		needle = needle.toLowerCase();
 
 		String a = name, b = customName;
-		if (b != null && -1 != needle.indexOf(b.toLowerCase())) return true;
-		if (a != null && -1 != needle.indexOf(a.toLowerCase())) return true;
+		if (b != null && needle.contains(b.toLowerCase())) return true;
+		if (a != null && needle.contains(a.toLowerCase())) return true;
 		return false;
 	}
 
@@ -352,7 +352,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	protected static AutoRefTeam fromElement(Element elt, AutoRefMatch match)
 	{
 		// the element we are building on needs to be a team element
-		assert elt.getName().toLowerCase() == "team";
+		assert "team".equals(elt.getName().toLowerCase());
 
 		AutoRefTeam newTeam = new AutoRefTeam();
 		newTeam.color = ChatColor.RESET;
@@ -362,18 +362,20 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		if (null == (newTeam.name = elt.getChildTextTrim("name"))) return null;
 
 		String clr = elt.getAttributeValue("color");
-		String msz = elt.getAttributeValue("maxsize");
+		String maxsz = elt.getAttributeValue("maxsize");
+		String minsz = elt.getAttributeValue("minsize");
 
 		if (clr != null) try
 		{ newTeam.color = ChatColor.valueOf(clr.toUpperCase()); }
-		catch (IllegalArgumentException e) { }
+		catch (IllegalArgumentException e) {  }
 
 		// initialize this team for referees
 		match.messageReferees("team", newTeam.getName(), "init");
 		match.messageReferees("team", newTeam.getName(), "color", newTeam.color.toString());
 
-		// get the max size from the map
-		if (msz != null) newTeam.maxSize = Integer.parseInt(msz);
+		// get the min and max size from the team tag
+		if (maxsz != null) newTeam.maxSize = Integer.parseInt(maxsz);
+		if (minsz != null) newTeam.minSize = Integer.parseInt(minsz);
 
 		if (elt.getAttributeValue("kit") != null)
 		{
@@ -403,19 +405,19 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		Element elt = new Element("team");
 		elt.addContent(new Element("name").setText(getName()));
 
-		if (this.getColor() != ChatColor.RESET)
-			elt.setAttribute("color", this.getColor().name());
-		if (this.maxSize != 0)
-			elt.setAttribute("maxsize", Integer.toString(this.maxSize));
+		if (this.getColor() != ChatColor.RESET) elt.setAttribute("color", this.getColor().name());
+		if (this.maxSize != null) elt.setAttribute("maxsize", Integer.toString(this.maxSize));
+		if (this.minSize != null) elt.setAttribute("minsize", Integer.toString(this.minSize));
+		if (this.playerlives > 0) elt.setAttribute("lives", Integer.toString(this.playerlives));
 
 		PlayerKit teamKit = this.getKit();
 		if (teamKit != null) elt.setAttribute("kit", teamKit.getName());
 
-		if (this.playerlives > 0)
-			elt.setAttribute("lives", Integer.toString(this.playerlives));
-
-		if (this.spawn != null) elt.addContent(
-			new Element("spawn").addContent(this.spawn.toElement()));
+		if (this.spawn != null)
+		{
+			Element spawnElement = new Element("spawn").addContent(this.spawn.toElement());
+			elt.addContent(spawnElement);
+		}
 
 		return elt;
 	}
