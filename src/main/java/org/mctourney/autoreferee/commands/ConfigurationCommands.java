@@ -53,14 +53,6 @@ public class ConfigurationCommands implements CommandHandler
 		throws IOException
 	{
 		if (match == null) return false;
-		World world = match.getWorld();
-
-		// LAST MINUTE CLEANUP!!!
-		match.clearEntities();
-		world.setTime(match.getStartClock());
-
-		// save the world and configuration first, then archive
-		world.save();
 		match.saveWorldConfiguration();
 		File zipfile = match.distributeMap();
 

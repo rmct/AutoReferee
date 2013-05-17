@@ -1540,6 +1540,13 @@ public class AutoRefMatch implements Metadatable
 	 */
 	private File archiveMapData() throws IOException
 	{
+		this.clearEntities();
+		primaryWorld.setTime(this.getStartClock());
+
+		// save the world and configuration first, then archive
+		primaryWorld.save();
+		this.saveWorldConfiguration();
+
 		// make sure the folder exists first
 		File archiveFolder = new File(PACKAGING_DIRECTORY, this.getVersionString());
 		if (!archiveFolder.exists()) archiveFolder.mkdir();
