@@ -584,7 +584,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 				match.getVersionString(), match.getWorld().getName()));
 
 			sender.sendMessage(ChatColor.DARK_GRAY + match.getVersionString() + " setup!");
-			if (sender instanceof Player) ((Player) sender).teleport(match.getWorldSpawn());
+			if (sender instanceof Player) match.joinMatch((Player) sender);
 			if (sender == Bukkit.getConsoleSender()) plugin.setConsoleWorld(match.getWorld());
 		}
 	}

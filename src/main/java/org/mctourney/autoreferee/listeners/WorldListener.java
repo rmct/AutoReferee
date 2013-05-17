@@ -79,6 +79,7 @@ public class WorldListener implements Listener
 		{
 			// if we are logging in to the wrong world, teleport to the correct world
 			if (player.getWorld() != match.getWorld()) match.joinMatch(player);
+			else match.checkTeamsReady();
 
 			SportBukkitUtil.setOverheadName(player, match.getDisplayName(player));
 			if (!match.getCurrentState().inProgress() || match.isPlayer(player))
@@ -134,7 +135,6 @@ public class WorldListener implements Listener
 			matchTo.sendMatchInfo(player);
 			matchTo.setupSpectators(player);
 
-			player.teleport(matchTo.getPlayerSpawn(player));
 			if (matchTo.isReferee(player))
 				matchTo.updateReferee(player);
 
@@ -143,6 +143,10 @@ public class WorldListener implements Listener
 			player.getInventory().addItem(matchTo.getMatchInfoBook());
 		}
 		else SportBukkitUtil.setOverheadName(player, player.getName());
+
+		// if this is leaving a match, leave its team
+		if (matchFm != null)
+			matchFm.leaveTeam(player, false);
 
 		// if they are leaving AutoReferee-managed worlds
 		if (matchFm != null && matchTo == null)

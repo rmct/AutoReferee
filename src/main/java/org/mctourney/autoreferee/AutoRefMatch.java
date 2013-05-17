@@ -2221,7 +2221,7 @@ public class AutoRefMatch implements Metadatable
 		if (!getCurrentState().isBeforeMatch()) return;
 
 		// if there are no players on the server
-		if (getPlayers().size() == 0)
+		if (getPlayers().isEmpty())
 		{
 			// set all the teams to not ready and status as waiting
 			for ( AutoRefTeam t : teams ) t.setReady(false);
@@ -2236,6 +2236,7 @@ public class AutoRefMatch implements Metadatable
 
 		// set status based on whether the players are online
 		setCurrentState(ready ? MatchStatus.READY : MatchStatus.WAITING);
+		if (AutoReferee.isAutoLobbyMode()) this.checkTeamsStart();
 	}
 
 	/**
@@ -2245,7 +2246,7 @@ public class AutoRefMatch implements Metadatable
 	{
 		boolean teamsReady = true;
 		for ( AutoRefTeam t : teams )
-			teamsReady &= t.isReady() || t.isEmptyTeam();
+			teamsReady &= t.isReady();
 
 		boolean ready = getReferees().size() == 0 ? teamsReady : isRefereeReady();
 		if (teamsReady && !ready) for (Player p : getReferees())
@@ -2501,12 +2502,17 @@ public class AutoRefMatch implements Metadatable
 		AutoRefTeam team = this.expectedTeam(player);
 		if (team != null) this.joinTeam(player, team, false);
 
+		// if the plugin is in autolobby mode
+		else if (AutoReferee.isAutoLobbyMode())
+			this.joinTeam(player, this.getArbitraryTeam(), false);
+
 		// otherwise, get them into the world
 		else if (player.getWorld() != this.getWorld())
 			player.teleport(this.getPlayerSpawn(player));
 
 		// remove name from all lists
 		this.removeExpectedPlayer(player);
+		this.checkTeamsReady();
 	}
 
 	/**

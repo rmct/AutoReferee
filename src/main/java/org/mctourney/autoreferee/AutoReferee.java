@@ -40,6 +40,7 @@ import org.mctourney.autoreferee.commands.PlayerCommands;
 import org.mctourney.autoreferee.commands.PracticeCommands;
 import org.mctourney.autoreferee.commands.ScoreboardCommands;
 import org.mctourney.autoreferee.commands.SpectatorCommands;
+import org.mctourney.autoreferee.listeners.lobby.AutoLobbyListener;
 import org.mctourney.autoreferee.listeners.lobby.ClassicLobbyListener;
 import org.mctourney.autoreferee.listeners.CombatListener;
 import org.mctourney.autoreferee.listeners.ObjectiveTracker;
@@ -124,6 +125,11 @@ public class AutoReferee extends JavaPlugin
 
 	public static void callEvent(Event event)
 	{ Bukkit.getServer().getPluginManager().callEvent(event); }
+
+	private LobbyListener lobbyListener = null;
+
+	public static boolean isAutoLobbyMode()
+	{ return getInstance().lobbyListener instanceof AutoLobbyListener; }
 
 	private World lobby = null;
 
@@ -276,8 +282,9 @@ public class AutoReferee extends JavaPlugin
 		PluginManager pm = getServer().getPluginManager();
 		PracticeCommands practice = new PracticeCommands(this);
 
-		LobbyListener lobbyListener = new ClassicLobbyListener(this);
-		// TODO add other lobby types
+		if (getConfig().getBoolean("lobby.auto", false))
+			lobbyListener = new AutoLobbyListener(this);
+		else lobbyListener = new ClassicLobbyListener(this);
 
 		// listener utility classes, subdivided for organization
 		pm.registerEvents(new TeamListener(this), this);
@@ -345,7 +352,7 @@ public class AutoReferee extends JavaPlugin
 			@Override
 			public void run()
 			{
-				String lobby = getConfig().getString("lobby-world", null);
+				String lobby = getConfig().getString("lobby.world", null);
 				if (lobby != null) setLobbyWorld(getServer().getWorld(lobby));
 			}
 		});
@@ -498,5 +505,16 @@ public class AutoReferee extends JavaPlugin
 		// v2.2, 2013/05/04, remove remains of server mode
 		if (config.get("server-mode") != null)
 			config.set("server-mode", null);
+
+		// v2.3, 2013/05/17, update lobby info
+		if (config.getString("lobby-world") != null)
+		{
+			// set new parameter paths
+			config.set("lobby.world", config.getString("lobby-world"));
+			config.set("lobby.auto", false);
+
+			// remove old configuration flag
+			config.set("lobby-world", null);
+		}
 	}
 }

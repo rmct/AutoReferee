@@ -199,7 +199,10 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	 * @return true if team is ready, otherwise false
 	 */
 	public boolean isReady()
-	{ return ready; }
+	{
+		boolean fullteam = getPlayers().size() >= getMaxSize();
+		return ready || (AutoReferee.isAutoLobbyMode() ? fullteam : this.isEmptyTeam());
+	}
 
 	/**
 	 * Sets whether this team is ready for the match to begin.
@@ -509,6 +512,10 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 
 		// if there is no match object, drop out here
 		if (match == null) return false;
+
+		// if the team has enough players and we are in auto-lobby mode, no one may join
+		if (this.getPlayers().size() >= this.getMaxSize() &&
+			AutoReferee.isAutoLobbyMode() && !force) return false;
 
 		// if the match is in progress, no one may join
 		if (!match.getCurrentState().isBeforeMatch() && !force) return false;

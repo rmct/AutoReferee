@@ -20,3 +20,7 @@ config-mode:
     win-condition: GOLD_SPADE
     start-mechanism: GOLD_AXE
     protect-entities: GOLD_SWORD
+
+lobby:
+  world: autoref-lobby
+  auto: false
