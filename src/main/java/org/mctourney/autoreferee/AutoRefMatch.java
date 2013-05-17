@@ -1123,6 +1123,7 @@ public class AutoRefMatch implements Metadatable
 			InputStream cfgStream = worldConfigFile.exists() ? new FileInputStream(worldConfigFile)
 				: AutoReferee.getInstance().getResource("defaults/map.xml");
 			worldConfig = new SAXBuilder().build(cfgStream).getRootElement();
+			assert "map".equals(worldConfig.getName());
 		}
 		catch (Exception e) { e.printStackTrace(); return; }
 
