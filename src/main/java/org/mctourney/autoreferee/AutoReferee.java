@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -255,6 +256,12 @@ public class AutoReferee extends JavaPlugin
 	{
 		// store the singleton instance
 		instance = this;
+		updateConfigurationFile();
+
+		// ensure we are dealing with the right type of config file
+		int configVersion = getConfig().getInt("config-version", PLUGIN_CFG_VERSION);
+		if (configVersion != PLUGIN_CFG_VERSION) getLogger().severe(String.format(
+			"!!! Incorrect config-version (expected %d, got %d)", PLUGIN_CFG_VERSION, configVersion));
 
 		// get properties file data
 		InputStream propStream = getResource("autoreferee.properties");
@@ -298,12 +305,6 @@ public class AutoReferee extends JavaPlugin
 		if (configInputStream != null) getConfig().setDefaults(
 			YamlConfiguration.loadConfiguration(configInputStream));
 		getConfig().options().copyDefaults(true); saveConfig();
-
-		// ensure we are dealing with the right type of config file
-		int configVersion = getConfig().getInt("config-version", -1);
-		if (configVersion != PLUGIN_CFG_VERSION && configVersion != -1)
-			getLogger().severe(String.format("!!! Incorrect config-version (expected %d, got %d)",
-				PLUGIN_CFG_VERSION, configVersion));
 
 		// setup a possible alternate map repository
 		String mrepo = this.getConfig().getString("map-repo", null);
@@ -487,5 +488,15 @@ public class AutoReferee extends JavaPlugin
 				msg.recipient.sendMessage(msg.message);
 			msgQueue.clear();
 		}
+	}
+
+	// this is a catch-all to make general upgrades to old configuration files
+	private void updateConfigurationFile()
+	{
+		FileConfiguration config = getConfig();
+
+		// v2.2, 2013/05/04, remove remains of server mode
+		if (config.get("server-mode") != null)
+			config.set("server-mode", null);
 	}
 }
