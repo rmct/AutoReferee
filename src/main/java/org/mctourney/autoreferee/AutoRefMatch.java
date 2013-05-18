@@ -80,7 +80,6 @@ import org.mctourney.autoreferee.event.match.MatchUploadStatsEvent;
 import org.mctourney.autoreferee.event.player.PlayerMatchJoinEvent;
 import org.mctourney.autoreferee.event.player.PlayerMatchLeaveEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
-import org.mctourney.autoreferee.goals.SurvivalGoal;
 import org.mctourney.autoreferee.goals.TimeGoal;
 import org.mctourney.autoreferee.listeners.SpectatorListener;
 import org.mctourney.autoreferee.listeners.ZoneListener;
@@ -1917,7 +1916,7 @@ public class AutoRefMatch implements Metadatable
 	/**
 	 * Starts the match.
 	 */
-	public void startMatch()
+	protected void _startMatch()
 	{
 		// set up the world time one last time
 		primaryWorld.setTime(startClock);
@@ -2148,7 +2147,7 @@ public class AutoRefMatch implements Metadatable
 			else if (remainingSeconds == 0)
 			{
 				// setup world to go!
-				if (this.start) match.startMatch();
+				if (this.start) match._startMatch();
 				match.broadcast(">>> " + CountdownTask.COLOR + "GO!");
 
 				// cancel the task
@@ -2165,8 +2164,12 @@ public class AutoRefMatch implements Metadatable
 	}
 
 	// prepare this world to start
-	protected void prepareMatch()
+	public void startMatch()
 	{
+		MatchStartEvent event = new MatchStartEvent(this);
+		AutoReferee.callEvent(event);
+		if (!refereeReady && event.isCancelled()) return;
+
 		// nothing to do if the countdown is running
 		if (isCountdownRunning()) return;
 
@@ -2236,7 +2239,6 @@ public class AutoRefMatch implements Metadatable
 
 		// set status based on whether the players are online
 		setCurrentState(ready ? MatchStatus.READY : MatchStatus.WAITING);
-		if (AutoReferee.isAutoLobbyMode()) this.checkTeamsStart();
 	}
 
 	/**
@@ -2253,12 +2255,7 @@ public class AutoRefMatch implements Metadatable
 			p.sendMessage(ChatColor.GRAY + "Teams are ready. Type /ready to begin the match.");
 
 		// everyone is ready, let's go!
-		if (ready)
-		{
-			MatchStartEvent event = new MatchStartEvent(this);
-			AutoReferee.callEvent(event);
-			if (!event.isCancelled()) this.prepareMatch();
-		}
+		if (ready) this.startMatch();
 	}
 
 	/**
@@ -2501,10 +2498,6 @@ public class AutoRefMatch implements Metadatable
 		// if this player needs to be placed on a team, go for it
 		AutoRefTeam team = this.expectedTeam(player);
 		if (team != null) this.joinTeam(player, team, false);
-
-		// if the plugin is in autolobby mode
-		else if (AutoReferee.isAutoLobbyMode())
-			this.joinTeam(player, this.getArbitraryTeam(), false);
 
 		// otherwise, get them into the world
 		else if (player.getWorld() != this.getWorld())

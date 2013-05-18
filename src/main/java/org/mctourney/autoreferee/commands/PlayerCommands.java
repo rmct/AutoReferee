@@ -208,8 +208,7 @@ public class PlayerCommands implements CommandHandler
 	public boolean ready(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
 		// if there is no match in progress, or the match has started, quit
-		if (AutoReferee.isAutoLobbyMode() || match == null ||
-			!match.getCurrentState().isBeforeMatch()) return false;
+		if (match == null || !match.getCurrentState().isBeforeMatch()) return false;
 
 		boolean rstate = !options.hasOption('f') && !options.hasOption('n');
 		Player player = sender instanceof Player ? (Player) sender : null;

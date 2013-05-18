@@ -128,9 +128,6 @@ public class AutoReferee extends JavaPlugin
 
 	private LobbyListener lobbyListener = null;
 
-	public static boolean isAutoLobbyMode()
-	{ return getInstance().lobbyListener instanceof AutoLobbyListener; }
-
 	private World lobby = null;
 
 	/**
