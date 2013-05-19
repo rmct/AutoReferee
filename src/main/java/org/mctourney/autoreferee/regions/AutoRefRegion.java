@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
 
@@ -140,10 +141,13 @@ public abstract class AutoRefRegion
 
 	protected AutoRefRegion getRegionSettings(AutoRefMatch match, Element e)
 	{
-		this.addFlags(e.getChild("flags"));
 		for (Element owner : e.getChildren("owner"))
 			this.addOwners(match.getTeam(owner.getTextTrim()));
+		return this.getRegionSettings(match.getWorld(), e);
+	}
 
+	protected AutoRefRegion getRegionSettings(World world, Element e)
+	{
 		if (e.getAttribute("yaw") != null)
 			yaw = Integer.parseInt(e.getAttributeValue("yaw"));
 
@@ -153,6 +157,7 @@ public abstract class AutoRefRegion
 		if (e.getAttribute("name") != null)
 			this.setName(e.getAttributeValue("name"));
 
+		this.addFlags(e.getChild("flags"));
 		return this;
 	}
 
@@ -220,6 +225,19 @@ public abstract class AutoRefRegion
 		{
 			Constructor<? extends AutoRefRegion> cons = cls.getConstructor(AutoRefMatch.class, Element.class);
 			return cons.newInstance(match, elt).getRegionSettings(match, elt);
+		}
+		catch (Exception e) { e.printStackTrace(); return null; }
+	}
+
+	public static AutoRefRegion fromElement(World world, Element elt)
+	{
+		Class<? extends AutoRefRegion> cls = elementNames.get(elt.getName());
+		if (cls == null) return null;
+
+		try
+		{
+			Constructor<? extends AutoRefRegion> cons = cls.getConstructor(World.class, Element.class);
+			return cons.newInstance(world, elt).getRegionSettings(world, elt);
 		}
 		catch (Exception e) { e.printStackTrace(); return null; }
 	}

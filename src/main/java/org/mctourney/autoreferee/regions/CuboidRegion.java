@@ -37,10 +37,13 @@ public class CuboidRegion extends AutoRefRegion
 	}
 
 	public CuboidRegion(AutoRefMatch match, Element elt)
+	{ this(match.getWorld(), elt); }
+
+	public CuboidRegion(World world, Element elt)
 	{
 		this(
-			LocationUtil.fromCoords(match.getWorld(), elt.getAttributeValue("min")),
-			LocationUtil.fromCoords(match.getWorld(), elt.getAttributeValue("max"))
+			LocationUtil.fromCoords(world, elt.getAttributeValue("min")),
+			LocationUtil.fromCoords(world, elt.getAttributeValue("max"))
 		);
 	}
 
