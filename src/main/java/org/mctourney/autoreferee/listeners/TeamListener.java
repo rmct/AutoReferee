@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -105,8 +106,10 @@ public class TeamListener implements Listener
 			boolean hasBed = event.getPlayer().getBedSpawnLocation() != null;
 
 			// if the player attempts to respawn in a different world, bring them back
-			if (!hasBed || event.getRespawnLocation().getWorld() != match.getWorld())
-				event.setRespawnLocation(match.getPlayerSpawn(event.getPlayer()));
+			Location respawnLocation = event.getRespawnLocation();
+			boolean changeRespawn = !hasBed || respawnLocation.getWorld() != match.getWorld() ||
+				match.inStartRegion(respawnLocation);
+			if (changeRespawn) event.setRespawnLocation(match.getPlayerSpawn(event.getPlayer()));
 
 			// setup respawn for the player
 			match.getPlayer(event.getPlayer()).respawn();
