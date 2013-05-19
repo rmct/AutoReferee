@@ -4,6 +4,7 @@ import java.util.Random;
 
 import org.bukkit.Location;
 
+import org.bukkit.World;
 import org.jdom2.Element;
 
 import org.mctourney.autoreferee.AutoRefMatch;
@@ -17,7 +18,10 @@ public class PointRegion extends AutoRefRegion
 	{ this.pos = loc.getBlock().getLocation(); this.yaw = (int)loc.getYaw(); }
 
 	public PointRegion(AutoRefMatch match, Element e)
-	{ this(LocationUtil.fromCoords(match.getWorld(), e.getAttributeValue("pos"))); }
+	{ this(match.getWorld(), e); }
+
+	public PointRegion(World world, Element e)
+	{ this(LocationUtil.fromCoords(world, e.getAttributeValue("pos"))); }
 
 	public Element toElement()
 	{
