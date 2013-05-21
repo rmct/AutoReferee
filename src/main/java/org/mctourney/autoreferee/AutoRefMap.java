@@ -135,6 +135,22 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 			"MD5 Mismatch: " + md5comp + " != " + md5sum);
 	}
 
+	/**
+	 * Installs the map if it is not already installed.
+	 */
+	public void install()
+	{
+		// runnable downloads the map if it isn't installed
+		BukkitRunnable runnable = new BukkitRunnable()
+		{
+			@Override public void run()
+			{ try { getZip(); } catch (IOException e) { e.printStackTrace(); } }
+		};
+
+		// run the task asynchronously to avoid locking up the main thread on a download
+		runnable.runTaskAsynchronously(AutoReferee.getInstance());
+	}
+
 	@Override
 	public int hashCode()
 	{ return name.toLowerCase().hashCode(); }
