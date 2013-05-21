@@ -1965,6 +1965,7 @@ public class AutoRefMatch implements Metadatable
 
 		// match minute timer
 		AutoReferee plugin = AutoReferee.getInstance();
+		clockTask = new MatchClockTask();
 		clockTask.runTaskTimer(plugin, 60 * 20L, 60 * 20L);
 
 		if (plugin.playedMapsTracker != null)
@@ -1975,7 +1976,7 @@ public class AutoRefMatch implements Metadatable
 		Sets.newHashSet(60L, 30L, 10L, 5L, 4L, 3L, 2L, 1L);
 
 	// handle to the clock task
-	private MatchClockTask clockTask = new MatchClockTask();
+	private MatchClockTask clockTask;
 
 	private class MatchClockTask extends BukkitRunnable
 	{
