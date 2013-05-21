@@ -21,6 +21,7 @@ import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import org.mctourney.autoreferee.event.match.MatchLoadEvent;
 import org.mctourney.autoreferee.util.NullChunkGenerator;
@@ -318,7 +319,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		return maps;
 	}
 
-	private static class MapUpdateTask implements Runnable
+	private static class MapUpdateTask extends BukkitRunnable
 	{
 		private CommandSender sender;
 		private boolean force;
@@ -388,11 +389,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	 * @param force force re-download of maps, irrespective of version
 	 */
 	public static void getUpdates(CommandSender sender, boolean force)
-	{
-		AutoReferee instance = AutoReferee.getInstance();
-		instance.getServer().getScheduler().runTaskAsynchronously(
-			instance, new MapUpdateTask(sender, force));
-	}
+	{ new MapUpdateTask(sender, force).runTaskAsynchronously(AutoReferee.getInstance()); }
 
 	/**
 	 * Gets maps that are not installed, but may be downloaded.
@@ -419,9 +416,9 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		Set<AutoRefMap> maps = Sets.newHashSet();
 
 		// look through the zip files for what's already installed
-		for (File f : AutoRefMap.getMapLibrary().listFiles())
+		for (File zip : AutoRefMap.getMapLibrary().listFiles())
 		{
-			AutoRefMap mapInfo = getMapInfo(f);
+			AutoRefMap mapInfo = getMapInfo(zip);
 			if (mapInfo != null) maps.add(mapInfo);
 		}
 
@@ -498,7 +495,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		return dest;
 	}
 
-	private static abstract class MapDownloader implements Runnable
+	private static abstract class MapDownloader extends BukkitRunnable
 	{
 		protected CommandSender sender;
 		private String custom;
@@ -511,8 +508,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 			try
 			{
 				if (!map.isInstalled()) map.download();
-				AutoReferee.getInstance().getServer().getScheduler().scheduleSyncDelayedTask(
-					AutoReferee.getInstance(), new MapLoader(sender, map, custom));
+				new MapLoader(sender, map, custom).runTask(AutoReferee.getInstance());
 			}
 			catch (IOException e) {  }
 		}
@@ -560,7 +556,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		}
 	}
 
-	private static class MapLoader implements Runnable
+	private static class MapLoader extends BukkitRunnable
 	{
 		private CommandSender sender;
 		private AutoRefMap map;
@@ -598,9 +594,9 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	 */
 	public static void loadMap(CommandSender sender, String name, String worldname)
 	{
-		AutoReferee instance = AutoReferee.getInstance();
-		instance.getServer().getScheduler().runTaskAsynchronously(
-				instance, new MapRepoDownloader(sender, name, worldname));
+		sender.sendMessage(ChatColor.GREEN + "Loading map: " + name);
+		new MapRepoDownloader(sender, name, worldname)
+			.runTaskAsynchronously(AutoReferee.getInstance());
 	}
 
 	/**
@@ -612,9 +608,9 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	 */
 	public static void loadMap(CommandSender sender, AutoRefMap map, String worldname)
 	{
-		AutoReferee instance = AutoReferee.getInstance();
-		instance.getServer().getScheduler().runTaskAsynchronously(
-			instance, new MapRepoDownloader(sender, map, worldname));
+		sender.sendMessage(ChatColor.GREEN + "Loading map: " + map.getVersionString());
+		new MapRepoDownloader(sender, map, worldname)
+			.runTaskAsynchronously(AutoReferee.getInstance());
 	}
 
 	/**
@@ -626,8 +622,8 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	 */
 	public static void loadMapFromURL(CommandSender sender, String url, String worldname)
 	{
-		AutoReferee instance = AutoReferee.getInstance();
-		instance.getServer().getScheduler().runTaskAsynchronously(
-			instance, new MapURLDownloader(sender, url, worldname));
+		sender.sendMessage(ChatColor.GREEN + "Loading map from URL...");
+		new MapURLDownloader(sender, url, worldname)
+			.runTaskAsynchronously(AutoReferee.getInstance());
 	}
 }
