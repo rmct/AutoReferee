@@ -1,6 +1,7 @@
 package org.mctourney.autoreferee.commands;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Set;
 
@@ -14,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
+import org.mctourney.autoreferee.AutoRefMap;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
@@ -29,8 +31,14 @@ import org.mctourney.autoreferee.util.commands.AutoRefPermission;
 import org.mctourney.autoreferee.util.commands.CommandHandler;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Sets;
+
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
@@ -411,6 +419,49 @@ public class ConfigurationCommands implements CommandHandler
 	{
 		match.reload();
 		sender.sendMessage(ChatColor.GREEN + AutoReferee.CFG_FILENAME + " reload complete!");
+		return true;
+	}
+
+	@AutoRefCommand(name={"autoref", "cfg", "apply"}, argmin=1, options="v+",
+		description="Apply a known configuration file to the current map.")
+	@AutoRefPermission(console=true, nodes={"autoreferee.configure"})
+
+	public boolean configApply(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		// generate a map name from the args
+		String mapName = StringUtils.join(args, " ");
+		AutoRefMap map = AutoRefMap.getMap(mapName);
+		World world = plugin.getSenderWorld(sender);
+
+		if (map == null)
+		{
+			sender.sendMessage(ChatColor.RED + "Unknown map: " + mapName);
+			return true;
+		}
+		else sender.sendMessage(ChatColor.RED + "Applying " + map.getVersionString());
+
+		Element worldConfig = null;
+		try { worldConfig = AutoRefMap.getConfigFileData(map.getZip()); }
+		catch (IOException e) { e.printStackTrace(); return true; }
+		catch (JDOMException e) { e.printStackTrace(); return true; }
+
+		// set a new version string if one is specified
+		if (options.hasOption('v'))
+		{
+			Element version = worldConfig.getChild("meta").getChild("version");
+			version.setText(options.getOptionValue('v'));
+		}
+
+		try
+		{
+			XMLOutputter xmlout = new XMLOutputter(Format.getPrettyFormat());
+			File localconfig = new File(world.getWorldFolder(), AutoReferee.CFG_FILENAME);
+			xmlout.output(worldConfig, new FileOutputStream(localconfig));
+		}
+		catch (java.io.IOException e)
+		{ AutoReferee.log("Could not save world config: " + world.getName()); return true; }
+
+		AutoRefMatch.setupWorld(world, false);
 		return true;
 	}
 

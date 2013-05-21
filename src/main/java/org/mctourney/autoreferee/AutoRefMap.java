@@ -441,6 +441,21 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		return maps;
 	}
 
+	public static Element getConfigFileData(File zip) throws IOException, JDOMException
+	{
+		ZipFile zfile = new ZipFile(zip);
+		Enumeration<? extends ZipEntry> entries = zfile.entries();
+
+		// if it doesn't have an autoreferee config file
+		while (entries.hasMoreElements())
+		{
+			ZipEntry entry = entries.nextElement();
+			if (entry.getName().endsWith(AutoReferee.CFG_FILENAME))
+				return new SAXBuilder().build(zfile.getInputStream(entry)).getRootElement();
+		}
+		return null;
+	}
+
 	/**
 	 * Get map info object associated with a zip
 	 *
@@ -453,24 +468,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		if (zip.isDirectory()) return null;
 
 		Element worldConfig = null;
-		try
-		{
-			ZipFile zfile = new ZipFile(zip);
-			Enumeration<? extends ZipEntry> entries = zfile.entries();
-
-			// if it doesn't have an autoreferee config file
-			InputStream cfgFile = null;
-			while (entries.hasMoreElements() && cfgFile == null)
-			{
-				ZipEntry entry = entries.nextElement();
-				if (entry.getName().endsWith(AutoReferee.CFG_FILENAME))
-					cfgFile = zfile.getInputStream(entry);
-			}
-
-			// if we didn't find a config file, there's a problem
-			if (cfgFile == null) return null;
-			worldConfig = new SAXBuilder().build(cfgFile).getRootElement();
-		}
+		try { worldConfig = getConfigFileData(zip); }
 		catch (IOException e) { e.printStackTrace(); return null; }
 		catch (JDOMException e) { e.printStackTrace(); return null; }
 
