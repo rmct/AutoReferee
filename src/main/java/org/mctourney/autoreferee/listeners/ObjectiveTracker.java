@@ -329,7 +329,12 @@ public class ObjectiveTracker implements Listener
 		public void run()
 		{
 			int crafted = countItemInInventory() - this.count;
-			int craftedStacks = crafted / this.size;
+			AutoRefMatch match = plugin.getMatch(player.getWorld());
+			if (match == null || !match.getCurrentState().inProgress()) return;
+
+			AutoRefPlayer apl = match.getPlayer((Player) player);
+			AchievementPoints ach = AchievementPoints.getEquipmentCraft(type);
+			if (apl != null) apl.addPoints(ach, crafted / this.size);
 		}
 	}
 

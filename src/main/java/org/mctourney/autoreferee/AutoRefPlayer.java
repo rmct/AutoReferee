@@ -398,11 +398,17 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	/**
 	 * Adds achievement points for this player.
 	 */
-	public void addPoints(AchievementPoints ach)
+	public void addPoints(AchievementPoints ach, int count)
 	{
 		if (ach == null) return;
-		this.addPoints(ach.getValue());
+		this.addPoints(ach.getValue() * count);
 	}
+
+	/**
+	 * Adds achievement points for this player.
+	 */
+	public void addPoints(AchievementPoints ach)
+	{ this.addPoints(ach, 1); }
 
 	/**
 	 * Adds achievement points for this player. This method can be used to add
