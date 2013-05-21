@@ -2001,10 +2001,6 @@ public class AutoRefMatch implements Metadatable
 
 			if (lockTime) primaryWorld.setTime(startClock);
 			AutoRefMatch.this.checkWinConditions();
-
-			// re-apply night vision to all spectators during recovery
-			for (AutoRefSpectator spec : AutoRefMatch.this.spectators.values())
-				if (spec.hasNightVision()) spec.applyNightVision();
 		}
 	}
 
