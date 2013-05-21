@@ -390,6 +390,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 							AutoReferee.getInstance().sendMessageSync(sender,
 								"Update " + ChatColor.GREEN + "SUCCESS: " +
 									ChatColor.RESET + rmap.getVersionString());
+							FileUtils.deleteQuietly(map.getZip());
 						}
 					}
 				}
