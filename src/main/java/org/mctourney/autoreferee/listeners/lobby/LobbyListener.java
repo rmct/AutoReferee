@@ -240,7 +240,7 @@ public abstract class LobbyListener implements Listener
 						else this.lobbyLoadMap(player, map);
 
 						// if the sign is fit to have a version string listed, add/update it
-						if (hasVersion && map.getVersion().length() <= 14)
+						if (hasVersion && map.getVersion().length() <= 13)
 						{
 							sign.setLine(3, String.format("[v%s]", map.getVersion()));
 							sign.update();
