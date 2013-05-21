@@ -215,7 +215,10 @@ public abstract class LobbyListener implements Listener
 		Player player = event.getPlayer();
 		if (event.hasBlock() && event.getClickedBlock().getState() instanceof Sign)
 		{
-			String[] lines = ((Sign) event.getClickedBlock().getState()).getLines();
+			Sign sign = (Sign) event.getClickedBlock().getState();
+			String[] lines = sign.getLines();
+
+			// if the first line isn't the AutoReferee tag, not our sign, not our business
 			if (lines[0] == null || !"[AutoReferee]".equals(lines[0])) return;
 
 			if (player.getWorld() == plugin.getLobbyWorld())
@@ -223,11 +226,26 @@ public abstract class LobbyListener implements Listener
 				// load the world named on the sign
 				if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
 				{
-					player.sendMessage(ChatColor.GREEN + "Please wait...");
-					String mapname = lines[1] + " " + lines[2] + " " + lines[3];
+					// if the last line is a version string, make sure it isn't included in the name
+					boolean hasVersion = lines[3].isEmpty() ||
+						(lines[3].trim().startsWith("[") && lines[3].trim().endsWith("]"));
+
+					String mapname = lines[1] + " " + lines[2];
+					if (!hasVersion) mapname += " " + lines[3];
 
 					AutoRefMap map = AutoRefMap.getMap(mapname.trim());
-					if (map != null) this.lobbyLoadMap(player, map);
+					if (map != null)
+					{
+						if (player.isSneaking()) map.install();
+						else this.lobbyLoadMap(player, map);
+
+						// if the sign is fit to have a version string listed, add/update it
+						if (hasVersion && map.getVersion().length() <= 14)
+						{
+							sign.setLine(3, String.format("[v%s]", map.getVersion()));
+							sign.update();
+						}
+					}
 				}
 			}
 		}
