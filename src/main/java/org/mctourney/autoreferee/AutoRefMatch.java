@@ -1161,12 +1161,6 @@ public class AutoRefMatch implements Metadatable
 			try { protectedEntities.add(UUID.fromString(c.getTextTrim())); }
 			catch (Exception e) {  }
 
-		// HELPER: ensure all protected entities are still present in world
-		Set<UUID> uuidSearch = Sets.newHashSet(protectedEntities);
-		for (Entity e : getWorld().getEntities()) uuidSearch.remove(e.getUniqueId());
-		if (!uuidSearch.isEmpty()) this.broadcast(ChatColor.RED + "" + ChatColor.BOLD + "WARNING: " +
-			ChatColor.RESET + "One or more protected entities are missing!");
-
 		// get the start region (safe for both teams, no pvp allowed)
 		assert worldConfig.getChild("startregion") != null;
 		for (Element e : worldConfig.getChild("startregion").getChildren())
