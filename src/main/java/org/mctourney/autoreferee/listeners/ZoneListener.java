@@ -352,8 +352,9 @@ public class ZoneListener implements Listener
 		for (Map.Entry<Class<? extends Entity>, String> e : entityRenames.entrySet())
 			if (e.getKey().isAssignableFrom(clazz)) vehicleType = e.getValue();
 
-		teleportEvent((Player) event.getEntered(), event.getEntered().getLocation(),
-			event.getVehicle().getLocation(), "into a " + vehicleType);
+		if (event.getEntered() instanceof Player)
+			teleportEvent((Player) event.getEntered(), event.getEntered().getLocation(),
+				event.getVehicle().getLocation(), "into a " + vehicleType);
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
