@@ -996,7 +996,8 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	private boolean showInventory(Player pl, Inventory v)
 	{
 		AutoRefMatch match = AutoReferee.getInstance().getMatch(pl.getWorld());
-		if (match == null || !match.isReferee(pl)) return false;
+		if (match == null || !match.isSpectator(pl) ||
+			!match.getSpectator(pl).canViewInventory()) return false;
 
 		// show the requested inventory view
 		if (v != null) pl.openInventory(v);

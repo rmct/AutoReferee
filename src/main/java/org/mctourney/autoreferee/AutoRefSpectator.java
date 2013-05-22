@@ -11,6 +11,7 @@ public class AutoRefSpectator extends AutoRefPlayer
 	private AutoRefMatch match = null;
 	private boolean nightVision = false;
 	private String cyclePlayer = null;
+	private boolean viewInventory = true;
 
 	public AutoRefSpectator(String name, AutoRefMatch match)
 	{ super(name, null); this.match = match; }
@@ -55,4 +56,10 @@ public class AutoRefSpectator extends AutoRefPlayer
 		AutoRefPlayer apl = getMatch().getPlayer(this.cyclePlayer);
 		if (apl != null) getPlayer().teleport(TeleportationUtil.playerTeleport(apl));
 	}
+
+	public boolean canViewInventory()
+	{ return viewInventory; }
+
+	public void setViewInventory(boolean vi)
+	{ this.viewInventory = vi; }
 }
