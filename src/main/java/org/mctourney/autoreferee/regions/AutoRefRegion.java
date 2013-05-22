@@ -206,11 +206,16 @@ public abstract class AutoRefRegion
 		return CuboidRegion.combine(reg1.getBoundingCuboid(), reg2.getBoundingCuboid());
 	}
 
+	// wrote this dumb helper function because `distanceToRegion` was looking ugly...
+	protected static double multimax(double base, double ... more )
+	{ for ( double x : more ) base = Math.max(base, x); return base; }
+
 	public static Map<String, Class<? extends AutoRefRegion>> elementNames = Maps.newHashMap();
 	static
 	{
 		elementNames.put("location", PointRegion.class);
 		elementNames.put("cuboid", CuboidRegion.class);
+		elementNames.put("cylinder", CylinderRegion.class);
 	}
 
 	public static void addRegionType(String tag, Class<? extends AutoRefRegion> cls)

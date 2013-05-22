@@ -94,10 +94,6 @@ public class CuboidRegion extends AutoRefRegion
 			Math.min(a.z1, b.z1), Math.max(a.z2, b.z2));
 	}
 
-	// wrote this dumb helper function because `distanceToRegion` was looking ugly...
-	public static double multimax(double base, double ... more )
-	{ for ( double x : more ) base = Math.max(base, x); return base; }
-
 	// distance from region, axially aligned (value less than actual distance, but
 	// appropriate for measurements on cuboid regions)
 	@Override
