@@ -2,12 +2,12 @@ package org.mctourney.autoreferee;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 
 import com.google.common.collect.Maps;
 import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -24,10 +24,8 @@ import org.mctourney.autoreferee.goals.BlockGoal;
 import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
 import org.mctourney.autoreferee.util.BlockData;
-import org.mctourney.autoreferee.util.LocationUtil;
 import org.mctourney.autoreferee.util.Metadatable;
 import org.mctourney.autoreferee.util.PlayerKit;
-import org.mctourney.autoreferee.util.PlayerUtil;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
 
 import org.apache.commons.lang.StringUtils;
@@ -277,23 +275,38 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	}
 
 	// location of custom spawn
-	private AutoRefRegion spawn;
+	private Set<AutoRefRegion> spawnRegions = Sets.newHashSet();
+	private static Random random = new Random();
 
 	/**
-	 * Sets this team's spawn location.
+	 * Clears this team's spawn locations.
 	 */
-	public void setSpawnLocation(Location loc)
-	{
-		getMatch().broadcast("Set " + getDisplayName() + "'s spawn to " +
-			LocationUtil.toBlockCoords(loc));
-		this.spawn = new org.mctourney.autoreferee.regions.PointRegion(loc);
-	}
+	public void clearSpawnRegions()
+	{ this.spawnRegions = Sets.newHashSet(); }
 
 	/**
-	 * Gets this team's spawn location.
+	 * Adds to this team's spawn locations.
+	 */
+	public void addSpawnRegion(AutoRefRegion reg)
+	{ this.spawnRegions.add(reg); }
+
+	/**
+	 * Adds to this team's spawn locations.
+	 */
+	public void addSpawnRegion(Location loc)
+	{ this.addSpawnRegion(new org.mctourney.autoreferee.regions.PointRegion(loc)); }
+
+	/**
+	 * Gets a valid spawn location for this team.
 	 */
 	public Location getSpawnLocation()
-	{ return spawn == null ? match.getWorldSpawn() : spawn.getLocation(); }
+	{
+		if (spawnRegions == null || spawnRegions.isEmpty())
+			return match.getWorldSpawn();
+
+		AutoRefRegion[] regs = spawnRegions.toArray(new AutoRefRegion[0]);
+		return regs[random.nextInt(spawnRegions.size())].getLocation();
+	}
 
 	private Set<AutoRefGoal> goals = Sets.newHashSet();
 
@@ -390,8 +403,8 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		}
 
 		Element spawn = elt.getChild("spawn");
-		newTeam.spawn = spawn == null ? null :
-			AutoRefRegion.fromElement(match, spawn.getChildren().get(0));
+		for (Element reg : spawn.getChildren())
+			newTeam.addSpawnRegion(AutoRefRegion.fromElement(match, reg));
 
 		if (elt.getAttribute("lives") != null)
 			try { newTeam.playerlives = Integer.parseInt(elt.getAttributeValue("lives").trim()); }
@@ -414,9 +427,11 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		PlayerKit teamKit = this.getKit();
 		if (teamKit != null) elt.setAttribute("kit", teamKit.getName());
 
-		if (this.spawn != null)
+		if (this.spawnRegions != null)
 		{
-			Element spawnElement = new Element("spawn").addContent(this.spawn.toElement());
+			Element spawnElement = new Element("spawn");
+			for (AutoRefRegion reg : this.spawnRegions)
+				spawnElement.addContent(reg.toElement());
 			elt.addContent(spawnElement);
 		}
 
