@@ -162,7 +162,7 @@ public class ConfigurationCommands implements CommandHandler
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "setspawn"}, argmin=0, argmax=1,
+	@AutoRefCommand(name={"autoref", "setspawn"}, argmin=0, argmax=1, options="a",
 		description="Set the current location as the global spawn. If a team name is provided, sets team spawn.")
 	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
 
@@ -190,10 +190,13 @@ public class ConfigurationCommands implements CommandHandler
 		}
 		else
 		{
-			team.setSpawnLocation(player.getLocation());
-			String coords = LocationUtil.toBlockCoords(player.getLocation());
-			sender.sendMessage(ChatColor.GRAY + "Spawn set to " +
-				coords + " for " + team.getDisplayName());
+			boolean append = options.hasOption('a');
+			if (!append) team.clearSpawnRegions();
+			team.addSpawnRegion(player.getLocation());
+
+			sender.sendMessage(ChatColor.GRAY + String.format("%s set as spawn for %s",
+				LocationUtil.toBlockCoords(player.getLocation()), team.getDisplayName()));
+			if (append) sender.sendMessage(ChatColor.GRAY + "Appended.");
 		}
 		return true;
 	}
