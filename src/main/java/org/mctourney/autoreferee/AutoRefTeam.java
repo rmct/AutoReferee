@@ -403,7 +403,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		}
 
 		Element spawn = elt.getChild("spawn");
-		for (Element reg : spawn.getChildren())
+		if (spawn != null) for (Element reg : spawn.getChildren())
 			newTeam.addSpawnRegion(AutoRefRegion.fromElement(match, reg));
 
 		if (elt.getAttribute("lives") != null)
