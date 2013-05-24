@@ -2091,7 +2091,7 @@ public class AutoRefMatch implements Metadatable
 						Monster.class, Animals.class, Ambient.class, ExperienceOrb.class))
 					if (!protectedEntities.contains(e.getUniqueId())) e.remove();
 			}
-		}.runTask(AutoReferee.getInstance());
+		}.runTaskLater(AutoReferee.getInstance(), 5L);
 	}
 
 	/**
