@@ -56,8 +56,6 @@ public class AdminCommands implements CommandHandler
 		World lobby = ((Player) sender).getWorld();
 
 		plugin.setLobbyWorld(lobby);
-		plugin.getConfig().set("lobby.world", lobby.getName());
-
 		sender.sendMessage(ChatColor.GREEN + lobby.getName() +
 			" is the new AutoReferee lobby world.");
 		return true;

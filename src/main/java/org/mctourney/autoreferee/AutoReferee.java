@@ -145,7 +145,17 @@ public class AutoReferee extends JavaPlugin
 	 * @param world lobby world
 	 */
 	public void setLobbyWorld(World world)
-	{ if (world != null && !AutoRefMatch.isCompatible(world)) this.lobby = world; }
+	{
+		if (world != null && !AutoRefMatch.isCompatible(world))
+		{
+			// change the lobby world
+			this.lobby = world;
+
+			// reflect this change in the config file
+			this.getConfig().set("lobby.world", this.lobby.getName());
+			this.saveConfig();
+		}
+	}
 
 	private boolean consoleLog = false;
 
