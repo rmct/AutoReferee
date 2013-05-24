@@ -1543,7 +1543,7 @@ public class AutoRefMatch implements Metadatable
 
 		// make sure the folder exists first
 		File archiveFolder = new File(PACKAGING_DIRECTORY, this.getVersionString());
-		if (!archiveFolder.exists()) archiveFolder.mkdir();
+		if (!archiveFolder.exists()) FileUtils.forceMkdir(archiveFolder);
 		FileUtils.cleanDirectory(archiveFolder);
 
 		// (1) copy the configuration file:
