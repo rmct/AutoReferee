@@ -50,7 +50,7 @@ public class NoteBlockReceiver implements Receiver
 		if (ShortMessage.NOTE_ON != message.getCommand()) return;
 
 		// get pitch and volume from the midi message
-		float pitch = (float) ToneUtil.noteToPitch(ToneUtil.midiToNote(message));
+		float pitch = (float) ToneUtil.midiToPitch(message);
 		float volume = VOLUME_RANGE * ((float) message.getData2() / 127.0f);
 
 		for (Player player : listeners)
