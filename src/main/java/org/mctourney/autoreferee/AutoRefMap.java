@@ -495,9 +495,11 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		while (entries.hasMoreElements())
 		{
 			ZipEntry entry = entries.nextElement();
-			if (!entry.isDirectory()) FileUtils.copyInputStreamToFile(
-				zfile.getInputStream(entry), f = new File(tmp, entry.getName()));
-			else (f = new File(tmp, entry.getName())).mkdirs();
+			f = new File(tmp, entry.getName());
+			if (f.exists()) FileUtils.deleteQuietly(f);
+
+			if (entry.isDirectory()) FileUtils.forceMkdir(f);
+			else FileUtils.copyInputStreamToFile(zfile.getInputStream(entry), f);
 
 			if (entry.isDirectory() && (basedir == null ||
 				basedir.getName().startsWith(f.getName()))) basedir = f;
