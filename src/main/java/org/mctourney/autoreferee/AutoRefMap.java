@@ -3,7 +3,6 @@ package org.mctourney.autoreferee;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.Date;
@@ -47,6 +46,8 @@ import com.google.gson.reflect.TypeToken;
  */
 public class AutoRefMap implements Comparable<AutoRefMap>
 {
+	private static final File DOWNLOADING = new File("");
+
 	private String name;
 	private String version;
 
@@ -116,12 +117,20 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	 */
 	public File getZip() throws IOException
 	{
+		// if the map is already downloading, just be patient
+		while (this.zip == DOWNLOADING)
+			try { Thread.sleep(500); }
+			catch (InterruptedException e) {  }
+
 		if (!isInstalled()) download();
 		return this.zip;
 	}
 
 	private void download() throws IOException
 	{
+		// mark the file as downloading
+		this.zip = AutoRefMap.DOWNLOADING;
+
 		URL url = new URL(AutoRefMatch.getMapRepo() + filename);
 		File zip = new File(AutoRefMap.getMapLibrary(), filename);
 		FileUtils.copyURLToFile(url, zip);
