@@ -367,6 +367,8 @@ public class AutoReferee extends JavaPlugin
 
 	public void onDisable()
 	{
+		for (AutoRefMatch match : getMatches())
+			match.saveWorldConfiguration();
 		getLogger().info(this.getName() + " disabled.");
 	}
 

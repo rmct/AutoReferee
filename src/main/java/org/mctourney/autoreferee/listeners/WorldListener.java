@@ -15,6 +15,7 @@ import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.world.WorldEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldInitEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.plugin.Plugin;
 
 import org.mctourney.autoreferee.AutoRefMatch;
@@ -154,5 +155,12 @@ public class WorldListener implements Listener
 			matchFm.setSpectatorMode(player, false);
 			PlayerUtil.setGameMode(player, GameMode.SURVIVAL);
 		}
+	}
+
+	@EventHandler
+	public void worldUnload(WorldUnloadEvent event)
+	{
+		AutoRefMatch match = plugin.getMatch(event.getWorld());
+		if (match != null) match.saveWorldConfiguration();
 	}
 }
