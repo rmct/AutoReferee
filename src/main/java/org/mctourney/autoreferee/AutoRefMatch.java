@@ -189,7 +189,7 @@ public class AutoRefMatch implements Metadatable
 
 		int existingteams = 0;
 		for (AutoRefTeam team : this.getTeams())
-			if (team.getCachedPlayers().isEmpty()) ++existingteams;
+			if (!team.getCachedPlayers().isEmpty()) ++existingteams;
 		return existingteams < 2;
 	}
 
