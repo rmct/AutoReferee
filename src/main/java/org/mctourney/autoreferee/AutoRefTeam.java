@@ -245,12 +245,15 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	public Location getVictoryMonumentLocation()
 	{
 		Vector vmin = null, vmax = null;
-		for (AutoRefGoal goal : goals)
+		for (BlockGoal goal : this.getTeamGoals(BlockGoal.class))
 		{
 			Vector v = goal.getTarget().toVector().add(HALF_BLOCK_VECTOR);
 			vmin = vmin == null ? v : Vector.getMinimum(vmin, v);
 			vmax = vmax == null ? v : Vector.getMaximum(vmax, v);
 		}
+
+		// if we didn't find any block goals, no victory monument
+		if (vmin == null || vmax == null) return null;
 
 		World w = getMatch().getWorld();
 		return vmin.getMidpoint(vmax).toLocation(w);
