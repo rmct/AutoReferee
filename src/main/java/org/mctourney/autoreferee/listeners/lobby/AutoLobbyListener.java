@@ -15,7 +15,10 @@ import org.mctourney.autoreferee.event.player.PlayerTeamJoinEvent;
 public class AutoLobbyListener extends LobbyListener
 {
 	public AutoLobbyListener(AutoReferee plugin)
-	{ super(plugin); }
+	{
+		super(plugin);
+		AutoRefMatch.giveMatchInfoBooks = false;
+	}
 
 	@Override
 	protected void lobbyLoadMap(Player player, AutoRefMap map)

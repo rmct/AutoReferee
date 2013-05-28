@@ -95,7 +95,7 @@ public class WorldListener implements Listener
 			{
 				// give them a book with info about the match
 				PlayerUtil.clearInventory(player);
-				player.getInventory().addItem(match.getMatchInfoBook());
+				match.giveMatchInfoBook(player);
 			}
 
 			if (match.isReferee(player))
@@ -141,7 +141,7 @@ public class WorldListener implements Listener
 
 			// give them a book with info about the match
 			PlayerUtil.clearInventory(player);
-			player.getInventory().addItem(matchTo.getMatchInfoBook());
+			matchTo.giveMatchInfoBook(player);
 		}
 		else SportBukkitUtil.setOverheadName(player, player.getName());
 
