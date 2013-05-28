@@ -127,6 +127,9 @@ public class AutoRefMatch implements Metadatable
 	public static void changeMapRepo(String url)
 	{ MAPREPO = url + "/"; }
 
+	// set this to false to not give match info books to players
+	public static boolean giveMatchInfoBooks = true;
+
 	// local storage locations
 	private static File matchSummaryDirectory = null;
 	static
@@ -3093,6 +3096,15 @@ public class AutoRefMatch implements Metadatable
 		book.setItemMeta(meta);
 		return book;
 	}
+
+	public void giveMatchInfoBook(Player player, boolean force)
+	{
+		if (force || AutoRefMatch.giveMatchInfoBooks)
+			player.getInventory().addItem(this.getMatchInfoBook());
+	}
+
+	public void giveMatchInfoBook(Player player)
+	{ this.giveMatchInfoBook(player, false); }
 
 	/**
 	 * Send updated match information to a player.
