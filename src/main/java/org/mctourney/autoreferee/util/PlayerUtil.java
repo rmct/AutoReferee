@@ -103,12 +103,16 @@ public class PlayerUtil
 		private static Map<String, BufferedGameModeChangeTask> players = Maps.newHashMap();
 
 		private Player player;
-		private GameMode gamemode;
+		private GameMode gamemode = null;
+		private Boolean flight = null;
 
 		private BufferedGameModeChangeTask(Player player)
-		{ this.player = player; this.gamemode = null; }
+		{ this.player = player; }
 
 		public static BufferedGameModeChangeTask change(Player player, GameMode gm)
+		{ return BufferedGameModeChangeTask.change(player, gm, null); }
+
+		public static BufferedGameModeChangeTask change(Player player, GameMode gm, Boolean flight)
 		{
 			BufferedGameModeChangeTask task = players.get(player.getName());
 			if (task == null)
@@ -119,6 +123,7 @@ public class PlayerUtil
 			}
 
 			task.gamemode = gm;
+			task.flight = flight;
 			return task;
 		}
 
@@ -127,6 +132,8 @@ public class PlayerUtil
 		{
 			if (this.gamemode != null)
 				player.setGameMode(this.gamemode);
+			if (this.flight != null)
+				player.setAllowFlight(this.flight);
 			players.remove(player.getName());
 		}
 	}
@@ -138,6 +145,15 @@ public class PlayerUtil
 	 */
 	public static void setGameMode(Player player, GameMode gamemode)
 	{ BufferedGameModeChangeTask.change(player, gamemode); }
+
+	/**
+	 * Changes the players gamemode on the next server tick. Buffers gamemode changes.
+	 * @param player player
+	 * @param gamemode new gamemode
+	 * @param flight allow flight
+	 */
+	public static void setGameMode(Player player, GameMode gamemode, boolean flight)
+	{ BufferedGameModeChangeTask.change(player, gamemode, flight); }
 
 	public static void setSpectatorSettings(Player player, boolean spec)
 	{
