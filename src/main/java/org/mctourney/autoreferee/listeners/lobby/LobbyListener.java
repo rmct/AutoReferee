@@ -89,9 +89,7 @@ public abstract class LobbyListener implements Listener
 		{
 			if (!player.hasPlayedBefore())
 				player.teleport(player.getWorld().getSpawnLocation());
-
-			PlayerUtil.setGameMode(player, GameMode.ADVENTURE);
-			player.setAllowFlight(true);
+			PlayerUtil.setGameMode(player, GameMode.ADVENTURE, true);
 		}
 	}
 
@@ -101,10 +99,7 @@ public abstract class LobbyListener implements Listener
 		// moving to lobby world, set player to creative
 		Player player = event.getPlayer();
 		if (player.getWorld() == plugin.getLobbyWorld())
-		{
-			PlayerUtil.setGameMode(player, GameMode.ADVENTURE);
-			player.setAllowFlight(true);
-		}
+			PlayerUtil.setGameMode(player, GameMode.ADVENTURE, true);
 	}
 
 	@EventHandler(priority= EventPriority.HIGHEST)
