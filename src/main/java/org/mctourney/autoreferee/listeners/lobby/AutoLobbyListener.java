@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.mctourney.autoreferee.AutoRefMap;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefTeam;
@@ -44,6 +45,24 @@ public class AutoLobbyListener extends LobbyListener
 			match.joinTeam(event.getPlayer(), match.getArbitraryTeam(), false);
 	}
 
+	private class MatchStarterTask extends BukkitRunnable
+	{
+		private final AutoRefMatch match;
+
+		public MatchStarterTask(AutoRefMatch match)
+		{ this.match = match; }
+
+		@Override
+		public void run()
+		{
+			// starting a match is based purely on teams being filled
+			boolean ready = true;
+			for (AutoRefTeam t : match.getTeams())
+				ready &= t.getPlayers().size() >= t.getMaxSize();
+			if (ready) match.startMatch();
+		}
+	}
+
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void teamJoin(PlayerTeamJoinEvent event)
 	{
@@ -51,11 +70,8 @@ public class AutoLobbyListener extends LobbyListener
 		if (team.getPlayers().size() >= team.getMaxSize())
 			event.setCancelled(true);
 
-		// starting a match is based purely on teams being filled
-		boolean ready = true;
-		for (AutoRefTeam t : team.getMatch().getTeams())
-			ready &= t.getPlayers().size() >= t.getMaxSize();
-		if (ready) team.getMatch().startMatch();
+		// schedule a check to see if we need to start the match
+		new MatchStarterTask(team.getMatch()).runTask(plugin);
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
