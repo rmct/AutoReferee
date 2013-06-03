@@ -71,7 +71,8 @@ public class AutoLobbyListener extends LobbyListener
 			event.setCancelled(true);
 
 		// schedule a check to see if we need to start the match
-		new MatchStarterTask(team.getMatch()).runTask(plugin);
+		if (team.getMatch().getCurrentState().isBeforeMatch())
+			new MatchStarterTask(team.getMatch()).runTask(plugin);
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
