@@ -348,13 +348,16 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 
 	public void startMatch()
 	{
+		// if there is no match associated, most of this work is moot
+		assert getMatch() != null : "Match is null";
+
 		for (AutoRefGoal goal : goals) if (goal.hasItem())
 			goal.setItemStatus(AutoRefGoal.ItemStatus.NONE);
 
 		for (AutoRefPlayer apl : getPlayers())
 		{
 			Player player = apl.getPlayer();
-			if (!getMatch().inStartRegion(player.getLocation()))
+			if (player != null && !getMatch().inStartRegion(player.getLocation()))
 				player.teleport(getMatch().getPlayerSpawn(player));
 
 			apl.heal();
