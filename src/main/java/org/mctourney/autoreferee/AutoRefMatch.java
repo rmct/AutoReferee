@@ -2160,6 +2160,9 @@ public class AutoRefMatch implements Metadatable
 	// prepare this world to start
 	public void startMatch()
 	{
+		// match has already started, don't try to start it again
+		if (!this.getCurrentState().isBeforeMatch()) return;
+
 		MatchStartEvent event = new MatchStartEvent(this);
 		AutoReferee.callEvent(event);
 		if (!refereeReady && event.isCancelled()) return;
