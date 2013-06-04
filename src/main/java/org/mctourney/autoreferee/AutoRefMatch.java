@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -68,6 +69,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import org.bukkit.scoreboard.Scoreboard;
 import org.jdom2.Element;
+import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
@@ -459,6 +461,7 @@ public class AutoRefMatch implements Metadatable
 	// configuration information for the world
 	private File worldConfigFile;
 	private Element worldConfig;
+	private boolean saveConfig = true;
 
 	// basic variables loaded from file
 	private String mapName = null;
@@ -1121,10 +1124,27 @@ public class AutoRefMatch implements Metadatable
 	{
 		try
 		{
+			// until told otherwise, assume that what we have should not be
+			// saved (to prevent a bad config from being destroyed)
+			saveConfig = false;
+
 			// file stream and configuration object (located in world folder)
 			InputStream cfgStream = worldConfigFile.exists() ? new FileInputStream(worldConfigFile)
 				: AutoReferee.getInstance().getResource("defaults/map.xml");
 			worldConfig = new SAXBuilder().build(cfgStream).getRootElement();
+
+			// turn on saving functionality if we loaded a configuration properly
+			assert "map".equals(worldConfig.getName());
+			saveConfig = true;
+		}
+		catch (JDOMParseException e)
+		{
+			AutoReferee.log(String.format(">> With configuration file: %s [%s]",
+				worldConfigFile.getPath(), getWorld().getName()), Level.SEVERE);
+			AutoReferee.log(e.getLocalizedMessage(), Level.SEVERE);
+
+			// maybe try to salvage the partially parsed document?
+			worldConfig = e.getPartialDocument().getRootElement();
 			assert "map".equals(worldConfig.getName());
 		}
 		catch (Exception e) { e.printStackTrace(); return; }
@@ -1262,6 +1282,11 @@ public class AutoRefMatch implements Metadatable
 	 */
 	public void saveWorldConfiguration()
 	{
+		// if for some reason we have disabled the saveConfig flag,
+		// just do nothing. more than likely, trying to save will do more
+		// harm than good, so best to just skip this entirely
+		if (!saveConfig) return;
+
 		// if there is no configuration object or file, nothin' doin'...
 		if (worldConfig == null)
 		{
