@@ -5,10 +5,13 @@ import javax.sound.midi.MidiMessage;
 import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+
+import com.google.common.collect.Maps;
 
 /**
  * Midi Receiver for processing note events.
@@ -20,10 +23,12 @@ public class NoteBlockReceiver implements Receiver
 	private static final float VOLUME_RANGE = 10.0f;
 
 	private final Set<Player> listeners;
+	private final Map<Integer, Integer> channelPatches;
 
 	public NoteBlockReceiver(Set<Player> listeners) throws InvalidMidiDataException, IOException
 	{
 		this.listeners = listeners;
+		this.channelPatches = Maps.newHashMap();
 	}
 
 	@Override
@@ -32,8 +37,15 @@ public class NoteBlockReceiver implements Receiver
 		if (m instanceof ShortMessage)
 		{
 			ShortMessage smessage = (ShortMessage) m;
+			int chan = smessage.getChannel();
+
 			switch (smessage.getCommand())
 			{
+				case ShortMessage.PROGRAM_CHANGE:
+					int patch = smessage.getData1();
+					channelPatches.put(chan, patch);
+					break;
+
 				case ShortMessage.NOTE_ON:
 					this.playNote(smessage);
 					break;
@@ -51,15 +63,21 @@ public class NoteBlockReceiver implements Receiver
 
 		// get pitch and volume from the midi message
 		float pitch = (float) ToneUtil.midiToPitch(message);
-		float volume = VOLUME_RANGE * ((float) message.getData2() / 127.0f);
+		float volume = VOLUME_RANGE * (message.getData2() / 127.0f);
+
+		// get the correct instrument
+		Integer patch = channelPatches.get(message.getChannel());
+		Sound instrument = Sound.NOTE_PIANO;
+		if (patch != null) instrument = MidiUtil.patchToInstrument(patch);
 
 		for (Player player : listeners)
-			player.playSound(player.getLocation(), Sound.NOTE_PIANO, volume, pitch);
+			player.playSound(player.getLocation(), instrument, volume, pitch);
 	}
 
 	@Override
 	public void close()
 	{
 		listeners.clear();
+		channelPatches.clear();
 	}
 }
