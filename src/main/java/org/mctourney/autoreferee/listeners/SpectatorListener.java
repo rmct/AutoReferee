@@ -321,8 +321,11 @@ public class SpectatorListener implements PluginMessageListener, Listener
 				if (!event.getPlayer().hasPermission("autoreferee.configure")) return;
 
 				for (AutoRefTeam team : match.getTeams())
-					if (!team.hasFlag(block.getLocation(), AutoRefRegion.Flag.NO_BUILD))
-						team.addGoal(new BlockGoal(team, block));
+				{
+					boolean canBuild = !team.hasFlag(block.getLocation(), AutoRefRegion.Flag.NO_BUILD);
+					boolean canEnter = !team.hasFlag(block.getLocation(), AutoRefRegion.Flag.NO_ENTRY);
+					if (canBuild && canEnter) team.addGoal(new BlockGoal(team, block));
+				}
 
 				break;
 
