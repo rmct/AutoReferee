@@ -1,7 +1,6 @@
 package org.mctourney.autoreferee.commands;
 
 import java.util.Map;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -324,7 +323,7 @@ public class SpectatorCommands implements CommandHandler
 	public boolean swapHUD(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
 		if (match != null && sender instanceof Player)
-			match.messageReferee((Player) sender, "match", match.getWorld().getName(), "swap");
+			AutoRefMatch.messageReferee((Player) sender, "match", match.getWorld().getName(), "swap");
 		return true;
 	}
 

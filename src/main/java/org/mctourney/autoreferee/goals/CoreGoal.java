@@ -61,8 +61,7 @@ public class CoreGoal extends AutoRefGoal
 	@Override
 	public void updateReferee(Player ref)
 	{
-		AutoRefMatch match = getOwner().getMatch();
-		match.messageReferee(ref, "team", getOwner().getName(),
+		AutoRefMatch.messageReferee(ref, "team", getOwner().getName(),
 			"goal", "core", region.toString(), Boolean.toString(broken));
 	}
 

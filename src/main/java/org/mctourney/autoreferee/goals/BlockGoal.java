@@ -151,11 +151,9 @@ public class BlockGoal extends AutoRefGoal
 	@Override
 	public void updateReferee(Player ref)
 	{
-		AutoRefMatch match = getOwner().getMatch();
 		String bd = getItem().serialize();
-
-		match.messageReferee(ref, "team", getOwner().getName(), "goal", "+" + bd);
-		match.messageReferee(ref, "team", getOwner().getName(), "state", bd,
+		AutoRefMatch.messageReferee(ref, "team", getOwner().getName(), "goal", "+" + bd);
+		AutoRefMatch.messageReferee(ref, "team", getOwner().getName(), "state", bd,
 				getItemStatus().toString());
 	}
 
