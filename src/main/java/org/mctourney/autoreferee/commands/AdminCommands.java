@@ -16,6 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.mctourney.autoreferee.AutoRefMap;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoReferee;
+import org.mctourney.autoreferee.listeners.SpectatorListener;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
 import org.mctourney.autoreferee.util.commands.CommandHandler;
@@ -191,6 +192,19 @@ public class AdminCommands implements CommandHandler
 			// otherwise, let's drag them in (no asking)
 			match.joinMatch(invited);
 		}
+
+		return true;
+	}
+
+	@AutoRefCommand(name={"autoref", "pmsend"}, argmin=1,
+		description="Send plugin message.")
+	@AutoRefPermission(console=false, nodes={"autoreferee.admin"})
+
+	public boolean sendPluginMessage(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		if (!(sender instanceof Player) || !sender.isOp()) return false;
+		AutoRefMatch.messageReferee((Player) sender,
+			StringUtils.join(args, SpectatorListener.DELIMITER));
 
 		return true;
 	}

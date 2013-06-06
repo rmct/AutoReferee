@@ -29,7 +29,7 @@ public class AutoRefSpectator extends AutoRefPlayer
 	public void setNightVision(boolean b)
 	{
 		this.nightVision = b;
-		if (this.hasClientMod()) getMatch().messageReferee(getPlayer(),
+		if (this.hasClientMod()) AutoRefMatch.messageReferee(getPlayer(),
 			"match", getMatch().getWorld().getName(), "nightvis", this.nightVision ? "1" : "0");
 		else this.applyNightVision();
 	}

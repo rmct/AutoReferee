@@ -825,7 +825,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	public void sendAccuracyUpdate(Player ref)
 	{
 		String acc = Integer.toString(shotsFired == 0 ? 0 : (100 * shotsHit / shotsFired));
-		getMatch().messageReferee(ref, "player", getName(), "accuracy", acc);
+		AutoRefMatch.messageReferee(ref, "player", getName(), "accuracy", acc);
 	}
 
 	/**

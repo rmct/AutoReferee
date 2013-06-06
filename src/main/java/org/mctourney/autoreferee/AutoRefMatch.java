@@ -1403,7 +1403,7 @@ public class AutoRefMatch implements Metadatable
 	 *
 	 * @param ref referee to recieve the plugin channel message
 	 */
-	public void messageReferee(Player ref, String ...parts)
+	public static void messageReferee(Player ref, String ...parts)
 	{
 		try
 		{
