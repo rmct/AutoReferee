@@ -13,13 +13,30 @@ import org.mctourney.autoreferee.AutoRefTeam;
  */
 public class PlayerTeamJoinEvent extends PlayerTeamEvent implements Cancellable
 {
+	public static enum Reason
+	{
+		MANUAL,
+		AUTOMATIC,
+		EXPECTED,
+		UNKNOWN;
+	}
+
 	private static final HandlerList handlers = new HandlerList();
 	private boolean cancelled = false;
+	private Reason reason = Reason.UNKNOWN;
 
+	@Deprecated
 	public PlayerTeamJoinEvent(Player player, AutoRefTeam team)
+	{ this(player, team, Reason.UNKNOWN); }
+
+	public PlayerTeamJoinEvent(Player player, AutoRefTeam team, Reason reason)
 	{
 		super(player, team);
+		this.reason = reason;
 	}
+
+	public Reason getReason()
+	{ return this.reason; }
 
 	/**
 	 * Checks the cancelled state of the event.

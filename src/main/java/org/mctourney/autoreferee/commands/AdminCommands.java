@@ -16,6 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.mctourney.autoreferee.AutoRefMap;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoReferee;
+import org.mctourney.autoreferee.event.match.MatchUnloadEvent;
 import org.mctourney.autoreferee.listeners.SpectatorListener;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
@@ -103,7 +104,7 @@ public class AdminCommands implements CommandHandler
 
 	public boolean unloadMap(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
-		if (match != null) match.destroy();
+		if (match != null) match.destroy(MatchUnloadEvent.Reason.COMMAND);
 		else sender.sendMessage(ChatColor.GRAY + "No world to unload.");
 
 		return true;
@@ -133,7 +134,7 @@ public class AdminCommands implements CommandHandler
 		for (Player p : match.getWorld().getPlayers())
 			p.teleport(newmatch.getWorldSpawn());
 
-		match.destroy();
+		match.destroy(MatchUnloadEvent.Reason.COMMAND);
 		return true;
 	}
 

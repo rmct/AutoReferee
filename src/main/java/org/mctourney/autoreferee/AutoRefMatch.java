@@ -953,7 +953,8 @@ public class AutoRefMatch implements Metadatable
 			if (getUserCount() != 0) lastOccupiedTime = tick;
 
 			// if this world has been inactive for long enough, just unload it
-			if (tick - lastOccupiedTime >= getCurrentState().inactiveMillis) destroy();
+			if (tick - lastOccupiedTime >= getCurrentState().inactiveMillis)
+				destroy(MatchUnloadEvent.Reason.EMPTY);
 		}
 	}
 
@@ -989,10 +990,7 @@ public class AutoRefMatch implements Metadatable
 		countTask = new PlayerCountTask();
 
 		// startup the player count timer (for automatic unloading)
-		countTask.runTaskTimer(AutoReferee.getInstance(), 0L, 60*20L);
-
-		// setup custom scoreboard
-		scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+		countTask.runTaskTimer(AutoReferee.getInstance(), 5L, 60*20L);
 	}
 
 	/**
@@ -1725,10 +1723,10 @@ public class AutoRefMatch implements Metadatable
 	 * Unloads and cleans up this match. Players will be teleported out or kicked,
 	 * the map will be unloaded, and the map folder may be deleted.
 	 */
-	public void destroy()
+	public void destroy(MatchUnloadEvent.Reason reason)
 	{
 		// fire match unload event
-		MatchUnloadEvent event = new MatchUnloadEvent(this);
+		MatchUnloadEvent event = new MatchUnloadEvent(this, reason);
 		AutoReferee.callEvent(event);
 		if (event.isCancelled()) return;
 
@@ -1738,7 +1736,7 @@ public class AutoRefMatch implements Metadatable
 		// if everyone has been moved out of this world, clean it up
 		if (primaryWorld.getPlayers().size() == 0)
 		{
-			// if we are running in auto-mode and this is OUR world
+			// if this is OUR world (we can delete it if we want)
 			AutoReferee plugin = AutoReferee.getInstance();
 			if (this.isTemporaryWorld())
 			{
@@ -2236,12 +2234,12 @@ public class AutoRefMatch implements Metadatable
 	}
 
 	// prepare this world to start
-	public void startMatch()
+	public void startMatch(MatchStartEvent.Reason reason)
 	{
 		// match has already started, don't try to start it again
 		if (!this.getCurrentState().isBeforeMatch()) return;
 
-		MatchStartEvent event = new MatchStartEvent(this);
+		MatchStartEvent event = new MatchStartEvent(this, reason);
 		AutoReferee.callEvent(event);
 		if (!refereeReady && event.isCancelled()) return;
 
@@ -2330,7 +2328,7 @@ public class AutoRefMatch implements Metadatable
 			p.sendMessage(ChatColor.GRAY + "Teams are ready. Type /ready to begin the match.");
 
 		// everyone is ready, let's go!
-		if (ready) this.startMatch();
+		if (ready) this.startMatch(MatchStartEvent.Reason.READY);
 	}
 
 	/**
@@ -2381,7 +2379,7 @@ public class AutoRefMatch implements Metadatable
 	private class MatchEndTask extends BukkitRunnable
 	{
 		public void run()
-		{ destroy(); }
+		{ destroy(MatchUnloadEvent.Reason.COMPLETE); }
 	}
 
 	private static class TiebreakerComparator implements Comparator<AutoRefTeam>
@@ -2420,7 +2418,7 @@ public class AutoRefMatch implements Metadatable
 
 		// let the console know that the match cannot be ruled upon
 		AutoReferee.log("Match tied. Deferring to referee intervention...");
-		clockTask.cancel();
+		if (clockTask != null) clockTask.cancel();
 	}
 
 	/**
@@ -2469,7 +2467,7 @@ public class AutoRefMatch implements Metadatable
 		setWinningTeam(team);
 		logPlayerStats();
 
-		clockTask.cancel();
+		if (clockTask != null) clockTask.cancel();
 
 		// increment the metrics for number of matches played
 		AutoReferee plugin = AutoReferee.getInstance();
@@ -2575,7 +2573,8 @@ public class AutoRefMatch implements Metadatable
 
 		// if this player needs to be placed on a team, go for it
 		AutoRefTeam team = this.expectedTeam(player);
-		if (team != null) this.joinTeam(player, team, false);
+		if (team != null) this.joinTeam(player,
+			team, PlayerTeamJoinEvent.Reason.EXPECTED, false);
 
 		// otherwise, get them into the world
 		else if (player.getWorld() != this.getWorld())
@@ -2595,13 +2594,13 @@ public class AutoRefMatch implements Metadatable
 	 * @param force should player be added to team, even if match is in progress
 	 * @return true if player was added to team, otherwise false
 	 */
-	public boolean joinTeam(Player player, AutoRefTeam team, boolean force)
+	public boolean joinTeam(Player player, AutoRefTeam team, PlayerTeamJoinEvent.Reason reason, boolean force)
 	{
 		AutoRefTeam pteam = getPlayerTeam(player);
 		if (team == pteam) return true;
 
 		if (pteam != null) pteam.leave(player, force);
-		return team.join(player, force);
+		return team.join(player, reason, force);
 	}
 
 	/**

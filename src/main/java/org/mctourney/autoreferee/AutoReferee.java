@@ -39,8 +39,6 @@ import org.mctourney.autoreferee.commands.PlayerCommands;
 import org.mctourney.autoreferee.commands.PracticeCommands;
 import org.mctourney.autoreferee.commands.ScoreboardCommands;
 import org.mctourney.autoreferee.commands.SpectatorCommands;
-import org.mctourney.autoreferee.listeners.lobby.AutoLobbyListener;
-import org.mctourney.autoreferee.listeners.lobby.ClassicLobbyListener;
 import org.mctourney.autoreferee.listeners.CombatListener;
 import org.mctourney.autoreferee.listeners.ObjectiveTracker;
 import org.mctourney.autoreferee.listeners.SpectatorListener;
@@ -48,6 +46,7 @@ import org.mctourney.autoreferee.listeners.TeamListener;
 import org.mctourney.autoreferee.listeners.WorldListener;
 import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.listeners.lobby.LobbyListener;
+import org.mctourney.autoreferee.listeners.lobby.LobbyListener.LobbyMode;
 import org.mctourney.autoreferee.util.NullChunkGenerator;
 import org.mctourney.autoreferee.util.QueryServer;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
@@ -288,9 +287,8 @@ public class AutoReferee extends JavaPlugin
 		PluginManager pm = getServer().getPluginManager();
 		PracticeCommands practice = new PracticeCommands(this);
 
-		if (getConfig().getBoolean("lobby.auto", false))
-			lobbyListener = new AutoLobbyListener(this);
-		else lobbyListener = new ClassicLobbyListener(this);
+		String lobbymode = getConfig().getString("lobby.mode", "manual");
+		lobbyListener = LobbyMode.fromConfig(lobbymode).getInstance(this);
 
 		// listener utility classes, subdivided for organization
 		pm.registerEvents(new TeamListener(this), this);
@@ -298,11 +296,12 @@ public class AutoReferee extends JavaPlugin
 		pm.registerEvents(new ZoneListener(this), this);
 		pm.registerEvents(new WorldListener(this), this);
 		pm.registerEvents(new ObjectiveTracker(this), this);
-		pm.registerEvents(lobbyListener, this);
-		pm.registerEvents(practice, this);
 
 		// save this reference to use for setting up the referee channel later
 		pm.registerEvents(refChannelListener = new SpectatorListener(this), this);
+
+		pm.registerEvents(lobbyListener, this);
+		pm.registerEvents(practice, this);
 
 		// user interface commands in a custom command manager
 		commandManager = new CommandManager();
@@ -311,6 +310,8 @@ public class AutoReferee extends JavaPlugin
 		commandManager.registerCommands(new SpectatorCommands(this), this);
 		commandManager.registerCommands(new ConfigurationCommands(this), this);
 		commandManager.registerCommands(new ScoreboardCommands(this), this);
+
+		commandManager.registerCommands(lobbyListener, this);
 		commandManager.registerCommands(practice, this);
 
 		// global configuration object (can't be changed, so don't save onDisable)
@@ -519,10 +520,18 @@ public class AutoReferee extends JavaPlugin
 		{
 			// set new parameter paths
 			config.set("lobby.world", config.getString("lobby-world"));
-			config.set("lobby.auto", false);
+			config.set("lobby.mode", "manual");
 
 			// remove old configuration flag
 			config.set("lobby-world", null);
+		}
+
+		// v2.3, 2013/06/03, allow for lobby mode enum (not "auto" boolean)
+		if (config.getString("lobby.auto") != null)
+		{
+			boolean autoMode = config.getBoolean("lobby.auto", false);
+			config.set("lobby.mode", autoMode ? "auto" : "manual");
+			config.set("lobby.auto", null);
 		}
 	}
 }

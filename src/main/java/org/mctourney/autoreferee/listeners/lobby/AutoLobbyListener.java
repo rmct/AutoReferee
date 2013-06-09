@@ -41,8 +41,8 @@ public class AutoLobbyListener extends LobbyListener
 	public void matchJoin(PlayerMatchJoinEvent event)
 	{
 		AutoRefMatch match = event.getMatch();
-		if (!event.getPlayer().hasPermission("autoreferee.referee"))
-			match.joinTeam(event.getPlayer(), match.getArbitraryTeam(), false);
+		if (match.getCurrentState().isBeforeMatch() && !event.getPlayer().hasPermission("autoreferee.referee"))
+			match.joinTeam(event.getPlayer(), match.getArbitraryTeam(), PlayerTeamJoinEvent.Reason.AUTOMATIC, false);
 	}
 
 	private class MatchStarterTask extends BukkitRunnable
@@ -59,7 +59,7 @@ public class AutoLobbyListener extends LobbyListener
 			boolean ready = true;
 			for (AutoRefTeam t : match.getTeams())
 				ready &= t.getPlayers().size() >= t.getMaxSize();
-			if (ready) match.startMatch();
+			if (ready) match.startMatch(MatchStartEvent.Reason.AUTOMATIC);
 		}
 	}
 

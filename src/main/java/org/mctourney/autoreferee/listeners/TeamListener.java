@@ -27,6 +27,7 @@ import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.AutoRefMatch.Role;
+import org.mctourney.autoreferee.event.player.PlayerTeamJoinEvent;
 
 public class TeamListener implements Listener
 {
@@ -125,7 +126,12 @@ public class TeamListener implements Listener
 		AutoRefTeam team = plugin.getExpectedTeam(player);
 		AutoRefMatch match = plugin.getMatch(player.getWorld());
 
-		if (team != null) { team.join(player); match = team.getMatch(); }
+		if (team != null)
+		{
+			team.join(player, PlayerTeamJoinEvent.Reason.EXPECTED);
+			match = team.getMatch();
+		}
+
 		if (match != null && match.isPlayer(player))
 			match.messageReferees("player", player.getName(), "login");
 	}

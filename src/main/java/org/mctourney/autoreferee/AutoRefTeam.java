@@ -534,8 +534,8 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	 *
 	 * @return true if player was successfully added, otherwise false
 	 */
-	public boolean join(Player player)
-	{ return join(player, false); }
+	public boolean join(Player player, PlayerTeamJoinEvent.Reason reason)
+	{ return join(player, reason, false); }
 
 	/**
 	 * Adds a player to this team.
@@ -543,9 +543,9 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	 * @param force force join operation, even if match is in progress
 	 * @return true if player was successfully added, otherwise false
 	 */
-	public boolean join(Player player, boolean force)
+	public boolean join(Player player, PlayerTeamJoinEvent.Reason reason, boolean force)
 	{
-		PlayerTeamJoinEvent event = new PlayerTeamJoinEvent(player, this);
+		PlayerTeamJoinEvent event = new PlayerTeamJoinEvent(player, this, reason);
 		AutoReferee.callEvent(event);
 		if (event.isCancelled()) return false;
 
