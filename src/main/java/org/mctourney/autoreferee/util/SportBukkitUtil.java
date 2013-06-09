@@ -85,7 +85,9 @@ public class SportBukkitUtil
 	 *
 	 * @param overheadName New string to display above player's head
 	 * @see <a href="http://www.github.com/ProjectAres/SportBukkit">SportBukkit</a>
+	 * @deprecated use built-in scoreboards to change name colors
 	 */
+	@Deprecated
 	public static void setOverheadName(Player player, String overheadName)
 	{
 		if (mSetOverheadName != null) try

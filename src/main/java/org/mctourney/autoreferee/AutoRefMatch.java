@@ -67,6 +67,8 @@ import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
@@ -81,8 +83,10 @@ import org.mctourney.autoreferee.event.match.MatchUnloadEvent;
 import org.mctourney.autoreferee.event.match.MatchUploadStatsEvent;
 import org.mctourney.autoreferee.event.player.PlayerMatchJoinEvent;
 import org.mctourney.autoreferee.event.player.PlayerMatchLeaveEvent;
+import org.mctourney.autoreferee.event.player.PlayerTeamJoinEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
 import org.mctourney.autoreferee.goals.TimeGoal;
+import org.mctourney.autoreferee.goals.scoreboard.AutoRefObjective;
 import org.mctourney.autoreferee.listeners.SpectatorListener;
 import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
@@ -329,10 +333,18 @@ public class AutoRefMatch implements Metadatable
 	{ this.currentState = status; this.setupSpectators(); }
 
 	// custom scoreboard
-	private Scoreboard scoreboard = null;
+	protected final Scoreboard scoreboard;
+	protected final Scoreboard  infoboard;
+	protected final Objective infoboardObjective;
 
 	public Scoreboard getScoreboard()
 	{ return scoreboard; }
+
+	Scoreboard getInfoboard()
+	{ return infoboard; }
+
+	Objective getInfoboardObjective()
+	{ return infoboardObjective; }
 
 	// teams participating in the match
 	private Set<AutoRefTeam> teams = Sets.newHashSet();
@@ -860,7 +872,7 @@ public class AutoRefMatch implements Metadatable
 		public BedUpdateTask(Entity ent)
 		{
 			AutoReferee plugin = AutoReferee.getInstance();
-			switch(ent.getType())
+			switch (ent.getType())
 			{
 				case CREEPER: breakerName = "Creeper"; break;
 				case LIGHTNING: breakerName = "Lightning"; break;
@@ -953,6 +965,15 @@ public class AutoRefMatch implements Metadatable
 	public AutoRefMatch(World world, boolean tmp)
 	{
 		setPrimaryWorld(world);
+
+		// setup custom scoreboard
+		scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+		 infoboard = Bukkit.getScoreboardManager().getNewScoreboard();
+
+		// register our custom objective for the sideboard
+		infoboardObjective = infoboard.registerNewObjective(
+			String.format("ar%x#scores", System.currentTimeMillis() % (1L << 16)), "dummy");
+
 		loadWorldConfiguration();
 
 		// is this world a temporary world?
@@ -1161,6 +1182,7 @@ public class AutoRefMatch implements Metadatable
 		if (meta != null)
 		{
 			mapName = meta.getChildText("name");
+			infoboardObjective.setDisplayName(ChatColor.BOLD + mapName);
 			versionString = meta.getChildText("version");
 
 			mapAuthors = Lists.newLinkedList();
@@ -1210,6 +1232,9 @@ public class AutoRefMatch implements Metadatable
 			AutoReferee.log("Loading goals for " + team.getName());
 			if (team != null) for (Element gelt : teamgoals.getChildren()) team.addGoal(gelt);
 		}
+
+		// setup scoreboard for the teams (on next server tick)
+		setupScoreboardObjectives();
 
 		Element mechanisms = worldConfig.getChild("mechanisms");
 		if (mechanisms != null) for (Element mech : mechanisms.getChildren())
@@ -1278,6 +1303,28 @@ public class AutoRefMatch implements Metadatable
 			for (Element item : gameplay.getChild("nocraft").getChildren("item"))
 				this.addIllegalCraft(BlockData.unserialize(item.getAttributeValue("id")));
 		}
+	}
+
+	private void setupScoreboardObjectives()
+	{
+		// defer to prevent exception on server start,
+		// before any worlds are fully loaded
+		new BukkitRunnable()
+		{
+			@Override
+			public void run()
+			{
+				// setup the objectives for each team
+				for (AutoRefTeam team : getTeams())
+				{
+					team.scoreboardObjectives = AutoRefObjective.fromTeam(infoboardObjective, team);
+					AutoReferee.log("loaded " + team.scoreboardObjectives.size() + " scoreboard objectives");
+					if (!team.scoreboardObjectives.isEmpty())
+						infoboardObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
+				}
+			}
+		// run this task on the next server tick
+		}.runTask(AutoReferee.getInstance());
 	}
 
 	/**
@@ -2100,6 +2147,9 @@ public class AutoRefMatch implements Metadatable
 	public void setSpectatorMode(Player player, boolean spec)
 	{
 		PlayerUtil.setSpectatorSettings(player, spec);
+		player.setScoreboard(spec ? getInfoboard() : getScoreboard());
+		for (AutoRefTeam team : getTeams()) team.updateObjectives();
+
 		if (!player.getAllowFlight()) player.setFallDistance(0.0f);
 		SportBukkitUtil.setAffectsSpawning(player, !spec);
 
@@ -2300,6 +2350,9 @@ public class AutoRefMatch implements Metadatable
 			Set<AutoRefTeam> winningTeams = Sets.newHashSet();
 			for (AutoRefTeam team : this.teams)
 			{
+				// pass this information along to the scoreboard
+				team.updateObjectives();
+
 				// if there are no win conditions set, skip this team
 				if (team.getTeamGoals().size() == 0) continue;
 
@@ -2309,7 +2362,7 @@ public class AutoRefMatch implements Metadatable
 					win &= goal.isSatisfied(this);
 
 				// force an update of objective status
-				team.updateObjectives();
+				team.updateBlockGoals();
 
 				// if the team won, mark the match as completed
 				if (win) winningTeams.add(team);

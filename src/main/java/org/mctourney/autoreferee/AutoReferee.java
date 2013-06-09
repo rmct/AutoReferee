@@ -30,7 +30,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 
 import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
 import org.mcstats.Metrics;
 import org.mcstats.Metrics.Graph;
 
