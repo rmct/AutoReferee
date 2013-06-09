@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import com.google.common.collect.Maps;
+
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -21,13 +23,12 @@ import org.mctourney.autoreferee.event.player.PlayerTeamLeaveEvent;
 import org.mctourney.autoreferee.event.team.ObjectiveUpdateEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
 import org.mctourney.autoreferee.goals.BlockGoal;
+import org.mctourney.autoreferee.goals.scoreboard.AutoRefObjective;
 import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
 import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.Metadatable;
 import org.mctourney.autoreferee.util.PlayerKit;
-import org.mctourney.autoreferee.util.SportBukkitUtil;
-
 import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Sets;
@@ -49,6 +50,9 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	 */
 	public AutoRefMatch getMatch()
 	{ return match; }
+
+	org.bukkit.scoreboard.Team scoreboardTeam;
+	org.bukkit.scoreboard.Team  infoboardTeam;
 
 	// player information
 	private Set<AutoRefPlayer> players = Sets.newHashSet();
@@ -156,6 +160,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 
 		if (!oldName.equals(getDisplayName()))
 			match.broadcast(oldName + " is now known as " + getDisplayName());
+		scoreboardTeam.setDisplayName(name);
 	}
 
 	/**
@@ -334,6 +339,15 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		return typedGoals;
 	}
 
+	Set<AutoRefObjective> scoreboardObjectives;
+
+	public void updateObjectives()
+	{
+		if (scoreboardObjectives != null)
+			for (AutoRefObjective obj : scoreboardObjectives)
+				obj.update();
+	}
+
 	// does a provided search string match this team?
 	public boolean matches(String needle)
 	{
@@ -416,6 +430,22 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 			try { newTeam.playerlives = Integer.parseInt(elt.getAttributeValue("lives").trim()); }
 			catch (NumberFormatException e) { e.printStackTrace(); }
 
+		String teamslug = "ar#" + newTeam.name;
+
+		// set team data on spectators' scoreboard
+		newTeam.infoboardTeam = match.getInfoboard().registerNewTeam(teamslug);
+		newTeam.infoboardTeam.setPrefix(newTeam.color.toString());
+		newTeam.infoboardTeam.setDisplayName(newTeam.getName());
+
+		// set team data on players' scoreboard
+		newTeam.scoreboardTeam = match.getScoreboard().registerNewTeam(teamslug);
+		newTeam.scoreboardTeam.setPrefix(newTeam.color.toString());
+		newTeam.scoreboardTeam.setDisplayName(newTeam.getName());
+
+		// this stuff is only really necessary for the players themselves
+		newTeam.scoreboardTeam.setAllowFriendlyFire(match.allowFriendlyFire());
+		newTeam.scoreboardTeam.setCanSeeFriendlyInvisibles(true);
+
 		newTeam.players = Sets.newHashSet();
 		return newTeam;
 	}
@@ -482,13 +512,21 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 
 	protected void addPlayer(AutoRefPlayer apl)
 	{
+		if (scoreboardTeam != null) scoreboardTeam.addPlayer(Bukkit.getOfflinePlayer(apl.getName()));
+		if ( infoboardTeam != null)  infoboardTeam.addPlayer(Bukkit.getOfflinePlayer(apl.getName()));
+
 		apl.setTeam(this); this.players.add(apl);
 		if (this.getMatch() != null && this.getMatch().getCurrentState().inProgress())
 			this.playersCache.add(apl);
 	}
 
 	protected boolean removePlayer(AutoRefPlayer apl)
-	{ return this.players.remove(apl); }
+	{
+		if (scoreboardTeam != null) scoreboardTeam.removePlayer(Bukkit.getOfflinePlayer(apl.getName()));
+		if ( infoboardTeam != null)  infoboardTeam.removePlayer(Bukkit.getOfflinePlayer(apl.getName()));
+
+		return this.players.remove(apl);
+	}
 
 	/**
 	 * Adds a player to this team. Players may not be added to teams if the match
@@ -549,8 +587,6 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		match.updatePlayerList();
 
 		match.broadcast(apl.getDisplayName() + " has joined " + getDisplayName());
-		SportBukkitUtil.setOverheadName(player, apl.getDisplayName());
-
 		match.setupSpectators(player);
 		match.checkTeamsReady();
 		return true;
@@ -606,8 +642,6 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 			player.teleport(match.getWorldSpawn());
 
 		match.messageReferees("team", getName(), "player", "-" + apl.getName());
-		SportBukkitUtil.setOverheadName(player, player.getName());
-
 		match.setupSpectators(player);
 		match.checkTeamsReady();
 		return true;
@@ -728,11 +762,11 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		AutoReferee.callEvent(event);
 	}
 
-	protected void updateObjectives()
+	protected void updateBlockGoals()
 	{
-		objloop: for (AutoRefGoal goal : goals) if (goal.hasItem())
+		objloop: for (BlockGoal goal : this.getTeamGoals(BlockGoal.class))
 		{
-			if (goal instanceof BlockGoal && ((BlockGoal) goal).isSatisfied(getMatch()))
+			if (goal.isSatisfied(getMatch()))
 			{ changeObjectiveStatus(goal, AutoRefGoal.ItemStatus.TARGET); continue objloop; }
 
 			for (AutoRefPlayer apl : getPlayers())
@@ -746,13 +780,6 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		}
 	}
 
-	private int objCount(AutoRefGoal.ItemStatus status)
-	{
-		int k = 0; for (AutoRefGoal goal : goals)
-			if (goal.getItemStatus() == status) ++k;
-		return k;
-	}
-
 	public double getObjectiveScore()
 	{
 		double score = 0.0f;
@@ -764,6 +791,9 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	protected void updateCarrying(AutoRefPlayer apl, Set<BlockData> oldCarrying, Set<BlockData> newCarrying)
 	{
 		match.updateCarrying(apl, oldCarrying, newCarrying);
+		this.updateBlockGoals();
+
+		// pass this information along to the scoreboard
 		this.updateObjectives();
 	}
 

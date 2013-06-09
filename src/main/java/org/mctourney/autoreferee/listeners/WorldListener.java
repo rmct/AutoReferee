@@ -1,5 +1,6 @@
 package org.mctourney.autoreferee.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.block.Block;
@@ -21,7 +22,6 @@ import org.bukkit.plugin.Plugin;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.util.PlayerUtil;
-import org.mctourney.autoreferee.util.SportBukkitUtil;
 
 public class WorldListener implements Listener
 {
@@ -82,7 +82,6 @@ public class WorldListener implements Listener
 			if (player.getWorld() != match.getWorld()) match.joinMatch(player);
 			else match.checkTeamsReady();
 
-			SportBukkitUtil.setOverheadName(player, match.getDisplayName(player));
 			if (!match.getCurrentState().inProgress() || match.isPlayer(player))
 				match.broadcast(match.colorMessage(event.getJoinMessage()));
 			event.setJoinMessage(null);
@@ -115,6 +114,9 @@ public class WorldListener implements Listener
 			if (!match.getCurrentState().inProgress() || match.isPlayer(event.getPlayer()))
 				match.broadcast(match.colorMessage(event.getQuitMessage()));
 			event.setQuitMessage(null);
+
+			// set the player back to the main scoreboard
+			event.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 		}
 	}
 
@@ -130,8 +132,6 @@ public class WorldListener implements Listener
 
 		if (matchTo != null)
 		{
-			SportBukkitUtil.setOverheadName(player, matchTo.getDisplayName(player));
-
 			matchTo.checkTeamsReady();
 			matchTo.sendMatchInfo(player);
 			matchTo.setupSpectators(player);
@@ -143,7 +143,6 @@ public class WorldListener implements Listener
 			PlayerUtil.clearInventory(player);
 			matchTo.giveMatchInfoBook(player);
 		}
-		else SportBukkitUtil.setOverheadName(player, player.getName());
 
 		// if this is leaving a match, leave its team
 		if (matchFm != null)
@@ -154,6 +153,9 @@ public class WorldListener implements Listener
 		{
 			matchFm.setSpectatorMode(player, false);
 			PlayerUtil.setGameMode(player, GameMode.SURVIVAL);
+
+			// set the player back to the main scoreboard
+			player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 		}
 	}
 
