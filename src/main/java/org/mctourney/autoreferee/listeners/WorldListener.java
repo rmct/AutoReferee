@@ -159,10 +159,13 @@ public class WorldListener implements Listener
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void worldUnload(WorldUnloadEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getWorld());
-		if (match != null) match.saveWorldConfiguration();
+		if (match == null) return;
+
+		match.saveWorldConfiguration();
+		plugin.clearMatch(match);
 	}
 }
