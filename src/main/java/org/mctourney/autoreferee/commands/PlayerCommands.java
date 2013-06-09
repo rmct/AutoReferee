@@ -19,6 +19,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
+import org.mctourney.autoreferee.event.player.PlayerTeamJoinEvent;
 import org.mctourney.autoreferee.listeners.TeamListener;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
@@ -81,12 +82,13 @@ public class PlayerCommands implements CommandHandler
 		if (args.length > 1 && isref) for (int i = 1; i < args.length; ++i)
 		{
 			Player target = plugin.getServer().getPlayer(args[i]);
-			if (target != null) match.joinTeam(target, team, true);
+			if (target != null) match.joinTeam(target, team,
+				PlayerTeamJoinEvent.Reason.MANUAL, true);
 		}
 
 		// otherwise, add yourself
-		else if (sender instanceof Player)
-			match.joinTeam((Player) sender, team, isref || match.isPracticeMode());
+		else if (sender instanceof Player) match.joinTeam((Player) sender, team,
+			PlayerTeamJoinEvent.Reason.MANUAL, isref || match.isPracticeMode());
 		return true;
 	}
 

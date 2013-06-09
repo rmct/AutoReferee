@@ -1,9 +1,9 @@
 package org.mctourney.autoreferee.listeners.lobby;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -39,11 +39,54 @@ import org.mctourney.autoreferee.AutoRefMap;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.util.PlayerUtil;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
+import org.mctourney.autoreferee.util.commands.CommandHandler;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-public abstract class LobbyListener implements Listener
+public abstract class LobbyListener implements CommandHandler, Listener
 {
+	public static enum LobbyMode
+	{
+		MANUAL     ("manual",     ClassicLobbyListener.class),
+		AUTOMATIC  ("auto",          AutoLobbyListener.class),
+		ROTATION   ("rotation",  RotationLobbyListener.class);
+
+		private static final Map<String, LobbyMode> BY_CONFIG;
+		static
+		{
+			BY_CONFIG = Maps.newHashMap();
+			for (LobbyMode mode : LobbyMode.values())
+				BY_CONFIG.put(mode.config, mode);
+		}
+
+		public String config;
+		public Class<? extends LobbyListener> listener;
+
+		LobbyMode(String config, Class<? extends LobbyListener> listener)
+		{
+			this.config = config;
+			this.listener = listener;
+		}
+
+		public LobbyListener getInstance(AutoReferee plugin)
+		{
+			try
+			{
+				// find the appropriate constructor and return an instance
+				return listener.getConstructor(AutoReferee.class).newInstance(plugin);
+			}
+			catch (Exception e) { e.printStackTrace(); }
+			return new ClassicLobbyListener(plugin);
+		}
+
+		public static LobbyMode fromConfig(String config)
+		{
+			LobbyMode mode = BY_CONFIG.get(config);
+			return mode == null ? LobbyMode.MANUAL : mode;
+		}
+	}
+
 	protected AutoReferee plugin = null;
 
 	public LobbyListener(AutoReferee plugin)

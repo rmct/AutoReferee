@@ -12,13 +12,29 @@ import org.mctourney.autoreferee.AutoRefMatch;
  */
 public class MatchStartEvent extends MatchEvent implements Cancellable
 {
+	public static enum Reason
+	{
+		READY,
+		AUTOMATIC,
+		UNKNOWN;
+	}
+
 	private static final HandlerList handlers = new HandlerList();
 	private boolean cancelled = false;
+	private Reason reason = Reason.UNKNOWN;
 
+	@Deprecated
 	public MatchStartEvent(AutoRefMatch match)
+	{ this(match, Reason.UNKNOWN); }
+
+	public MatchStartEvent(AutoRefMatch match, Reason reason)
 	{
 		super(match);
+		this.reason = reason;
 	}
+
+	public Reason getReason()
+	{ return this.reason; }
 
 	/**
 	 * Checks the cancelled state of the event.

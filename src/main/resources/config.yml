@@ -23,4 +23,4 @@ config-mode:
 
 lobby:
   world: autoref-lobby
-  auto: false
+  mode: manual
