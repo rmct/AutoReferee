@@ -199,15 +199,8 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	 */
 	public static AutoRefMatch createMatch(AutoRefMap map, String world) throws IOException
 	{
-		// add a match object now marked as temporary
-		AutoReferee plugin = AutoReferee.getInstance();
 		World w = createMatchWorld(map, world);
-
-		if (w == null) return null;
-
-		// return the added temporary match
-		AutoRefMatch match = new AutoRefMatch(w, true);
-		plugin.addMatch(match); return match;
+		return AutoReferee.getInstance().getMatch(w).temporary();
 	}
 
 	private static World createMatchWorld(AutoRefMap map, String world) throws IOException

@@ -219,7 +219,10 @@ public class AutoRefMatch implements Metadatable
 
 	private boolean tmp;
 
-	private boolean isTemporaryWorld()
+	public AutoRefMatch temporary()
+	{ this.tmp = true; return this; }
+
+	public boolean isTemporaryWorld()
 	{ return tmp; }
 
 	private long startClock = 0L;
