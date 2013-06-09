@@ -75,7 +75,7 @@ public class CombatListener implements Listener
 
 			// if the death was due to intervention by the plugin
 			// let's change the death message to reflect this fact
-			if (lastDmg.getCause() == DamageCause.VOID)
+			if (lastDmg == AutoRefPlayer.VOID_DEATH)
 			{
 				dmsg = victim.getName() + " entered the void lane";
 				event.getDrops().clear();
