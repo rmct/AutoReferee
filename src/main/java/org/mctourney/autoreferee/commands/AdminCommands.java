@@ -17,7 +17,6 @@ import org.mctourney.autoreferee.AutoRefMap;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.event.match.MatchUnloadEvent;
-import org.mctourney.autoreferee.listeners.SpectatorListener;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
 import org.mctourney.autoreferee.util.commands.CommandHandler;
@@ -204,8 +203,7 @@ public class AdminCommands implements CommandHandler
 	public boolean sendPluginMessage(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
 		if (!(sender instanceof Player) || !sender.isOp()) return false;
-		AutoRefMatch.messageReferee((Player) sender,
-			StringUtils.join(args, SpectatorListener.DELIMITER));
+		AutoRefMatch.messageReferee((Player) sender, StringUtils.join(args, " "));
 
 		return true;
 	}
