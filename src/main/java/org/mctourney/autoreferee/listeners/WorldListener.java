@@ -62,7 +62,7 @@ public class WorldListener implements Listener
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority=EventPriority.HIGH, ignoreCancelled=true)
 	public void playerJoin(PlayerJoinEvent event)
 	{
 		Player player = event.getPlayer();
