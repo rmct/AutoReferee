@@ -1,5 +1,6 @@
 package org.mctourney.autoreferee.util;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
@@ -50,13 +51,13 @@ public class QueryServer
 		catch (Exception e) { return null; }
 	}
 
-	public static String syncGetQuery(String path, String params)
+	public static String syncGetQuery(String path, String params) throws IOException
 	{ return syncQuery(path, params, null); }
 
-	public static String syncPostQuery(String path, String params)
+	public static String syncPostQuery(String path, String params) throws IOException
 	{ return syncQuery(path, null, params); }
 
-	public static String syncQuery(String path, String getParams, String postParams)
+	public static String syncQuery(String path, String getParams, String postParams) throws IOException
 	{
 		OutputStreamWriter wr = null;
 		InputStream rd = null;
@@ -83,8 +84,7 @@ public class QueryServer
 		}
 
 		// just drop out
-		catch (Exception e)
-		{ e.printStackTrace(); return null; }
+		catch (IOException e) { throw e; }
 
 		finally
 		{
