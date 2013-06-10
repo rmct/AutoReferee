@@ -1227,7 +1227,6 @@ public class AutoRefMatch implements Metadatable
 		if (goals != null) for (Element teamgoals : goals.getChildren("teamgoals"))
 		{
 			AutoRefTeam team = this.getTeam(teamgoals.getAttributeValue("team"));
-			AutoReferee.log("Loading goals for " + team.getName());
 			if (team != null) for (Element gelt : teamgoals.getChildren()) team.addGoal(gelt);
 		}
 
@@ -1294,7 +1293,6 @@ public class AutoRefMatch implements Metadatable
 				rmode = RespawnMode.valueOf(rtext.toUpperCase());
 			setRespawnMode(rmode == null ? RespawnMode.ALLOW : rmode);
 		}
-		AutoReferee.log("Respawn mode is " + getRespawnMode().name());
 
 		if (gameplay.getChild("nocraft") != null)
 		{
@@ -1316,7 +1314,6 @@ public class AutoRefMatch implements Metadatable
 				for (AutoRefTeam team : getTeams())
 				{
 					team.scoreboardObjectives = AutoRefObjective.fromTeam(infoboardObjective, team);
-					AutoReferee.log("loaded " + team.scoreboardObjectives.size() + " scoreboard objectives");
 					if (!team.scoreboardObjectives.isEmpty())
 						infoboardObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
 				}
@@ -1904,6 +1901,12 @@ public class AutoRefMatch implements Metadatable
 		}
 	}
 
+	static final Set<Material> EXPECTED_MECHANISMS = Sets.newHashSet
+	(	Material.LEVER
+	,	Material.STONE_BUTTON
+	,	Material.WOOD_BUTTON
+	);
+
 	/**
 	 * Adds a new start mechanism for this map. These mechanisms are activated automatically
 	 * at the start of a match when using SportBukkit, and players may interact with them
@@ -1918,9 +1921,9 @@ public class AutoRefMatch implements Metadatable
 	{
 		if (block.getType() != Material.LEVER) state = true;
 		StartMechanism sm = new StartMechanism(block, state);
-		startMechanisms.add(sm);
 
-		AutoReferee.log(sm.toString() + " is a start mechanism.");
+		if (startMechanisms.add(sm) && !EXPECTED_MECHANISMS.contains(block.getType()))
+			AutoReferee.log("Unexpected start mechanism: " + block.getType().name(), Level.WARNING);
 		return sm;
 	}
 
