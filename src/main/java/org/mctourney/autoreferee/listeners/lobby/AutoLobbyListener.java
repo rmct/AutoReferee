@@ -37,13 +37,29 @@ public class AutoLobbyListener extends LobbyListener
 		return null;
 	}
 
+	protected class PlayerJoinTask extends BukkitRunnable
+	{
+		private AutoRefMatch match;
+		private Player player;
+
+		public PlayerJoinTask(AutoRefMatch match, Player player)
+		{ this.match = match; this.player = player; }
+
+		@Override
+		public void run()
+		{
+			if (match.getCurrentState().isBeforeMatch() && match.getPlayerTeam(player) == null
+				&& !player.hasPermission("autoreferee.referee"))
+			{
+				match.joinTeam(player, match.getArbitraryTeam(),
+					PlayerTeamJoinEvent.Reason.AUTOMATIC, false);
+			}
+		}
+	}
+
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void matchJoin(PlayerMatchJoinEvent event)
-	{
-		AutoRefMatch match = event.getMatch();
-		if (match.getCurrentState().isBeforeMatch() && !event.getPlayer().hasPermission("autoreferee.referee"))
-			match.joinTeam(event.getPlayer(), match.getArbitraryTeam(), PlayerTeamJoinEvent.Reason.AUTOMATIC, false);
-	}
+	{ new PlayerJoinTask(event.getMatch(), event.getPlayer()).runTask(plugin); }
 
 	private class MatchStarterTask extends BukkitRunnable
 	{
@@ -78,6 +94,9 @@ public class AutoLobbyListener extends LobbyListener
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void matchStart(MatchStartEvent event)
 	{
+		// if the match is being manually started, let it happen(?)
+		if (event.getReason() == MatchStartEvent.Reason.READY) return;
+
 		boolean canStart = true;
 		for (AutoRefTeam t : event.getMatch().getTeams())
 			canStart &= t.getPlayers().size() >= t.getMinSize();

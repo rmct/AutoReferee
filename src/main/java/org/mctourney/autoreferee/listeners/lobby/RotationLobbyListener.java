@@ -11,20 +11,17 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import org.mctourney.autoreferee.AutoRefMap;
 import org.mctourney.autoreferee.AutoRefMatch;
-import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.event.match.MatchCompleteEvent;
 import org.mctourney.autoreferee.event.match.MatchLoadEvent;
-import org.mctourney.autoreferee.event.match.MatchStartEvent;
 import org.mctourney.autoreferee.event.match.MatchUnloadEvent;
-import org.mctourney.autoreferee.event.player.PlayerMatchJoinEvent;
-import org.mctourney.autoreferee.event.player.PlayerTeamJoinEvent;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
 
@@ -33,7 +30,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FileUtils;
 
-public class RotationLobbyListener extends LobbyListener
+public class RotationLobbyListener extends AutoLobbyListener
 {
 	public static final File ROTATION_FILE = new File("rotation.txt");
 
@@ -46,8 +43,6 @@ public class RotationLobbyListener extends LobbyListener
 	public RotationLobbyListener(AutoReferee plugin)
 	{
 		super(plugin);
-		AutoRefMatch.giveMatchInfoBooks = false;
-
 		try
 		{
 			// loop through the map names in the rotation file to add to the list
@@ -66,6 +61,13 @@ public class RotationLobbyListener extends LobbyListener
 
 		// defer the task of loading the next map to the first server tick
 		new BukkitRunnable() { @Override public void run() { loadNextMap(); } }.runTask(plugin);
+	}
+
+	@Override
+	protected void lobbyLoadMap(Player player, AutoRefMap map)
+	{
+		if (currentMatch != null)
+			currentMatch.joinMatch(player);
 	}
 
 	protected AutoRefMap getNextMap()
@@ -115,91 +117,37 @@ public class RotationLobbyListener extends LobbyListener
 		}
 	}
 
-	public void playerJoinMatch(AutoRefMatch match, Player player)
-	{
-		if (match.getCurrentState().isBeforeMatch() && !player.hasPermission("autoreferee.referee"))
-			match.joinTeam(player, match.getArbitraryTeam(), PlayerTeamJoinEvent.Reason.AUTOMATIC, false);
-	}
-
-	@EventHandler(priority=EventPriority.LOW, ignoreCancelled=true)
+	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void playerLogin(PlayerJoinEvent event)
 	{
 		if (event.getPlayer().getWorld() == plugin.getLobbyWorld())
 		{
 			this.currentMatch.joinMatch(event.getPlayer());
-			playerJoinMatch(this.currentMatch, event.getPlayer());
+			new PlayerJoinTask(this.currentMatch, event.getPlayer()).runTask(plugin);
 		}
 	}
 
-	@EventHandler(priority=EventPriority.LOW, ignoreCancelled=true)
+	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void playerTeleport(PlayerTeleportEvent event)
 	{
 		if (event.getTo().getWorld() == plugin.getLobbyWorld())
 		{
 			event.setTo(this.currentMatch.getPlayerSpawn(event.getPlayer()));
-			playerJoinMatch(this.currentMatch, event.getPlayer());
-		}
-	}
-
-	@Override
-	protected void lobbyLoadMap(Player player, AutoRefMap map)
-	{
-		if (currentMatch != null)
-			currentMatch.joinMatch(player);
-	}
-
-	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
-	public void matchJoin(PlayerMatchJoinEvent event)
-	{
-		playerJoinMatch(event.getMatch(), event.getPlayer());
-	}
-
-	private class MatchStarterTask extends BukkitRunnable
-	{
-		private final AutoRefMatch match;
-
-		public MatchStarterTask(AutoRefMatch match)
-		{ this.match = match; }
-
-		@Override
-		public void run()
-		{
-			// starting a match is based purely on teams being filled
-			boolean ready = true;
-			for (AutoRefTeam t : match.getTeams())
-				ready &= t.getPlayers().size() >= t.getMaxSize();
-			if (ready) match.startMatch(MatchStartEvent.Reason.AUTOMATIC);
+			new PlayerJoinTask(this.currentMatch, event.getPlayer()).runTask(plugin);
 		}
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
-	public void teamJoin(PlayerTeamJoinEvent event)
+	public void playerChangeWorld(PlayerChangedWorldEvent event)
 	{
-		AutoRefTeam team = event.getTeam();
-		if (team.getPlayers().size() >= team.getMaxSize())
-			event.setCancelled(true);
-
-		// schedule a check to see if we need to start the match
-		if (team.getMatch().getCurrentState().isBeforeMatch())
-			new MatchStarterTask(team.getMatch()).runTask(plugin);
-	}
-
-	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
-	public void matchStart(MatchStartEvent event)
-	{
-		// if the match is being manually started, let it happen(?)
-		if (event.getReason() == MatchStartEvent.Reason.READY) return;
-
-		boolean canStart = true;
-		for (AutoRefTeam t : event.getMatch().getTeams())
-			canStart &= t.getPlayers().size() >= t.getMinSize();
-		if (!canStart) event.setCancelled(true);
+		if (event.getPlayer().getWorld() == this.currentMatch.getWorld())
+			new PlayerJoinTask(this.currentMatch, event.getPlayer()).runTask(plugin);
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void matchComplete(MatchCompleteEvent event)
 	{
-		if (event.getMatch() == this.currentMatch)
+		if (event.getMatch() == this.currentMatch && AutoRefMatch.COMPLETED_SECONDS >= 15)
 			new BukkitRunnable()
 			{
 				@Override
@@ -208,8 +156,8 @@ public class RotationLobbyListener extends LobbyListener
 					currentMatch.broadcast(ChatColor.GREEN + "Coming next: " +
 						ChatColor.RESET + getNextMap().getVersionString());
 				}
-			// announce the next match 10 seconds after the match ends
-			}.runTaskLater(plugin, 10 * 20L);
+			// announce the next match 5 seconds after the match ends
+			}.runTaskLater(plugin, 5 * 20L);
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
