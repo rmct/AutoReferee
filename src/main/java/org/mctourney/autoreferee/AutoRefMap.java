@@ -418,10 +418,13 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	public static Set<AutoRefMap> getRemoteMaps()
 	{
 		Set<AutoRefMap> maps = Sets.newHashSet();
-		String mlist = QueryServer.syncQuery(AutoRefMatch.getMapRepo() + "list.csv", null, null);
-
-		if (mlist != null) for (String line : mlist.split("[\\r\\n]+"))
-			maps.add(new AutoRefMap(line));
+		try
+		{
+			String mlist = QueryServer.syncQuery(AutoRefMatch.getMapRepo() + "list.csv", null, null);
+			if (mlist != null) for (String line : mlist.split("[\\r\\n]+"))
+				maps.add(new AutoRefMap(line));
+		}
+		catch (IOException e) {  }
 		return maps;
 	}
 

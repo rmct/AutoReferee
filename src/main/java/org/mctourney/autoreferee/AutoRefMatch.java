@@ -2838,6 +2838,7 @@ public class AutoRefMatch implements Metadatable
 
 	private String uploadReport(String report)
 	{
+		String failure = "<unknown reason>";
 		try
 		{
 			// submit our request to pastehtml, get back a link to the report
@@ -2845,7 +2846,10 @@ public class AutoRefMatch implements Metadatable
 				"input_type=html&result=address&minecraft=1",
 				"txt=" + URLEncoder.encode(report, "UTF-8"));
 		}
-		catch (UnsupportedEncodingException e) {  }
+		catch (IOException e) { failure = e.getLocalizedMessage(); }
+
+		// somewhat quietly log the reason for the failed upload
+		AutoReferee.log("Report upload failed: " + failure, Level.SEVERE);
 		return null;
 	}
 
