@@ -135,7 +135,14 @@ public class AutoReferee extends JavaPlugin
 	 * @return lobby world
 	 */
 	public World getLobbyWorld()
-	{ return lobby; }
+	{
+		if (lobby == null)
+		{
+			String lname = getConfig().getString("lobby.world", null);
+			this.setLobbyWorld(Bukkit.getWorld(lname));
+		}
+		return lobby;
+	}
 
 	/**
 	 * Sets the world designated as the lobby world.
@@ -352,17 +359,6 @@ public class AutoReferee extends JavaPlugin
 		// update maps automatically if auto-update is enabled
 		if (getConfig().getBoolean("auto-update", true))
 			AutoRefMap.getUpdates(Bukkit.getConsoleSender(), false);
-
-		// get the lobby world ASAP (allow for null lobby world)
-		getServer().getScheduler().runTask(this, new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				String lobby = getConfig().getString("lobby.world", null);
-				if (lobby != null) setLobbyWorld(getServer().getWorld(lobby));
-			}
-		});
 	}
 
 	public void onDisable()
