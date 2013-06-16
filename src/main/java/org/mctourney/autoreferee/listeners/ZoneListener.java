@@ -230,6 +230,9 @@ public class ZoneListener implements Listener
 
 		if (match.isPlayer(player))
 		{
+			if (!match.getPlayer(player).isInsideLane())
+			{ event.setCancelled(true); return; }
+
 			if (match.isStartMechanism(loc) && !match.getStartMechanism(loc).canFlip(match))
 			{ event.setCancelled(true); return; }
 
@@ -247,7 +250,7 @@ public class ZoneListener implements Listener
 		AutoRefMatch match = plugin.getMatch(loc.getWorld());
 		if (match == null) return;
 
-		if (!validPlayer(player))
+		if (!validPlayer(player) || !match.getPlayer(player).isInsideLane())
 		{ event.setCancelled(true); return; }
 	}
 
@@ -416,4 +419,3 @@ public class ZoneListener implements Listener
 			event.setCancelled(true);
 	}
 }
-

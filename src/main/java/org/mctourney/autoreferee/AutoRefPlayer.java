@@ -851,6 +851,9 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	public void setExitLocation(Location loc)
 	{ this.exitLocation = loc; }
 
+	public boolean isInsideLane()
+	{ return getExitLocation() == null; }
+
 	public void updateCarrying()
 	{
 		Player player = getPlayer();
