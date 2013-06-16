@@ -77,14 +77,6 @@ public class CuboidRegion extends AutoRefRegion
 	public Location getMaximumPoint()
 	{ return new Location(world, x2, y2, z2); }
 
-	@Override
-	public boolean contains(Location loc)
-	{
-		return loc.getX() >= x1 && loc.getY() >= y1 && loc.getZ() >= z1
-		    && loc.getX() <= x2 && loc.getY() <= y2 && loc.getZ() <= z2
-			&& world == loc.getWorld();
-	}
-
 	public static CuboidRegion combine(CuboidRegion a, CuboidRegion b)
 	{
 		assert a.world == b.world;
