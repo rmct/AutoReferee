@@ -18,7 +18,6 @@ import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
-
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -109,6 +108,22 @@ public abstract class AutoRefRegion
 		if (yaw != null) loc.setYaw(yaw);
 
 		return loc.add(0.0, 0.5, 0.0);
+	}
+
+	public Location getCenter()
+	{
+		CuboidRegion cuboid = this.getBoundingCuboid();
+
+		// Get points of the region
+		Location min = cuboid.getMinimumPoint();
+		Location max = cuboid.getMaximumPoint();
+		World world = cuboid.world;
+
+		double pointX = (min.getBlockX() + max.getBlockX()) / 2.0;
+		double pointZ = (min.getBlockZ() + max.getBlockZ()) / 2.0;
+		int pointY = world.getHighestBlockAt((int) pointX, (int) pointZ).getY();
+
+		return new Location(world, pointX, pointY + 1, pointZ);
 	}
 
 	public boolean contains(Location loc)
