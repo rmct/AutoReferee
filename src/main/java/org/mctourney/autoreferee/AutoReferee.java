@@ -139,7 +139,7 @@ public class AutoReferee extends JavaPlugin
 		if (lobby == null)
 		{
 			String lname = getConfig().getString("lobby.world", null);
-			this.setLobbyWorld(Bukkit.getWorld(lname));
+			if (lname != null) this.setLobbyWorld(Bukkit.getWorld(lname));
 		}
 		return lobby;
 	}
