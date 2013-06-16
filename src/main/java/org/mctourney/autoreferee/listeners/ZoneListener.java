@@ -230,6 +230,9 @@ public class ZoneListener implements Listener
 
 		if (match.isPlayer(player))
 		{
+            if (match.getPlayer(player).getExitLocation() != null)
+            { event.setCancelled(true); return; }
+
 			if (match.isStartMechanism(loc) && !match.getStartMechanism(loc).canFlip(match))
 			{ event.setCancelled(true); return; }
 
@@ -246,6 +249,9 @@ public class ZoneListener implements Listener
 
 		AutoRefMatch match = plugin.getMatch(loc.getWorld());
 		if (match == null) return;
+
+        if (match.getPlayer(player).getExitLocation() != null)
+        { event.setCancelled(true); return; }
 
 		if (!validPlayer(player))
 		{ event.setCancelled(true); return; }
@@ -416,4 +422,3 @@ public class ZoneListener implements Listener
 			event.setCancelled(true);
 	}
 }
-

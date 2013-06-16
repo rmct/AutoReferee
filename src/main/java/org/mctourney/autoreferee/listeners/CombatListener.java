@@ -167,6 +167,9 @@ public class CombatListener implements Listener
 		{
 			AutoRefPlayer apl = match.getPlayer((Player) event.getEntity());
 			if (apl != null && apl.isGodMode()) { event.setDamage(0); return; }
+
+            if (apl.getExitLocation() != null)
+            { event.setCancelled(true); return;}
 		}
 
 		if (match.getCurrentState().inProgress() &&
@@ -253,6 +256,9 @@ public class CombatListener implements Listener
 		if (match.getCurrentState().inProgress())
 		{
 			Player damager = entityToPlayer(event.getAttacker());
+
+            if (match.getPlayer(damager).getExitLocation() != null)
+            { event.setCancelled(true); return; }
 
 			// spectators cannot cause damage to any vehicle
 			if (match.getCurrentState().inProgress() &&
