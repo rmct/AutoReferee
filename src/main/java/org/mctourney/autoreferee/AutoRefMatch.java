@@ -2242,6 +2242,10 @@ public class AutoRefMatch implements Metadatable
 		// nothing to do if the countdown is running
 		if (isCountdownRunning()) return;
 
+		// update all the objectives
+		for (AutoRefTeam team : getTeams())
+			team.updateObjectives();
+
 		// set the current time to the start time
 		primaryWorld.setTime(this.startClock);
 
