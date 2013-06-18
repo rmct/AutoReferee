@@ -92,6 +92,7 @@ public abstract class AutoRefObjective
 
 		objectives.addAll(BlockObjective.fromTeam(objective, team));
 		objectives.addAll(SurvivalObjective.fromTeam(objective, team));
+		objectives.addAll(ScoreObjective.fromTeam(objective, team));
 
 		return objectives;
 	}
