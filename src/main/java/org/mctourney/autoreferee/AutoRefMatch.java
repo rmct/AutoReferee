@@ -100,6 +100,7 @@ import org.mctourney.autoreferee.util.Metadatable;
 import org.mctourney.autoreferee.util.PlayerKit;
 import org.mctourney.autoreferee.util.PlayerUtil;
 import org.mctourney.autoreferee.util.QueryServer;
+import org.mctourney.autoreferee.util.ReportGenerator;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
 
 import com.google.common.collect.Lists;
@@ -357,17 +358,10 @@ public class AutoRefMatch implements Metadatable
 	public Set<AutoRefTeam> getTeams()
 	{ return teams; }
 
-	protected List<AutoRefTeam> getSortedTeams()
-	{
-		List<AutoRefTeam> sortedTeams = Lists.newArrayList(getTeams());
-		Collections.sort(sortedTeams);
-		return sortedTeams;
-	}
-
 	public String getTeamList()
 	{
 		Set<String> tlist = Sets.newHashSet();
-		for (AutoRefTeam team : getSortedTeams())
+		for (AutoRefTeam team : getTeams())
 			tlist.add(team.getDisplayName());
 		return StringUtils.join(tlist, ", ");
 	}
@@ -1995,8 +1989,7 @@ public class AutoRefMatch implements Metadatable
 		primaryWorld.setTime(startClock);
 		this.setStartTime(ManagementFactory.getRuntimeMXBean().getUptime());
 
-		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_START,
-			"Match began.", null, null, null));
+		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_START, "Match began.", null));
 
 		// send referees the start event
 		messageReferees("match", getWorld().getName(), "start");
@@ -2070,7 +2063,7 @@ public class AutoRefMatch implements Metadatable
 				{
 					String timelimit = (match.getTimeLimit() / 60L) + " min";
 					match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.MATCH_END,
-						"Match time limit reached: " + timelimit, null, null, null));
+						"Match time limit reached: " + timelimit, null));
 					match.endMatch();
 				}
 				else if (AutoRefMatch.announceMinutes.contains(minutesRemaining))
@@ -2463,8 +2456,7 @@ public class AutoRefMatch implements Metadatable
 		for (AutoRefPlayer apl : getPlayers()) apl.resetKillStreak();
 
 		String winner = team == null ? "" : (" " + team.getName() + " wins!");
-		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_END,
-			"Match ended." + winner, null, null, null));
+		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_END, "Match ended." + winner, null));
 		setCurrentState(MatchStatus.COMPLETED);
 
 		setWinningTeam(team);
@@ -2965,8 +2957,7 @@ public class AutoRefMatch implements Metadatable
 			{ return supportsFiltering; }
 		}
 
-		public Object icon1;
-		public Object icon2;
+		public Set<Object> actors;
 
 		private EventType type;
 
@@ -2985,7 +2976,7 @@ public class AutoRefMatch implements Metadatable
 		private long timestamp;
 
 		public TranscriptEvent(AutoRefMatch match, EventType type, String message,
-			Location loc, Object icon1, Object icon2)
+			Location loc, Object ...actors)
 		{
 			this.type = type;
 			this.message = message;
@@ -2994,9 +2985,7 @@ public class AutoRefMatch implements Metadatable
 			this.location = (loc != null) ? loc :
 				match.getWorld().getSpawnLocation();
 
-			this.icon1 = icon1;
-			this.icon2 = icon2;
-
+			this.actors = Sets.newHashSet(actors);
 			this.timestamp = match.getElapsedSeconds();
 		}
 
@@ -3216,7 +3205,7 @@ public class AutoRefMatch implements Metadatable
 			else player.sendMessage("You are not on a team! Type " + ChatColor.GRAY + "/jointeam");
 		}
 
-		for (AutoRefTeam team : getSortedTeams())
+		for (AutoRefTeam team : getTeams())
 			sender.sendMessage(String.format("%s (%d) - %s",
 				team.getDisplayName(), team.getPlayers().size(), team.getPlayerList()));
 

@@ -743,7 +743,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		// if it meets the requirements, report it
 		if (totalStreak >= MIN_KILLSTREAK)
 			getMatch().addEvent(new TranscriptEvent(getMatch(), TranscriptEvent.EventType.PLAYER_STREAK,
-				String.format("%s had a %d-kill streak!", this.getName(), totalStreak), null, this, null));
+				String.format("%s had a %d-kill streak!", this.getName(), totalStreak), null, this));
 
 		// reset to zero
 		this.totalStreak = 0;

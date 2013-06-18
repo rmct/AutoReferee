@@ -1,4 +1,4 @@
-package org.mctourney.autoreferee;
+package org.mctourney.autoreferee.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,12 +22,12 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.material.Colorable;
 
+import org.mctourney.autoreferee.AutoRefMatch;
+import org.mctourney.autoreferee.AutoRefPlayer;
+import org.mctourney.autoreferee.AutoRefTeam;
+import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
-import org.mctourney.autoreferee.util.BlockData;
-import org.mctourney.autoreferee.util.ColorConverter;
-import org.mctourney.autoreferee.util.LocationUtil;
-import org.mctourney.autoreferee.util.MapImageGenerator;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -80,7 +80,7 @@ public class ReportGenerator
 		TranscriptEvent endEvent = null;
 		for (TranscriptEvent e : match.getTranscript())
 		{
-			transcript.write(transcriptEventHTML(e));
+			transcript.write(transcriptEventHTML(match, e));
 			if (e.getType() != TranscriptEvent.EventType.MATCH_END) endEvent = e;
 		}
 
@@ -296,7 +296,7 @@ public class ReportGenerator
 	private static String getTeamList(AutoRefMatch match)
 	{
 		StringWriter teamlist = new StringWriter();
-		for (AutoRefTeam team : match.getSortedTeams())
+		for (AutoRefTeam team : match.getTeams())
 		{
 			Set<String> members = Sets.newHashSet();
 			for (AutoRefPlayer apl : team.getCachedPlayers())
@@ -380,41 +380,43 @@ public class ReportGenerator
 			getTag(apl), getTag(apl.getTeam()), apl.getName());
 	}
 
-	private static String transcriptEventHTML(TranscriptEvent e)
+	private static String transcriptEventHTML(AutoRefMatch match, TranscriptEvent e)
 	{
-		String m = e.getMessage(), xtra = "";
+		String m = e.getMessage(), tagdata = "";
 		Set<String> rowClasses = Sets.newHashSet("type-" + e.getType().getEventClass());
 
 		Set<AutoRefPlayer> players = Sets.newHashSet();
-		if (e.icon1 instanceof AutoRefPlayer)
+		for (Object actor : e.actors)
 		{
-			players.add((AutoRefPlayer) e.icon1);
-			xtra += String.format(" data-player='%s'", ((AutoRefPlayer) e.icon1).getName());
-		}
-		if (e.icon2 instanceof AutoRefPlayer)
-			players.add((AutoRefPlayer) e.icon2);
+			if (actor instanceof AutoRefPlayer)
+			{
+				AutoRefPlayer apl = (AutoRefPlayer) actor; players.add(apl);
+				tagdata += String.format(" data-player='%s'", apl.getName());
+			}
 
-		for (AutoRefPlayer apl : players)
+			if (actor instanceof BlockData)
+			{
+				BlockData bd = (BlockData) actor;
+				int mat = bd.getMaterial().getId();
+				int data = bd.getData();
+
+				m = m.replaceAll(bd.getName(), String.format(
+					"<span class='block mat-%d data-%d'>%s</span>",
+						mat, data, bd.getName()));
+			}
+		}
+
+		for (AutoRefPlayer apl : match.getPlayers())
+			if (m.contains(apl.getName()))
 		{
 			m = m.replaceAll(apl.getName(), playerHTML(apl));
 			rowClasses.add("type-player-event");
 			rowClasses.add("player-" + getTag(apl));
 		}
 
-		if (e.icon2 instanceof BlockData)
-		{
-			BlockData bd = (BlockData) e.icon2;
-			int mat = bd.getMaterial().getId();
-			int data = bd.getData();
-
-			m = m.replaceAll(bd.getName(), String.format(
-				"<span class='block mat-%d data-%d'>%s</span>",
-					mat, data, bd.getName()));
-		}
-
 		String coords = LocationUtil.toBlockCoords(e.getLocation());
 		String fmt = "<tr class='transcript-event %s' data-location='%s'%s>" +
 			"<td class='message'>%s</td><td class='timestamp'>%s</td></tr>\n";
-		return String.format(fmt, StringUtils.join(rowClasses, " "), coords, xtra, m, e.getTimestamp());
+		return String.format(fmt, StringUtils.join(rowClasses, " "), coords, tagdata, m, e.getTimestamp());
 	}
 }

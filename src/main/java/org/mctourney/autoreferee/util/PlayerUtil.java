@@ -12,7 +12,6 @@ import com.google.common.collect.Maps;
 
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoReferee;
 
 public class PlayerUtil
