@@ -12,7 +12,7 @@ Join us for support at [#autoreferee](http://webchat.freenode.net?channels=autor
 
 _Note:_ This plugin uses [WorldEdit](http://wiki.sk89q.com/wiki/WorldEdit) for map configuration. Server operators need not run WorldEdit on their server, but to configure a map for use with **AutoReferee**, WorldEdit is required.
 
-[![Plugin Statistics via mcstats.org](http://mcstats.org/signature/AutoReferee.png)](http://mcstats.org/plugin/AutoReferee)
+[![Plugin Statistics via mcstats.org](http://api.mcstats.org/signature/AutoReferee.png)](http://mcstats.org/plugin/AutoReferee)
 
 ---
 
