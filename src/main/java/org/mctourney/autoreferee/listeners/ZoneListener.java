@@ -223,9 +223,9 @@ public class ZoneListener implements Listener
 	public void blockInteract(PlayerInteractEvent event)
 	{
 		Player player = event.getPlayer();
-		Location loc = event.getClickedBlock().getLocation();
+		Block block = event.getClickedBlock();
 
-		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+		AutoRefMatch match = plugin.getMatch(block.getWorld());
 		if (match == null) return;
 
 		if (match.isPlayer(player))
@@ -233,7 +233,7 @@ public class ZoneListener implements Listener
 			if (!match.getPlayer(player).isInsideLane())
 			{ event.setCancelled(true); return; }
 
-			if (match.isStartMechanism(loc) && !match.getStartMechanism(loc).canFlip(match))
+			if (match.isStartMechanism(block) && !match.getStartMechanism(block).canFlip(match))
 			{ event.setCancelled(true); return; }
 
 			if (!validPlayer(player))

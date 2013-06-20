@@ -1826,21 +1826,21 @@ public class AutoRefMatch implements Metadatable
 	 */
 	public static class StartMechanism
 	{
-		private Location loc = null;
+		private Block block = null;
 		private BlockState state = null;
 		private boolean flip = true;
 
 		public StartMechanism(Block block, boolean flip)
 		{
 			this.flip = flip;
-			loc = block.getLocation();
+			this.block = block;
 			state = block.getState();
 		}
 
 		public Element toElement()
 		{
 			return new Element(state.getType().name().toLowerCase())
-				.setAttribute("pos", LocationUtil.toBlockCoords(loc))
+				.setAttribute("pos", LocationUtil.toBlockCoords(block.getLocation()))
 				.setText(Boolean.toString(flip));
 		}
 
@@ -1848,13 +1848,13 @@ public class AutoRefMatch implements Metadatable
 		{ this(block, true); }
 
 		@Override public int hashCode()
-		{ return loc.hashCode() ^ state.hashCode(); }
+		{ return block.hashCode() ^ state.hashCode(); }
 
 		@Override public boolean equals(Object o)
 		{ return (o instanceof StartMechanism) && hashCode() == o.hashCode(); }
 
 		public String serialize()
-		{ return LocationUtil.toBlockCoords(loc) + ":" + Boolean.toString(flip); }
+		{ return LocationUtil.toBlockCoords(block.getLocation()) + ":" + Boolean.toString(flip); }
 
 		public static StartMechanism fromElement(Element e, World w)
 		{
@@ -1867,8 +1867,8 @@ public class AutoRefMatch implements Metadatable
 		@Override public String toString()
 		{ return state.getType().name() + "(" + this.serialize() + ")"; }
 
-		public Location getLocation()
-		{ return loc; }
+		public Block getBlock()
+		{ return block; }
 
 		public BlockState getBlockState()
 		{ return state; }
@@ -1878,7 +1878,7 @@ public class AutoRefMatch implements Metadatable
 
 		public boolean active()
 		{
-			MaterialData bdata = getLocation().getBlock().getState().getData();
+			MaterialData bdata = state.getData();
 
 			if (bdata instanceof Redstone)
 				return flip == ((Redstone) bdata).isPowered();
@@ -1926,11 +1926,11 @@ public class AutoRefMatch implements Metadatable
 	 *
 	 * @return start mechanism located at that position, otherwise null
 	 */
-	public StartMechanism getStartMechanism(Location loc)
+	public StartMechanism getStartMechanism(Block block)
 	{
-		if (loc == null) return null;
+		if (block == null) return null;
 		for (StartMechanism sm : startMechanisms)
-			if (loc.equals(sm.getLocation())) return sm;
+			if (block.equals(sm.getBlock())) return sm;
 		return null;
 	}
 
@@ -1939,8 +1939,8 @@ public class AutoRefMatch implements Metadatable
 	 *
 	 * @return true if a start mechanism is located at that position, otherwise false
 	 */
-	public boolean isStartMechanism(Location loc)
-	{ return getStartMechanism(loc) != null; }
+	public boolean isStartMechanism(Block block)
+	{ return getStartMechanism(block) != null; }
 
 	/**
 	 * Parameters necessary to configure a match.
