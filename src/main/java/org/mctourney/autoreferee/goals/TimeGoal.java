@@ -16,11 +16,22 @@ public class TimeGoal extends AutoRefGoal
 {
 	private long seconds = Long.MAX_VALUE;
 
+	public TimeGoal(AutoRefTeam team, long seconds)
+	{ super(team); this.seconds = seconds; }
+
+	private TimeGoal(AutoRefTeam team, TimeGoal goal)
+	{ this(team, goal.seconds); }
+
 	public TimeGoal(AutoRefTeam team, Element elt)
-	{
-		super(team);
-		this.seconds = parseTime(elt.getTextTrim());
-	}
+	{ this(team, parseTime(elt.getTextTrim())); }
+
+	@Override
+	public TimeGoal copy()
+	{ return this.copy(this.owner); }
+
+	@Override
+	public TimeGoal copy(AutoRefTeam team)
+	{ return new TimeGoal(team, this); }
 
 	@Override
 	public boolean isSatisfied(AutoRefMatch match)

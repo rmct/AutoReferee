@@ -30,6 +30,10 @@ public abstract class AutoRefGoal
 	// for saving the data
 	public abstract Element toElement();
 
+	// make a copy of this goal
+	public abstract <T extends AutoRefGoal> T copy();
+	public abstract <T extends AutoRefGoal> T copy(AutoRefTeam team);
+
 	/**
 	 * Represents the status of a tracked item.
 	 */
@@ -54,7 +58,7 @@ public abstract class AutoRefGoal
 		{ return msg; }
 	}
 
-	private AutoRefTeam owner;
+	protected AutoRefTeam owner;
 	private ItemStatus itemStatus = ItemStatus.NONE;
 
 	public AutoRefGoal(AutoRefTeam team)

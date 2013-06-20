@@ -13,14 +13,21 @@ import org.mctourney.autoreferee.util.BlockData;
 public class ScoreDeathmatchGoal extends ScoreGoal
 {
 	public ScoreDeathmatchGoal(AutoRefTeam team)
-	{
-		super(team);
-	}
+	{ super(team); }
+
+	private ScoreDeathmatchGoal(AutoRefTeam team, ScoreDeathmatchGoal goal)
+	{ this(team); }
 
 	public ScoreDeathmatchGoal(AutoRefTeam team, Element elt)
-	{
-		super(team);
-	}
+	{ super(team); }
+
+	@Override
+	public ScoreDeathmatchGoal copy()
+	{ return this.copy(this.owner); }
+
+	@Override
+	public ScoreDeathmatchGoal copy(AutoRefTeam team)
+	{ return new ScoreDeathmatchGoal(team, this); }
 
 	public double getScore(AutoRefMatch match)
 	{

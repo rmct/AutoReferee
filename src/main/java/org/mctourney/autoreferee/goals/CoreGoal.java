@@ -17,11 +17,14 @@ public class CoreGoal extends AutoRefGoal
 	private AutoRefRegion region;
 	private long range = 0L;
 
+	public CoreGoal(AutoRefTeam team, AutoRefRegion region, long range)
+	{ super(team); this.region = region; this.range = range; }
+
 	public CoreGoal(AutoRefTeam team, AutoRefRegion region)
-	{
-		super(team);
-		this.region = region;
-	}
+	{ this(team, region, 0L); }
+
+	private CoreGoal(AutoRefTeam team, CoreGoal goal)
+	{ this(team, goal.region, goal.range); }
 
 	public CoreGoal(AutoRefTeam team, Element elt)
 	{
@@ -32,6 +35,14 @@ public class CoreGoal extends AutoRefGoal
 			try { this.range = Long.parseLong(elt.getAttributeValue("range").trim()); }
 			catch (NumberFormatException e) { e.printStackTrace(); }
 	}
+
+	@Override
+	public CoreGoal copy()
+	{ return this.copy(this.owner); }
+
+	@Override
+	public CoreGoal copy(AutoRefTeam team)
+	{ return new CoreGoal(team, this); }
 
 	public long getRange()
 	{ return this.range; }

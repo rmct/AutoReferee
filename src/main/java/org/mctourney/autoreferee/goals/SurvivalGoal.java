@@ -11,8 +11,22 @@ import org.mctourney.autoreferee.util.BlockData;
 
 public class SurvivalGoal extends AutoRefGoal
 {
+	public SurvivalGoal(AutoRefTeam team)
+	{ super(team); }
+
+	private SurvivalGoal(AutoRefTeam team, SurvivalGoal goal)
+	{ this(team); }
+
 	public SurvivalGoal(AutoRefTeam team, Element elt)
 	{ super(team); }
+
+	@Override
+	public SurvivalGoal copy()
+	{ return this.copy(this.owner); }
+
+	@Override
+	public SurvivalGoal copy(AutoRefTeam team)
+	{ return new SurvivalGoal(team, this); }
 
 	public Element toElement()
 	{ return new Element("survive"); }

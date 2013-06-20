@@ -36,6 +36,9 @@ public class BlockGoal extends AutoRefGoal
 	public BlockGoal(AutoRefTeam team, Location loc, BlockData blockdata, int range)
 	{ super(team); this.loc = loc; this.blockdata = blockdata; this.range = range; }
 
+	private BlockGoal(AutoRefTeam team, BlockGoal goal)
+	{ this(team, goal.loc, goal.blockdata, goal.range); }
+
 	/**
 	 * Constructs a team's win condition.
 	 *
@@ -85,6 +88,14 @@ public class BlockGoal extends AutoRefGoal
 		if (text != null && !text.isEmpty())
 			customName = text;
 	}
+
+	@Override
+	public BlockGoal copy()
+	{ return this.copy(this.owner); }
+
+	@Override
+	public BlockGoal copy(AutoRefTeam team)
+	{ return new BlockGoal(team, this); }
 
 	@Override
 	public Element toElement()
