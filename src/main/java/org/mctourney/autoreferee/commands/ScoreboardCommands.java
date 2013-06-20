@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-
 import org.apache.commons.cli.CommandLine;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,7 +26,9 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import org.mctourney.autoreferee.AutoRefMatch;
+import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
+import org.mctourney.autoreferee.event.player.PlayerTeamJoinEvent;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
 import org.mctourney.autoreferee.util.commands.CommandHandler;
@@ -382,6 +382,18 @@ public class ScoreboardCommands implements CommandHandler
 							}
 							team.addPlayer(offlinePlayer);
 							addedPlayers.add(offlinePlayer.getName());
+
+							// AUTOREFEREE START - check for AutoRefTeam
+							if (match != null)
+							{
+								AutoRefTeam autorefteam = match.getTeam(teamName);
+								if (autorefteam != null && player != null)
+								{
+									PlayerTeamJoinEvent.Reason reason = PlayerTeamJoinEvent.Reason.AUTOMATIC;
+									match.joinTeam(player, autorefteam, reason, false);
+								}
+							}
+							// AUTOREFEREE END
 						}
 					}
 					sender.sendMessage("Added " + addedPlayers.size() + " player(s) to team " + team.getName() + ": " + stringCollectionToString(addedPlayers));
