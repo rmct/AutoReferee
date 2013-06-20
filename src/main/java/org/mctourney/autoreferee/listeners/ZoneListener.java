@@ -2,6 +2,7 @@ package org.mctourney.autoreferee.listeners;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -46,6 +47,7 @@ import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.LocationUtil;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class ZoneListener implements Listener
 {
@@ -59,6 +61,10 @@ public class ZoneListener implements Listener
 
 	public static final double SNEAK_DISTANCE = 0.301;
 	public static final double FREEFALL_THRESHOLD = 0.350;
+
+	public static final Set<Material> RESTRICTED_BLOCKS = Sets.newHashSet
+	(	Material.COMMAND
+	);
 
 	public ZoneListener(Plugin p)
 	{ plugin = (AutoReferee) p; }
@@ -237,6 +243,9 @@ public class ZoneListener implements Listener
 			{ event.setCancelled(true); return; }
 
 			if (!validPlayer(player))
+			{ event.setCancelled(true); return; }
+
+			if (RESTRICTED_BLOCKS.contains(block.getType()))
 			{ event.setCancelled(true); return; }
 		}
 	}
