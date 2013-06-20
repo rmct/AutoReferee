@@ -33,7 +33,6 @@ import org.bukkit.Material;
 
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefPlayer;
-import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.util.AchievementPoints;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
@@ -167,9 +166,6 @@ public class CombatListener implements Listener
 		{
 			AutoRefPlayer apl = match.getPlayer((Player) event.getEntity());
 			if (apl != null && apl.isGodMode()) { event.setDamage(0); return; }
-
-			if (!apl.isInsideLane())
-			{ event.setCancelled(true); return;}
 		}
 
 		if (match.getCurrentState().inProgress() &&
@@ -220,24 +216,22 @@ public class CombatListener implements Listener
 			// if either of these aren't players, nothing to do here
 			if (null == damager || null == damaged) return;
 
-			// if the damaged entity was a player
-			if (null != damaged)
-			{
-				AutoRefPlayer apl = match.getPlayer(damaged);
+			AutoRefPlayer aapl = match.getPlayer(damager);
+			AutoRefPlayer vapl = match.getPlayer(damaged);
 
-				// if the match is in progress and player is in start region
-				// cancel any damage dealt to the player
-				if (match.getCurrentState().inProgress() && apl != null && !apl.isActive())
-				{ event.setCancelled(true); return; }
-			}
+			if (!aapl.isInsideLane())
+			{ event.setCancelled(true); return; }
 
-			// get team affiliations of these players (maybe null)
-			AutoRefTeam d1team = plugin.getTeam(damager);
-			AutoRefTeam d2team = plugin.getTeam(damaged);
-			if (d1team == null && d2team == null) return;
+			// if the match is in progress and player is in start region
+			// cancel any damage dealt to the player
+			if (match.getCurrentState().inProgress() && vapl != null && !vapl.isActive())
+			{ event.setCancelled(true); return; }
+
+			// if both players are not on a team, quit
+			if (aapl.getTeam() == null && vapl.getTeam() == null) return;
 
 			// if the attacked isn't on a team, or same team (w/ no FF), cancel
-			if (d2team == null || (d1team == d2team && !match.allowFriendlyFire()))
+			if (vapl.getTeam() == null || (aapl.getTeam() == vapl.getTeam() && !match.allowFriendlyFire()))
 			{ event.setCancelled(true); return; }
 		}
 
