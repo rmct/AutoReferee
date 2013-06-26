@@ -8,59 +8,195 @@ softdepend:
   - WorldEdit
 
 commands:
+  announce:
+    aliases: [a, ann]
+    description: Make an announcement to players and streamers
+    usage: /<command> <message>
+  artp:
+    aliases: [atp]
+    description: Teleport spectators safely
+    usage: /<command> [b*/d*/l*/t*/s*/o*/v*/r] <target>
   autoref:
     aliases: [ar, autoreferee]
     description: AutoReferee configuration
-    usage: /<command> [<action>] [args...]
+    usage: /<command> <action> [args...]
+  autoref archive:
+    aliases: [ar archive]
+    description: Save a configured map into a zip file
+    usage: /<command>
+  autoref autoinvite:
+    aliases: [ar autoinvite]
+    description: Automatically teleport players to invited match
+    usage: /<command> <player> [players...]
+  autoref cfg init:
+    aliases: [ar cfg init]
+    description: Create initial config file
+    usage: /<command>
+  autoref cfg reload:
+    aliases: [ar cfg reload]
+    description: Reload config file
+    usage: /<command>
+  autoref cfg save:
+    aliases: [ar cfg save]
+    description: Save config file
+    usage: /<command>
+  autoref core:
+    aliases: [ar core]
+    description: Set WorldEdit region to team's core
+    usage: /<command> <team> [r+]
+  autoref countdown:
+    aliases: [ar countdown]
+    description: Begin generic countdown
+    usage: /<command> [time]
+  autoref cycle:
+    aliases: [ar cycle]
+    description: Cycle through players
+    usage: /<command> [n/p]
+  autoref debug:
+    aliases: [ar debug]
+    description: Turn on debugging mode
+    usage: /<command> [c]
+  autoref endmatch:
+    aliases: [ar endmatch]
+    description: Ends current match by decision
+    usage: /<command> <team>
+  autoref givekit:
+    aliases: [ar givekit]
+    description: Give a kit to the specified player
+    usage: /<command> <player>
+  autoref hud swap:
+    aliases: [ar hud swap]
+    description: If using AR client mod, swap sides for teams listed
+    usage: /<command>
+  autoref invite:
+    aliases: [ar invite]
+    description: Invite players to your current match
+    usage: /<command> <player> [players...]
+  autoref load:
+    aliases: [ar load]
+    description: Loads a map by name
+    usage: /<command> <map> [c+/x]
+  autoref loadurl:
+    aliases: [ar loadurl]
+    description: Loads a map from a remote zip file
+    usage: /<command> <url>
+  autoref maplist:
+    aliases: [ar maplist]
+    description: List all maps available
+    usage: /<command>
+  autoref nightvis:
+    aliases: [ar nightvis]
+    description: Toggles permanent night vision for a spectator
+    usage: /<command> <0/1>
+  autoref nocraft:
+    alias: [ar nocraft]
+    description: Prohibit the item in hand from being crafted during a match
+    usage: /<command> (with item in hand)
+  autoref practice:
+    alias: [ar practice]
+    description: Switch to practice mode or activate menu
+    usage: /<command> [t*]
+  autoref protectall:
+    alias: [ar protectall]
+    description: Protect all entities currently on the map
+    usage: /<command>
+  autoref reload:
+    alias: [ar reload]
+    description: Reloads current map to its original state.
+    usage: /<command>
+  autoref setheight:
+    alias: [ar setheight]
+    description: Restrict all team zones to be within given height
+    usage: /<command> <height>
+  autoref setlobby:
+    alias: [ar setlobby]
+    description: Set the current world to be the lobby world
+    usage: /<command>
+  autoref setspawn:
+    alias: [ar setspawn]
+    description: Set the current location as global spawn
+    usage: /<command>
+  autoref swapteams:
+    alias: [ar swapteams]
+    description: Swaps players and team names
+    usage: /<command> <team> <team>
+  autoref teamname:
+    alias: [ar teamname]
+    description: Rename a team
+    usage: /<command> <team> <new name>
+  autoref timelimit:
+    alias: [ar timelimit]
+    description: Specify the total amount of minutes allowed for this match
+    usage: /<command> <minutes>
+  autoref tool protect:
+    alias: [ar tool protect]
+    description: Get the tool used to configure protected entities
+    usage: /<command>
+  autoref tool startmech:
+    alias: [ar tool startmech]
+    description: Get the tool used to configure start mechanisms
+    usage: /<command>
+  autoref tool wincond:
+    alias: [ar tool wincond]
+    description: Get the tool used to configure win conditions
+    usage: /<command>
+  autoref unload:
+    alias: [ar unload]
+    description: Unloads current map
+    usage: /<command>
+  autoref update:
+    alias: [ar update]
+    description: Updates maps installed on server
+    usage: /<command> [f]
+  autoref version:
+    alias: [ar version]
+    description: Returns version information of this plugin
+    usage: /<command>
+  autoref world:
+    alias: [ar world]
+    description: Specifies name of the world for console to modify
+    usage: /<command> <world>
+  broadcast:
+    aliases: [b, bcast]
+    description: Make a broadcast to players and streamers
+    usage: /<command> <message>
+  joinmatch:
+    description: Join another player's match
+    usage: /<command> <player>
+  jointeam:
+    aliases: [join, j]
+    description: Set player's team
+    usage: /<command> <team> [player]
+  leavematch:
+    description: Leave the current match
+    usage: /<command>
+  leaveteam:
+    aliases: leave
+    description: Remove player's team
+    usage: /<command> [player]
+  matchinfo:
+    description: Show info about current match
+    usage: /<command>
+  notify:
+    aliases: [n]
+    description: Notify streamers and referees of a matter of interest
+    usage: /<command> <message>
+  ready:
+    description: Mark team as ready to play
+    usage: /<command> [t/f/y/n/s+]
+  setaccess:
+    description: Set access type of the current match
+    usage: /<command> <type>
+  viewinventory:
+    aliases: vi
+    description: View the inventory of the player
+    usage: /<command> [p] <player>
   zone:
     description: Set a region's ownership
     usage: /<command> <team>|start
   zones:
     description: Show a list of all zones
     usage: /<command>
-  matchinfo:
-    description: Show info about current match
-    usage: /<command>
-  joinmatch:
-    description: Join another player's match
-    usage: /<command> <player>
-  leavematch:
-    description: Leave the current match
-    usage: /<command>
-  setaccess:
-    description: Set access type of the current match
-    usage: /<command> <type>
-  jointeam:
-    aliases: [join, j]
-    description: Set player's team
-    usage: /<command> [<team>] [<player>]
-  leaveteam:
-    aliases: leave
-    description: Remove player's team
-    usage: /<command> [<player>]
-  ready:
-    description: Mark team as ready to play
-    usage: /<command> -tfyn
-  viewinventory:
-    aliases: vi
-    description: View the inventory of the player
-    usage: /<command> [-p] <player>
-  artp:
-    aliases: [atp]
-    description: Teleport spectators safely
-    usage: /<command> [<options>] <target>
-  announce:
-    aliases: [a, ann]
-    description: Make an announcement to players and streamers
-    usage: /<command> <message>
-  broadcast:
-    aliases: [b, bcast]
-    description: Make a broadcast to players and streamers
-    usage: /<command> <message>
-  notify:
-    aliases: [n]
-    description: Notify streamers and referees of a matter of interest
-    usage: /<command> <message>
   scoreboard:
     description: Replacement for Bukkit's /scoreboard command
     usage: /<command> ...
