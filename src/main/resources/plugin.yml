@@ -25,6 +25,7 @@ commands:
     description: Join another player's match
     usage: /<command> <player>
   leavematch:
+    aliases: [lobby]
     description: Leave the current match
     usage: /<command>
   setaccess:
