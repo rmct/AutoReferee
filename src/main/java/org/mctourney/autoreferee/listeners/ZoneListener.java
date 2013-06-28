@@ -259,7 +259,8 @@ public class ZoneListener implements Listener
 		AutoRefMatch match = plugin.getMatch(loc.getWorld());
 		if (match == null) return;
 
-		if (!validPlayer(player) || !match.getPlayer(player).isInsideLane())
+		AutoRefPlayer apl = match.getPlayer(player);
+		if (!validPlayer(player) || (apl != null && !apl.isInsideLane()))
 		{ event.setCancelled(true); return; }
 	}
 
