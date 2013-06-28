@@ -26,10 +26,10 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.Messenger;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Scoreboard;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 
-import org.bukkit.scoreboard.Scoreboard;
 import org.mcstats.Metrics;
 import org.mcstats.Metrics.Graph;
 
@@ -48,7 +48,6 @@ import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.listeners.lobby.LobbyListener;
 import org.mctourney.autoreferee.listeners.lobby.LobbyListener.LobbyMode;
 import org.mctourney.autoreferee.util.NullChunkGenerator;
-import org.mctourney.autoreferee.util.QueryServer;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
 import org.mctourney.autoreferee.util.commands.CommandManager;
 import org.mctourney.autoreferee.util.metrics.IncrementPlotter;
@@ -111,9 +110,6 @@ public class AutoReferee extends JavaPlugin
 	public static final String NO_LOGIN_MESSAGE = "You are not scheduled for a match on this server.";
 	public static final String COMPLETED_KICK_MESSAGE = "Thank you for playing!";
 	public static final String NO_WEBSTATS_MESSAGE = "An error has occured; no webstats will be generated.";
-
-	// query server object
-	private QueryServer qserv = null;
 
 	// command manager
 	protected CommandManager commandManager = null;

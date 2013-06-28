@@ -66,10 +66,10 @@ import org.bukkit.material.PressureSensor;
 import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
+
 import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
@@ -99,7 +99,7 @@ import org.mctourney.autoreferee.util.MapImageGenerator;
 import org.mctourney.autoreferee.util.Metadatable;
 import org.mctourney.autoreferee.util.PlayerKit;
 import org.mctourney.autoreferee.util.PlayerUtil;
-import org.mctourney.autoreferee.util.QueryServer;
+import org.mctourney.autoreferee.util.QueryUtil;
 import org.mctourney.autoreferee.util.ReportGenerator;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
 
@@ -118,7 +118,7 @@ public class AutoRefMatch implements Metadatable
 		"A notification has been sent. Type /artp to teleport.";
 
 	// online map list
-	private static String MAPREPO = "http://s3.amazonaws.com/autoreferee/maps/";
+	private static String MAPREPO = "http://autoreferee.s3.amazonaws.com/";
 
 	/**
 	 * Get the base url for the map repository
@@ -2841,7 +2841,7 @@ public class AutoRefMatch implements Metadatable
 		try
 		{
 			// submit our request to pastehtml, get back a link to the report
-			return QueryServer.syncQuery("http://pastehtml.com/upload/create",
+			return QueryUtil.syncQuery("http://pastehtml.com/upload/create",
 				"input_type=html&result=address&minecraft=1",
 				"txt=" + URLEncoder.encode(report, "UTF-8"));
 		}

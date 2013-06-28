@@ -14,41 +14,18 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 
-import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
-import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoReferee;
 
-public class QueryServer
+public class QueryUtil
 {
 	private static final String ENCODING = "UTF-8";
 
-	private String qurl = null;
-	private String key = null;
-
-	public QueryServer(String qurl, String key)
-	{ this.qurl = qurl; this.key = key; }
-
-	public boolean ack()
+	public static String getUserAgent()
 	{
-		try
-		{
-			String params = String.format("key=%s", URLEncoder.encode(key, ENCODING));
-			String json = syncPostQuery(qurl + "/ack.php", params);
-			return json != null && new Gson().fromJson(json, boolean.class);
-		}
-		catch (Exception e) { return false; }
-	}
-
-	public AutoRefMatch.MatchParams getNextMatch()
-	{
-		try
-		{
-			String params = String.format("key=%s", URLEncoder.encode(key, ENCODING));
-			String json = syncPostQuery(qurl + "/match.php", params);
-			return json == null ? null : new Gson().fromJson(json, AutoRefMatch.MatchParams.class);
-		}
-		catch (Exception e) { return null; }
+		AutoReferee instance = AutoReferee.getInstance();
+		String pluginName = instance.getDescription().getFullName();
+		return String.format("%s (%s)", pluginName, instance.getCommit());
 	}
 
 	public static String syncGetQuery(String path, String params) throws IOException

@@ -3,6 +3,7 @@ package org.mctourney.autoreferee;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.Date;
@@ -24,7 +25,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import org.mctourney.autoreferee.event.match.MatchLoadEvent;
 import org.mctourney.autoreferee.util.NullChunkGenerator;
-import org.mctourney.autoreferee.util.QueryServer;
+import org.mctourney.autoreferee.util.QueryUtil;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -32,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
+import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
 
 import com.google.common.collect.Maps;
@@ -48,6 +50,11 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 {
 	private static final File DOWNLOADING = new File("");
 
+	private static Set<AutoRefMap> _cachedRemoteMaps = null;
+
+	private static final long REMOTE_MAP_CACHE_LENGTH = 5000L;
+	private static long _cachedRemoteMapsTime = 0L;
+
 	private String name;
 	private String version;
 
@@ -63,18 +70,10 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		this.md5sum = DigestUtils.md5Hex(new FileInputStream(zip));
 	}
 
-	protected AutoRefMap(String csv)
+	protected AutoRefMap(String name, String version, String filename, String md5sum)
 	{
-		String[] parts = csv.split(";", 5);
-		if (parts.length < 4) return;
-
-		// normalized name and version are first 2 columns
-		this.name = AutoRefMatch.normalizeMapName(parts[0]);
-		this.version = parts[1];
-
-		// followed by the filename and an md5sum
-		this.filename = parts[2];
-		this.md5sum = parts[3];
+		this.name = name; this.version = version;
+		this.filename = filename; this.md5sum = md5sum;
 	}
 
 	/**
@@ -131,9 +130,8 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		// mark the file as downloading
 		this.zip = AutoRefMap.DOWNLOADING;
 
-		URL url = new URL(AutoRefMatch.getMapRepo() + filename);
 		File zip = new File(AutoRefMap.getMapLibrary(), filename);
-		FileUtils.copyURLToFile(url, zip);
+		FileUtils.copyURLToFile(new URL(filename), zip);
 
 		// if the md5s match, return the zip
 		String md5comp = DigestUtils.md5Hex(new FileInputStream(zip));
@@ -417,15 +415,55 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	 */
 	public static Set<AutoRefMap> getRemoteMaps()
 	{
+		// check the cache first, we might want to just use the cached value
+		long time = ManagementFactory.getRuntimeMXBean().getUptime() - _cachedRemoteMapsTime;
+		if (_cachedRemoteMaps != null && time < AutoRefMap.REMOTE_MAP_CACHE_LENGTH) return _cachedRemoteMaps;
+
 		Set<AutoRefMap> maps = Sets.newHashSet();
+		String repo = AutoRefMatch.getMapRepo();
+
 		try
 		{
-			String mlist = QueryServer.syncQuery(AutoRefMatch.getMapRepo() + "list.csv", null, null);
-			if (mlist != null) for (String line : mlist.split("[\\r\\n]+"))
-				maps.add(new AutoRefMap(line));
+			Map<String, String> params = Maps.newHashMap();
+			params.put("prefix", "maps/");
+
+			for (;;)
+			{
+				String url = String.format("%s?%s", repo, QueryUtil.prepareParams(params));
+				Element listing = new SAXBuilder().build(new URL(url)).getRootElement();
+				assert "ListBucketResult".equals(listing.getName()) : "Unexpected response";
+				Namespace ns = listing.getNamespace();
+
+				String lastkey = null;
+				for (Element entry : listing.getChildren("Contents", ns))
+				{
+					lastkey = entry.getChildTextTrim("Key", ns);
+					if (!lastkey.endsWith(".zip")) continue;
+
+					String[] keyparts = lastkey.split("/");
+					String mapfile = keyparts[keyparts.length - 1];
+
+					String mapslug = mapfile.substring(0, mapfile.length() - 4);
+					String slugparts[] = mapslug.split("-v");
+
+					String etag = entry.getChildTextTrim("ETag", ns);
+
+					maps.add(new AutoRefMap(slugparts[0], slugparts[1],
+						AutoRefMatch.getMapRepo() + lastkey, etag.substring(1, etag.length() - 1)));
+				}
+
+				// stop looping if the result says that it hasn't been truncated (no more results)
+				if (!Boolean.parseBoolean(listing.getChildText("IsTruncated", ns))) break;
+
+				// use the last key as a marker for the next pass
+				if (lastkey != null) params.put("marker", lastkey);
+			}
 		}
-		catch (IOException e) {  }
-		return maps;
+		catch (IOException e) { e.printStackTrace(); }
+		catch (JDOMException e) { e.printStackTrace(); }
+
+		_cachedRemoteMapsTime = ManagementFactory.getRuntimeMXBean().getUptime();
+		return _cachedRemoteMaps = maps;
 	}
 
 	/**
