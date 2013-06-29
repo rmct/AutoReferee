@@ -13,13 +13,14 @@ public class SurvivalObjective extends AutoRefObjective
 {
 	public SurvivalObjective(Objective objective, AutoRefTeam team)
 	{
-		super(objective, team, team.getName(), 0);
+		super(objective, team, team.getScoreboardName(), 0);
 		this.update();
 	}
 
 	@Override
 	public void update()
 	{
+		this.setName(String.format("%s", this.team.getScoreboardName()));
 		this.setValue(this.team.getPlayers().size());
 	}
 

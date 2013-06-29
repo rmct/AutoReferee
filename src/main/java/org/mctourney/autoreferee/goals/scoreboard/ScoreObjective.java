@@ -14,7 +14,7 @@ public class ScoreObjective extends AutoRefObjective
 {
 	public ScoreObjective(Objective objective, AutoRefTeam team, Set<ScoreGoal> scoregoals)
 	{
-		super(objective, team, team.getName(), 0);
+		super(objective, team, team.getScoreboardName(), 0);
 		this.goals.addAll(scoregoals);
 
 		// update these objectives
@@ -28,7 +28,7 @@ public class ScoreObjective extends AutoRefObjective
 		for (AutoRefGoal goal : this.goals)
 			totalscore += goal.getScore(this.team.getMatch());
 
-		this.setName(String.format("%s", this.team.getName()));
+		this.setName(String.format("%s", this.team.getScoreboardName()));
 		this.setValue((int) totalscore);
 	}
 
