@@ -48,13 +48,19 @@ public abstract class AutoRefObjective
 
 	public void setName(String name)
 	{
-		if (this.title != null)
-			this.objective.getScoreboard().resetScores(this.title);
 		this.name = name;
-
 		String clr = this.color == null || name.length() > 14
 			? "" : this.color.toString();
-		this.title = Bukkit.getOfflinePlayer(clr + name);
+
+		// if we need to replace the title object, do so
+		if (this.title == null || !this.title.getName().equals(clr + name))
+		{
+			if (this.title != null)
+				this.objective.getScoreboard().resetScores(this.title);
+			this.title = Bukkit.getOfflinePlayer(clr + name);
+		}
+
+		// no matter what, update the score
 		this.objective.getScore(this.title).setScore(this.value);
 	}
 
