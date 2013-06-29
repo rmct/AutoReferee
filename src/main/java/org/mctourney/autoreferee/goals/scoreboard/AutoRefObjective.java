@@ -64,6 +64,11 @@ public abstract class AutoRefObjective
 	public void setValue(int value)
 	{
 		this.value = value;
+
+		// set to 1 first to try to force zeroes to show up
+		if (this.value == 0) this.objective.getScore(this.title).setScore(1);
+
+		// set the correct value
 		this.objective.getScore(this.title).setScore(this.value);
 	}
 
