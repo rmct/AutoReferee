@@ -115,30 +115,38 @@ public class PlayerCommands implements CommandHandler
 		return true;
 	}
 
+	@AutoRefCommand(name={"listmatches"}, argmax=0,
+		description="Lists all available matches.")
+	@AutoRefPermission(console=true)
+
+	public boolean listMatches(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		boolean isref = sender.hasPermission("autoreferee.referee");
+		sender.sendMessage(ChatColor.DARK_GRAY + "Available matches:");
+
+		List<String> lines = Lists.newLinkedList();
+		for (AutoRefMatch m : plugin.getMatches())
+		{
+			List<Player> players = m.getWorld().getPlayers();
+			if ((m.access == AutoRefMatch.AccessType.PUBLIC || isref) && players.size() > 0)
+				lines.add("* " + ChatColor.GRAY + m.getMapName() + " v" + m.getMapVersion() +
+					ChatColor.RESET + " with " + ChatColor.RED + players.get(0).getName());
+		}
+
+		if (lines.size() == 0) sender.sendMessage(ChatColor.GRAY + "None available. Create one now!");
+		else for (String line : lines) sender.sendMessage(line);
+
+		return true;
+	}
+
 	@AutoRefCommand(name={"joinmatch"}, argmin=0, argmax=1,
 		description="Join the match of the named player. If no player is named, lists available matches.")
 	@AutoRefPermission(console=false)
 
 	public boolean joinMatch(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
-		if (args.length == 0)
-		{
-			sender.sendMessage(ChatColor.DARK_GRAY + "Available matches:");
-			List<String> lines = Lists.newLinkedList();
-
-			for (AutoRefMatch m : plugin.getMatches())
-			{
-				List<Player> players = m.getWorld().getPlayers();
-				if (m.access == AutoRefMatch.AccessType.PUBLIC && players.size() > 0)
-					lines.add("* " + ChatColor.GRAY + m.getMapName() + " v" + m.getMapVersion() +
-						ChatColor.RESET + " with " + ChatColor.RED + players.get(0).getName());
-			}
-
-			if (lines.size() == 0) sender.sendMessage(ChatColor.GRAY + "None available. Create one now!");
-			else for (String line : lines) sender.sendMessage(line);
-
-			return true;
-		}
+		// if no arguments are provided, execute the list match command
+		if (args.length == 0) return listMatches(sender, match, args, options);
 
 		// if the player is preoccupied, don't let this happen
 		if (match != null && match.isPlayer((OfflinePlayer) sender) &&
