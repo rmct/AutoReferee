@@ -137,10 +137,19 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	private String customName = null;
 
 	/**
+	 * Gets the default name of the team.
+	 */
+	public String getDefaultName()
+	{ return name; }
+
+	/**
 	 * Gets the name of the team.
 	 */
 	public String getName()
-	{ return customName != null ? customName : name; }
+	{
+		if (customName != null) return customName;
+		return this.getDefaultName();
+	}
 
 	/**
 	 * Gets the scoreboard name of the team.

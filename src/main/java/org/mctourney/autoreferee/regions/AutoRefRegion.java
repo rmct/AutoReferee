@@ -180,8 +180,6 @@ public abstract class AutoRefRegion
 
 	protected Element setRegionSettings(Element e)
 	{
-		if (e == null) return e;
-
 		Set<Flag> fset = getFlags();
 		if (!fset.isEmpty())
 		{
@@ -190,7 +188,7 @@ public abstract class AutoRefRegion
 		}
 
 		if (getOwners() != null) for (AutoRefTeam team : getOwners())
-			e.addContent(new Element("owner").setText(team.getName()));
+			e.addContent(new Element("owner").setText(team.getDefaultName()));
 
 		if (yaw != null) e.setAttribute("yaw",
 			Integer.toString(Math.round((float)yaw/ANGLE_RND)*ANGLE_RND));
@@ -208,7 +206,7 @@ public abstract class AutoRefRegion
 	{ return owners; }
 
 	public void addOwners(AutoRefTeam ...teams)
-	{ for (AutoRefTeam team : teams) owners.add(team); }
+	{ for (AutoRefTeam team : teams) if (team != null) owners.add(team); }
 
 	public boolean isOwner(AutoRefTeam team)
 	{ return owners.contains(team); }

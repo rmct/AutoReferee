@@ -1384,7 +1384,7 @@ public class AutoRefMatch implements Metadatable
 			for (AutoRefTeam team : this.getTeams())
 			{
 				Element tgoals = new Element("teamgoals")
-					.setAttribute("team", team.getName());
+					.setAttribute("team", team.getDefaultName());
 				eGoals.addContent(tgoals);
 				for (AutoRefGoal goal : team.getTeamGoals())
 					tgoals.addContent(goal.toElement());
