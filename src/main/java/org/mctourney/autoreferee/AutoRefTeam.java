@@ -167,6 +167,9 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		if (!oldName.equals(getDisplayName()))
 			match.broadcast(oldName + " is now known as " + getDisplayName());
 		scoreboardTeam.setDisplayName(name);
+
+		// update objectives to propagate name changes
+		this.updateObjectives();
 	}
 
 	/**

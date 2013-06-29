@@ -25,6 +25,9 @@ public abstract class AutoRefObjective
 	protected String name;
 	protected int value = 0;
 
+	// does this objective need to be set non-zero still
+	private boolean _needsZeroFix = true;
+
 	public AutoRefObjective(Objective objective, AutoRefTeam team, String name, int value, ChatColor color)
 	{
 		// reference to the actual scoreboard objective where we drop our entries
@@ -49,8 +52,10 @@ public abstract class AutoRefObjective
 	public void setName(String name)
 	{
 		this.name = name;
-		String clr = this.color == null || name.length() > 14
-			? "" : this.color.toString();
+
+		// is this name colorable?
+		boolean colorable = this.color == null || name.length() > 14;
+		String clr = colorable ? "" : this.color.toString();
 
 		// if we need to replace the title object, do so
 		if (this.title == null || !this.title.getName().equals(clr + name))
@@ -58,10 +63,11 @@ public abstract class AutoRefObjective
 			if (this.title != null)
 				this.objective.getScoreboard().resetScores(this.title);
 			this.title = Bukkit.getOfflinePlayer(clr + name);
+			this._needsZeroFix = true;
 		}
 
 		// no matter what, update the score
-		this.objective.getScore(this.title).setScore(this.value);
+		this.setValue(this.value);
 	}
 
 	public String getName()
@@ -72,9 +78,11 @@ public abstract class AutoRefObjective
 		this.value = value;
 
 		// set to 1 first to try to force zeroes to show up
-		if (this.value == 0) this.objective.getScore(this.title).setScore(1);
+		if (this.value == 0 && this._needsZeroFix)
+			this.objective.getScore(this.title).setScore(1);
 
 		// set the correct value
+		this._needsZeroFix = false;
 		this.objective.getScore(this.title).setScore(this.value);
 	}
 
