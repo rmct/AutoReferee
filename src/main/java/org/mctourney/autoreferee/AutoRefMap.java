@@ -130,16 +130,16 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		// mark the file as downloading
 		this.zip = AutoRefMap.DOWNLOADING;
 
-		File zip = new File(AutoRefMap.getMapLibrary(), filename);
-		FileUtils.copyURLToFile(new URL(filename), zip);
+		String bparts[] = filename.split("/"), basename = bparts[bparts.length - 1];
+		File zip = new File(AutoRefMap.getMapLibrary(), basename);
+		FileUtils.copyURLToFile(new URL(AutoRefMatch.getMapRepo() + filename), zip);
 
 		// if the md5s match, return the zip
 		String md5comp = DigestUtils.md5Hex(new FileInputStream(zip));
 		if (md5comp.equalsIgnoreCase(md5sum)) { this.zip = zip; return; }
 
 		// if the md5sum did not match, quit here
-		zip.delete(); throw new IOException(
-			"MD5 Mismatch: " + md5comp + " != " + md5sum);
+		zip.delete(); throw new IOException("MD5 Mismatch: " + md5comp + " != " + md5sum);
 	}
 
 	/**
@@ -449,7 +449,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 					String etag = entry.getChildTextTrim("ETag", ns);
 
 					maps.add(new AutoRefMap(slugparts[0], slugparts[1],
-						AutoRefMatch.getMapRepo() + lastkey, etag.substring(1, etag.length() - 1)));
+						lastkey, etag.substring(1, etag.length() - 1)));
 				}
 
 				// stop looping if the result says that it hasn't been truncated (no more results)

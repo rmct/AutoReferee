@@ -180,6 +180,8 @@ public abstract class AutoRefRegion
 
 	protected Element setRegionSettings(Element e)
 	{
+		if (e == null) return e;
+
 		Set<Flag> fset = getFlags();
 		if (!fset.isEmpty())
 		{
@@ -187,7 +189,7 @@ public abstract class AutoRefRegion
 			for (Flag f : fset) eFlags.addContent(new Element(f.name.toLowerCase()));
 		}
 
-		for (AutoRefTeam team : getOwners())
+		if (getOwners() != null) for (AutoRefTeam team : getOwners())
 			e.addContent(new Element("owner").setText(team.getName()));
 
 		if (yaw != null) e.setAttribute("yaw",
