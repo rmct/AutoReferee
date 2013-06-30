@@ -367,15 +367,15 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	}
 
 	// does a provided search string match this team?
-	public boolean matches(String needle)
+	public int matches(String needle)
 	{
-		if (needle == null) return false;
+		if (needle == null) return 0;
 		needle = needle.toLowerCase();
 
 		String a = name, b = customName;
-		if (b != null && needle.contains(b.toLowerCase())) return true;
-		if (a != null && needle.contains(a.toLowerCase())) return true;
-		return false;
+		if (b != null && needle.contains(b.toLowerCase())) return b.length();
+		if (a != null && needle.contains(a.toLowerCase())) return a.length();
+		return 0;
 	}
 
 	public void startMatch()

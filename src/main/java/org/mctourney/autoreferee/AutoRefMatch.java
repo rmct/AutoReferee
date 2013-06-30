@@ -2491,11 +2491,19 @@ public class AutoRefMatch implements Metadatable
 	public AutoRefTeam getTeam(String name)
 	{
 		AutoRefTeam mteam = null;
+		int bsz = 0;
 
 		// if there is no match on that world, forget it
 		// is this team name a word?
-		for (AutoRefTeam t : teams) if (t.matches(name))
-		{ if (mteam == null) mteam = t; else return null; }
+		for (AutoRefTeam t : teams)
+		{
+			// get the "match size"
+			int msz = t.matches(name);
+
+			// update the best match (null if multiple matches)
+			if (msz >  bsz) { mteam = t; bsz = msz; }
+			else if (msz == bsz) mteam = null;
+		}
 
 		// return the matched team (or null if no match)
 		return mteam;
