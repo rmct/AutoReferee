@@ -25,6 +25,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.DoubleChestInventory;
@@ -44,6 +45,7 @@ import com.google.common.collect.Maps;
 
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefPlayer;
+import org.mctourney.autoreferee.AutoRefSpectator;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.goals.BlockGoal;
@@ -53,6 +55,9 @@ import org.mctourney.autoreferee.util.LocationUtil;
 public class SpectatorListener implements PluginMessageListener, Listener
 {
 	public static final char DELIMITER = '|';
+
+	public static final double SPECTATOR_VISIBILITY_RADIUS = 8.0;
+
 	AutoReferee plugin = null;
 
 	// mapping spectators to the matches they died in
@@ -160,6 +165,34 @@ public class SpectatorListener implements PluginMessageListener, Listener
 			if (match != null) event.setRespawnLocation(match.getWorldSpawn());
 			deadSpectators.remove(name); return;
 		}
+	}
+
+	@EventHandler(priority=EventPriority.MONITOR)
+	public void spectatorMove(PlayerMoveEvent event)
+	{
+		Player player = event.getPlayer();
+		World world = player.getWorld();
+
+		AutoRefMatch match = plugin.getMatch(world);
+		if (!match.isSpectator(player)) return;
+
+		AutoRefSpectator spec = match.getSpectator(player);
+		boolean pvis = spec.isInvisible();
+
+		double bdistance = Double.MAX_VALUE;
+		for (AutoRefPlayer apl : match.getPlayers()) if (apl.isOnline())
+		{
+			Location ploc = apl.getPlayer().getLocation();
+			double dist = ploc.distanceSquared(player.getLocation());
+			if (dist < bdistance) { bdistance = dist; }
+		}
+
+		// if the spectator should be invisible, change visibility and then redo visibility
+		boolean vis = bdistance <= SPECTATOR_VISIBILITY_RADIUS * SPECTATOR_VISIBILITY_RADIUS;
+		spec.setInvisible(vis);
+
+		// if the visibility status has changed, reconfigure
+		if (pvis != vis) match.setupVisibility(player);
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)

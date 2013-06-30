@@ -2094,9 +2094,10 @@ public class AutoRefMatch implements Metadatable
 	// either vanish or show the player `subj` from perspective of `view`
 	protected void setupVanish(Player view, Player subj)
 	{
-		if (getVanishLevel(view) >= getVanishLevel(subj) ||
-			!this.getCurrentState().inProgress()) view.showPlayer(subj);
-		else view.hidePlayer(subj);
+		if (isSpectator(subj) && getSpectator(subj).isInvisible()) view.hidePlayer(subj);
+		if (getVanishLevel(view) < getVanishLevel(subj) &&
+			this.getCurrentState().inProgress()) view.hidePlayer(subj);
+		else view.showPlayer(subj);
 	}
 
 	/**
@@ -2116,12 +2117,8 @@ public class AutoRefMatch implements Metadatable
 		if (getCurrentState().isBeforeMatch()) setSpectatorMode(player, isReferee(player));
 		else setSpectatorMode(player, !isPlayer(player) || getCurrentState().isAfterMatch());
 
-		for ( Player x : getWorld().getPlayers() )
-		{
-			// setup vanish in both directions
-			setupVanish(player, x);
-			setupVanish(x, player);
-		}
+		// redo visibility
+		setupVisibility(player);
 
 		// if this player is a spectator
 		if (isSpectator(player))
@@ -2129,6 +2126,19 @@ public class AutoRefMatch implements Metadatable
 			// apply night vision if necessary
 			AutoRefSpectator s = getSpectator(player);
 			if (s.hasNightVision()) s.applyNightVision();
+		}
+	}
+
+	/**
+	 * Reconfigures visibility, to and from the specified player.
+	 */
+	public void setupVisibility(Player player)
+	{
+		for ( Player x : getWorld().getPlayers() )
+		{
+			// setup vanish in both directions
+			setupVanish(player, x);
+			setupVanish(x, player);
 		}
 	}
 

@@ -12,12 +12,19 @@ public class AutoRefSpectator extends AutoRefPlayer
 	private boolean nightVision = false;
 	private String cyclePlayer = null;
 	private boolean viewInventory = true;
+	private boolean invisible = true;
 
 	public AutoRefSpectator(String name, AutoRefMatch match)
 	{ super(name, null); this.match = match; }
 
 	public AutoRefSpectator(Player player, AutoRefMatch match)
 	{ this(player.getName(), match); }
+
+	public boolean isInvisible()
+	{ return invisible; }
+
+	public void setInvisible(boolean vis)
+	{ this.invisible = vis; }
 
 	@Override
 	public AutoRefMatch getMatch()
