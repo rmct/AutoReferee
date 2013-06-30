@@ -22,7 +22,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefPlayer;
-import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.util.PlayerUtil;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
@@ -53,7 +52,7 @@ public class PracticeCommands implements CommandHandler, Listener
 
 	@AutoRefCommand(name={"autoref", "practice"}, options="t*",
 			description="Switch to practice mode or activate practice mode menu.")
-	@AutoRefPermission(console=false)
+	@AutoRefPermission(console=false, nodes={"autoreferee.player"})
 
 	public boolean practiceMode(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{

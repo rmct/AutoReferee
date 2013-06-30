@@ -41,7 +41,7 @@ public class PlayerCommands implements CommandHandler
 
 	@AutoRefCommand(name={"matchinfo"}, argmax=0,
 		description="Get info regarding the current match.")
-	@AutoRefPermission(console=true)
+	@AutoRefPermission(console=true, nodes={"autoreferee.player"})
 
 	public boolean matchInfo(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
@@ -54,7 +54,7 @@ public class PlayerCommands implements CommandHandler
 
 	@AutoRefCommand(name={"jointeam"},
 		description="Join a random team. If a team name is specified, that team will be joined.")
-	@AutoRefPermission(console=false)
+	@AutoRefPermission(console=false, nodes={"autoreferee.player"})
 
 	public boolean joinTeam(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
@@ -94,7 +94,7 @@ public class PlayerCommands implements CommandHandler
 
 	@AutoRefCommand(name={"leaveteam"},
 		description="Leave a team.")
-	@AutoRefPermission(console=false)
+	@AutoRefPermission(console=false, nodes={"autoreferee.player"})
 
 	public boolean leaveTeam(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
@@ -117,7 +117,7 @@ public class PlayerCommands implements CommandHandler
 
 	@AutoRefCommand(name={"listmatches"}, argmax=0,
 		description="Lists all available matches.")
-	@AutoRefPermission(console=true)
+	@AutoRefPermission(console=true, nodes={"autoreferee.player"})
 
 	public boolean listMatches(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
@@ -141,7 +141,7 @@ public class PlayerCommands implements CommandHandler
 
 	@AutoRefCommand(name={"joinmatch"}, argmin=0, argmax=1,
 		description="Join the match of the named player. If no player is named, lists available matches.")
-	@AutoRefPermission(console=false)
+	@AutoRefPermission(console=false, nodes={"autoreferee.player"})
 
 	public boolean joinMatch(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
@@ -170,7 +170,7 @@ public class PlayerCommands implements CommandHandler
 
 	@AutoRefCommand(name={"leavematch"}, argmax=1,
 		description="Leave the current match.")
-	@AutoRefPermission(console=true)
+	@AutoRefPermission(console=true, nodes={"autoreferee.player"})
 
 	public boolean leaveMatch(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
@@ -186,7 +186,7 @@ public class PlayerCommands implements CommandHandler
 
 	@AutoRefCommand(name={"setaccess"}, argmin=1, argmax=1, options="q",
 		description="Changes access type of the current match: PUBLIC or PRIVATE.")
-	@AutoRefPermission(console=true)
+	@AutoRefPermission(console=true, nodes={"autoreferee.player"})
 
 	public boolean setAccess(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
@@ -213,7 +213,7 @@ public class PlayerCommands implements CommandHandler
 
 	@AutoRefCommand(name={"ready"}, argmax=1, options="tfyns+",
 		description="Mark your team as ready. Referees may use this command to begin a match.")
-	@AutoRefPermission(console=true)
+	@AutoRefPermission(console=true, nodes={"autoreferee.player"})
 
 	public boolean ready(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
@@ -256,7 +256,7 @@ public class PlayerCommands implements CommandHandler
 
 	@AutoRefCommand(name={"notify"},
 		description="Notifies spectators of your location. Follow this command with a message to provide further info.")
-	@AutoRefPermission(console=false)
+	@AutoRefPermission(console=false, nodes={"autoreferee.player"})
 
 	public boolean notify(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
@@ -285,7 +285,7 @@ public class PlayerCommands implements CommandHandler
 
 	@AutoRefCommand(name={"autoref", "invite"}, argmin=1,
 		description="Invite players to your current match.")
-	@AutoRefPermission(console=true)
+	@AutoRefPermission(console=true, nodes={"autoreferee.player"})
 
 	public boolean invitePlayers(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
