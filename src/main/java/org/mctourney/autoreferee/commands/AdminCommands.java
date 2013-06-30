@@ -109,8 +109,8 @@ public class AdminCommands implements CommandHandler
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "reload"}, argmin=0, argmax=0,
-		description="Reloads the current map to its original, unmodified state. Players are migrated to the new copy.")
+	@AutoRefCommand(name={"autoref", "reload"},
+		description="Reloads the current map (or specified map) to its original, unmodified state. Players are migrated to the new copy.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean reloadMap(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -118,11 +118,14 @@ public class AdminCommands implements CommandHandler
 	{
 		if (match == null) return false;
 
-		AutoRefMap map = AutoRefMap.getMap(match.getMapName());
-		if (map == null || !map.isInstalled())
+		String name = match.getMapName();
+		if (args.length > 0) name = StringUtils.join(args, ' ');
+
+		AutoRefMap map = AutoRefMap.getMap(name);
+		if (map == null)
 		{
 			sender.sendMessage(ChatColor.DARK_GRAY +
-				"No archive of this map exists " + match.getMapName());
+				"No archive of this map exists " + name);
 			return true;
 		}
 
