@@ -174,7 +174,7 @@ public class SpectatorListener implements PluginMessageListener, Listener
 		World world = player.getWorld();
 
 		AutoRefMatch match = plugin.getMatch(world);
-		if (!match.isSpectator(player)) return;
+		if (match == null || !match.isSpectator(player)) return;
 
 		AutoRefSpectator spec = match.getSpectator(player);
 		boolean pvis = spec.isInvisible();
