@@ -393,9 +393,9 @@ public class AutoReferee extends JavaPlugin
 		metrics.start();
 	}
 
-	public WorldEditPlugin getWorldEdit()
+	public static WorldEditPlugin getWorldEdit()
 	{
-		Plugin x = getServer().getPluginManager().getPlugin("WorldEdit");
+		Plugin x = Bukkit.getPluginManager().getPlugin("WorldEdit");
 		return (x != null && x instanceof WorldEditPlugin) ? (WorldEditPlugin) x : null;
 	}
 

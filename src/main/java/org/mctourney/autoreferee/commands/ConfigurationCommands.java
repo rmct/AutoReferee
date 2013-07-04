@@ -269,7 +269,7 @@ public class ConfigurationCommands implements CommandHandler
 		if (match == null) return false;
 		Player player = (Player) sender;
 
-		WorldEditPlugin worldEdit = plugin.getWorldEdit();
+		WorldEditPlugin worldEdit = AutoReferee.getWorldEdit();
 		if (worldEdit == null)
 		{
 			// world edit not installed
@@ -333,7 +333,7 @@ public class ConfigurationCommands implements CommandHandler
 		if (match == null) return false;
 		Player player = (Player) sender;
 
-		WorldEditPlugin worldEdit = plugin.getWorldEdit();
+		WorldEditPlugin worldEdit = AutoReferee.getWorldEdit();
 		if (worldEdit == null)
 		{
 			// world edit not installed
