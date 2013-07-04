@@ -479,8 +479,8 @@ public class AutoRefMatch implements Metadatable
 	private boolean saveConfig = true;
 
 	// basic variables loaded from file
-	private String mapName = null;
-	private Collection<String> mapAuthors = null;
+	protected String mapName = null;
+	protected Collection<String> mapAuthors = null;
 
 	/**
 	 * Gets the name of the map for this match.
