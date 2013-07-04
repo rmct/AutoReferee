@@ -2,11 +2,13 @@ package org.mctourney.autoreferee.util.midi;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Set;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Sequence;
 import javax.sound.midi.Sequencer;
 
 import org.bukkit.Sound;
@@ -19,11 +21,11 @@ import org.bukkit.entity.Player;
  */
 public class MidiUtil
 {
-	public static void playMidi(File file, float tempo, Set<Player> listeners)
+	private static void playMidi(Sequence seq, float tempo, Set<Player> listeners)
 		throws InvalidMidiDataException, IOException, MidiUnavailableException
 	{
 		Sequencer sequencer = MidiSystem.getSequencer(false);
-		sequencer.setSequence(MidiSystem.getSequence(file));
+		sequencer.setSequence(seq);
 		sequencer.open();
 
 		// slow it down just a bit
@@ -34,6 +36,14 @@ public class MidiUtil
 		sequencer.start();
 	}
 
+	public static void playMidi(File file, float tempo, Set<Player> listeners)
+		throws InvalidMidiDataException, IOException, MidiUnavailableException
+	{ playMidi(MidiSystem.getSequence(file), tempo, listeners); }
+
+	public static void playMidi(InputStream stream, float tempo, Set<Player> listeners)
+		throws InvalidMidiDataException, IOException, MidiUnavailableException
+	{ playMidi(MidiSystem.getSequence(stream), tempo, listeners); }
+
 	public static boolean playMidiQuietly(File file, float tempo, Set<Player> listeners)
 	{
 		try { MidiUtil.playMidi(file, tempo, listeners); }
@@ -43,11 +53,21 @@ public class MidiUtil
 
 		return true;
 	}
+	public static boolean playMidiQuietly(InputStream stream, float tempo, Set<Player> listeners)
+	{
+		try { MidiUtil.playMidi(stream, tempo, listeners); }
+		catch (MidiUnavailableException e) { e.printStackTrace(); return false; }
+		catch (InvalidMidiDataException e) { e.printStackTrace(); return false; }
+		catch (IOException e) { e.printStackTrace(); return false; }
+
+		return true;
+	}
 
 	public static boolean playMidiQuietly(File file, Set<Player> listeners)
-	{
-		return playMidiQuietly(file, 1.0f, listeners);
-	}
+	{ return playMidiQuietly(file, 1.0f, listeners); }
+
+	public static boolean playMidiQuietly(InputStream stream, Set<Player> listeners)
+	{ return playMidiQuietly(stream, 1.0f, listeners); }
 
 	// provided by github.com/sk89q/craftbook
 	private static final int[] instruments = {
