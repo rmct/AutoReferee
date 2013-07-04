@@ -214,6 +214,12 @@ public class AutoRefMatch implements Metadatable
 	@Override public int hashCode()
 	{ return getWorld().hashCode(); }
 
+	@Override public String toString()
+	{
+		return String.format("%s[%s, w=%s]", this.getClass().getSimpleName(),
+			this.mapName, this.getWorld().getName());
+	}
+
 	/**
 	 * Gets the global spawn location for this match.
 	 *
