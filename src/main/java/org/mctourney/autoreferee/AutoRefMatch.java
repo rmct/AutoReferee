@@ -515,9 +515,17 @@ public class AutoRefMatch implements Metadatable
 	/**
 	 * Gets the creators of the map for this match.
 	 *
+	 * @return collection of names
+	 */
+	public Collection<String> getMapAuthors()
+	{ return mapAuthors; }
+
+	/**
+	 * Gets the creators of the map for this match.
+	 *
 	 * @return string list of names
 	 */
-	public String getMapAuthors()
+	public String getAuthorList()
 	{
 		if (mapAuthors != null && mapAuthors.size() != 0)
 			return StringUtils.join(mapAuthors, ", ");
@@ -3154,7 +3162,7 @@ public class AutoRefMatch implements Metadatable
 		BookMeta meta = (BookMeta) book.getItemMeta();
 
 		meta.setTitle(ChatColor.RED + "" + ChatColor.BOLD + this.getMapName());
-		meta.setAuthor(ChatColor.DARK_GRAY + this.getMapAuthors());
+		meta.setAuthor(ChatColor.DARK_GRAY + this.getAuthorList());
 
 		List<String> pages = Lists.newArrayList();
 
@@ -3162,7 +3170,7 @@ public class AutoRefMatch implements Metadatable
 		pages.add(BookUtil.makePage(
 			BookUtil.center(ChatColor.BOLD + "[" + AutoReferee.getInstance().getName() + "]")
 		,	BookUtil.center(ChatColor.DARK_GRAY + this.getMapName())
-		,	BookUtil.center(" by " + ChatColor.DARK_GRAY + this.getMapAuthors())
+		,	BookUtil.center(" by " + ChatColor.DARK_GRAY + this.getAuthorList())
 		,	BookUtil.center("(v" + this.getMapVersion() + ")")
 		,	""
 		,	BookUtil.center(ChatColor.DARK_GRAY + "" + ChatColor.BOLD + "-- Teams --")
@@ -3176,7 +3184,7 @@ public class AutoRefMatch implements Metadatable
 		pages.add(BookUtil.makePage(
 			BookUtil.center(ChatColor.BOLD + "[" + AutoReferee.getInstance().getName() + "]")
 		,	BookUtil.center(ChatColor.DARK_GRAY + this.getMapName())
-		,	BookUtil.center(" by " + ChatColor.DARK_GRAY + this.getMapAuthors())
+		,	BookUtil.center(" by " + ChatColor.DARK_GRAY + this.getAuthorList())
 		,	BookUtil.center("(v" + this.getMapVersion() + ")")
 		,	""
 		,	BookUtil.center("Coming soon...")
@@ -3219,7 +3227,7 @@ public class AutoRefMatch implements Metadatable
 	public void sendMatchInfo(CommandSender sender)
 	{
 		sender.sendMessage(ChatColor.RESET + "Map: " + ChatColor.GRAY + getMapName() +
-			" v" + getMapVersion() + ChatColor.ITALIC + " by " + getMapAuthors());
+			" v" + getMapVersion() + ChatColor.ITALIC + " by " + getAuthorList());
 
 		if (sender instanceof Player)
 		{
