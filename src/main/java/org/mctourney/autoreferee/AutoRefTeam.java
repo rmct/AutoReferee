@@ -401,7 +401,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	}
 
 	// a factory for processing config xml
-	protected static AutoRefTeam fromElement(Element elt, AutoRefMatch match)
+	public static AutoRefTeam fromElement(Element elt, AutoRefMatch match)
 	{
 		// the element we are building on needs to be a team element
 		assert "team".equals(elt.getName().toLowerCase());
@@ -448,24 +448,46 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 			try { newTeam.playerlives = Integer.parseInt(elt.getAttributeValue("lives").trim()); }
 			catch (NumberFormatException e) { e.printStackTrace(); }
 
-		String teamslug = "ar#" + newTeam.name;
-
-		// set team data on spectators' scoreboard
-		newTeam.infoboardTeam = match.getInfoboard().registerNewTeam(teamslug);
-		newTeam.infoboardTeam.setPrefix(newTeam.color.toString());
-		newTeam.infoboardTeam.setDisplayName(newTeam.getName());
-
-		// set team data on players' scoreboard
-		newTeam.scoreboardTeam = match.getScoreboard().registerNewTeam(teamslug);
-		newTeam.scoreboardTeam.setPrefix(newTeam.color.toString());
-		newTeam.scoreboardTeam.setDisplayName(newTeam.getName());
-
-		// this stuff is only really necessary for the players themselves
-		newTeam.scoreboardTeam.setAllowFriendlyFire(match.allowFriendlyFire());
-		newTeam.scoreboardTeam.setCanSeeFriendlyInvisibles(true);
-
+		newTeam.setupScoreboard();
 		newTeam.players = Sets.newHashSet();
 		return newTeam;
+	}
+
+	// a factory for creating raw teams
+	public static AutoRefTeam create(AutoRefMatch match, String name, ChatColor color)
+	{
+		AutoRefTeam newTeam = new AutoRefTeam();
+		newTeam.color = color;
+		newTeam.match = match;
+
+		newTeam.name = name;
+
+		// initialize this team for referees
+		match.messageReferees("team", newTeam.getName(), "init");
+		match.messageReferees("team", newTeam.getName(), "color", newTeam.color.toString());
+
+		newTeam.setupScoreboard();
+		newTeam.players = Sets.newHashSet();
+		return newTeam;
+	}
+
+	private void setupScoreboard()
+	{
+		String teamslug = "ar#" + name;
+
+		// set team data on spectators' scoreboard
+		infoboardTeam = match.getInfoboard().registerNewTeam(teamslug);
+		infoboardTeam.setPrefix(color.toString());
+		infoboardTeam.setDisplayName(getName());
+
+		// set team data on players' scoreboard
+		scoreboardTeam = match.getScoreboard().registerNewTeam(teamslug);
+		scoreboardTeam.setPrefix(color.toString());
+		scoreboardTeam.setDisplayName(getName());
+
+		// this stuff is only really necessary for the players themselves
+		scoreboardTeam.setAllowFriendlyFire(match.allowFriendlyFire());
+		scoreboardTeam.setCanSeeFriendlyInvisibles(true);
 	}
 
 	public Element toElement()

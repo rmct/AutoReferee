@@ -982,7 +982,24 @@ public class AutoRefMatch implements Metadatable
 		infoboardObjective = infoboard.registerNewObjective(
 			String.format("ar%x#scores", System.currentTimeMillis() % (1L << 16)), "dummy");
 
+		teams = Sets.newHashSet();
+		messageReferees("match", getWorld().getName(), "init");
+		setCurrentState(MatchStatus.WAITING);
+
 		loadWorldConfiguration();
+
+		// setup scoreboard for the teams (on next server tick)
+		setupScoreboardObjectives();
+
+		// restore competitive settings and some default values
+		primaryWorld.setPVP(true);
+		primaryWorld.setSpawnFlags(true, true);
+
+		primaryWorld.setTicksPerAnimalSpawns(-1);
+		primaryWorld.setTicksPerMonsterSpawns(-1);
+
+		// last, send an update about the match to everyone logged in
+		for (Player pl : primaryWorld.getPlayers()) sendMatchInfo(pl);
 
 		// is this world a temporary world?
 		this.tmp = tmp;
@@ -1178,10 +1195,6 @@ public class AutoRefMatch implements Metadatable
 		}
 		catch (Exception e) { e.printStackTrace(); return; }
 
-		teams = Sets.newHashSet();
-		messageReferees("match", getWorld().getName(), "init");
-		setCurrentState(MatchStatus.WAITING);
-
 		// get the extra settings cached
 		Element meta = worldConfig.getChild("meta");
 		if (meta != null)
@@ -1205,9 +1218,6 @@ public class AutoRefMatch implements Metadatable
 
 		for (Element e : worldConfig.getChild("teams").getChildren("team"))
 			teams.add(AutoRefTeam.fromElement(e, this));
-
-		protectedEntities = Sets.newHashSet();
-		prohibitCraft = Sets.newHashSet();
 
 		Element eProtect = worldConfig.getChild("protect");
 		if (eProtect != null) for (Element c : eProtect.getChildren())
@@ -1237,9 +1247,6 @@ public class AutoRefMatch implements Metadatable
 			if (team != null) for (Element gelt : teamgoals.getChildren()) team.addGoal(gelt);
 		}
 
-		// setup scoreboard for the teams (on next server tick)
-		setupScoreboardObjectives();
-
 		Element mechanisms = worldConfig.getChild("mechanisms");
 		if (mechanisms != null) for (Element mech : mechanisms.getChildren())
 		{
@@ -1247,16 +1254,6 @@ public class AutoRefMatch implements Metadatable
 			Location mechloc = LocationUtil.fromCoords(getWorld(), mech.getAttributeValue("pos"));
 			this.addStartMech(getWorld().getBlockAt(mechloc), state);
 		}
-
-		// restore competitive settings and some default values
-		primaryWorld.setPVP(true);
-		primaryWorld.setSpawnFlags(true, true);
-
-		primaryWorld.setTicksPerAnimalSpawns(-1);
-		primaryWorld.setTicksPerMonsterSpawns(-1);
-
-		// last, send an update about the match to everyone logged in
-		for (Player pl : primaryWorld.getPlayers()) sendMatchInfo(pl);
 	}
 
 	private static Difficulty getDifficulty(String d)
