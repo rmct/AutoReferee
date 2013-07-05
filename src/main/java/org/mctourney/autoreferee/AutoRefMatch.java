@@ -173,7 +173,7 @@ public class AutoRefMatch implements Metadatable
 
 	public AccessType access = AccessType.PRIVATE;
 
-	private boolean currentlyTied = false;
+	protected boolean currentlyTied = false;
 
 	// world this match is taking place on
 	private World primaryWorld;
@@ -237,7 +237,7 @@ public class AutoRefMatch implements Metadatable
 	{ return tmp; }
 
 	private long startClock = 0L;
-	private boolean lockTime = false;
+	protected boolean lockTime = false;
 
 	/**
 	 * Gets the time to set the world to at the start of the match.
@@ -354,7 +354,7 @@ public class AutoRefMatch implements Metadatable
 	{ return infoboardObjective; }
 
 	// teams participating in the match
-	private Set<AutoRefTeam> teams = Sets.newHashSet();
+	protected Set<AutoRefTeam> teams = Sets.newHashSet();
 
 	/**
 	 * Gets the teams participating in this match.
@@ -388,7 +388,7 @@ public class AutoRefMatch implements Metadatable
 	public void setWinningTeam(AutoRefTeam team)
 	{ winningTeam = team; }
 
-	private Map<String, PlayerKit> kits = Maps.newHashMap();
+	protected Map<String, PlayerKit> kits = Maps.newHashMap();
 
 	public PlayerKit getKit(String name)
 	{ return kits.get(name); }
@@ -474,8 +474,8 @@ public class AutoRefMatch implements Metadatable
 	}
 
 	// configuration information for the world
-	private File worldConfigFile;
-	private Element worldConfig;
+	protected File worldConfigFile;
+	protected Element worldConfig;
 	private boolean saveConfig = true;
 
 	// basic variables loaded from file
@@ -490,7 +490,7 @@ public class AutoRefMatch implements Metadatable
 	public String getMapName()
 	{ return mapName; }
 
-	private String versionString = "1.0";
+	protected String versionString = "1.0";
 
 	/**
 	 * Gets the version number of the map for this match.
@@ -534,10 +534,10 @@ public class AutoRefMatch implements Metadatable
 
 	private long startTime = 0;
 
-	private long getStartTime()
+	public long getStartTime()
 	{ return startTime; }
 
-	private void setStartTime(long time)
+	public void setStartTime(long time)
 	{ this.startTime = time; }
 
 	/**
@@ -607,10 +607,10 @@ public class AutoRefMatch implements Metadatable
 	}
 
 	// task that starts the match
-	private CountdownTask matchStarter = null;
+	protected CountdownTask matchStarter = null;
 
 	// mechanisms to open the starting gates
-	private Set<StartMechanism> startMechanisms = Sets.newHashSet();
+	protected Set<StartMechanism> startMechanisms = Sets.newHashSet();
 
 	// protected entities - only protected from "butchering"
 	private Set<UUID> protectedEntities = Sets.newHashSet();
@@ -660,7 +660,7 @@ public class AutoRefMatch implements Metadatable
 	{ this.allowObjectiveCraft = b; }
 
 	// provided by configuration file
-	private static boolean allowTies = false;
+	protected static boolean allowTies = false;
 
 	/**
 	 * Checks if ties are allowed on this server.
@@ -677,10 +677,10 @@ public class AutoRefMatch implements Metadatable
 	{ AutoRefMatch.allowTies = b; }
 
 	// list of items players may not craft
-	private Set<BlockData> prohibitCraft = Sets.newHashSet();
+	protected Set<BlockData> prohibitCraft = Sets.newHashSet();
 
 	// range of inexact placement
-	private int inexactRange = 2;
+	protected int inexactRange = 2;
 
 	/**
 	 * Gets the distance an objective may be placed from its target location.
@@ -691,7 +691,7 @@ public class AutoRefMatch implements Metadatable
 	{ return inexactRange; }
 
 	// transcript of every event in the match
-	private List<TranscriptEvent> transcript;
+	protected List<TranscriptEvent> transcript;
 
 	private boolean refereeReady = false;
 
@@ -738,8 +738,7 @@ public class AutoRefMatch implements Metadatable
 			AutoReferee.log("You may not direct debug message to a streamer!");
 
 		debugRecipient = recipient;
-		debug(ChatColor.GREEN + "Debug mode is now " +
-			(isDebugMode() ? "on" : "off"));
+		debug(ChatColor.GREEN + "Debug mode is now " + (isDebugMode() ? "on" : "off"));
 	}
 
 	private ReportGenerator matchReportGenerator = new ReportGenerator();
@@ -2062,9 +2061,9 @@ public class AutoRefMatch implements Metadatable
 		Sets.newHashSet(60L, 30L, 10L, 5L, 4L, 3L, 2L, 1L);
 
 	// handle to the clock task
-	private MatchClockTask clockTask;
+	protected MatchClockTask clockTask;
 
-	private class MatchClockTask extends BukkitRunnable
+	protected class MatchClockTask extends BukkitRunnable
 	{
 		public void run()
 		{

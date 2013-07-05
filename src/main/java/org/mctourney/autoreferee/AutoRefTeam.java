@@ -41,7 +41,7 @@ import com.google.common.collect.Sets;
 public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 {
 	// reference to the match
-	private AutoRefMatch match = null;
+	protected AutoRefMatch match = null;
 
 	/**
 	 * Gets this team's match.
@@ -55,17 +55,17 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	org.bukkit.scoreboard.Team  infoboardTeam;
 
 	// player information
-	private Set<AutoRefPlayer> players = Sets.newHashSet();
+	protected Set<AutoRefPlayer> players = Sets.newHashSet();
 	private Set<AutoRefPlayer> playersCache = Sets.newHashSet();
 
 	private int playerlives = -1;
 
 	public String toString()
-	{ return "AutoRefTeam[" + this.getName() + "]"; }
+	{ return this.getClass().getSimpleName() + "[" + this.getName() + "]"; }
 
 	public boolean equals(Object o)
 	{
-		return o instanceof AutoRefTeam
+		return this.getClass().isInstance(o)
 			&& this.getMatch().equals(((AutoRefTeam) o).getMatch())
 			&& this.name.equals(((AutoRefTeam) o).name);
 	}
@@ -203,14 +203,14 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	{ this.color = color; }
 
 	// maximum size of a team
-	private Integer maxSize = null;
-	private Integer minSize = null;
+	protected Integer maxsize = null;
+	protected Integer minsize = null;
 
 	public int getMaxSize()
-	{ return maxSize == null ? 4 : maxSize; }
+	{ return maxsize == null ? 4 : maxsize; }
 
 	public int getMinSize()
-	{ return minSize == null ? (3 * getMaxSize() / 4) : minSize; }
+	{ return minsize == null ? (3 * getMaxSize() / 4) : minsize; }
 
 	// is this team ready to play?
 	private boolean ready = false;
@@ -426,8 +426,8 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		match.messageReferees("team", newTeam.getName(), "color", newTeam.color.toString());
 
 		// get the min and max size from the team tag
-		if (maxsz != null) newTeam.maxSize = Integer.parseInt(maxsz);
-		if (minsz != null) newTeam.minSize = Integer.parseInt(minsz);
+		if (maxsz != null) newTeam.maxsize = Integer.parseInt(maxsz);
+		if (minsz != null) newTeam.minsize = Integer.parseInt(minsz);
 
 		if (elt.getAttributeValue("kit") != null)
 		{
@@ -474,8 +474,8 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		elt.addContent(new Element("name").setText(getName()));
 
 		if (this.getColor() != ChatColor.RESET) elt.setAttribute("color", this.getColor().name());
-		if (this.maxSize != null) elt.setAttribute("maxsize", Integer.toString(this.maxSize));
-		if (this.minSize != null) elt.setAttribute("minsize", Integer.toString(this.minSize));
+		if (this.maxsize != null) elt.setAttribute("maxsize", Integer.toString(this.maxsize));
+		if (this.minsize != null) elt.setAttribute("minsize", Integer.toString(this.minsize));
 		if (this.playerlives > 0) elt.setAttribute("lives", Integer.toString(this.playerlives));
 
 		PlayerKit teamKit = this.getKit();
