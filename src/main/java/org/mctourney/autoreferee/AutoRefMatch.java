@@ -1170,14 +1170,24 @@ public class AutoRefMatch implements Metadatable
 	{
 		try
 		{
+			// file stream and configuration object (located in world folder)
+			File f = worldConfigFile;
+			loadWorldConfiguration(f.exists() ? new FileInputStream(f)
+				: AutoReferee.getInstance().getResource("defaults/map.xml"));
+		}
+		catch (FileNotFoundException e) {  }
+	}
+
+	protected void loadWorldConfiguration(InputStream cfg)
+	{
+		try
+		{
 			// until told otherwise, assume that what we have should not be
 			// saved (to prevent a bad config from being destroyed)
 			saveConfig = false;
 
-			// file stream and configuration object (located in world folder)
-			InputStream cfgStream = worldConfigFile.exists() ? new FileInputStream(worldConfigFile)
-				: AutoReferee.getInstance().getResource("defaults/map.xml");
-			worldConfig = new SAXBuilder().build(cfgStream).getRootElement();
+			// build configuration file from
+			worldConfig = new SAXBuilder().build(cfg).getRootElement();
 
 			// turn on saving functionality if we loaded a configuration properly
 			assert "map".equals(worldConfig.getName());
