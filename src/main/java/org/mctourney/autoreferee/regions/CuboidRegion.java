@@ -31,9 +31,9 @@ public class CuboidRegion extends AutoRefRegion
 	public CuboidRegion(World world, double x1, double x2, double y1, double y2, double z1, double z2)
 	{
 		this.world = world;
-		this.x1 = x1; this.x2 = x2;
-		this.y1 = y1; this.y2 = y2;
-		this.z1 = z1; this.z2 = z2;
+		this.x1 = Math.min(x1, x2); this.x2 = Math.max(x1, x2);
+		this.y1 = Math.min(y1, y2); this.y2 = Math.max(y1, y2);
+		this.z1 = Math.min(z1, z2); this.z2 = Math.max(z1, z2);
 	}
 
 	public CuboidRegion(AutoRefMatch match, Element elt)
