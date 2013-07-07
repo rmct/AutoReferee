@@ -169,7 +169,7 @@ public class SpectatorCommands implements CommandHandler
 		else tplocation = match.getLastNotificationLocation();
 
 		// if we ever found a valid teleport, take it!
-		if (tplocation != null)
+		if (tplocation != null && tplocation.getWorld() == player.getWorld())
 		{
 			prevLocation.put(player.getName(), player.getLocation());
 			player.setFlying(true); player.teleport(tplocation);
