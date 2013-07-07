@@ -30,7 +30,7 @@ public class CommandDocumentationGenerator
 			AutoRefCommand cmd = method.getAnnotation(AutoRefCommand.class);
 			AutoRefPermission perm = method.getAnnotation(AutoRefPermission.class);
 
-			if (cmd != null)
+			if (cmd != null && !cmd.description().isEmpty())
 				commandLines.add(String.format("%s;%s;%s;%s;%d;%d;%s",
 					// command execution
 					StringUtils.join(cmd.name(), ' '),
