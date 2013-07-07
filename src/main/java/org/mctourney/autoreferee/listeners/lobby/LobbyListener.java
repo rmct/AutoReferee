@@ -20,6 +20,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
@@ -142,7 +143,12 @@ public abstract class LobbyListener implements CommandHandler, Listener
 		// moving to lobby world, set player to creative
 		Player player = event.getPlayer();
 		if (player.getWorld() == plugin.getLobbyWorld())
+        {
 			PlayerUtil.setGameMode(player, GameMode.ADVENTURE, true);
+            player.setHealth(20);
+            player.setFoodLevel(20);
+            player.getInventory().clear();
+        }
 	}
 
 	@EventHandler(priority= EventPriority.HIGHEST)
@@ -179,14 +185,22 @@ public abstract class LobbyListener implements CommandHandler, Listener
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST)
-	public void entityDamage(EntityDamageByEntityEvent event)
+	public void entityDamageByEntity(EntityDamageByEntityEvent event)
 	{
 		if (checkAdminPrivilege(event.getDamager())) return;
 		if (event.getEntity().getWorld() == plugin.getLobbyWorld())
 			event.setCancelled(true);
 	}
 
-	@EventHandler(priority=EventPriority.HIGHEST)
+
+    @EventHandler(priority=EventPriority.HIGHEST)
+    public void entityDamage(EntityDamageEvent event)
+    {
+        if (event.getEntity().getWorld() == plugin.getLobbyWorld())
+            event.setCancelled(true);
+    }
+
+    @EventHandler(priority=EventPriority.HIGHEST)
 	public void hangingBreak(HangingBreakEvent event)
 	{
 		if (event instanceof HangingBreakByEntityEvent)
