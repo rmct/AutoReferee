@@ -21,6 +21,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -142,7 +143,11 @@ public abstract class LobbyListener implements CommandHandler, Listener
 		// moving to lobby world, set player to creative
 		Player player = event.getPlayer();
 		if (player.getWorld() == plugin.getLobbyWorld())
+		{
 			PlayerUtil.setGameMode(player, GameMode.ADVENTURE, true);
+			PlayerUtil.restore(player);
+			PlayerUtil.clearInventory(player);
+		}
 	}
 
 	@EventHandler(priority= EventPriority.HIGHEST)
@@ -179,9 +184,14 @@ public abstract class LobbyListener implements CommandHandler, Listener
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST)
-	public void entityDamage(EntityDamageByEntityEvent event)
+	public void entityDamage(EntityDamageEvent event)
 	{
-		if (checkAdminPrivilege(event.getDamager())) return;
+		// don't cancel the event if the damager is an admin
+		if (event instanceof EntityDamageByEntityEvent)
+		{
+			EntityDamageByEntityEvent e = (EntityDamageByEntityEvent) event;
+			if (checkAdminPrivilege(e.getDamager())) return;
+		}
 		if (event.getEntity().getWorld() == plugin.getLobbyWorld())
 			event.setCancelled(true);
 	}
