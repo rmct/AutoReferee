@@ -3002,6 +3002,9 @@ public class AutoRefMatch implements Metadatable
 
 		public Set<Object> actors;
 
+        public Set<Object> getActors()
+        { return actors; }
+
 		private EventType type;
 
 		public EventType getType()
@@ -3076,7 +3079,13 @@ public class AutoRefMatch implements Metadatable
 		else message = (clr + message + ChatColor.RESET);
 
 		if (recipients != null) for (Player player : recipients)
-			player.sendMessage(message);
+        {
+            if (event.getType() == TranscriptEvent.EventType.PLAYER_DEATH && event.getMessage().contains("shot") &&
+            !event.actors.isEmpty() && event.getActors().size() == 1)
+                for (Object aplo : event.actors)
+                   ((Player) ((AutoRefPlayer) aplo).getKiller()).sendMessage(message + " (" + ((AutoRefPlayer) aplo).getLastKillShot() + ")");
+            else player.sendMessage(message);
+        }
 
 		if (plugin.isConsoleLoggingEnabled())
 			plugin.getLogger().info(event.toString());
