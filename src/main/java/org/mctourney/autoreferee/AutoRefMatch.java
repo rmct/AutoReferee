@@ -3078,12 +3078,24 @@ public class AutoRefMatch implements Metadatable
 		if (clr == null) message = colorMessage(message);
 		else message = (clr + message + ChatColor.RESET);
 
+        AutoRefPlayer killer = null;
+
+        if (event.getType() == TranscriptEvent.EventType.PLAYER_DEATH
+                && event.getMessage().contains("shot"))
+        {
+            String[] parsedDmsg = event.getMessage().split("\\s+");
+            killer = getPlayer(parsedDmsg[4]);
+        }
+
 		if (recipients != null) for (Player player : recipients)
         {
-            if (event.getType() == TranscriptEvent.EventType.PLAYER_DEATH && event.getMessage().contains("shot") &&
-            !event.actors.isEmpty() && event.getActors().size() == 1)
-                for (Object aplo : event.actors)
-                   ((Player) ((AutoRefPlayer) aplo).getKiller()).sendMessage(message + " (" + ((AutoRefPlayer) aplo).getLastKillShot() + ")");
+            if (event.getType() == TranscriptEvent.EventType.PLAYER_DEATH
+                && event.getMessage().contains("shot")
+                && !event.actors.isEmpty()
+                && event.actors.contains(killer)
+                && ((getPlayer(player) == killer)
+                || isSpectator(player)))
+                player.sendMessage(String.format(message + ChatColor.DARK_GRAY + " (%.2f)", (getPlayer(player).getLastKillShot())));
             else player.sendMessage(message);
         }
 
