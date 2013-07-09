@@ -216,9 +216,12 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	private int teamKills = 0;
 
 	private double furthestShot = 0.0;
+    private double lastKillShot = 0.0;
 
 	/**
 	 * Sets the furthest accurate bow shot.
+     *
+     * @param distance furthest accurate shot
 	 */
 	public void setFurthestShot(double distance)
 	{ if (distance > furthestShot) furthestShot = distance; }
@@ -230,6 +233,22 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 */
 	public double getFurthestShot()
 	{ return furthestShot; }
+
+    /**
+     * Sets the last killing bow shot.
+     *
+     * @param distance last killing shot
+     */
+    public void setLastKillShot(double distance)
+    { this.lastKillShot = distance; }
+
+    /**
+     * Gets the last killing bow shot.
+     *
+     * @return distance of last killing shot
+     */
+     public double getLastKillShot()
+     { return lastKillShot; }
 
 	private int livesRemaining = -1;
 

@@ -94,6 +94,13 @@ public class CombatListener implements Listener
 							if (kapl != null) dmsg = victim.getName() + " was blown up by " + kapl.getName();
 						}
 					break;
+                    case ARROW:
+                        Location shotFrom = shotArrows.get(ed.getDamager().getUniqueId());
+                        Entity shooter = ((Arrow) ed.getDamager()).getShooter();
+                        if (!(shooter instanceof Player)) return;
+                        AutoRefPlayer shooterPlayer = match.getPlayer(((Player) shooter).getName());
+                        if (shooterPlayer != null  && shotFrom != null)
+                            shooterPlayer.setLastKillShot(ed.getDamager().getLocation().distance(shotFrom));
 				}
 			}
 
