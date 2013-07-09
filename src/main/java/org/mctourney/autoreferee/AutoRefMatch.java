@@ -3095,7 +3095,7 @@ public class AutoRefMatch implements Metadatable
                 && event.actors.contains(killer)
                 && ((getPlayer(player) == killer)
                 || isSpectator(player)))
-                player.sendMessage(String.format(message + ChatColor.DARK_GRAY + " (%.2f)", (getPlayer(player).getLastKillShot())));
+                player.sendMessage(String.format(message + ChatColor.DARK_GRAY + " (%.2f)", killer.getLastKillShot()));
             else player.sendMessage(message);
         }
 
