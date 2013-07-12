@@ -951,6 +951,12 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		newContents[oldContents.length + 2] = pInventory.getLeggings();
 		newContents[oldContents.length + 3] = pInventory.getBoots();
 
+		if (player.getLevel() > 0)
+		{
+			ItemStack level = new ItemStack(Material.EXP_BOTTLE, player.getLevel());
+			newContents[oldContents.length + 5] = level;
+		}
+
 		if (player.getActivePotionEffects().size() > 0)
 		{
 			ItemStack potion = new Potion(PotionType.WATER).toItemStack(1);
