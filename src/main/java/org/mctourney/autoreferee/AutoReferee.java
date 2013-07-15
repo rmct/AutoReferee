@@ -399,7 +399,7 @@ public class AutoReferee extends JavaPlugin
 		return (x != null && x instanceof WorldEditPlugin) ? (WorldEditPlugin) x : null;
 	}
 
-	private World consoleWorld = null;
+	private UUID consoleWorld = null;
 
 	/**
 	 * Gets the world that the console user has selected.
@@ -408,15 +408,15 @@ public class AutoReferee extends JavaPlugin
 	 */
 	public World getConsoleWorld()
 	{
-		List<World> worlds = getServer().getWorlds();
-		return consoleWorld == null ? worlds.get(0) : consoleWorld;
+		return consoleWorld == null || getServer().getWorld(consoleWorld) == null
+			? getServer().getWorlds().get(0) : getServer().getWorld(consoleWorld);
 	}
 
 	/**
 	 * Sets the world that the console user has selected.
 	 */
 	public void setConsoleWorld(World world)
-	{ consoleWorld = world; }
+	{ consoleWorld = world.getUID(); }
 
 	/**
 	 * Sets the world that the console user has selected.
