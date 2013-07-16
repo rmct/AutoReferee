@@ -467,21 +467,4 @@ public class ConfigurationCommands implements CommandHandler
 		AutoRefMatch.setupWorld(world, false);
 		return true;
 	}
-
-	@AutoRefCommand(name={"autoref", "debug"}, argmax=0, options="c",
-		description="Turn on debugging mode.")
-	@AutoRefPermission(console=true, nodes={"autoreferee.configure"})
-
-	public boolean debug(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
-	{
-		if (match == null) return false;
-
-		if (match.isDebugMode())
-		{ match.setDebug(null); return true; }
-
-		match.setDebug(!options.hasOption('c') ? sender :
-			plugin.getServer().getConsoleSender());
-
-		return true;
-	}
 }

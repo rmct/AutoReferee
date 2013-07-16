@@ -710,38 +710,6 @@ public class AutoRefMatch implements Metadatable
 	public void setRefereeReady(boolean r)
 	{ refereeReady = r; }
 
-	private CommandSender debugRecipient = null;
-
-	/**
-	 * Checks if the match is in debug mode.
-	 *
-	 * @return true if match is in debug mode, otherwise false
-	 */
-	public boolean isDebugMode()
-	{ return debugRecipient != null; }
-
-	/**
-	 * Sends a debug message to the debug recipient.
-	 *
-	 * @param msg debug message
-	 */
-	public void debug(String msg)
-	{ if (debugRecipient != null) debugRecipient.sendMessage(msg); }
-
-	/**
-	 * Sets the recipient of debug messages for this match.
-	 *
-	 * @param recipient a recipient for debug messages, or null to disable debug
-	 */
-	public void setDebug(CommandSender recipient)
-	{
-		if (recipient != null && recipient.hasPermission("autoreferee.streamer"))
-			AutoReferee.log("You may not direct debug message to a streamer!");
-
-		debugRecipient = recipient;
-		debug(ChatColor.GREEN + "Debug mode is now " + (isDebugMode() ? "on" : "off"));
-	}
-
 	private ReportGenerator matchReportGenerator = new ReportGenerator();
 
 	/**
@@ -1454,7 +1422,6 @@ public class AutoRefMatch implements Metadatable
 	 */
 	public void messageReferees(String ...parts)
 	{
-		if (this.isDebugMode()) this.debug(StringUtils.join(parts, SpectatorListener.DELIMITER));
 		for (Player ref : getReferees(false)) messageReferee(ref, parts);
 	}
 
