@@ -12,5 +12,5 @@ public class ClassicLobbyListener extends LobbyListener
 
 	@Override
 	protected void lobbyLoadMap(Player player, AutoRefMap map)
-	{ AutoRefMap.loadMap(player, map, null); }
+	{ _loadMap(player, map, null); }
 }

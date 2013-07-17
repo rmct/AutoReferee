@@ -26,7 +26,7 @@ public class AutoLobbyListener extends LobbyListener
 	{
 		AutoRefMatch match = findSuitableMatch(map);
 		if (match != null) match.joinMatch(player);
-		else AutoRefMap.loadMap(player, map, null);
+		else _loadMap(player, map, null);
 	}
 
 	private AutoRefMatch findSuitableMatch(AutoRefMap map)

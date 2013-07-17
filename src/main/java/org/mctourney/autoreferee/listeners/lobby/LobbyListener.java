@@ -1,14 +1,17 @@
 package org.mctourney.autoreferee.listeners.lobby;
 
+import java.lang.management.ManagementFactory;
 import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Sign;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -89,6 +92,9 @@ public abstract class LobbyListener implements CommandHandler, Listener
 	}
 
 	protected AutoReferee plugin = null;
+
+	private final long MAP_LOAD_COOLDOWN = 15 * 1000L;
+	protected Map<String, Long> lastMapLoad = Maps.newHashMap();
 
 	public LobbyListener(AutoReferee plugin)
 	{ this.plugin = plugin; }
@@ -257,6 +263,14 @@ public abstract class LobbyListener implements CommandHandler, Listener
 
 	protected abstract void lobbyLoadMap(Player player, AutoRefMap map);
 
+	protected void _loadMap(CommandSender sender, AutoRefMap map, String name)
+	{
+		// record the last load time to prevent load spamming
+		lastMapLoad.put(sender.getName(), ManagementFactory.getRuntimeMXBean().getUptime());
+
+		AutoRefMap.loadMap(sender, map, name);
+	}
+
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void signCommand(PlayerInteractEvent event)
 	{
@@ -271,8 +285,18 @@ public abstract class LobbyListener implements CommandHandler, Listener
 
 			if (player.getWorld() == plugin.getLobbyWorld())
 			{
+				Long lastLoadTime = lastMapLoad.get(player.getName());
+				long time = ManagementFactory.getRuntimeMXBean().getUptime();
+
+				if (lastLoadTime != null && time < lastLoadTime + MAP_LOAD_COOLDOWN)
+				{
+					long secs = (lastLoadTime + MAP_LOAD_COOLDOWN - time) / 1000L;
+					player.sendMessage(ChatColor.RED + "You must wait " +
+						secs + "s before attempting to load another map.");
+				}
+
 				// load the world named on the sign
-				if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
+				else if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
 				{
 					// if the last line is a version string, make sure it isn't included in the name
 					boolean hasVersion = lines[3].isEmpty() ||
