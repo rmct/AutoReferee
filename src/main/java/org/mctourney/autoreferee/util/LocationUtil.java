@@ -26,7 +26,7 @@ public abstract class LocationUtil
 			if (values.length > 4) ret.setPitch(Float.parseFloat(values[4]));
 			return ret;
 		}
-		catch (Exception e) { return null; }
+		catch (NumberFormatException e) { return null; }
 	}
 
 	// simply here for utility
