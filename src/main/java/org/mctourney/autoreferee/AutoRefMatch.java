@@ -3075,8 +3075,18 @@ public class AutoRefMatch implements Metadatable
 		if (clr == null) message = colorMessage(message);
 		else message = (clr + message + ChatColor.RESET);
 
-		if (recipients != null) for (Player player : recipients)
-			player.sendMessage(message);
+		if (recipients != null)
+            for (Player player : recipients)
+            {
+			    if (event.getType() == TranscriptEvent.EventType.PLAYER_DEATH && event.getMessage().contains("shot by"))
+                {
+                    if (getPlayer(player) == getPlayer(event.getMessage().split("\\s")[4]) || isSpectator(player))
+                        player.sendMessage(message);
+                    else
+                        player.sendMessage(message.substring(0,message.length()-7));
+                }
+                else player.sendMessage(message);
+            }
 
 		if (plugin.isConsoleLoggingEnabled())
 			plugin.getLogger().info(event.toString());
