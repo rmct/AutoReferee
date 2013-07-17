@@ -152,15 +152,6 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	}
 
 	/**
-	 * Gets the scoreboard name of the team.
-	 */
-	public String getScoreboardName()
-	{
-		boolean v = customName != null && customName.length() <= 14;
-		return v ? customName : name;
-	}
-
-	/**
 	 * Sets the name of the team.
 	 *
 	 * @param name new team name
@@ -474,6 +465,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	private void setupScoreboard()
 	{
 		String teamslug = "ar#" + name;
+		if (teamslug.length() > 16) teamslug = teamslug.substring(0, 16);
 
 		// set team data on spectators' scoreboard
 		infoboardTeam = match.getInfoboard().registerNewTeam(teamslug);

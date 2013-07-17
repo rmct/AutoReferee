@@ -14,7 +14,7 @@ public class BlockObjective extends AutoRefObjective
 {
 	public BlockObjective(Objective objective, AutoRefTeam team, Set<BlockGoal> blockgoals)
 	{
-		super(objective, team, team.getScoreboardName(), 0);
+		super(objective, team, team.getName(), 0);
 		this.goals.addAll(blockgoals);
 
 		// update these objectives
@@ -37,7 +37,7 @@ public class BlockObjective extends AutoRefObjective
 			default: break;
 		}
 
-		this.setName(String.format("%s", this.team.getScoreboardName()));
+		this.setName(String.format("%s", this.team.getName()));
 	//	this.setName(String.format("%s (%d)", this.team.getName(), found));
 		this.setValue(placed);
 	}

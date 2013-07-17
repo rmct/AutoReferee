@@ -53,16 +53,16 @@ public abstract class AutoRefObjective
 	{
 		this.name = name;
 
-		// is this name colorable?
-		boolean colorable = this.color == null || name.length() > 14;
-		String clr = colorable ? "" : this.color.toString();
+		// compute display name (color + name, truncated)
+		String disp = (this.color == null ? "" : this.color.toString()) + name;
+		if (disp.length() > 16) disp = disp.substring(0, 13) + "...";
 
 		// if we need to replace the title object, do so
-		if (this.title == null || !this.title.getName().equals(clr + name))
+		if (this.title == null || !this.title.getName().equals(disp))
 		{
 			if (this.title != null)
 				this.objective.getScoreboard().resetScores(this.title);
-			this.title = Bukkit.getOfflinePlayer(clr + name);
+			this.title = Bukkit.getOfflinePlayer(disp);
 			this._needsZeroFix = true;
 		}
 
