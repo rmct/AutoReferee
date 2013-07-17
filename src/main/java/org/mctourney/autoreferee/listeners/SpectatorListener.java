@@ -380,15 +380,16 @@ public class SpectatorListener implements PluginMessageListener, Listener
 				if (blockState.getData() instanceof Redstone)
 				{
 					// get the start mechanism
-					AutoRefMatch.StartMechanism sm = match.addStartMech(block,
+					AutoRefMatch.StartMechanism sm = match.toggleStartMech(block,
 						((Redstone) blockState.getData()).isPowered());
 
-					if (sm != null)
+					if (sm != null) event.getPlayer().sendMessage(ChatColor.RED +
+						"" + sm + ChatColor.RESET + " is a start mechanism.");
+					else
 					{
-						// announce it...
-						String m = ChatColor.RED + sm.toString() +
-							ChatColor.RESET + " is a start mechanism.";
-						event.getPlayer().sendMessage(m);
+						String coords = LocationUtil.toBlockCoords(block.getLocation());
+						event.getPlayer().sendMessage(ChatColor.RED + "" +
+							coords + ChatColor.RESET + " is NOT a start mechanism.");
 					}
 				}
 

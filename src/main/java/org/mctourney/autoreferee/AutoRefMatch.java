@@ -1231,7 +1231,7 @@ public class AutoRefMatch implements Metadatable
 		{
 			boolean state = Boolean.parseBoolean(mech.getText());
 			Location mechloc = LocationUtil.fromCoords(getWorld(), mech.getAttributeValue("pos"));
-			this.addStartMech(getWorld().getBlockAt(mechloc), state);
+			this.toggleStartMech(getWorld().getBlockAt(mechloc), state);
 		}
 	}
 
@@ -1899,12 +1899,15 @@ public class AutoRefMatch implements Metadatable
 	 * @return generated start mechanism object
 	 * @see <a href="http://www.github.com/rmct/SportBukkit">SportBukkit</a>
 	 */
-	public StartMechanism addStartMech(Block block, boolean state)
+	public StartMechanism toggleStartMech(Block block, boolean state)
 	{
 		if (block.getType() != Material.LEVER) state = true;
 		StartMechanism sm = new StartMechanism(block, state);
 
-		if (startMechanisms.add(sm) && !EXPECTED_MECHANISMS.contains(block.getType()))
+		boolean adding = startMechanisms.add(sm);
+		if (!adding) { startMechanisms.remove(sm); return null; }
+
+		if (adding && !EXPECTED_MECHANISMS.contains(block.getType()))
 			AutoReferee.log("Unexpected start mechanism: " + block.getType().name(), Level.WARNING);
 		return sm;
 	}
