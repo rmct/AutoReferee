@@ -3083,7 +3083,7 @@ public class AutoRefMatch implements Metadatable
                     if (getPlayer(player) == getPlayer(event.getMessage().split("\\s")[4]) || isSpectator(player))
                         player.sendMessage(message);
                     else
-                        player.sendMessage(message.substring(0,message.length()-7));
+                        player.sendMessage(message.substring(0,message.lastIndexOf(" ")));
                 }
                 else player.sendMessage(message);
             }
