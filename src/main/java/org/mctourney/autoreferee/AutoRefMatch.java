@@ -3002,6 +3002,11 @@ public class AutoRefMatch implements Metadatable
 
 		public Set<Object> actors;
 
+        private Entity killer;
+
+        public Entity getKiller()
+        { return killer; }
+
 		private EventType type;
 
 		public EventType getType()
@@ -3031,6 +3036,20 @@ public class AutoRefMatch implements Metadatable
 			this.actors = Sets.newHashSet(actors);
 			this.timestamp = match.getElapsedSeconds();
 		}
+
+        public TranscriptEvent(AutoRefMatch match, EventType type, String message,
+                               Location loc, Entity killer, Object ...actors)
+        {
+            this.type = type;
+            this.message = message;
+
+            // if no location is given, use the spawn location
+            this.location = (loc != null) ? loc :
+                    match.getWorld().getSpawnLocation();
+            this.killer = killer;
+            this.actors = Sets.newHashSet(actors);
+            this.timestamp = match.getElapsedSeconds();
+        }
 
 		public String getTimestamp()
 		{
@@ -3078,7 +3097,8 @@ public class AutoRefMatch implements Metadatable
 		if (recipients != null)
             for (Player player : recipients)
             {
-			    if (event.getType() == TranscriptEvent.EventType.PLAYER_DEATH && event.getMessage().contains("shot by"))
+			    if (event.getType() == TranscriptEvent.EventType.PLAYER_DEATH && event.getMessage().contains("shot by")
+                        && event.getKiller() instanceof Player)
                 {
                     if (getPlayer(player) == getPlayer(event.getMessage().split("\\s")[4]) || isSpectator(player))
                         player.sendMessage(message);

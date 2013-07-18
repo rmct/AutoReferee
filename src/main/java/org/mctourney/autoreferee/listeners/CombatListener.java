@@ -95,8 +95,10 @@ public class CombatListener implements Listener
 						}
 					break;
                     case ARROW:
+                        if (kapl != null)
                         dmsg = String.format("%s was shot by %s" + ChatColor.DARK_GRAY + " (%.2f)",
-                                vapl.getName(), kapl.getName(), victim.getLocation().distance(shotArrows.get(ed.getDamager().getUniqueId())));
+                            vapl.getName(), kapl.getName(), victim.getLocation().distance(shotArrows.get(ed.getDamager().getUniqueId())));
+                    break;
 				}
 			}
 
