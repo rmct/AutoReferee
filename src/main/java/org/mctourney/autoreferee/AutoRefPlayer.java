@@ -729,7 +729,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		match.messageReferees("player", getName(), "deaths", Integer.toString(totalDeaths));
 
 		match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DEATH,
-			e.getDeathMessage(), loc, this, apl));
+			e.getDeathMessage(), loc, e.getEntity().getKiller(), this, apl));
 		this.setLastDeathLocation(loc);
 		this.addPoints(AchievementPoints.DEATH);
 
