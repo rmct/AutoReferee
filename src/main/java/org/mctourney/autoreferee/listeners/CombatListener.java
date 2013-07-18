@@ -247,7 +247,7 @@ public class CombatListener implements Listener
 		AutoRefMatch match = plugin.getMatch(event.getVehicle().getWorld());
 		if (match == null || !match.getCurrentState().inProgress()) return;
 
-		if (match.getCurrentState().inProgress())
+		if (match.getCurrentState().inProgress() && event.getAttacker() != null)
 		{
 			Player damager = entityToPlayer(event.getAttacker());
 
