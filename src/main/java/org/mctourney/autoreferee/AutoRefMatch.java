@@ -2928,7 +2928,7 @@ public class AutoRefMatch implements Metadatable
 			MATCH_END("match-end", false, EventVisibility.NONE),
 
 			// player messages (except kill streak) should be broadcast to players
-			PLAYER_DEATH("player-death", true, EventVisibility.ALL),
+			PLAYER_DEATH("player-death", true, EventVisibility.NONE),
 			PLAYER_STREAK("player-killstreak", false, EventVisibility.NONE, ChatColor.DARK_GRAY),
 			PLAYER_DOMINATE("player-dominate", true, EventVisibility.ALL, ChatColor.DARK_GRAY),
 			PLAYER_REVENGE("player-revenge", true, EventVisibility.ALL, ChatColor.DARK_GRAY),
@@ -2992,7 +2992,8 @@ public class AutoRefMatch implements Metadatable
 			Location loc, Object ...actors)
 		{
 			this.type = type;
-			this.message = message;
+			this.message = type.getColor() != null ? type.getColor() + message + ChatColor.RESET :
+				message.contains("" + ChatColor.COLOR_CHAR) ? message : match.colorMessage(message);
 
 			// if no location is given, use the spawn location
 			this.location = (loc != null) ? loc :
@@ -3041,9 +3042,6 @@ public class AutoRefMatch implements Metadatable
 
 		ChatColor clr = event.getType().getColor();
 		String message = event.getColoredMessage();
-
-		if (clr == null) message = colorMessage(message);
-		else message = (clr + message + ChatColor.RESET);
 
 		if (recipients != null) for (Player player : recipients)
 			player.sendMessage(message);

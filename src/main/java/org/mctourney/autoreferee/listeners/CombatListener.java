@@ -80,6 +80,7 @@ public class CombatListener implements Listener
 				event.getDrops().clear();
 			}
 
+			Location locKiller = null;
 			if (lastDmg instanceof EntityDamageByEntityEvent)
 			{
 				EntityDamageByEntityEvent ed = (EntityDamageByEntityEvent) lastDmg;
@@ -95,6 +96,9 @@ public class CombatListener implements Listener
 						}
 					break;
 				}
+
+				if (ed.getDamager() instanceof Projectile)
+					locKiller = shotArrows.get(ed.getDamager().getUniqueId());
 			}
 
 			// update the death message with the changes
@@ -103,7 +107,7 @@ public class CombatListener implements Listener
 			if (match.getCurrentState().inProgress())
 			{
 				// register the death and kill
-				if (vapl != null) vapl.registerDeath(event);
+				if (vapl != null) vapl.registerDeath(event, locKiller);
 				if (kapl != null && kapl != vapl) kapl.registerKill(event);
 			}
 

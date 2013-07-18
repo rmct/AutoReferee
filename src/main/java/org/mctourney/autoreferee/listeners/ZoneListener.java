@@ -203,7 +203,6 @@ public class ZoneListener implements Listener
 		locationEvent(event, player, loc);
 	}
 
-
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void bucketEmpty(PlayerBucketEmptyEvent event)
 	{

@@ -709,7 +709,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	}
 
 	// register that we just died
-	public void registerDeath(PlayerDeathEvent e)
+	public void registerDeath(PlayerDeathEvent e, Location from)
 	{
 		// sanity check...
 		if (e.getEntity() != getPlayer()) return;
@@ -719,8 +719,8 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		if (hasLives()) --livesRemaining;
 
 		AutoRefMatch match = getMatch();
-		AutoRefPlayer apl = match.getPlayer(e.getEntity().getKiller());
-		deaths.put(apl, 1 + deaths.get(apl)); ++totalDeaths;
+		AutoRefPlayer killer = match.getPlayer(e.getEntity().getKiller());
+		deaths.put(killer, 1 + deaths.get(killer)); ++totalDeaths;
 
 		Location loc = e.getEntity().getLocation();
 		if (getExitLocation() != null) loc = getExitLocation();
@@ -728,8 +728,16 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		match.messageReferees("player", getName(), "deathpos", LocationUtil.toBlockCoords(loc));
 		match.messageReferees("player", getName(), "deaths", Integer.toString(totalDeaths));
 
-		match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DEATH,
-			e.getDeathMessage(), loc, this, apl));
+		TranscriptEvent entry = new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DEATH,
+			e.getDeathMessage(), loc, this, killer);
+
+		match.addEvent(entry);
+
+		String m = entry.getColoredMessage();
+		for (Player pl : match.getWorld().getPlayers())
+			pl.sendMessage(pl != e.getEntity().getKiller() || from == null ? m
+				: String.format("%s " + ChatColor.DARK_GRAY + "(@ %.2f)", m, getLocation().distance(from)));
+
 		this.setLastDeathLocation(loc);
 		this.addPoints(AchievementPoints.DEATH);
 
@@ -737,6 +745,9 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		this.resetKillStreak();
 		match.messageReferees("player", getName(), "streak", Integer.toString(totalStreak));
 	}
+
+	public void registerDeath(PlayerDeathEvent e)
+	{ registerDeath(e, null); }
 
 	/**
 	 * Resets this player's killstreak.
