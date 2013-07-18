@@ -46,7 +46,7 @@ public class SportBukkitUtil
 	 * Checks if AutoReferee is installed on a system supporting the SportBukkit API
 	 *
 	 * @return true if SportBukkit is installed, false otherwise
-	 * @see <a href="http://www.github.com/ProjectAres/SportBukkit">SportBukkit</a>
+	 * @see <a href="http://www.github.com/OvercastNetwork/SportBukkit">SportBukkit</a>
 	 */
 	public static boolean hasSportBukkitApi()
 	{ return isSportBukkit; }
@@ -56,7 +56,7 @@ public class SportBukkitUtil
 	 * Uses last_username's affects-spawning API from SportBukkit
 	 *
 	 * @param affectsSpawning Set whether player affects spawning
-	 * @see <a href="http://www.github.com/ProjectAres/SportBukkit">SportBukkit</a>
+	 * @see <a href="http://www.github.com/OvercastNetwork/SportBukkit">SportBukkit</a>
 	 */
 	public static void setAffectsSpawning(Player player, boolean affectsSpawning)
 	{
@@ -70,7 +70,7 @@ public class SportBukkitUtil
 	 * Uses last_username's collides-with-entities API from SportBukkit
 	 *
 	 * @param collidesWithEntities Set whether player collides with entities
-	 * @see <a href="http://www.github.com/ProjectAres/SportBukkit">SportBukkit</a>
+	 * @see <a href="http://www.github.com/OvercastNetwork/SportBukkit">SportBukkit</a>
 	 */
 	public static void setCollidesWithEntities(Player player, boolean collidesWithEntities)
 	{
@@ -84,7 +84,7 @@ public class SportBukkitUtil
 	 * Uses anxuiz's set-overhead-name API from SportBukkit
 	 *
 	 * @param overheadName New string to display above player's head
-	 * @see <a href="http://www.github.com/ProjectAres/SportBukkit">SportBukkit</a>
+	 * @see <a href="http://www.github.com/OvercastNetwork/SportBukkit">SportBukkit</a>
 	 * @deprecated use built-in scoreboards to change name colors
 	 */
 	@Deprecated
@@ -100,7 +100,7 @@ public class SportBukkitUtil
 	 * Gets the logged-out location of an OfflinePlayer
 	 * Uses md_5's offlineUtil API from SportBukkit
 	 *
-	 * @see <a href="http://www.github.com/ProjectAres/SportBukkit">SportBukkit</a>
+	 * @see <a href="http://www.github.com/OvercastNetwork/SportBukkit">SportBukkit</a>
 	 */
 	public static Location getOfflinePlayerLocation(OfflinePlayer player)
 	{
