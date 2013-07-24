@@ -79,7 +79,7 @@ public class AutoReferee extends JavaPlugin
 	{ return instance; }
 
 	public static void log(String msg, Level level)
-	{ getInstance().getLogger().log(level, msg); }
+	{ getInstance().getLogger().log(level, ChatColor.stripColor(msg)); }
 
 	public static void log(String msg)
 	{ log(msg, Level.INFO); }

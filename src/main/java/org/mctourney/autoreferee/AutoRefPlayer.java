@@ -893,7 +893,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 					if (goal.getItemStatus() == AutoRefGoal.ItemStatus.NONE && newCarrying.contains(goal.getItem()))
 					{
 						// generate a transcript event for seeing the box
-						String m = String.format("%s is carrying %s", getName(), goal.getItem().getDisplayName());
+						String m = String.format("%s is carrying %s", getDisplayName(), goal.getItem().getDisplayName());
 						getMatch().addEvent(new TranscriptEvent(getMatch(),
 							TranscriptEvent.EventType.OBJECTIVE_FOUND, m, getLocation(), this, goal.getItem()));
 						this.addPoints(AchievementPoints.OBJECTIVE_FOUND);
