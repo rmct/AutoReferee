@@ -1522,17 +1522,16 @@ public class AutoRefMatch implements Metadatable
 				Location stop = lastStoppedLocation.get(uuid);
 
 				if (prev == null) continue items;
-
 				boolean pass = TeleportationUtil.isBlockPassable(curr.getBlock());
-				boolean elev = elevatedItem.containsKey(uuid);
 
 				// if the item is moving upwards and is currently in a passable
 				double ydelta = curr.getY() - prev.getY();
-				if (ydelta > YDELTA_THRESHOLD && !pass && !elev)
+				if (ydelta > YDELTA_THRESHOLD && !pass && !elevatedItem.containsKey(uuid))
 					elevatedItem.put(uuid, false);
 
 				double dy = stop == null ? 0.0 : curr.getY() - stop.getY();
-				if (elev && dy >= DISTANCE_THRESHOLD) elevatedItem.put(uuid, true);
+				if (elevatedItem.containsKey(uuid) && dy >= DISTANCE_THRESHOLD)
+					elevatedItem.put(uuid, true);
 
 				if (ydelta < 0.001)
 				{
@@ -1540,7 +1539,7 @@ public class AutoRefMatch implements Metadatable
 					lastStoppedLocation.put(uuid, curr);
 
 					boolean atrest = !TeleportationUtil.isBlockPassable(curr.getBlock().getRelative(0, -1, 0));
-					if (elev && elevatedItem.get(uuid) && atrest)
+					if (elevatedItem.containsKey(uuid) && elevatedItem.get(uuid) && atrest)
 					{
 						// if the item didn't elevate high enough, don't worry about it
 						if (dy < DISTANCE_THRESHOLD) { elevatedItem.remove(uuid); continue items; }
