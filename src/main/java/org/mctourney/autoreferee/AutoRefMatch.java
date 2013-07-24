@@ -1445,7 +1445,7 @@ public class AutoRefMatch implements Metadatable
 	/**
 	 * Sends all information to a single referee necessary to sync a match's current status.
 	 *
-	 * @param ref referee to recieve the plugin channel messages
+	 * @param ref referee to receive the plugin channel messages
 	 */
 	public void updateReferee(Player ref)
 	{
