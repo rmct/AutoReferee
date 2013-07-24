@@ -107,7 +107,7 @@ public class TeleportationUtil
 	,	Material.YELLOW_FLOWER
 	);
 
-	private static boolean isBlockPassable(Block b)
+	public static boolean isBlockPassable(Block b)
 	{ return passableBlocks.contains(b.getType()); }
 
 	public static boolean safeLocation(Location loc)

@@ -30,6 +30,7 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
@@ -177,6 +178,25 @@ public class ZoneListener implements Listener
 
 		// seems okay!
 		return true;
+	}
+
+	@EventHandler(priority=EventPriority.MONITOR)
+	public void playerPickup(PlayerPickupItemEvent event)
+	{
+		// if this isn't a match, skip it
+		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
+		if (match == null) return;
+
+		if (match.elevatedItem.containsKey(event.getItem().getUniqueId()))
+		{
+			String itemname = new BlockData(event.getItem().getItemStack()).getDisplayName();
+			String msg = match.getDisplayName(event.getPlayer()) + ChatColor.DARK_GRAY +
+				" picked up " + itemname + ChatColor.DARK_GRAY + " from an item elevator.";
+			match.setLastNotificationLocation(event.getItem().getLocation());
+
+			for (Player ref : match.getReferees()) ref.sendMessage(msg);
+			AutoReferee.log(msg);
+		}
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)

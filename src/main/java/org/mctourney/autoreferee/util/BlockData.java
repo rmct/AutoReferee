@@ -60,6 +60,11 @@ public class BlockData
 	public BlockData(Material material, byte data) { setMaterial(material); setData(data); }
 
 	/**
+	 * Constructs a block data object from an itemstack.
+	 */
+	public BlockData(ItemStack item) { this(item.getType(), item.getData().getData()); }
+
+	/**
 	 * Constructs a block data object with a material and any metadata.
 	 *
 	 * @param material material type

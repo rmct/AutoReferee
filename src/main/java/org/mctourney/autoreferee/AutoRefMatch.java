@@ -103,6 +103,7 @@ import org.mctourney.autoreferee.util.PlayerUtil;
 import org.mctourney.autoreferee.util.QueryUtil;
 import org.mctourney.autoreferee.util.ReportGenerator;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
+import org.mctourney.autoreferee.util.TeleportationUtil;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -1492,6 +1493,71 @@ public class AutoRefMatch implements Metadatable
 		messageReferee(ref, "player", apl.getName(), "cape", apl.getCape());
 	}
 
+	private class ItemElevatorDetectionTask extends BukkitRunnable
+	{
+		private static final long INTERVAL = 5L;
+		private static final double DISTANCE_THRESHOLD = 1.8;
+		private static final double YDELTA_THRESHOLD = 0.8;
+
+		private Map<UUID, Location> itemLocations = Maps.newHashMap();
+		private Map<UUID, Location> lastStoppedLocation = Maps.newHashMap();
+
+		@Override public void run()
+		{
+			items: for (Entity e : getWorld().getEntitiesByClasses(Item.class))
+			{
+				Item item = (Item) e;
+				UUID uuid = item.getUniqueId();
+
+				Location prev = itemLocations.get(uuid);
+				Location curr = e.getLocation();
+				Location stop = lastStoppedLocation.get(uuid);
+
+				if (prev == null) continue items;
+
+				boolean pass = TeleportationUtil.isBlockPassable(curr.getBlock());
+				boolean elev = elevatedItem.containsKey(uuid);
+
+				// if the item is moving upwards and is currently in a passable
+				double ydelta = curr.getY() - prev.getY();
+				if (ydelta > YDELTA_THRESHOLD && !pass && !elev)
+					elevatedItem.put(uuid, false);
+
+				double dy = stop == null ? 0.0 : curr.getY() - stop.getY();
+				if (elev && dy >= DISTANCE_THRESHOLD) elevatedItem.put(uuid, true);
+
+				if (ydelta < 0.001)
+				{
+					// record the last location it was stopped at
+					lastStoppedLocation.put(uuid, curr);
+
+					boolean atrest = !TeleportationUtil.isBlockPassable(curr.getBlock().getRelative(0, -1, 0));
+					if (elev && elevatedItem.get(uuid) && atrest)
+					{
+						// if the item didn't elevate high enough, don't worry about it
+						if (dy < DISTANCE_THRESHOLD) { elevatedItem.remove(uuid); continue items; }
+						setLastNotificationLocation(curr);
+
+						String coords = LocationUtil.toBlockCoords(curr);
+						String msg = ChatColor.DARK_GRAY + String.format(
+							"Possible Item Elevator @ (%s) [y%+d] %s", coords, Math.round(dy),
+							new BlockData(item.getItemStack()).getDisplayName());
+
+						for (Player ref : getReferees()) ref.sendMessage(msg);
+						AutoReferee.log(msg);
+					}
+				}
+			}
+
+			itemLocations.clear();
+			for (Entity e : getWorld().getEntitiesByClasses(Item.class))
+				itemLocations.put(e.getUniqueId(), e.getLocation());
+		}
+	}
+
+	public Map<UUID, Boolean> elevatedItem = Maps.newHashMap();
+	protected ItemElevatorDetectionTask itemElevatorDetectionTask = null;
+
 	/**
 	 * Sends a message to all players in this match, including referees and streamers.
 	 *
@@ -2271,6 +2337,10 @@ public class AutoRefMatch implements Metadatable
 
 		// save a copy of the map image quickly before the match starts...
 		saveMapImage();
+
+		itemElevatorDetectionTask = new ItemElevatorDetectionTask();
+		itemElevatorDetectionTask.runTaskTimer(AutoReferee.getInstance(),
+			0L, ItemElevatorDetectionTask.INTERVAL);
 	}
 
 	/**
@@ -2476,6 +2546,9 @@ public class AutoRefMatch implements Metadatable
 
 		if (plugin.getLobbyWorld() != null)
 			new MatchEndTask().runTaskLater(plugin, termDelay * 20L);
+
+		if (itemElevatorDetectionTask != null) itemElevatorDetectionTask.cancel();
+		itemElevatorDetectionTask = null;
 
 		// set the time to day
 		getWorld().setTime(0L);
