@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
@@ -50,7 +51,6 @@ import org.mctourney.autoreferee.listeners.lobby.LobbyListener.LobbyMode;
 import org.mctourney.autoreferee.util.NullChunkGenerator;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
 import org.mctourney.autoreferee.util.commands.CommandManager;
-import org.mctourney.autoreferee.util.metrics.IncrementPlotter;
 import org.mctourney.autoreferee.util.metrics.PieChartGraph;
 
 import com.google.common.collect.Lists;
@@ -374,7 +374,6 @@ public class AutoReferee extends JavaPlugin
 	}
 
 	protected PieChartGraph playedMapsTracker = null;
-	protected IncrementPlotter matchesPlayed = null;
 
 	private void setupPluginMetrics()
 		throws IOException
@@ -387,8 +386,6 @@ public class AutoReferee extends JavaPlugin
 
 		Graph gMaps = metrics.createGraph("Most Popular Maps");
 		playedMapsTracker = new PieChartGraph(gMaps, mapNames);
-
-		metrics.addCustomData(matchesPlayed = new IncrementPlotter("Matches Played"));
 
 		metrics.start();
 	}

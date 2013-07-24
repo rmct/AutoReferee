@@ -2471,8 +2471,6 @@ public class AutoRefMatch implements Metadatable
 
 		// increment the metrics for number of matches played
 		AutoReferee plugin = AutoReferee.getInstance();
-		if (plugin.matchesPlayed != null) plugin.matchesPlayed.increment();
-
 		int termDelay = plugin.getConfig().getInt(
 			"delay-seconds.completed", COMPLETED_SECONDS);
 
