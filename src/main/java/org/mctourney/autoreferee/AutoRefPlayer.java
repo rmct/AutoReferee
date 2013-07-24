@@ -215,6 +215,9 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	private int totalKills = 0;
 	private int teamKills = 0;
 
+    // number of times this player has assisted in killing other players
+    private int totalAssists = 0;
+
 	private double furthestShot = 0.0;
 
 	/**
@@ -257,6 +260,9 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 */
 	public int getKills(AutoRefPlayer apl)
 	{ return this.kills.get(apl); }
+
+    public int getAssists()
+    { return this.totalAssists; }
 
 	/**
 	 * Gets the total number of players killed by this player.
@@ -721,6 +727,10 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		AutoRefMatch match = getMatch();
 		AutoRefPlayer killer = match.getPlayer(e.getEntity().getKiller());
 		deaths.put(killer, 1 + deaths.get(killer)); ++totalDeaths;
+
+        for (AutoRefPlayer apl : this.getKillAssists())
+            if (apl != killer)
+                ++apl.totalAssists;
 
 		Location loc = e.getEntity().getLocation();
 		if (getExitLocation() != null) loc = getExitLocation();
