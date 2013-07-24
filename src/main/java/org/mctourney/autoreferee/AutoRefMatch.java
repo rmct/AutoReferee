@@ -205,6 +205,14 @@ public class AutoRefMatch implements Metadatable
 		return existingteams < 2;
 	}
 
+	protected boolean previewMode = false;
+
+	public void setPreviewMode(boolean b)
+	{ this.previewMode = b; }
+
+	public boolean isPreviewMode()
+	{ return this.previewMode; }
+
 	/**
 	 * Gets the world associated with this match.
 	 *
@@ -2171,7 +2179,7 @@ public class AutoRefMatch implements Metadatable
 	 */
 	public void setupSpectators(Player player)
 	{
-		if (getCurrentState().isBeforeMatch()) setSpectatorMode(player, isReferee(player));
+		if (getCurrentState().isBeforeMatch()) setSpectatorMode(player, isReferee(player) || isPreviewMode());
 		else setSpectatorMode(player, !isPlayer(player) || getCurrentState().isAfterMatch());
 
 		// redo visibility

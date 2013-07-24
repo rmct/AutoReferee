@@ -178,6 +178,31 @@ public class SpectatorCommands implements CommandHandler
 		return true;
 	}
 
+	@AutoRefCommand(name={"autoref", "preview"}, argmax=0, options="y",
+			description="Cycle through players.")
+	@AutoRefPermission(console=false, role=AutoRefMatch.Role.REFEREE)
+
+	public boolean previewMode(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		if (match == null || !match.getCurrentState().isBeforeMatch()) return false;
+		if (!options.hasOption('y'))
+		{
+			sender.sendMessage(ChatColor.GREEN + "You are attempting to put this match in preview mode");
+			sender.sendMessage(ChatColor.GREEN + "Type '/ar preview -y' to confirm that you want to do this.");
+			return true;
+		}
+
+		match.setPreviewMode(options.hasOption('y'));
+		match.setupSpectators();
+
+		for (Player player : match.getWorld().getPlayers())
+		{
+			sender.sendMessage(ChatColor.GREEN + "This match is now in PREVIEW mode!");
+			sender.sendMessage(ChatColor.GREEN + "You may join a team and begin playing when you are ready.");
+		}
+		return true;
+	}
+
 	@AutoRefCommand(name={"autoref", "cycle"}, argmax=0, options="np",
 			description="Cycle through players.")
 	@AutoRefPermission(console=false, role=AutoRefMatch.Role.SPECTATOR)
