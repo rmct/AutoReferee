@@ -729,7 +729,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		deaths.put(killer, 1 + deaths.get(killer)); ++totalDeaths;
 
 		for (AutoRefPlayer apl : this.getKillAssists())
-			if (apl != killer) ++apl.totalAssists;
+			if (apl != killer && apl.getTeam() != match.getPlayerTeam(e.getEntity())) ++apl.totalAssists;
 
 		Location loc = e.getEntity().getLocation();
 		if (getExitLocation() != null) loc = getExitLocation();
