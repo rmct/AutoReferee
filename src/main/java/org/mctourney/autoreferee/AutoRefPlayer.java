@@ -974,12 +974,19 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		if (player.getLevel() > 0)
 		{
 			ItemStack level = new ItemStack(Material.EXP_BOTTLE, player.getLevel());
+			ItemMeta meta = level.getItemMeta();
+
+			meta.setDisplayName(ChatColor.GREEN + "" + ChatColor.ITALIC + "Player XP Level");
+			meta.setLore(Lists.newArrayList(ChatColor.GRAY + "" + ChatColor.ITALIC +
+				String.format("%2.1f levels", player.getLevel())));
+
+			level.setItemMeta(meta);
 			newContents[oldContents.length + 5] = level;
 		}
 
 		if (player.getActivePotionEffects().size() > 0)
 		{
-			ItemStack potion = new Potion(PotionType.WATER).toItemStack(1);
+			ItemStack potion = new Potion(PotionType.POISON).toItemStack(1);
 			ItemMeta meta = potion.getItemMeta();
 
 			List<String> effects = Lists.newLinkedList();
