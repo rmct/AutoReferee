@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.conversations.BooleanPrompt;
 import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationContext;
@@ -232,8 +233,16 @@ public class PlayerCommands implements CommandHandler
 		boolean rstate = !options.hasOption('f') && !options.hasOption('n');
 		Player player = sender instanceof Player ? (Player) sender : null;
 
+		if (!rstate && match.isCountdownRunning())
+		{
+			String name = sender instanceof ConsoleCommandSender
+				? "console" : match.getDisplayName(player);
+			match.broadcast(ChatColor.GREEN + "Countdown cancelled by " + name);
+			match.cancelCountdown();
+		}
+
 		// if console or referee sends this message
-		if (player == null || match.isReferee(player))
+		if (sender instanceof ConsoleCommandSender || match.isReferee(player))
 		{
 			// attempt to set the ready delay if one is specified
 			try { if (options.hasOption('s')) match.setReadyDelay(Integer.parseInt(options.getOptionValue('s'))); }
