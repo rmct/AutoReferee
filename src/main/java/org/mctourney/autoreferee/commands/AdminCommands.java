@@ -35,7 +35,8 @@ public class AdminCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"autoref", "world"}, argmin=1, argmax=1,
-		description="Specifies the name of the world for console commands to modify.")
+		description="Specifies the world for console commands to modify.",
+		usage="<command> <world or player name>")
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean setConsoleWorld(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -63,7 +64,13 @@ public class AdminCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"autoref", "load"}, argmin=1, options="c+x",
-		description="Loads a map by name, case insensitive.")
+		description="Loads a map by name, case insensitive.",
+		usage="<command> <map name>",
+		opthelp=
+		{
+			"c", "specify a custom world name",
+			"x", "load world without AutoReferee",
+		})
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean loadMap(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -82,7 +89,13 @@ public class AdminCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"autoref", "loadurl"}, argmin=1, argmax=1, options="c+x",
-		description="Loads a map from a remote zip file, taking the URL as a parameter.")
+		description="Loads a map from a remote zip file, taking the URL as a parameter.",
+		usage="<command> <url>",
+		opthelp=
+		{
+			"c", "specify a custom world name",
+			"x", "load world without AutoReferee",
+		})
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean loadMapFromURL(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -110,7 +123,8 @@ public class AdminCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"autoref", "reload"},
-		description="Reloads the current map (or specified map) to its original, unmodified state. Players are migrated to the new copy.")
+		description="Reloads the current map (or specified map) to its original, unmodified state. Players are migrated to the new copy.",
+		usage="<command> [<map name>]")
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean reloadMap(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -160,7 +174,11 @@ public class AdminCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"autoref", "update"}, argmin=0, argmax=0, options="f",
-		description="Updates maps installed on server. Use -f to force an update.")
+		description="Updates maps installed on server. Use -f to force an update.",
+		opthelp=
+		{
+			"f", "force an update of all maps",
+		})
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean updateMaps(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -170,7 +188,8 @@ public class AdminCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"autoref", "autoinvite"}, argmin=1,
-		description="Invite player(s) to participate in match. Works for offline players as well.")
+		description="Invite player(s) to participate in match. Works for offline players as well.",
+		usage="<command> <player names...>")
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean autoInvite(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -200,7 +219,8 @@ public class AdminCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"autoref", "pmsend"}, argmin=1,
-		description="Send plugin message.")
+		description="Send plugin message (for debugging client mods).",
+		usage="<command> <plugin message>")
 	@AutoRefPermission(console=false, nodes={"autoreferee.admin"})
 
 	public boolean sendPluginMessage(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)

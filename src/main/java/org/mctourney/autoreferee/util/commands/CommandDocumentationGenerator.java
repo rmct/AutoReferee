@@ -39,7 +39,7 @@ public class CommandDocumentationGenerator
 					cmd.options(),
 
 					// options help info, if any
-					cmd.optionsHelp(),
+					StringUtils.join(cmd.opthelp(), '|'),
 
 					// necessary permissions nodes
 					StringUtils.join(perm.nodes(), ','),

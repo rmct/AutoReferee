@@ -317,6 +317,9 @@ public class AutoReferee extends JavaPlugin
 		commandManager.registerCommands(lobbyListener, this);
 		commandManager.registerCommands(practice, this);
 
+		// go ahead and generate all help for the plugin
+		commandManager.generateHelp(this);
+
 		// global configuration object (can't be changed, so don't save onDisable)
 		InputStream configInputStream = getResource("defaults/config.yml");
 		if (configInputStream != null) getConfig().setDefaults(

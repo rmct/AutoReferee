@@ -163,7 +163,12 @@ public class ConfigurationCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"autoref", "setspawn"}, argmin=0, argmax=1, options="a",
-		description="Set the current location as the global spawn. If a team name is provided, sets team spawn.")
+		description="Set the current location as the global spawn. If a team name is provided, sets team spawn.",
+		usage="<command> [<team name>]",
+		opthelp=
+		{
+			"a", "add an additional spawn location",
+		})
 	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
 
 	public boolean setSpawn(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -202,7 +207,8 @@ public class ConfigurationCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"zones"}, argmax=1,
-		description="List all configured regions on the map.")
+		description="List all configured regions on the map.",
+		usage="<command> [<team name>]")
 	@AutoRefPermission(console=true, nodes={"autoreferee.configure"})
 
 	public boolean getZones(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -215,6 +221,8 @@ public class ConfigurationCommands implements CommandHandler
 		if (args.length > 0)
 		{
 			AutoRefTeam t = match.getTeam(args[0]);
+			teams = Sets.newHashSet(t);
+
 			if (t == null)
 			{
 				// team name is invalid. let the player know
@@ -222,9 +230,6 @@ public class ConfigurationCommands implements CommandHandler
 					ChatColor.RESET + " is not a valid team.");
 				return true;
 			}
-
-			teams = Sets.newHashSet();
-			teams.add(t);
 		}
 
 		// otherwise, just print all the teams
@@ -261,7 +266,12 @@ public class ConfigurationCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"zone"}, argmin=0, options=AutoRefRegion.Flag.OPTIONS + "XSN+",
-		description="Set the currently selected WorldEdit region to be a team's zone.")
+		description="Set the currently selected WorldEdit region to be a team's zone.",
+		usage="<command> [<team names...>]",
+		opthelp=
+		{
+			// TODO Need data automatically from AutoRefRegion.Flag
+		})
 	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
 
 	public boolean setupZone(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -325,7 +335,12 @@ public class ConfigurationCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"autoref", "core"}, argmin=1, argmax=1, options="r+",
-		description="Set the currently selected WorldEdit region to be a team's core.")
+		description="Set the currently selected WorldEdit region to be a team's core.",
+		usage="<command> <team name>",
+		opthelp=
+		{
+			"r", "specify the range of the core",
+		})
 	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
 
 	public boolean setupCore(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -364,7 +379,8 @@ public class ConfigurationCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"autoref", "setheight"}, argmin=1, argmax=1,
-			description="Restrict all team zones to be within a given height.")
+		description="Restrict all team zones to be within a given height.",
+		usage="<command> <height>")
 	@AutoRefPermission(console=true, nodes={"autoreferee.configure"})
 
 	public boolean setHeight(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -426,7 +442,12 @@ public class ConfigurationCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"autoref", "cfg", "apply"}, argmin=1, options="v+",
-		description="Apply a known configuration file to the current map.")
+		description="Apply a known map configuration file to the current map.",
+		usage="<command> <map name>",
+		opthelp=
+		{
+			"v", "new map version number",
+		})
 	@AutoRefPermission(console=true, nodes={"autoreferee.configure"})
 
 	public boolean configApply(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)

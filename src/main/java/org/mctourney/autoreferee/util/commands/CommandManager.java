@@ -1,10 +1,13 @@
 package org.mctourney.autoreferee.util.commands;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
@@ -15,6 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrMatcher;
 import org.apache.commons.lang.text.StrTokenizer;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -23,12 +27,16 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
-
+import org.bukkit.help.HelpTopic;
+import org.bukkit.help.IndexHelpTopic;
 import org.bukkit.plugin.java.JavaPlugin;
+
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.AutoRefMatch.Role;
+import org.mctourney.autoreferee.util.commands.CommandManager.AutoRefCommandHelpTopic;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class CommandManager implements CommandExecutor
@@ -41,11 +49,17 @@ public class CommandManager implements CommandExecutor
 		public Method method;
 
 		Options commandOptions;
+		AutoRefCommandHelpTopic helpTopic = null;
 
 		public CommandDelegator(Object handler, Method method, PluginCommand command)
 		{
 			this.method = method; this.handler = handler;
+
 			AutoRefCommand cAnnotation = method.getAnnotation(AutoRefCommand.class);
+			AutoRefPermission pAnnotation = method.getAnnotation(AutoRefPermission.class);
+
+			if (!cAnnotation.description().isEmpty())
+				helpTopic = new AutoRefCommandHelpTopic(cAnnotation, pAnnotation);
 
 			commandOptions = new Options();
 			char options[] = cAnnotation.options().toCharArray();
@@ -66,10 +80,9 @@ public class CommandManager implements CommandExecutor
 		public boolean execute(CommandSender sender, AutoRefMatch match, String[] args)
 			throws CommandPermissionException, UnrecognizedOptionException
 		{
-			CommandLineParser parser = new GnuParser();
 			CommandLine cli = null;
 
-			try { cli = parser.parse(commandOptions, args); args = cli.getArgs(); }
+			try { cli = new GnuParser().parse(commandOptions, args); args = cli.getArgs(); }
 			catch (UnrecognizedOptionException e) { throw e; }
 			catch (ParseException e) { e.printStackTrace(); }
 
@@ -79,27 +92,95 @@ public class CommandManager implements CommandExecutor
 			// perform the args cut at this point
 			args = (String[]) ArrayUtils.subarray(args, command.name().length - 1, args.length);
 
-			if (sender instanceof ConsoleCommandSender && permissions != null && !permissions.console())
-				throw new CommandPermissionException(command, "Command not available from console");
+			// check command permissions
+			checkPermissions(command, permissions, sender);
 
-			if (sender instanceof Player)
-			{
-				Player player = (Player) sender;
-				Role role = match == null ? AutoRefMatch.Role.NONE : match.getRole(player);
-
-				if (!role.atLeast(permissions.role()))
-					throw new CommandPermissionException(command, match == null
-						? "Command available only within an AutoReferee match"
-						: ("Command not available to " + role.toString().toLowerCase()));
-
-				for (String node : permissions.nodes()) if (!player.hasPermission(node))
-					throw new CommandPermissionException(command, "Insufficient permissions");
-			}
 			// if the number of arguments is incorrect, just return false
 			if (command.argmin() > args.length || command.argmax() < args.length) return false;
 
 			try { return ((Boolean) method.invoke(handler, sender, match, args, cli)).booleanValue(); }
 			catch (Exception e) { e.printStackTrace(); return false; }
+		}
+	}
+
+	public class AutoRefCommandHelpTopic extends HelpTopic
+	{
+		private AutoRefPermission permissions;
+		private AutoRefCommand command;
+		private boolean alias = false;
+
+		public AutoRefCommandHelpTopic(AutoRefCommand command, AutoRefPermission permissions)
+		{
+			this.command = command;
+			this.permissions = permissions;
+
+			this.name = "/" + StringUtils.join(command.name(), " ");
+			this.shortText = command.description();
+			this.setupFullText();
+		}
+
+		protected void setupFullText()
+		{
+			String usage = command.usage();
+			if ("".equals(usage)) usage = command.argmax() == 0
+				? "<command>" : "<command> [args?]";
+
+			this.fullText = command.description() + "\n"
+				+ "Usage: " + usage.replace("<command>", this.name);
+
+			String[] opts = command.opthelp();
+			if (opts.length > 0)
+			{
+				String opt = "Options:";
+				for (int i = 0; i < opts.length; i += 2) opt += String.format(
+					"\n%s   -%s, %s", ChatColor.RESET.toString(), opts[i], opts[i+1]);
+				this.fullText += "\n" + opt;
+			}
+		}
+
+		@Override
+		public boolean canSee(CommandSender sender)
+		{
+			try { checkPermissions(this.command, this.permissions, sender); return true; }
+			catch (CommandPermissionException e) { return false; }
+		}
+
+		public boolean isAlias()
+		{ return alias; }
+
+		public AutoRefCommandHelpTopic copyAlias(String alias)
+		{
+			AutoRefCommandHelpTopic topic = new AutoRefCommandHelpTopic(this.command, this.permissions);
+
+			// modify the command to insert the Bukkit alias
+			String[] cmd = command.name().clone(); cmd[0] = alias;
+			topic.name = "/" + StringUtils.join(cmd, " ");
+
+			topic.alias = true;
+			topic.setupFullText();
+			return topic;
+		}
+	}
+
+	public void checkPermissions(AutoRefCommand command, AutoRefPermission permissions, CommandSender sender)
+		throws CommandPermissionException
+	{
+		if (sender instanceof ConsoleCommandSender && permissions != null && !permissions.console())
+			throw new CommandPermissionException(command, "Command not available from console");
+
+		if (sender instanceof Player)
+		{
+			Player player = (Player) sender;
+			AutoRefMatch match = AutoReferee.getInstance().getMatch(player.getWorld());
+			Role role = match == null ? AutoRefMatch.Role.NONE : match.getRole(player);
+
+			if (!role.atLeast(permissions.role()))
+				throw new CommandPermissionException(command, match == null
+					? "Command available only within an AutoReferee match"
+					: ("Command not available to " + role.toString().toLowerCase()));
+
+			for (String node : permissions.nodes()) if (!player.hasPermission(node))
+				throw new CommandPermissionException(command, "Insufficient permissions");
 		}
 	}
 
@@ -117,8 +198,45 @@ public class CommandManager implements CommandExecutor
 				throw new CommandRegistrationException(method, "Command method must return type boolean");
 
 			if (pcommand.getExecutor() != this) pcommand.setExecutor(this);
-			this.setHandler(new CommandDelegator(commands, method, pcommand), command.name());
+
+			CommandDelegator delegator = new CommandDelegator(commands, method, pcommand);
+			this.setHandler(delegator, command.name());
 		}
+	}
+
+	public void generateHelp(JavaPlugin plugin)
+	{
+		List<HelpTopic> topics = Lists.newArrayList();
+		for (Map.Entry<String, HandlerNode> e : cmap.entrySet())
+		{
+			PluginCommand pcommand = Bukkit.getPluginCommand(e.getKey());
+			if (pcommand != null && plugin.equals(pcommand.getPlugin()))
+			{
+				HandlerNode handler = e.getValue();
+				if (handler != null) topics.addAll(handler.getHelpTopics(pcommand));
+			}
+		}
+
+		Iterator<HelpTopic> iter = topics.iterator();
+		for (iter = topics.iterator(); iter.hasNext(); )
+		{
+			HelpTopic topic = iter.next();
+			Bukkit.getHelpMap().addTopic(topic);
+
+			// remove the aliases from the list before we populate the index
+			if (topic instanceof AutoRefCommandHelpTopic &&
+				((AutoRefCommandHelpTopic) topic).isAlias()) iter.remove();
+		}
+
+		Collections.sort(topics, new Comparator<HelpTopic>()
+		{
+			@Override
+			public int compare(HelpTopic a, HelpTopic b)
+			{ return a.getName().compareToIgnoreCase(b.getName()); }
+		});
+
+		String stext = String.format("Below is a list of all %s commands:", plugin.getName());
+		Bukkit.getHelpMap().addTopic(new IndexHelpTopic(plugin.getName(), stext, "", topics));
 	}
 
 	@Override
@@ -196,5 +314,20 @@ class HandlerNode
 	{
 		this.handler = handler;
 		this.cmap = Maps.newHashMap();
+	}
+
+	protected List<AutoRefCommandHelpTopic> getHelpTopics(PluginCommand pcmd)
+	{
+		List<AutoRefCommandHelpTopic> topics = Lists.newArrayList();
+		if (handler != null && handler.helpTopic != null)
+		{
+			for (String alias : pcmd.getAliases())
+				topics.add(handler.helpTopic.copyAlias(alias));
+			topics.add(handler.helpTopic);
+		}
+
+		for (HandlerNode child : cmap.values())
+			topics.addAll(child.getHelpTopics(pcmd));
+		return topics;
 	}
 }

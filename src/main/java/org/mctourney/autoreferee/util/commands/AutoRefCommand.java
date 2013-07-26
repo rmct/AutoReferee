@@ -9,6 +9,9 @@ public @interface AutoRefCommand
 	public String[] name();
 
 	// command description
+	public String usage() default "";
+
+	// command description
 	public String description() default "";
 
 	// number of arguments
@@ -17,5 +20,5 @@ public @interface AutoRefCommand
 
 	// options
 	public String options() default "";
-	public String optionsHelp() default "";
+	public String[] opthelp() default {};
 }

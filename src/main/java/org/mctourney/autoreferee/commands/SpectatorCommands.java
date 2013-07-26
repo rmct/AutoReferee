@@ -40,7 +40,8 @@ public class SpectatorCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"announce"},
-		description="Announce a message to your current match. Your name will be shown.")
+		description="Announce a message to your current match. Your name will be shown.",
+		usage="<command> <announcement message>")
 	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
 
 	public boolean announce(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -52,7 +53,8 @@ public class SpectatorCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"broadcast"},
-		description="Broadcast a message to your current match. No name will be shown.")
+		description="Broadcast a message to your current match. No name will be shown.",
+		usage="<command> <broadcast message>")
 	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
 
 	public boolean broadcast(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -64,7 +66,12 @@ public class SpectatorCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"viewinventory"}, argmax=1, options="p",
-		description="View the inventory of the nearest player. Specify a name to show that player's inventory.")
+		description="View the inventory of the nearest player. Specify a name to show that player's inventory.",
+		usage="<command> [<player name>]",
+		opthelp=
+		{
+			"p", "show last inventory (pre-death)",
+		})
 	@AutoRefPermission(console=false, role=AutoRefMatch.Role.SPECTATOR)
 
 	public boolean viewInventory(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -88,7 +95,19 @@ public class SpectatorCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"artp"}, argmax=1, options="b*d*l*t*s*o*v*r",
-		description="AutoReferee teleportation tools.")
+		description="AutoReferee teleportation tools.",
+		usage="<command> [<player name>]",
+		opthelp=
+		{
+			"b", "teleport to player's bed location",
+			"d", "teleport to player's death location",
+			"l", "teleport to player's logout location",
+			"t", "teleport to player's teleport location",
+			"s", "teleport to player's spawn location",
+			"o", "teleport to team's objective location",
+			"v", "teleport to team's victory monument",
+			"r", "teleport to previous location",
+		})
 	@AutoRefPermission(console=false, role=AutoRefMatch.Role.SPECTATOR)
 
 	public boolean teleport(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -178,14 +197,19 @@ public class SpectatorCommands implements CommandHandler
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "preview"}, argmax=0, options="y",
-			description="Cycle through players.")
+	@AutoRefCommand(name={"autoref", "preview"}, argmax=0, options="yn",
+		description="Cycle through players.",
+		opthelp=
+		{
+			"y", "activate match preview mode",
+			"n", "deactivate match preview mode",
+		})
 	@AutoRefPermission(console=false, role=AutoRefMatch.Role.REFEREE)
 
 	public boolean previewMode(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
 		if (match == null || !match.getCurrentState().isBeforeMatch()) return false;
-		if (!options.hasOption('y'))
+		if (!options.hasOption('y') && !options.hasOption('n'))
 		{
 			sender.sendMessage(ChatColor.GREEN + "You are attempting to put this match in preview mode");
 			sender.sendMessage(ChatColor.GREEN + "Type '/ar preview -y' to confirm that you want to do this.");
@@ -204,7 +228,12 @@ public class SpectatorCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"autoref", "cycle"}, argmax=0, options="np",
-			description="Cycle through players.")
+		description="Cycle through players.",
+		opthelp=
+		{
+			"n", "next player in cycle (default)",
+			"p", "previous player in cycle",
+		})
 	@AutoRefPermission(console=false, role=AutoRefMatch.Role.SPECTATOR)
 
 	public boolean playerCycle(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -220,7 +249,8 @@ public class SpectatorCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"autoref", "teamname"}, argmin=2, argmax=2,
-		description="Rename a team.")
+		description="Rename a team.",
+		usage="<command> <old name> <new name>")
 	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
 
 	public boolean setTeamName(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -240,7 +270,8 @@ public class SpectatorCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"autoref", "swapteams"}, argmin=2, argmax=2,
-		description="Swaps the players and custom names of both teams.")
+		description="Swaps the players and custom names of both teams.",
+		usage="<command> <team1> <team2>")
 	@AutoRefPermission(console=true, role=AutoRefMatch.Role.SPECTATOR)
 
 	public boolean swapTeams(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -267,7 +298,8 @@ public class SpectatorCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"autoref", "countdown"}, argmax=1,
-		description="Begin a generic countdown.")
+		description="Begin a generic countdown.",
+		usage="<command> [<countdown length>]")
 	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
 
 	public boolean countdown(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -282,7 +314,8 @@ public class SpectatorCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"autoref", "givekit"}, argmin=2, argmax=2,
-		description="Give a kit to the specified player.")
+		description="Give a kit to the specified player.",
+		usage="<command> <kit name> <player name>")
 	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
 
 	public boolean giveKit(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -309,7 +342,8 @@ public class SpectatorCommands implements CommandHandler
 	}
 
 	@AutoRefCommand(name={"autoref", "timelimit"}, argmin=1, argmax=1,
-		description="Specify the total time allowed for this match, in minutes.")
+		description="Specify the total time allowed for this match, in minutes.",
+		usage="<command> <time limit>")
 	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
 
 	public boolean setTimeLimit(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -326,7 +360,8 @@ public class SpectatorCommands implements CommandHandler
 
 	@AutoRefCommand(name={"autoref", "endmatch"}, argmax=1,
 		description="Ends the current match by decision. Specify a team name to declare them " +
-			"the winner, or 'tie' to announce a tie.")
+			"the winner, or 'tie' to announce a tie.",
+		usage="<command> [<winning team>]")
 	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
 
 	public boolean endMatch(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -352,8 +387,13 @@ public class SpectatorCommands implements CommandHandler
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "nightvis"}, argmax=1, options="01",
-			description="Toggles permanent night vision for a spectator.")
+	@AutoRefCommand(name={"autoref", "nightvis"}, argmax=0, options="01",
+		description="Toggles permanent night vision for a spectator.",
+		opthelp=
+		{
+			"0", "explicitly turn night vision off",
+			"1", "explicitly turn night vision on",
+		})
 	@AutoRefPermission(console=false, role=AutoRefMatch.Role.SPECTATOR)
 
 	public boolean nightVision(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)

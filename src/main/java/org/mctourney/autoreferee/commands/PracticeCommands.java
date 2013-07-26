@@ -50,8 +50,12 @@ public class PracticeCommands implements CommandHandler, Listener
 		setupPracticeMenu();
 	}
 
-	@AutoRefCommand(name={"autoref", "practice"}, options="t*",
-			description="Switch to practice mode or activate practice mode menu.")
+	@AutoRefCommand(name={"autoref", "practice"}, argmax=0, options="t*",
+		description="Switch to practice mode or activate practice mode menu.",
+		opthelp=
+		{
+			"t", "teleport to specified player",
+		})
 	@AutoRefPermission(console=false, nodes={"autoreferee.player"})
 
 	public boolean practiceMode(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
