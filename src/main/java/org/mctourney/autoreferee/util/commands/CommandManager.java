@@ -26,6 +26,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.help.HelpTopic;
 import org.bukkit.help.IndexHelpTopic;
@@ -39,7 +40,7 @@ import org.mctourney.autoreferee.util.commands.CommandManager.AutoRefCommandHelp
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-public class CommandManager implements CommandExecutor
+public class CommandManager implements CommandExecutor, TabCompleter
 {
 	Map<String, HandlerNode> cmap = Maps.newHashMap();
 
@@ -198,6 +199,7 @@ public class CommandManager implements CommandExecutor
 				throw new CommandRegistrationException(method, "Command method must return type boolean");
 
 			if (pcommand.getExecutor() != this) pcommand.setExecutor(this);
+			if (pcommand.getTabCompleter() != this) pcommand.setTabCompleter(this);
 
 			CommandDelegator delegator = new CommandDelegator(commands, method, pcommand);
 			this.setHandler(delegator, command.name());
@@ -253,8 +255,45 @@ public class CommandManager implements CommandExecutor
 
 		try
 		{
-			CommandDelegator handler = this.getHandler(command.getName(), args);
-			return handler == null ? false : handler.execute(sender, match, args);
+			HandlerNode node = cmap.get(command.getName());
+			List<String> ccmd = Lists.newArrayList(command.getName());
+
+			if (node == null) return false;
+
+			// attempt to narrow down the method using the args
+			for (String arg : args)
+			{
+				// lowercase to maintain case insensitivity
+				arg = arg.toLowerCase();
+
+				HandlerNode next = node.cmap.get(arg);
+				if (next == null) break;
+
+				// move on to the next node, increment the cut length
+				ccmd.add(arg); node = next;
+			}
+
+			String partialcmd = "/" + StringUtils.join(ccmd, " ");
+			if (node.handler != null)
+			{
+				// attempt to execute the handler, if false, print usage
+				if (node.handler.execute(sender, match, args)) return true;
+				AutoRefCommand cAnnotation = node.handler.method.getAnnotation(AutoRefCommand.class);
+
+				String usage = cAnnotation.usage();
+				if ("".equals(usage)) usage = cAnnotation.argmax() == 0
+					? "<command>" : "<command> [args?]";
+
+				// show the usage string with the partial command
+				sender.sendMessage(ChatColor.DARK_RED + usage.replace("<command>", partialcmd));
+				return true;
+			}
+
+			// show possible branches in the command tree
+			String options = node.cmap.size() < 5 ? StringUtils.join(node.cmap.keySet(), '|') : "[args]";
+			sender.sendMessage(ChatColor.DARK_RED + partialcmd + " " + options);
+
+			return true;
 		}
 		catch (CommandPermissionException e)
 		{ sender.sendMessage(ChatColor.DARK_GRAY + e.getMessage()); return true; }
@@ -262,26 +301,40 @@ public class CommandManager implements CommandExecutor
 		{ sender.sendMessage(ChatColor.DARK_GRAY + e.getMessage()); return true; }
 	}
 
-	private CommandDelegator getHandler(String cmd, String[] args)
+	@Override
+	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args)
 	{
-		HandlerNode node = cmap.get(cmd);
-		if (node == null) return null;
-
-		// attempt to narrow down the method using the args
-		for (String arg : args)
+		try
 		{
-			// lowercase to maintain case insensitivity
-			arg = arg.toLowerCase();
+			HandlerNode node = cmap.get(command.getName());
+			if (node == null) return null;
 
-			HandlerNode next = node.cmap.get(arg);
-			if (next == null) break;
+			// attempt to narrow down the method using the args
+			for (int i = 0; i < args.length - 1; ++i)
+			{
+				// lowercase to maintain case insensitivity
+				String arg = args[i].toLowerCase();
 
-			// move on to the next node, increment the cut length
-			node = next;
+				HandlerNode next = node.cmap.get(arg);
+				if (next == null) return null;
+
+				// move on to the next node, increment the cut length
+				node = next;
+			}
+
+			if (node.handler != null) return null;
+			String partial = args[args.length - 1].toLowerCase();
+
+			// show possible branches in the command tree
+			List<String> opts = Lists.newArrayList();
+			for (String c : node.cmap.keySet())
+				if (c.toLowerCase().startsWith(partial)) opts.add(c);
+			return opts;
 		}
+		catch (CommandPermissionException e)
+		{ sender.sendMessage(ChatColor.DARK_GRAY + e.getMessage()); }
 
-		// return the appropriate handler
-		return node.handler;
+		return null;
 	}
 
 	private void setHandler(CommandDelegator handler, String[] cmd)
