@@ -1,5 +1,6 @@
 package org.mctourney.autoreferee;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -9,13 +10,21 @@ import org.mctourney.autoreferee.util.TeleportationUtil;
 public class AutoRefSpectator extends AutoRefPlayer
 {
 	private AutoRefMatch match = null;
-	private boolean nightVision = false;
 	private String cyclePlayer = null;
+
+	private boolean nightVision = false;
 	private boolean viewInventory = true;
 	private boolean invisible = true;
+	private boolean streamer;
 
 	public AutoRefSpectator(String name, AutoRefMatch match)
-	{ super(name, null); this.match = match; }
+	{
+		super(name, null); this.match = match;
+		Player player = this.getPlayer();
+
+		this.streamer = player == null ? false
+			: player.hasPermission("autoreferee.streamer");
+	}
 
 	public AutoRefSpectator(Player player, AutoRefMatch match)
 	{ this(player.getName(), match); }
@@ -25,6 +34,16 @@ public class AutoRefSpectator extends AutoRefPlayer
 
 	public void setInvisible(boolean vis)
 	{ this.invisible = vis; }
+
+	public boolean isStreamer()
+	{ return streamer; }
+
+	public void setStreamer(boolean b)
+	{
+		this.streamer = b; this.match.setupSpectators(this.getPlayer());
+		this.getPlayer().sendMessage(ChatColor.GREEN + "You are " +
+			(this.streamer ? "now" : "no longer") + " in streamer mode!");
+	}
 
 	@Override
 	public AutoRefMatch getMatch()

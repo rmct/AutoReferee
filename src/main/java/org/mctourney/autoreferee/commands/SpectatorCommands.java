@@ -391,8 +391,8 @@ public class SpectatorCommands implements CommandHandler
 		description="Toggles permanent night vision for a spectator.",
 		opthelp=
 		{
-			"0", "explicitly turn night vision off",
-			"1", "explicitly turn night vision on",
+			"0", "explicitly disable night vision",
+			"1", "explicitly enable night vision",
 		})
 	@AutoRefPermission(console=false, role=AutoRefMatch.Role.SPECTATOR)
 
@@ -406,6 +406,52 @@ public class SpectatorCommands implements CommandHandler
 			if (options.hasOption('0')) nightvis = false;
 			if (options.hasOption('1')) nightvis = true;
 			spectator.setNightVision(nightvis);
+		}
+		return true;
+	}
+
+	@AutoRefCommand(name={"autoref", "streamer"}, argmax=1, options="01",
+		description="Toggles streamer",
+		usage="<command> [<player name>]",
+		opthelp=
+		{
+			"0", "explicitly disable streamer mode",
+			"1", "explicitly enable streamer mode",
+		})
+	@AutoRefPermission(console=true, role=AutoRefMatch.Role.SPECTATOR)
+
+	public boolean setStreamerMode(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		Player player = null;
+
+		if (sender instanceof Player) player = (Player) sender;
+
+		if (args.length > 0)
+		{
+			// only admins have permission to change someone else's streamer mode
+			if (!sender.hasPermission("autoreferee.admin")) return false;
+
+			Player target = Bukkit.getPlayer(args[0]);
+			if (target == null)
+			{
+				sender.sendMessage(ChatColor.RED + "Not a valid player: " + args[0]);
+				return true;
+			}
+			else player = target;
+		}
+
+		if (match != null && player != null)
+		{
+			AutoRefSpectator spectator = match.getSpectator(player);
+			if (spectator == null) return false;
+			boolean streammode = !spectator.isStreamer();
+
+			if (options.hasOption('0')) streammode = false;
+			if (options.hasOption('1')) streammode = true;
+			spectator.setStreamer(streammode);
+
+			if (player != sender) sender.sendMessage(ChatColor.GREEN +
+				(streammode ? "Enabled" : "Disabled") + " streamer mode for " + player.getName());
 		}
 		return true;
 	}

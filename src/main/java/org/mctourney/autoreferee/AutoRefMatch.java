@@ -1073,7 +1073,7 @@ public class AutoRefMatch implements Metadatable
 	public boolean isStreamer(Player player)
 	{
 		if (isPlayer(player)) return false;
-		return player.hasPermission("autoreferee.streamer");
+		return isSpectator(player) && getSpectator(player).isStreamer();
 	}
 
 	/**
