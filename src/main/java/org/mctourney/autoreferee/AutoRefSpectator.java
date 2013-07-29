@@ -1,6 +1,7 @@
 package org.mctourney.autoreferee;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -71,16 +72,34 @@ public class AutoRefSpectator extends AutoRefPlayer
 
 	public void cycleNextPlayer()
 	{
-		this.cyclePlayer = getMatch().getCycleNextPlayer(this.cyclePlayer);
-		AutoRefPlayer apl = getMatch().getPlayer(this.cyclePlayer);
-		if (apl != null) getPlayer().teleport(TeleportationUtil.playerTeleport(apl));
+		AutoRefMatch match = getMatch();
+		for (int i = 0; i < match.getPlayers().size(); ++i)
+		{
+			this.cyclePlayer = match.getCycleNextPlayer(this.cyclePlayer);
+			AutoRefPlayer apl = match.getPlayer(this.cyclePlayer);
+
+			if (apl != null)
+			{
+				Location tploc = TeleportationUtil.playerTeleport(apl);
+				if (tploc != null) { getPlayer().teleport(tploc); break; }
+			}
+		}
 	}
 
 	public void cyclePrevPlayer()
 	{
-		this.cyclePlayer = getMatch().getCyclePrevPlayer(this.cyclePlayer);
-		AutoRefPlayer apl = getMatch().getPlayer(this.cyclePlayer);
-		if (apl != null) getPlayer().teleport(TeleportationUtil.playerTeleport(apl));
+		AutoRefMatch match = getMatch();
+		for (int i = 0; i < match.getPlayers().size(); ++i)
+		{
+			this.cyclePlayer = match.getCyclePrevPlayer(this.cyclePlayer);
+			AutoRefPlayer apl = match.getPlayer(this.cyclePlayer);
+
+			if (apl != null)
+			{
+				Location tploc = TeleportationUtil.playerTeleport(apl);
+				if (tploc != null) { getPlayer().teleport(tploc); break; }
+			}
+		}
 	}
 
 	public boolean canViewInventory()
