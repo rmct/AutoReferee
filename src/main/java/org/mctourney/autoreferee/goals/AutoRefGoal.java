@@ -105,6 +105,8 @@ public abstract class AutoRefGoal
 		addGoalType("survive", SurvivalGoal.class);
 		addGoalType("time", TimeGoal.class);
 		addGoalType("deathmatch", ScoreDeathmatchGoal.class);
+		addGoalType("dummy", ScoreDummyGoal.class);
+		addGoalType("region", ScoreRegionGoal.class);
 	}
 
 	public static void addGoalType(String tag, Class<? extends AutoRefGoal> cls)
