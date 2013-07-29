@@ -9,6 +9,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockFormEvent;
+import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -167,5 +169,21 @@ public class WorldListener implements Listener
 
 		match.saveWorldConfiguration();
 		plugin.clearMatch(match);
+	}
+
+	@EventHandler
+	public void blockForm(BlockFormEvent event)
+	{
+		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
+		if (match != null && !match.getCurrentState().inProgress())
+		{ event.setCancelled(true); return; }
+	}
+
+	@EventHandler
+	public void blockGrow(BlockGrowEvent event)
+	{
+		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
+		if (match != null && !match.getCurrentState().inProgress())
+		{ event.setCancelled(true); return; }
 	}
 }
