@@ -1795,7 +1795,7 @@ public class AutoRefMatch implements Metadatable
 				plugin.clearMatch(this);
 				this.countTask.cancel();
 
-				plugin.getServer().unloadWorld(primaryWorld, false);
+				plugin.getServer().unloadWorld(primaryWorld, true);
 				if (!plugin.getConfig().getBoolean("save-worlds", false))
 					new WorldFolderDeleter(primaryWorld).runTaskTimer(plugin, 0L, 10 * 20L);
 			}
