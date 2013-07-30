@@ -212,7 +212,17 @@ public class ZoneListener implements Listener
 	{
 		Player player = event.getPlayer();
 		Location loc = event.getBlock().getLocation();
-		locationEvent(event, player, loc);
+
+		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+		if (match == null) return;
+
+		if (!validPlayer(player))
+		{ event.setCancelled(true); return; }
+
+		AutoRefPlayer apl = match.getPlayer(player);
+		if (apl != null && apl.getTeam().hasFlag(
+			loc.clone().add(0.5, 0.5, 0.5), AutoRefRegion.Flag.NO_BUILD, false))
+		{ event.setCancelled(true); return; }
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)

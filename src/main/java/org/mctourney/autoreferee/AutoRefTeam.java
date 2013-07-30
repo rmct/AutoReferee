@@ -728,12 +728,20 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	 * @return true if location contains flag, otherwise false
 	 */
 	public boolean hasFlag(Location loc, AutoRefRegion.Flag flag)
+	{ return hasFlag(loc, flag, flag.defaultValue); }
+
+	/**
+	 * Checks if a region is marked with a specific region flag.
+	 *
+	 * @return true if location contains flag, otherwise false
+	 */
+	public boolean hasFlag(Location loc, AutoRefRegion.Flag flag, boolean def)
 	{
 		// check start region flags
 		if (getMatch().inStartRegion(loc))
 			return getMatch().getStartRegionFlags().contains(flag);
 
-		boolean is = flag.defaultValue; Set<AutoRefRegion> regions = getRegions();
+		boolean is = def; Set<AutoRefRegion> regions = getRegions();
 		if (regions != null) for ( AutoRefRegion reg : regions )
 			if (reg.contains(loc)) { is = false; if (reg.is(flag)) return true; }
 		return is;
