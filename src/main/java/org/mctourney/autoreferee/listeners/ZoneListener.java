@@ -240,7 +240,8 @@ public class ZoneListener implements Listener
 		{ event.setCancelled(true); return; }
 
 		AutoRefPlayer apl = match.getPlayer(player);
-		if (apl != null && apl.getTeam().hasFlag(loc, AutoRefRegion.Flag.NO_BUILD))
+		if (apl != null && apl.getTeam().hasFlag(
+			loc.clone().add(0.5, 0.5, 0.5), AutoRefRegion.Flag.NO_BUILD))
 		{ event.setCancelled(true); return; }
 	}
 
