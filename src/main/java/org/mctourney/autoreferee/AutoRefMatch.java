@@ -561,7 +561,7 @@ public class AutoRefMatch implements Metadatable
 		return (ManagementFactory.getRuntimeMXBean().getUptime() - getStartTime()) / 1000L;
 	}
 
-	private long timeLimit = -1L;
+	private long timeLimit = 0L;
 
 	/**
 	 * Gets the match time limit in seconds.
@@ -577,7 +577,7 @@ public class AutoRefMatch implements Metadatable
 	 * @return true if a time limit is set, otherwise false
 	 */
 	public boolean hasTimeLimit()
-	{ return timeLimit != -1L; }
+	{ return timeLimit > 0L; }
 
 	/**
 	 * Gets the number of seconds remaining in this match.
@@ -1195,6 +1195,10 @@ public class AutoRefMatch implements Metadatable
 			for (Element e : meta.getChild("creators").getChildren("creator"))
 				mapAuthors.add(e.getText());
 		}
+
+		// set the time limit based on the server config
+		long limit_min = AutoReferee.getInstance().getConfig().getLong("time-limit", 0L);
+		this.setTimeLimit(60L * limit_min);
 
 		// parse kits before parsing teams
 		Element kitsElt = worldConfig.getChild("kits");

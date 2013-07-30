@@ -4,6 +4,7 @@ console-log: true
 auto-update: true
 
 allow-ties: false
+time-limit: 0
 
 delay-seconds:
   ready: 15
