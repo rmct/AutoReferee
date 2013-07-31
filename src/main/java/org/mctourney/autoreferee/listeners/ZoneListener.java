@@ -24,6 +24,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
@@ -44,6 +45,7 @@ import org.mctourney.autoreferee.AutoRefMatch.MatchStatus;
 import org.mctourney.autoreferee.AutoRefMatch.Role;
 import org.mctourney.autoreferee.goals.BlockGoal;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
+import org.mctourney.autoreferee.regions.AutoRefRegion.Flag;
 import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.LocationUtil;
 
@@ -149,6 +151,27 @@ public class ZoneListener implements Listener
 
 				// reset exit location since player in region
 				apl.setExitLocation(null);
+			}
+		}
+	}
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void enderpearlThrow(ProjectileLaunchEvent event)
+	{
+		// if the match is not under our control, ignore
+		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
+		if (match == null || match.getCurrentState() == MatchStatus.NONE) return;
+
+		if (event.getEntityType() == EntityType.ENDER_PEARL)
+		{
+			Player player = (Player) event.getEntity().getShooter();
+			AutoRefPlayer apl = match.getPlayer(player);
+
+			if (apl != null && apl.getTeam().hasFlag(player.getLocation(), Flag.NO_ENTRY))
+			{
+				String msg = ChatColor.DARK_GRAY + apl.getDisplayName() +
+					ChatColor.DARK_GRAY + " has thrown an enderpearl while out of bounds.";
+				for (Player ref : match.getReferees()) ref.sendMessage(msg);
 			}
 		}
 	}
