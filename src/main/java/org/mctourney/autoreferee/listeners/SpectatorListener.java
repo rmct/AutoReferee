@@ -17,7 +17,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -209,19 +210,20 @@ public class SpectatorListener implements PluginMessageListener, Listener
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
-	public void spectatorDeath(EntityDamageByEntityEvent event)
+	public void spectatorDeath(EntityDamageEvent event)
 	{
 		World world = event.getEntity().getWorld();
 		AutoRefMatch match = plugin.getMatch(world);
 
-		if (event.getDamager().getType() != EntityType.PLAYER) return;
-		Player player = (Player) event.getDamager();
+		if (event.getEntityType() != EntityType.PLAYER) return;
+		Player player = (Player) event.getEntity();
 
-		if (match != null && match.getCurrentState().inProgress() &&
-			!match.isPlayer(player))
+		if (match != null && match.isSpectator(player))
 		{
+			Location loc = player.getLocation();
 			event.setCancelled(true);
-			if (player.getLocation().getY() < -64)
+
+			if (loc.getY() < -64 && event.getCause() == DamageCause.VOID)
 				player.teleport(match.getPlayerSpawn(player));
 			player.setFallDistance(0);
 		}
