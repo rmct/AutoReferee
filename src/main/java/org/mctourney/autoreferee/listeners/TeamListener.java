@@ -79,6 +79,7 @@ public class TeamListener implements Listener
 	{
 		AutoRefTeam speakerTeam = match.getPlayerTeam(speaker);
 		Role speakerRole = match.getRole(speaker);
+		boolean practiceMode = match.isPracticeMode();
 
 		Iterator<Player> iter = recipients.iterator();
 		if (!match.getCurrentState().isBeforeMatch()) while (iter.hasNext())
@@ -89,8 +90,8 @@ public class TeamListener implements Listener
 			if (match.isStreamer(listener) && speakerTeam == null && speakerRole != Role.STREAMER)
 			{ iter.remove(); continue; }
 
-			// if listener is on a team, and speaker is a spectator, hide message
-			if (speakerTeam == null && match.getPlayerTeam(listener) != null)
+			// if listener is on a team, and speaker is a spectator, hide message (unless practice mode)
+			if (!practiceMode && speakerTeam == null && match.getPlayerTeam(listener) != null)
 			{ iter.remove(); continue; }
 		}
 	}
