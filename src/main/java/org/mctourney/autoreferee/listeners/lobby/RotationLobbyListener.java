@@ -1,7 +1,7 @@
 package org.mctourney.autoreferee.listeners.lobby;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 import java.io.IOException;
 import java.io.File;
 
@@ -51,13 +51,11 @@ public class RotationLobbyListener extends AutoLobbyListener
 				AutoRefMap map = AutoRefMap.getMap(mapname);
 				if (map != null) rotation.add(map);
 			}
+
+			// shuffle the rotation
+			Collections.shuffle(rotation);
 		}
 		catch (IOException e) { e.printStackTrace(); }
-
-		// print the rotation to the server log
-		AutoReferee.log(String.format("AutoReferee Rotation (%d maps)", rotation.size()), Level.INFO);
-		for (AutoRefMap map : rotation)
-			AutoReferee.log(String.format(">>> %s", map.getVersionString()), Level.INFO);
 
 		// defer the task of loading the next map to the first server tick
 		new BukkitRunnable() { @Override public void run() { loadNextMap(); } }.runTask(plugin);
