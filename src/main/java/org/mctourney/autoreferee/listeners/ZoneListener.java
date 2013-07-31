@@ -225,56 +225,50 @@ public class ZoneListener implements Listener
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void blockPlace(BlockPlaceEvent event)
 	{
-		Player player = event.getPlayer();
-		Location loc = event.getBlock().getLocation();
-		locationEvent(event, player, loc);
+		blockEvent(event, event.getPlayer(), event.getBlock());
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void blockBreak(BlockBreakEvent event)
 	{
 		Player player = event.getPlayer();
-		Location loc = event.getBlock().getLocation();
+		Block b = event.getBlock();
 
-		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+		AutoRefMatch match = plugin.getMatch(b.getWorld());
 		if (match == null) return;
 
 		if (!validPlayer(player))
 		{ event.setCancelled(true); return; }
 
 		AutoRefPlayer apl = match.getPlayer(player);
-		if (apl != null && apl.getTeam().hasFlag(
-			loc.clone().add(0.5, 0.5, 0.5), AutoRefRegion.Flag.NO_BUILD, false))
+		if (apl != null && apl.getTeam().hasFlag(b, AutoRefRegion.Flag.NO_BUILD, false))
 		{ event.setCancelled(true); return; }
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void bucketFill(PlayerBucketFillEvent event)
 	{
-		Player player = event.getPlayer();
-		Location loc = event.getBlockClicked().getRelative(event.getBlockFace()).getLocation();
-		locationEvent(event, player, loc);
+		blockEvent(event, event.getPlayer(),
+			event.getBlockClicked().getRelative(event.getBlockFace()));
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void bucketEmpty(PlayerBucketEmptyEvent event)
 	{
-		Player player = event.getPlayer();
-		Location loc = event.getBlockClicked().getRelative(event.getBlockFace()).getLocation();
-		locationEvent(event, player, loc);
+		blockEvent(event, event.getPlayer(),
+			event.getBlockClicked().getRelative(event.getBlockFace()));
 	}
 
-	public void locationEvent(Cancellable event, Player player, Location loc)
+	public void blockEvent(Cancellable event, Player player, Block block)
 	{
-		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+		AutoRefMatch match = plugin.getMatch(block.getWorld());
 		if (match == null) return;
 
 		if (!validPlayer(player))
 		{ event.setCancelled(true); return; }
 
 		AutoRefPlayer apl = match.getPlayer(player);
-		if (apl != null && apl.getTeam().hasFlag(
-			loc.clone().add(0.5, 0.5, 0.5), AutoRefRegion.Flag.NO_BUILD))
+		if (apl != null && apl.getTeam().hasFlag(block, AutoRefRegion.Flag.NO_BUILD))
 		{ event.setCancelled(true); return; }
 	}
 
@@ -289,7 +283,10 @@ public class ZoneListener implements Listener
 
 		if (match.isPlayer(player))
 		{
-			if (!match.getPlayer(player).isInsideLane())
+			AutoRefPlayer apl = match.getPlayer(player);
+			boolean noaccess = apl.getTeam().hasFlag(block, Flag.NO_ACCESS);
+
+			if (!match.getPlayer(player).isInsideLane() || (noaccess && !event.isBlockInHand()))
 			{ event.setCancelled(true); return; }
 
 			if (match.isStartMechanism(block) && !match.getStartMechanism(block).canFlip(match))

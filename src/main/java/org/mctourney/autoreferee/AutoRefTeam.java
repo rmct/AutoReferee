@@ -13,6 +13,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
@@ -721,6 +722,22 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		}
 		return bestdist <= distance;
 	}
+
+	/**
+	 * Checks if a region is marked with a specific region flag.
+	 *
+	 * @return true if location contains flag, otherwise false
+	 */
+	public boolean hasFlag(Block b, AutoRefRegion.Flag flag)
+	{ return hasFlag(b, flag, flag.defaultValue); }
+
+	/**
+	 * Checks if a region is marked with a specific region flag.
+	 *
+	 * @return true if location contains flag, otherwise false
+	 */
+	public boolean hasFlag(Block b, AutoRefRegion.Flag flag, boolean def)
+	{ return hasFlag(b.getLocation().clone().add(0.5, 0.5, 0.5), flag, def); }
 
 	/**
 	 * Checks if a region is marked with a specific region flag.
