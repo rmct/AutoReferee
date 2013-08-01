@@ -486,7 +486,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	public Element toElement()
 	{
 		Element elt = new Element("team");
-		elt.addContent(new Element("name").setText(getName()));
+		elt.addContent(new Element("name").setText(getDefaultName()));
 
 		if (this.getColor() != ChatColor.RESET) elt.setAttribute("color", this.getColor().name());
 		if (this.maxsize != null) elt.setAttribute("maxsize", Integer.toString(this.maxsize));
