@@ -1061,7 +1061,7 @@ public class AutoRefMatch implements Metadatable
 	 */
 	public boolean isReferee(Player player)
 	{
-		if (isPlayer(player)) return false;
+		if (isPlayer(player) || getExpectedPlayers().contains(player.getName())) return false;
 		return player.hasPermission("autoreferee.referee");
 	}
 
@@ -1072,7 +1072,7 @@ public class AutoRefMatch implements Metadatable
 	 */
 	public boolean isStreamer(Player player)
 	{
-		if (isPlayer(player)) return false;
+		if (isPlayer(player) || getExpectedPlayers().contains(player.getName())) return false;
 		return isSpectator(player) && getSpectator(player).isStreamer();
 	}
 
