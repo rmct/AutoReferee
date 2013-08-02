@@ -111,26 +111,26 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		return StringUtils.join(plist, ", ");
 	}
 
-	private Set<OfflinePlayer> expectedPlayers = Sets.newHashSet();
+	private Set<String> expectedPlayers = Sets.newHashSet();
 
 	/**
 	 * Adds a player to the list of expected players for this team.
 	 */
 	public void addExpectedPlayer(OfflinePlayer opl)
-	{ expectedPlayers.add(opl); }
+	{ addExpectedPlayer(opl.getName()); }
 
 	/**
 	 * Adds a player to the list of expected players for this team by name.
 	 */
 	public void addExpectedPlayer(String name)
-	{ addExpectedPlayer(AutoReferee.getInstance().getServer().getOfflinePlayer(name)); }
+	{ expectedPlayers.add(name); }
 
 	/**
 	 * Gets the players expected to join this team.
 	 *
 	 * @return collection of players
 	 */
-	public Set<OfflinePlayer> getExpectedPlayers()
+	public Set<String> getExpectedPlayers()
 	{ return expectedPlayers; }
 
 	// team's name, may or may not be color-related

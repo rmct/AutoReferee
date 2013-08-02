@@ -2388,9 +2388,12 @@ public class AutoRefMatch implements Metadatable
 
 		// check if all the players are here
 		boolean ready = true;
-		for ( OfflinePlayer opl : getExpectedPlayers() )
+		for ( String name : getExpectedPlayers() )
+		{
+			OfflinePlayer opl = Bukkit.getOfflinePlayer(name);
 			ready &= opl.isOnline() && isPlayer(opl.getPlayer()) &&
 				getPlayer(opl.getPlayer()).isPresent();
+		}
 
 		// set status based on whether the players are online
 		setCurrentState(ready ? MatchStatus.READY : MatchStatus.WAITING);
@@ -2592,11 +2595,11 @@ public class AutoRefMatch implements Metadatable
 		return mteam;
 	}
 
-	Set<OfflinePlayer> expectedPlayers = Sets.newHashSet();
+	Set<String> expectedPlayers = Sets.newHashSet();
 
-	public Set<OfflinePlayer> getExpectedPlayers()
+	public Set<String> getExpectedPlayers()
 	{
-		Set<OfflinePlayer> eps = Sets.newHashSet(expectedPlayers);
+		Set<String> eps = Sets.newHashSet(expectedPlayers);
 		for (AutoRefTeam team : teams)
 			eps.addAll(team.getExpectedPlayers());
 		return eps;
@@ -2614,7 +2617,7 @@ public class AutoRefMatch implements Metadatable
 	 * Adds a player to the list of expected players, without a team affiliation.
 	 */
 	public void addExpectedPlayer(OfflinePlayer opl)
-	{ expectedPlayers.add(opl); }
+	{ expectedPlayers.add(opl.getName()); }
 
 	public void addExpectedPlayer(OfflinePlayer opl, String cape)
 	{ addExpectedPlayer(opl); addCape(opl, cape); }
