@@ -34,6 +34,7 @@ import org.bukkit.Material;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoReferee;
+import org.mctourney.autoreferee.regions.AutoRefRegion.Flag;
 import org.mctourney.autoreferee.util.AchievementPoints;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
 
@@ -262,6 +263,14 @@ public class CombatListener implements Listener
 			if (match.getCurrentState().inProgress() &&
 				null != damager && match.isSpectator(damager))
 			{ event.setCancelled(true); return; }
+
+			AutoRefPlayer apl = match.getPlayer(damager);
+			if (apl != null)
+			{
+				Location loc = event.getVehicle().getLocation();
+				if (!apl.isInsideLane() || apl.getTeam().hasFlag(loc, Flag.NO_ACCESS))
+				{ event.setCancelled(true); return; }
+			}
 		}
 	}
 
