@@ -2234,17 +2234,9 @@ public class AutoRefMatch implements Metadatable
 	 */
 	public void clearEntities()
 	{
-		// wait to do it on a future tick
-		new BukkitRunnable()
-		{
-			@Override
-			public void run()
-			{
-				for (Entity e : primaryWorld.getEntitiesByClasses(Arrow.class, Item.class,
-						Monster.class, Animals.class, Ambient.class, ExperienceOrb.class))
-					if (!protectedEntities.contains(e.getUniqueId())) e.remove();
-			}
-		}.runTaskLater(AutoReferee.getInstance(), 5L);
+		for (Entity e : primaryWorld.getEntitiesByClasses(Arrow.class, Item.class,
+				Monster.class, Animals.class, Ambient.class, ExperienceOrb.class))
+			if (!protectedEntities.contains(e.getUniqueId())) e.remove();
 	}
 
 	/**
@@ -2517,6 +2509,8 @@ public class AutoRefMatch implements Metadatable
 		AutoReferee.callEvent(event);
 		if (event.isCancelled()) return;
 
+		AutoReferee plugin = AutoReferee.getInstance();
+
 		// update winner from the match complete event
 		team = event.getWinner();
 
@@ -2524,8 +2518,15 @@ public class AutoRefMatch implements Metadatable
 		if (team != null) this.broadcast(team.getDisplayName() + " Wins!");
 		else this.broadcast("Match terminated!");
 
-		// remove all mobs, animals, and items
-		this.clearEntities();
+		new BukkitRunnable()
+		{
+			@Override public void run()
+			{
+				// remove all mobs, animals, and items
+				clearEntities();
+			}
+		// run a second later
+		}.runTaskLater(plugin, 20L);
 
 		for (AutoRefPlayer apl : getPlayers())
 		{
@@ -2554,7 +2555,6 @@ public class AutoRefMatch implements Metadatable
 		if (clockTask != null) clockTask.cancel();
 
 		// increment the metrics for number of matches played
-		AutoReferee plugin = AutoReferee.getInstance();
 		int termDelay = plugin.getConfig().getInt(
 			"delay-seconds.completed", COMPLETED_SECONDS);
 
