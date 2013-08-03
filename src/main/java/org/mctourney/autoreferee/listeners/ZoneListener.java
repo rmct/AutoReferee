@@ -389,6 +389,12 @@ public class ZoneListener implements Listener
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void playerTeleport(PlayerTeleportEvent event)
 	{
+		AutoRefMatch match = plugin.getMatch(event.getTo().getWorld());
+		if (match == null || match.getCurrentState() == MatchStatus.NONE) return;
+
+		AutoRefPlayer apl = match.getPlayer(event.getPlayer());
+		if (apl == null) return;
+
 		playerMove(event);
 		switch (event.getCause())
 		{
@@ -400,8 +406,12 @@ public class ZoneListener implements Listener
 				break;
 
 			default: // otherwise, fire a teleport event (to notify)
+				if (apl.getTeam().hasFlag(event.getTo(), Flag.NO_TELEPORT))
+				{ event.setCancelled(true); return; }
+
 				String reason = "by " + event.getCause().name().toLowerCase().replaceAll("_", " ");
 				teleportEvent(event.getPlayer(), event.getFrom(), event.getTo(), reason);
+
 				break;
 		}
 	}

@@ -32,10 +32,11 @@ public abstract class AutoRefRegion
 		NO_ENTRY           (1 << 1, true,  'n', "noentry"),
 		SAFE               (1 << 2, false, 's', "safe"),
 		NO_EXPLOSIONS      (1 << 3, false, 'e', "noexplosion"),
-		NO_ACCESS          (1 << 4, false, 'a', "noaccess");
+		NO_ACCESS          (1 << 4, false, 'a', "noaccess"),
+		NO_TELEPORT        (1 << 5, false, 't', "noteleport");
 
 		// generated from above values
-		public static final String OPTIONS = "abens";
+		public static final String OPTIONS = "abenst";
 
 		private int value;
 		private String name;
