@@ -61,7 +61,6 @@ public class ConfigurationCommands implements CommandHandler
 		throws IOException
 	{
 		if (match == null) return false;
-		match.saveWorldConfiguration();
 		File zipfile = match.distributeMap();
 
 		String resp = String.format("%s %s", match.getVersionString(),
