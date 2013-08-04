@@ -123,7 +123,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	 * Adds a player to the list of expected players for this team by name.
 	 */
 	public void addExpectedPlayer(String name)
-	{ expectedPlayers.add(name); }
+	{ expectedPlayers.add(name.toLowerCase()); }
 
 	/**
 	 * Gets the players expected to join this team.

@@ -2608,7 +2608,7 @@ public class AutoRefMatch implements Metadatable
 	protected Map<String, String> playerCapes = Maps.newHashMap();
 
 	public void addCape(String name, String cape)
-	{ playerCapes.put(name, cape); }
+	{ playerCapes.put(name.toLowerCase(), cape); }
 
 	public void addCape(OfflinePlayer opl, String cape)
 	{ addCape(opl.getName(), cape); }
@@ -2617,7 +2617,7 @@ public class AutoRefMatch implements Metadatable
 	 * Adds a player to the list of expected players, without a team affiliation.
 	 */
 	public void addExpectedPlayer(OfflinePlayer opl)
-	{ expectedPlayers.add(opl.getName()); }
+	{ expectedPlayers.add(opl.getName().toLowerCase()); }
 
 	public void addExpectedPlayer(OfflinePlayer opl, String cape)
 	{ addExpectedPlayer(opl); addCape(opl, cape); }
@@ -2629,8 +2629,9 @@ public class AutoRefMatch implements Metadatable
 	 */
 	public AutoRefTeam expectedTeam(OfflinePlayer opl)
 	{
+		String name = opl.getName().toLowerCase();
 		for (AutoRefTeam team : teams)
-			if (team.getExpectedPlayers().contains(opl)) return team;
+			if (team.getExpectedPlayers().contains(name)) return team;
 		return null;
 	}
 
@@ -2640,16 +2641,17 @@ public class AutoRefMatch implements Metadatable
 	 * @return true if player is expected, otherwise false
 	 */
 	public boolean isPlayerExpected(OfflinePlayer opl)
-	{ return getExpectedPlayers().contains(opl); }
+	{ return getExpectedPlayers().contains(opl.getName().toLowerCase()); }
 
 	/**
 	 * Removes a specified player from any expected player lists for this match.
 	 */
 	public void removeExpectedPlayer(OfflinePlayer opl)
 	{
+		String name = opl.getName().toLowerCase();
 		for (AutoRefTeam t : teams)
-			t.getExpectedPlayers().remove(opl);
-		expectedPlayers.remove(opl);
+			t.getExpectedPlayers().remove(name);
+		expectedPlayers.remove(name);
 	}
 
 	/**
