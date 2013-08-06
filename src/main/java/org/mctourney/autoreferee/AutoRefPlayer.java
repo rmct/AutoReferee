@@ -1058,6 +1058,17 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 *
 	 * @return true if the inventory can be shown, otherwise false
 	 */
+	public boolean showInventory(Player player, boolean old)
+	{
+		Inventory which = old ? this.getInventoryView() : this.getLastInventoryView();
+		return this.showInventory(player, which);
+	}
+
+	/**
+	 * Shows this player's inventory to the specified player.
+	 *
+	 * @return true if the inventory can be shown, otherwise false
+	 */
 	public boolean showInventory(Player player)
 	{ return this.showInventory(player, this.getInventoryView()); }
 

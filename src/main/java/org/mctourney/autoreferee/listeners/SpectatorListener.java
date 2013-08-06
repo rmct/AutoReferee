@@ -52,6 +52,7 @@ import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.goals.BlockGoal;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
 import org.mctourney.autoreferee.util.LocationUtil;
+import org.mctourney.autoreferee.util.TeleportationUtil;
 
 public class SpectatorListener implements PluginMessageListener, Listener
 {
@@ -100,6 +101,47 @@ public class SpectatorListener implements PluginMessageListener, Listener
 		{
 			String message = new String(mbytes, AutoReferee.PLUGIN_CHANNEL_ENC);
 			AutoRefMatch match = plugin.getMatch(player.getWorld());
+
+			if (!match.isSpectator(player)) return;
+			AutoRefSpectator spec = match.getSpectator(player);
+
+			String[] parts = message.trim().split("\\|");
+			if ("tp".equalsIgnoreCase(parts[0]))
+			{
+				Location loc = null;
+				if ("player".equalsIgnoreCase(parts[1]))
+				{
+					AutoRefPlayer apl = match.getPlayer(parts[2]);
+					if (apl != null)
+					{
+						// by default, go to player location
+						loc = apl.getLocation();
+
+						if ("spawn".equalsIgnoreCase(parts[3])) loc = apl.getSpawnLocation();
+						else if ("bed".equalsIgnoreCase(parts[3])) loc = apl.getBedLocation();
+					}
+				}
+				else if ("team".equalsIgnoreCase(parts[1]))
+				{
+					AutoRefTeam team = match.getTeam(parts[2]);
+					if (team != null)
+					{
+						if ("vm".equalsIgnoreCase(parts[3])) loc = team.getVictoryMonumentLocation();
+						else if ("spawn".equalsIgnoreCase(parts[3])) loc = team.getSpawnLocation();
+					}
+				}
+
+				// teleport to the location, if any
+				if (loc == null) player.sendMessage(ChatColor.DARK_GRAY +
+					"You cannot teleport to this location: invalid or unsafe.");
+				else player.teleport(TeleportationUtil.locationTeleport(loc));
+			}
+			else if ("inventory".equalsIgnoreCase(parts[0]))
+			{
+				AutoRefPlayer apl = match.getPlayer(parts[1]);
+				boolean old = parts.length > 2 && "prev".equalsIgnoreCase(parts[2]);
+				if (apl != null) apl.showInventory(player, old);
+			}
 		}
 		catch (UnsupportedEncodingException e)
 		{ plugin.getLogger().info("Unsupported encoding: " + AutoReferee.PLUGIN_CHANNEL_ENC); }
