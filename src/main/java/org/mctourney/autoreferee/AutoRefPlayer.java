@@ -396,7 +396,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	private Inventory lastInventoryView = null;
 	private long lastInventoryViewSavedMillis = -1L;
 
-	private boolean savedInventoryStale()
+	private boolean isSavedInventoryStale()
 	{
 		return ManagementFactory.getRuntimeMXBean().getUptime() >
 			lastInventoryViewSavedMillis + SAVED_INVENTORY_LIFESPAN;
@@ -932,7 +932,8 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 
 	private void saveInventoryView()
 	{
-		this.lastInventoryView = getInventoryView();
+		String invname = this.getDisplayName() + "'s Inventory (@ " + getMatch().getTimestamp(":") + ")";
+		this.lastInventoryView = getInventoryView(invname);
 		this.lastInventoryViewSavedMillis = ManagementFactory.getRuntimeMXBean().getUptime();
 	}
 
@@ -943,7 +944,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 * @return inventory view, or null
 	 */
 	public Inventory getLastInventoryView()
-	{ return savedInventoryStale() ? null : this.lastInventoryView; }
+	{ return isSavedInventoryStale() ? null : this.lastInventoryView; }
 
 	/**
 	 * Gets a copy of this player's current inventory. This includes an extra row
@@ -952,13 +953,22 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 * @return inventory view
 	 */
 	public Inventory getInventoryView()
+	{ return getInventoryView(this.getDisplayName() + "'s Inventory"); }
+
+	/**
+	 * Gets a copy of this player's current inventory. This includes an extra row
+	 * for armor and health/hunger information.
+	 *
+	 * @return inventory view
+	 */
+	public Inventory getInventoryView(String name)
 	{
 		Player player = this.getPlayer();
 		if (player == null) return null;
 
 		PlayerInventory pInventory = player.getInventory();
 		Inventory inventoryView = Bukkit.getServer().createInventory(null,
-			pInventory.getSize() + 9, this.getDisplayName() + "'s Inventory");
+			pInventory.getSize() + 9, name);
 
 		ItemStack[] oldContents = pInventory.getContents();
 		ItemStack[] newContents = inventoryView.getContents();
