@@ -221,8 +221,8 @@ public class SpectatorCommands implements CommandHandler
 
 		for (Player player : match.getWorld().getPlayers())
 		{
-			sender.sendMessage(ChatColor.GREEN + "This match is now in PREVIEW mode!");
-			sender.sendMessage(ChatColor.GREEN + "You may join a team and begin playing when you are ready.");
+			player.sendMessage(ChatColor.GREEN + "This match is now in PREVIEW mode!");
+			player.sendMessage(ChatColor.GREEN + "You may join a team and begin playing when you are ready.");
 		}
 		return true;
 	}
