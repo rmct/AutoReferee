@@ -19,6 +19,7 @@ commands:
     description: Show a list of all zones
     usage: /<command>
   matchinfo:
+    aliases: [info, minfo, mi]
     description: Show info about current match
     usage: /<command>
   joinmatch:
