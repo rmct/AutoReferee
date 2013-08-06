@@ -191,7 +191,7 @@ public class PlayerCommands implements CommandHandler
 
 	@AutoRefCommand(name={"setaccess"}, argmin=1, argmax=1, options="q",
 		description="Changes access type of the current match: PUBLIC or PRIVATE.",
-		usage="<command> <PUBLIC or PRIVATE>",
+		usage="<command> <access>",
 		opthelp=
 		{
 			"q", "set quietly (don't announce to lobby)",

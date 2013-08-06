@@ -3,11 +3,14 @@ package org.mctourney.autoreferee.util.commands;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 public class CommandDocumentationGenerator
@@ -23,7 +26,7 @@ public class CommandDocumentationGenerator
 
 	public static void generateDocumentationFile(File file)
 	{
-		Set<String> commandLines = Sets.newHashSet();
+		List<String> commandLines = Lists.newArrayList();
 		for (Class<? extends CommandHandler> handler : commandHandlers)
 			for (Method method : handler.getDeclaredMethods())
 		{
@@ -31,15 +34,25 @@ public class CommandDocumentationGenerator
 			AutoRefPermission perm = method.getAnnotation(AutoRefPermission.class);
 
 			if (cmd != null && !cmd.description().isEmpty())
-				commandLines.add(String.format("%s;%s;%s;%s;%d;%d;%s",
+			{
+				String usage = cmd.argmax() > 0 ? "<command> <args...>" : "<command>";
+				if (!cmd.usage().isEmpty()) usage = cmd.usage();
+
+				String c = StringUtils.join(cmd.name(), ' ');
+				usage = usage.replace("<command>", "/" + c);
+
+				if (usage.contains("|")) System.err.println(String.format(
+					"Usage string for '/%s' contains a '|'", StringUtils.join(cmd.name(), ' ')));
+
+				commandLines.add(String.format("%s|%s|%s|%s|%d|%d|%s|%s",
 					// command execution
-					StringUtils.join(cmd.name(), ' '),
+					c,
 
 					// options list (to be parsed)
 					cmd.options(),
 
 					// options help info, if any
-					StringUtils.join(cmd.opthelp(), '|'),
+					StringUtils.join(cmd.opthelp(), '#'),
 
 					// necessary permissions nodes
 					StringUtils.join(perm.nodes(), ','),
@@ -51,9 +64,15 @@ public class CommandDocumentationGenerator
 					perm.console() ? 1 : 0,
 
 					// text description (must be last)
-					cmd.description()
+					cmd.description(),
+
+					// usage string
+					usage
 				));
+			}
 		}
+
+		Collections.sort(commandLines);
 
 		try { FileUtils.writeLines(file, commandLines); }
 		catch (IOException e) { e.printStackTrace(); }
