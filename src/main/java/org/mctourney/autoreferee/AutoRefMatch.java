@@ -2139,6 +2139,9 @@ public class AutoRefMatch implements Metadatable
 						"Match ends in " + minutesRemaining + "m");
 			}
 
+			// send clock updates to ensure that client hud stays sync'd
+			messageReferees("match", getWorld().getName(), "time", getTimestamp(","));
+
 			if (lockTime) primaryWorld.setTime(startClock);
 			AutoRefMatch.this.checkWinConditions();
 		}
