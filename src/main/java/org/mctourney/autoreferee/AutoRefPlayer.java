@@ -978,7 +978,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 
 			meta.setDisplayName(ChatColor.GREEN + "" + ChatColor.ITALIC + "Player XP Level");
 			meta.setLore(Lists.newArrayList(ChatColor.GRAY + "" + ChatColor.ITALIC +
-				String.format("%d levels", player.getLevel())));
+				String.format("%d %s", player.getLevel(), player.getLevel() == 1 ? "level" : "levels")));
 
 			level.setItemMeta(meta);
 			newContents[oldContents.length + 5] = level;
