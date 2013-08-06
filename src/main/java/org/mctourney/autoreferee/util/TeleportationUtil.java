@@ -5,6 +5,7 @@ import java.lang.Math;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.Material;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
@@ -44,11 +45,20 @@ public class TeleportationUtil
 	{ return locationTeleport(loc.clone().add(0.5, 0.5, 0.5)); }
 
 	public static Location entityTeleport(Entity e)
-	{ return locationTeleport(e.getLocation()); }
+	{
+		Location loc = e.getLocation().clone();
+		if (e instanceof LivingEntity)
+		{
+			LivingEntity live = (LivingEntity) e;
+			loc.add(0, live.getEyeHeight(), 0);
+		}
+		return locationTeleport(loc);
+	}
 
 	public static Location playerTeleport(AutoRefPlayer apl)
 	{
 		if (apl == null) return null;
+		if (apl.isOnline()) return entityTeleport(apl.getPlayer());
 
 		Location loc = apl.getLocation().clone();
 		return locationTeleport(loc);
@@ -114,7 +124,7 @@ public class TeleportationUtil
 	{ return isBlockPassable(loc.getBlock()) &&
 		isBlockPassable(loc.getBlock().getRelative(0, 1, 0)); }
 
-	private static final int teleportDistance = 4;
+	private static final int MAX_TELEPORT_DISTANCE = 4;
 	private static Location checkDirection(Location loc, Vector v)
 	{
 		v = v.normalize();
@@ -122,10 +132,10 @@ public class TeleportationUtil
 
 		// furthest we can stray in one direction
 		// based on the rows preceeding
-		int m = teleportDistance;
+		int m = MAX_TELEPORT_DISTANCE;
 
 		Location best = loc.clone();
-		for (int h = 0; h <= teleportDistance && m > h; ++h)
+		for (int h = 0; h <= MAX_TELEPORT_DISTANCE && m > h; ++h)
 		{
 			// attempt up to M blocks away from the center
 			Location c = loc.clone().add(0, h, 0);
@@ -149,9 +159,7 @@ public class TeleportationUtil
 			if (h > 0 && k >= h && k + h > d) { d = k + h; best = c; }
 		}
 
-		// shift down if we ever found a spot that works
-		// location should be for feet-level, not head-level
-		return d < 0 ? best : best.subtract(0, 1, 0);
+		return best;
 	}
 
 	private static Set<Vector> directions = Sets.newHashSet

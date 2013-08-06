@@ -136,6 +136,7 @@ public class SpectatorCommands implements CommandHandler
 			AutoRefPlayer apl = match.getPlayer(options.getOptionValue('d'));
 			if (apl != null) tplocation = apl.getLastDeathLocation();
 			else tplocation = match.getLastDeathLocation();
+
 			targetcoords = "(" + LocationUtil.toBlockCoords(tplocation) + ")";
 			tplocation = TeleportationUtil.locationTeleport(tplocation);
 		}
