@@ -387,12 +387,11 @@ public class SpectatorCommands implements CommandHandler
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "nightvis"}, argmax=0, options="01",
+	@AutoRefCommand(name={"autoref", "nightvis"}, argmax=0, options="x",
 		description="Toggles permanent night vision for a spectator.",
 		opthelp=
 		{
-			"0", "explicitly disable night vision",
-			"1", "explicitly enable night vision",
+			"x", "explicitly disable night vision",
 		})
 	@AutoRefPermission(console=false, role=AutoRefMatch.Role.SPECTATOR)
 
@@ -401,22 +400,20 @@ public class SpectatorCommands implements CommandHandler
 		if (match != null)
 		{
 			AutoRefSpectator spectator = match.getSpectator((Player) sender);
-			boolean nightvis = !spectator.hasNightVision();
 
-			if (options.hasOption('0')) nightvis = false;
-			if (options.hasOption('1')) nightvis = true;
-			spectator.setNightVision(nightvis);
+			if (spectator.hasNightVision() && !options.hasOption('x'))
+				sender.sendMessage(ChatColor.GREEN + "Use '/ar nightvis -x' to disable night vision.");
+			else spectator.setNightVision(!options.hasOption('x'));
 		}
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "streamer"}, argmax=1, options="01",
+	@AutoRefCommand(name={"autoref", "streamer"}, argmax=1, options="x",
 		description="Toggles streamer",
 		usage="<command> [<player name>]",
 		opthelp=
 		{
-			"0", "explicitly disable streamer mode",
-			"1", "explicitly enable streamer mode",
+			"x", "explicitly disable streamer mode",
 		})
 	@AutoRefPermission(console=true, role=AutoRefMatch.Role.SPECTATOR)
 
@@ -444,14 +441,16 @@ public class SpectatorCommands implements CommandHandler
 		{
 			AutoRefSpectator spectator = match.getSpectator(player);
 			if (spectator == null) return false;
-			boolean streammode = !spectator.isStreamer();
 
-			if (options.hasOption('0')) streammode = false;
-			if (options.hasOption('1')) streammode = true;
-			spectator.setStreamer(streammode);
+			if (spectator.isStreamer() && !options.hasOption('x'))
+				sender.sendMessage(ChatColor.RED + "Use '/ar streamer -x' to disable streaming mode.");
+			else spectator.setStreamer(!options.hasOption('x'));
 
-			if (player != sender) sender.sendMessage(ChatColor.GREEN +
-				(streammode ? "Enabled" : "Disabled") + " streamer mode for " + player.getName());
+			if (player != sender)
+			{
+				String enabled = spectator.isStreamer() ? "Enabled" : "Disabled";
+				sender.sendMessage(ChatColor.GREEN + enabled + " streamer mode for " + player.getName());
+			}
 		}
 		return true;
 	}
