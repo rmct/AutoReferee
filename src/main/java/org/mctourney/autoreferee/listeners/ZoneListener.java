@@ -126,7 +126,7 @@ public class ZoneListener implements Listener
 		}
 
 		// if they have left their region, mark their exit location
-		if (!team.canEnter(event.getTo(), 0.3))
+		if (!team.canEnter(event.getTo(), 0.3) && !player.isSleeping())
 		{
 			// player is sneaking off the edge and not in freefall
 			if (player.isSneaking() && team.canEnter(event.getTo()) && fallspeed < FREEFALL_THRESHOLD);
