@@ -70,6 +70,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
@@ -352,7 +353,7 @@ public class AutoRefMatch implements Metadatable
 	// custom scoreboard
 	protected final Scoreboard scoreboard;
 	protected final Scoreboard  infoboard;
-	protected final Objective infoboardObjective;
+	protected Objective infoboardObjective;
 
 	public Scoreboard getScoreboard()
 	{ return scoreboard; }
@@ -364,7 +365,7 @@ public class AutoRefMatch implements Metadatable
 	{ return infoboardObjective; }
 
 	// teams participating in the match
-	protected Set<AutoRefTeam> teams = Sets.newHashSet();
+	protected Set<AutoRefTeam> teams;
 
 	/**
 	 * Gets the teams participating in this match.
@@ -398,7 +399,7 @@ public class AutoRefMatch implements Metadatable
 	public void setWinningTeam(AutoRefTeam team)
 	{ winningTeam = team; }
 
-	protected Map<String, PlayerKit> kits = Maps.newHashMap();
+	protected Map<String, PlayerKit> kits;
 
 	public PlayerKit getKit(String name)
 	{ return kits.get(name); }
@@ -620,10 +621,10 @@ public class AutoRefMatch implements Metadatable
 	protected CountdownTask matchStarter = null;
 
 	// mechanisms to open the starting gates
-	protected Set<StartMechanism> startMechanisms = Sets.newHashSet();
+	protected Set<StartMechanism> startMechanisms;
 
 	// protected entities - only protected from "butchering"
-	private Set<UUID> protectedEntities = Sets.newHashSet();
+	private Set<UUID> protectedEntities;
 
 	public boolean isProtected(UUID uuid)
 	{ return protectedEntities.contains(uuid); }
@@ -956,18 +957,10 @@ public class AutoRefMatch implements Metadatable
 		scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
 		 infoboard = Bukkit.getScoreboardManager().getNewScoreboard();
 
-		// register our custom objective for the sideboard
-		infoboardObjective = infoboard.registerNewObjective(
-			String.format("ar%x#scores", System.currentTimeMillis() % (1L << 16)), "dummy");
-
-		teams = Sets.newHashSet();
 		messageReferees("match", getWorld().getName(), "init");
 		setCurrentState(MatchStatus.WAITING);
 
 		loadWorldConfiguration();
-
-		// setup scoreboard for the teams (on next server tick)
-		setupScoreboardObjectives();
 
 		// restore competitive settings and some default values
 		primaryWorld.setPVP(true);
@@ -1183,6 +1176,18 @@ public class AutoRefMatch implements Metadatable
 		}
 		catch (Exception e) { e.printStackTrace(); return; }
 
+		// unregister any old objectives
+		for (Objective obj :  infoboard.getObjectives()) obj.unregister();
+		for (Objective obj : scoreboard.getObjectives()) obj.unregister();
+
+		// unregister any old teams
+		for (Team team :  infoboard.getTeams()) team.unregister();
+		for (Team team : scoreboard.getTeams()) team.unregister();
+
+		// register our custom objective for the sideboard
+		infoboardObjective = infoboard.registerNewObjective(
+			String.format("ar%x#scores", System.currentTimeMillis() % (1L << 16)), "dummy");
+
 		// get the extra settings cached
 		Element meta = worldConfig.getChild("meta");
 		if (meta != null)
@@ -1200,18 +1205,23 @@ public class AutoRefMatch implements Metadatable
 		long limit_min = AutoReferee.getInstance().getConfig().getLong("time-limit", 0L);
 		this.setTimeLimit(60L * limit_min);
 
-		// parse kits before parsing teams
 		Element kitsElt = worldConfig.getChild("kits");
+		kits = Maps.newHashMap();
+
+		// parse kits before parsing teams
 		if (kitsElt != null) for (Element kitElt : kitsElt.getChildren("kit"))
 		{
 			PlayerKit kit = new PlayerKit(kitElt);
 			kits.put(kit.getName(), kit);
 		}
 
+		teams = Sets.newHashSet();
 		for (Element e : worldConfig.getChild("teams").getChildren("team"))
 			teams.add(AutoRefTeam.fromElement(e, this));
 
 		Element eProtect = worldConfig.getChild("protect");
+		protectedEntities = Sets.newHashSet();
+
 		if (eProtect != null) for (Element c : eProtect.getChildren())
 			try { protectedEntities.add(UUID.fromString(c.getTextTrim())); }
 			catch (Exception e) {  }
@@ -1227,8 +1237,10 @@ public class AutoRefMatch implements Metadatable
 		Element gameplay = worldConfig.getChild("gameplay");
 		if (gameplay != null) this.parseExtraGameRules(gameplay);
 
-		Element regions = worldConfig.getChild("regions");
-		for (Element reg : regions.getChildren())
+		Element regElt = worldConfig.getChild("regions");
+		regions = Sets.newHashSet();
+
+		for (Element reg : regElt.getChildren())
 			if (!this.addRegion(AutoRefRegion.fromElement(this, reg)))
 				AutoReferee.log("Region did not load correctly: " + reg.getName(), java.util.logging.Level.SEVERE);
 
@@ -1240,12 +1252,17 @@ public class AutoRefMatch implements Metadatable
 		}
 
 		Element mechanisms = worldConfig.getChild("mechanisms");
+		startMechanisms = Sets.newHashSet();
+
 		if (mechanisms != null) for (Element mech : mechanisms.getChildren())
 		{
 			boolean state = Boolean.parseBoolean(mech.getText());
 			Location mechloc = LocationUtil.fromCoords(getWorld(), mech.getAttributeValue("pos"));
 			this.toggleStartMech(getWorld().getBlockAt(mechloc), state);
 		}
+
+		// setup scoreboard for the teams (on next server tick)
+		setupScoreboardObjectives();
 	}
 
 	private static Difficulty getDifficulty(String d)
@@ -1854,7 +1871,7 @@ public class AutoRefMatch implements Metadatable
 		return vteams.get(new Random().nextInt(vteams.size()));
 	}
 
-	private Set<AutoRefRegion> regions = Sets.newHashSet();
+	private Set<AutoRefRegion> regions;
 
 	public Set<AutoRefRegion> getRegions()
 	{ return regions; }
