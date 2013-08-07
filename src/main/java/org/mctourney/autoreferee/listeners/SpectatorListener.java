@@ -97,12 +97,12 @@ public class SpectatorListener implements PluginMessageListener, Listener
 
 	public void onPluginMessageReceived(String channel, Player player, byte[] mbytes)
 	{
-		try
+		if (AutoReferee.REFEREE_PLUGIN_CHANNEL.equals(channel)) try
 		{
 			String message = new String(mbytes, AutoReferee.PLUGIN_CHANNEL_ENC);
 			AutoRefMatch match = plugin.getMatch(player.getWorld());
 
-			if (!match.isSpectator(player)) return;
+			if (match == null || !match.isSpectator(player)) return;
 			AutoRefSpectator spec = match.getSpectator(player);
 
 			String[] parts = message.trim().split("\\|");
