@@ -2,7 +2,7 @@ package org.mctourney.autoreferee.listeners;
 
 import java.lang.management.ManagementFactory;
 import java.util.Map;
-import java.util.UUID;
+import java.util.WeakHashMap;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
@@ -17,7 +17,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
@@ -26,7 +25,6 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -49,7 +47,7 @@ public class CombatListener implements Listener
 
 	private Map<Location, AutoRefPlayer> tntPropagation = Maps.newHashMap();
 
-	private Map<UUID, Location> shotArrows = Maps.newHashMap();
+	private Map<Projectile, Location> shotArrows = new WeakHashMap<Projectile, Location>();
 	private Map<AutoRefPlayer, Long> lastPigmenAggro = Maps.newHashMap();
 
 	public CombatListener(Plugin p)
@@ -99,7 +97,7 @@ public class CombatListener implements Listener
 				}
 
 				if (ed.getDamager() instanceof Projectile)
-					locKiller = shotArrows.get(ed.getDamager().getUniqueId());
+					locKiller = shotArrows.get(ed.getDamager());
 			}
 
 			// update the death message with the changes
@@ -192,7 +190,7 @@ public class CombatListener implements Listener
 				if (arrow.getShooter().getType() == EntityType.PLAYER)
 				{
 					AutoRefPlayer shooter = match.getPlayer((Player) arrow.getShooter());
-					Location shotFrom = shotArrows.get(arrow.getUniqueId());
+					Location shotFrom = shotArrows.get(arrow);
 
 					if (shooter != null && shotFrom != null)
 						shooter.setFurthestShot(arrow.getLocation().distance(shotFrom));
@@ -308,18 +306,6 @@ public class CombatListener implements Listener
 		}
 	}
 
-	public class ArrowClearTask extends BukkitRunnable
-	{
-		private UUID uuid;
-
-		public ArrowClearTask (UUID uuid)
-		{ this.uuid = uuid; }
-
-		@Override
-		public void run()
-		{ shotArrows.remove(uuid); }
-	}
-
 	@EventHandler
 	public void playerBowFire(EntityShootBowEvent event)
 	{
@@ -333,15 +319,8 @@ public class CombatListener implements Listener
 		AutoRefPlayer apl = match.getPlayer(player);
 		if (apl != null) apl.incrementShotsFired();
 
-		shotArrows.put(event.getProjectile().getUniqueId(),
+		shotArrows.put((Projectile) event.getProjectile(),
 			event.getEntity().getLocation().clone());
-	}
-
-	@EventHandler
-	public void arrowLand(ProjectileHitEvent event)
-	{
-		if (event.getEntityType() == EntityType.ARROW)
-			new ArrowClearTask(event.getEntity().getUniqueId()).runTask(plugin);
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST)
