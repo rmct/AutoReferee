@@ -18,6 +18,8 @@ import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
+import org.mctourney.autoreferee.util.TeleportationUtil;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -103,11 +105,25 @@ public abstract class AutoRefRegion
 
 	public abstract Element toElement();
 
+	private int ANGLE_RND = 15;
+
+	public Integer getFixedYaw()
+	{
+		if (yaw == null) return null;
+		return Math.round(((float)yaw/ANGLE_RND)*ANGLE_RND);
+	}
+
+	public Integer getFixedPitch()
+	{
+		if (pitch == null) return null;
+		return Math.round(((float)pitch/ANGLE_RND)*ANGLE_RND);
+	}
+
 	public Location getLocation()
 	{
 		Location loc = getRandomLocation(random);
-		if (pitch != null) loc.setPitch(pitch);
-		if (yaw != null) loc.setYaw(yaw);
+		if (pitch != null) loc.setPitch(getFixedPitch());
+		if (yaw != null) loc.setYaw(getFixedYaw());
 
 		return loc.add(0.0, 0.5, 0.0);
 	}
@@ -122,10 +138,27 @@ public abstract class AutoRefRegion
 		World world = cuboid.world;
 
 		double pointX = (min.getBlockX() + max.getBlockX()) / 2.0;
+		double pointY = (min.getBlockY() + max.getBlockY()) / 2.0;
 		double pointZ = (min.getBlockZ() + max.getBlockZ()) / 2.0;
-		int pointY = world.getHighestBlockAt((int) pointX, (int) pointZ).getY();
 
-		return new Location(world, pointX, pointY + 1, pointZ);
+		Location loc = new Location(world, pointX, pointY, pointZ);
+		if (pitch != null) loc.setPitch(getFixedPitch());
+		if (yaw != null) loc.setYaw(getFixedYaw());
+
+		return loc;
+	}
+
+	public Location getGroundedCenter()
+	{
+		// keep searching down until we hit ground
+		Location loc = getCenter();
+		while (loc.getBlockY() > 0)
+		{
+			Location next = loc.clone().add(0,-1,0);
+			if (!TeleportationUtil.isBlockPassable(next.getBlock())) break;
+			loc = next;
+		}
+		return loc;
 	}
 
 	public boolean contains(Location loc)
@@ -178,8 +211,6 @@ public abstract class AutoRefRegion
 		return this;
 	}
 
-	private int ANGLE_RND = 15;
-
 	protected Element setRegionSettings(Element e)
 	{
 		Set<Flag> fset = getFlags();
@@ -192,11 +223,8 @@ public abstract class AutoRefRegion
 		if (getOwners() != null) for (AutoRefTeam team : getOwners())
 			e.addContent(new Element("owner").setText(team.getDefaultName()));
 
-		if (yaw != null) e.setAttribute("yaw",
-			Integer.toString(Math.round((float)yaw/ANGLE_RND)*ANGLE_RND));
-
-		if (pitch != null) e.setAttribute("pitch",
-			Integer.toString(Math.round((float)pitch/ANGLE_RND)*ANGLE_RND));
+		if (yaw != null) e.setAttribute("yaw", Integer.toString(getFixedYaw()));
+		if (pitch != null) e.setAttribute("pitch", Integer.toString(getFixedPitch()));
 
 		// set the custom region name if one has been specified
 		if (regionName != null) e.setAttribute("name", this.getName());

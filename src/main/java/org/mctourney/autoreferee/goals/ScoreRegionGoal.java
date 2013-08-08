@@ -82,7 +82,7 @@ public class ScoreRegionGoal extends ScoreGoal
 		CuboidRegion cube = null;
 		for (AutoRefRegion reg : this.regions)
 			cube = AutoRefRegion.combine(cube, reg);
-		return cube == null ? null : cube.getCenter();
+		return cube == null ? null : cube.getGroundedCenter();
 	}
 
 	@Override
