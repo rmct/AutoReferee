@@ -35,10 +35,11 @@ public abstract class AutoRefRegion
 		SAFE               (1 << 2, false, 's', "safe"),
 		NO_EXPLOSIONS      (1 << 3, false, 'e', "noexplosion"),
 		NO_ACCESS          (1 << 4, false, 'a', "noaccess"),
-		NO_TELEPORT        (1 << 5, false, 't', "noteleport");
+		NO_TELEPORT        (1 << 5, false, 't', "noteleport"),
+		SPAWNERS_ONLY      (1 << 6, false, 'w', "spawnersonly");
 
 		// generated from above values
-		public static final String OPTIONS = "abenst";
+		public static final String OPTIONS = "abenstw";
 
 		private int value;
 		private String name;

@@ -354,6 +354,11 @@ public class ZoneListener implements Listener
 		if (!match.getCurrentState().inProgress())
 		{ event.setCancelled(true); return; }
 
+		// if this is a spawners-only region and its a non-spawner spawn, cancel
+		if (match.hasFlag(event.getLocation(), AutoRefRegion.Flag.SPAWNERS_ONLY) &&
+			event.getSpawnReason() != SpawnReason.SPAWNER)
+		{ event.setCancelled(true); return; }
+
 		// if this is a safe zone, cancel
 		if (match.hasFlag(event.getLocation(), AutoRefRegion.Flag.SAFE))
 		{ event.setCancelled(true); return; }
