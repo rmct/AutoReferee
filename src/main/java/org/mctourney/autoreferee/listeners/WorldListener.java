@@ -3,6 +3,7 @@ package org.mctourney.autoreferee.listeners;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.entity.Player;
@@ -174,8 +175,10 @@ public class WorldListener implements Listener
 	@EventHandler
 	public void blockForm(BlockFormEvent event)
 	{
+		// we are really only interested in stopping ice from forming here
 		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
-		if (match != null && !match.getCurrentState().inProgress())
+		if (match != null && !match.getCurrentState().inProgress()
+			&& event.getNewState().getType() == Material.ICE)
 		{ event.setCancelled(true); return; }
 	}
 
