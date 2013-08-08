@@ -654,7 +654,9 @@ public class AutoRefMatch implements Metadatable
 	public void toggleProtection(UUID uuid)
 	{ if (isProtected(uuid)) unprotect(uuid); else protect(uuid); }
 
-	private boolean allowFriendlyFire = true;
+	protected boolean playersBecomeSpectators = true;
+
+	protected boolean allowFriendlyFire = true;
 
 	/**
 	 * Checks if friendly fire is allowed in this match.
@@ -969,6 +971,13 @@ public class AutoRefMatch implements Metadatable
 	{
 		setPrimaryWorld(world);
 
+		// is this world a temporary world?
+		this.tmp = tmp;
+
+		// should eliminated players become spectators?
+		this.playersBecomeSpectators = AutoReferee.getInstance().getConfig()
+			.getBoolean("players-become-spectators", true);
+
 		// setup custom scoreboard
 		scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
 		 infoboard = Bukkit.getScoreboardManager().getNewScoreboard();
@@ -987,9 +996,6 @@ public class AutoRefMatch implements Metadatable
 
 		// last, send an update about the match to everyone logged in
 		for (Player pl : primaryWorld.getPlayers()) sendMatchInfo(pl);
-
-		// is this world a temporary world?
-		this.tmp = tmp;
 
 		// brand new match transcript
 		transcript = Lists.newLinkedList();
@@ -2815,7 +2821,7 @@ public class AutoRefMatch implements Metadatable
 		if (!team.leaveQuietly(player)) return;
 
 		this.broadcast(name + " has been eliminated!");
-		this.ejectPlayer(player);
+		if (!this.playersBecomeSpectators) this.ejectPlayer(player);
 		this.checkWinConditions();
 	}
 
@@ -2910,7 +2916,9 @@ public class AutoRefMatch implements Metadatable
 	{
 		AutoRefTeam team = getPlayerTeam(player);
 		if (team != null) return team.getSpawnLocation();
-		return this.getWorldSpawn();
+
+		boolean useWorldSpawn = getCurrentState().isBeforeMatch();
+		return useWorldSpawn ? this.getWorldSpawn() : this.getSpectatorSpawn();
 	}
 
 	/**

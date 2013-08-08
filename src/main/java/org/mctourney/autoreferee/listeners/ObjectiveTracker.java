@@ -290,7 +290,11 @@ public class ObjectiveTracker implements Listener
 
 		AutoRefMatch match = plugin.getMatch(event.getRespawnLocation().getWorld());
 		if (match != null && match.getRespawnMode() == RespawnMode.BEDSONLY)
-			if (player.getBedSpawnLocation() == null) match.eliminatePlayer(player);
+			if (player.getBedSpawnLocation() == null)
+			{
+				match.eliminatePlayer(player);
+				event.setRespawnLocation(match.getSpectatorSpawn());
+			}
 	}
 
 	private class CraftCountTask extends BukkitRunnable
