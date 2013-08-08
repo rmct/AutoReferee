@@ -180,7 +180,9 @@ public class AutoRefMatch implements Metadatable
 
 	// world this match is taking place on
 	private World primaryWorld;
+
 	private AutoRefRegion worldSpawn = null;
+	private AutoRefRegion specSpawn = null;
 
 	private void setPrimaryWorld(World w)
 	{
@@ -191,9 +193,15 @@ public class AutoRefMatch implements Metadatable
 
 	public void setWorldSpawn(Location loc)
 	{
-		while (loc.getWorld().getBlockTypeIdAt(loc) != Material.AIR.getId()) loc = loc.add(0, 1, 0);
+		while (!TeleportationUtil.isBlockPassable(loc.getWorld().getBlockAt(loc))) loc = loc.add(0, 1, 0);
 		worldSpawn = new org.mctourney.autoreferee.regions.PointRegion(loc);
 		loc.getWorld().setSpawnLocation(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+	}
+
+	public void setSpectatorSpawn(Location loc)
+	{
+		while (!TeleportationUtil.isBlockPassable(loc.getWorld().getBlockAt(loc))) loc = loc.add(0, 1, 0);
+		specSpawn = new org.mctourney.autoreferee.regions.PointRegion(loc);
 	}
 
 	public boolean isPracticeMode()
@@ -238,6 +246,14 @@ public class AutoRefMatch implements Metadatable
 	 */
 	public Location getWorldSpawn()
 	{ return worldSpawn.getLocation(); }
+
+	/**
+	 * Gets the global spawn location for this match.
+	 *
+	 * @return global spawn location
+	 */
+	public Location getSpectatorSpawn()
+	{ return specSpawn != null ? specSpawn.getLocation() : getWorldSpawn(); }
 
 	private boolean tmp;
 
@@ -1013,6 +1029,19 @@ public class AutoRefMatch implements Metadatable
 	}
 
 	/**
+	 * Gets all match spectators (spectators, referees, and streamers).
+	 *
+	 * @return collection of spectators
+	 */
+	public Set<Player> getSpectators()
+	{
+		Set<Player> specs = Sets.newHashSet();
+		for (Player p : primaryWorld.getPlayers())
+			if (!isPlayer(p)) specs.add(p);
+		return specs;
+	}
+
+	/**
 	 * Gets all non-streamer referees present in this match.
 	 *
 	 * @return collection of referees
@@ -1234,6 +1263,9 @@ public class AutoRefMatch implements Metadatable
 		String attrSpawn = worldConfig.getChild("startregion").getAttributeValue("spawn");
 		if (attrSpawn != null) setWorldSpawn(LocationUtil.fromCoords(getWorld(), attrSpawn));
 
+		String attrSpecSpawn = worldConfig.getChild("startregion").getAttributeValue("spec");
+		if (attrSpecSpawn != null) setSpectatorSpawn(LocationUtil.fromCoords(getWorld(), attrSpecSpawn));
+
 		Element gameplay = worldConfig.getChild("gameplay");
 		if (gameplay != null) this.parseExtraGameRules(gameplay);
 
@@ -1380,6 +1412,9 @@ public class AutoRefMatch implements Metadatable
 			Element eStartRegions = worldConfig.getChild("startregion");
 			if (getWorldSpawn() != null) eStartRegions.setAttribute("spawn",
 				LocationUtil.toBlockCoordsWithYaw(getWorldSpawn()));
+
+			if (specSpawn != null) eStartRegions.setAttribute("spec",
+				LocationUtil.toBlockCoordsWithYaw(specSpawn.getCenter()));
 
 			eStartRegions.removeContent();
 			for (AutoRefRegion reg : this.getStartRegions())
@@ -2116,6 +2151,11 @@ public class AutoRefMatch implements Metadatable
 		// set teams as started
 		for (AutoRefTeam team : getTeams())
 			team.startMatch();
+
+		if (specSpawn != null)
+			for (Player spec : this.getSpectators())
+				if (this.inStartRegion(spec.getLocation()))
+					spec.teleport(specSpawn.getLocation());
 
 		// set the current state to playing
 		setCurrentState(MatchStatus.PLAYING);

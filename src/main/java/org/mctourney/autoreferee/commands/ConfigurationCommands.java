@@ -161,12 +161,13 @@ public class ConfigurationCommands implements CommandHandler
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "setspawn"}, argmin=0, argmax=1, options="a",
+	@AutoRefCommand(name={"autoref", "setspawn"}, argmin=0, argmax=1, options="as",
 		description="Set the current location as the global spawn. If a team name is provided, sets team spawn.",
 		usage="<command> [<team name>]",
 		opthelp=
 		{
 			"a", "add an additional spawn location",
+			"s", "set spectator spawn",
 		})
 	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
 
@@ -177,9 +178,17 @@ public class ConfigurationCommands implements CommandHandler
 
 		if (args.length == 0)
 		{
-			match.setWorldSpawn(player.getLocation());
-			String coords = LocationUtil.toBlockCoords(match.getWorldSpawn());
-			sender.sendMessage(ChatColor.GRAY + "Global spawn set to " + coords);
+			if (options.hasOption('s'))
+			{
+				match.setSpectatorSpawn(player.getLocation());
+				sender.sendMessage(ChatColor.GRAY + "Spectator spawn set!");
+			}
+			else
+			{
+				match.setWorldSpawn(player.getLocation());
+				String coords = LocationUtil.toBlockCoords(match.getWorldSpawn());
+				sender.sendMessage(ChatColor.GRAY + "Global spawn set to " + coords);
+			}
 
 			return true;
 		}
