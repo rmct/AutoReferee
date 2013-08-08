@@ -982,10 +982,10 @@ public class AutoRefMatch implements Metadatable
 		scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
 		 infoboard = Bukkit.getScoreboardManager().getNewScoreboard();
 
+		loadWorldConfiguration();
+
 		messageReferees("match", getWorld().getName(), "init");
 		setCurrentState(MatchStatus.WAITING);
-
-		loadWorldConfiguration();
 
 		// restore competitive settings and some default values
 		primaryWorld.setPVP(true);
