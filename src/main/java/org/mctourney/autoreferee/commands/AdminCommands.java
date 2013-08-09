@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -15,8 +16,10 @@ import org.apache.commons.lang.StringUtils;
 
 import org.mctourney.autoreferee.AutoRefMap;
 import org.mctourney.autoreferee.AutoRefMatch;
+import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.event.match.MatchUnloadEvent;
+import org.mctourney.autoreferee.event.player.PlayerTeamJoinEvent.Reason;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
 import org.mctourney.autoreferee.util.commands.CommandHandler;
@@ -122,9 +125,13 @@ public class AdminCommands implements CommandHandler
 		return true;
 	}
 
-	@AutoRefCommand(name={"autoref", "reload"},
+	@AutoRefCommand(name={"autoref", "reload"}, options="x",
 		description="Reloads the current map (or specified map) to its original, unmodified state. Players are migrated to the new copy.",
-		usage="<command> [<map name>]")
+		usage="<command> [<map name>]",
+		opthelp=
+		{
+			"x", "transfer players to same teams and location",
+		})
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
 
 	public boolean reloadMap(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
@@ -145,10 +152,29 @@ public class AdminCommands implements CommandHandler
 
 		sender.sendMessage(ChatColor.DARK_GRAY +
 			"Preparing a new copy of " + map.getVersionString());
-
 		AutoRefMatch newmatch = AutoRefMap.createMatch(map, null);
-		for (Player p : match.getWorld().getPlayers())
-			p.teleport(newmatch.getWorldSpawn());
+
+		if (map.equals(match.getMap()) && options.hasOption('x'))
+		{
+			newmatch.setStartTime(match.getStartTime());
+			newmatch.setCurrentState(match.getCurrentState());
+
+			for (Player p : match.getWorld().getPlayers())
+			{
+				AutoRefTeam team = match.getPlayerTeam(p);
+				if (team != null)
+				{
+					AutoRefTeam newteam = newmatch.getTeam(team.getDefaultName());
+					newteam.join(p, Reason.AUTOMATIC, true);
+				}
+
+				// teleport the player to location in new map
+				Location loc = p.getLocation();
+				loc.setWorld(newmatch.getWorld());
+				p.teleport(loc);
+			}
+		}
+		else for (Player p : match.getWorld().getPlayers()) newmatch.joinMatch(p);
 
 		match.destroy(MatchUnloadEvent.Reason.COMMAND);
 		return true;
