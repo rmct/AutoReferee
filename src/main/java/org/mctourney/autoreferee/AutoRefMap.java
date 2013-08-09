@@ -636,7 +636,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 			AutoReferee.callEvent(event);
 
 			AutoReferee plugin = AutoReferee.getInstance();
-			plugin.getLogger().info(String.format("%s loaded %s (%s)", sender.getName(),
+			AutoReferee.log(String.format("%s loaded %s (%s)", sender.getName(),
 				match.getVersionString(), match.getWorld().getName()));
 
 			sender.sendMessage(ChatColor.DARK_GRAY + match.getVersionString() + " setup!");

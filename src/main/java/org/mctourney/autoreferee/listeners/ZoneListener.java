@@ -389,7 +389,6 @@ public class ZoneListener implements Listener
 
 		boolean excludeStreamers = dsq <= LONG_TELE_DISTANCE * LONG_TELE_DISTANCE;
 		for (Player ref : match.getReferees(excludeStreamers)) ref.sendMessage(message);
-		plugin.getLogger().info(ChatColor.stripColor(message));
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)

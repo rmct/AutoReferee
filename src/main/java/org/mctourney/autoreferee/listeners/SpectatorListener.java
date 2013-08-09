@@ -144,7 +144,7 @@ public class SpectatorListener implements PluginMessageListener, Listener
 			}
 		}
 		catch (UnsupportedEncodingException e)
-		{ plugin.getLogger().info("Unsupported encoding: " + AutoReferee.PLUGIN_CHANNEL_ENC); }
+		{ AutoReferee.log("Unsupported encoding: " + AutoReferee.PLUGIN_CHANNEL_ENC); }
 	}
 
 	@EventHandler

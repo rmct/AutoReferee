@@ -65,7 +65,7 @@ public class ConfigurationCommands implements CommandHandler
 
 		String resp = String.format("%s %s", match.getVersionString(),
 			zipfile == null ? "failed to archive." : "archived!");
-		sender.sendMessage(ChatColor.GREEN + resp); plugin.getLogger().info(resp);
+		sender.sendMessage(ChatColor.GREEN + resp); AutoReferee.log(resp);
 		return true;
 	}
 

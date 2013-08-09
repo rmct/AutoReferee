@@ -3218,7 +3218,7 @@ public class AutoRefMatch implements Metadatable
 			player.sendMessage(message);
 
 		if (plugin.isConsoleLoggingEnabled())
-			plugin.getLogger().info(event.toString());
+			AutoReferee.log(event.toString());
 	}
 
 	/**
