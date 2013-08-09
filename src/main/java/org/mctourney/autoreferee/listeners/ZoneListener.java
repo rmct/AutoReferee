@@ -355,8 +355,9 @@ public class ZoneListener implements Listener
 		{ event.setCancelled(true); return; }
 
 		// if this is a spawners-only region and its a non-spawner spawn, cancel
+		// note: spawning rules for silverfish are a bit of a special case, so allow them
 		if (match.hasFlag(event.getLocation(), AutoRefRegion.Flag.SPAWNERS_ONLY) &&
-			event.getSpawnReason() != SpawnReason.SPAWNER)
+			event.getSpawnReason() != SpawnReason.SPAWNER && event.getEntityType() != EntityType.SILVERFISH)
 		{ event.setCancelled(true); return; }
 
 		// if this is a safe zone, cancel
