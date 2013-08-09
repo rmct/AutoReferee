@@ -132,12 +132,16 @@ public class AdminCommands implements CommandHandler
 		{
 			"x", "transfer players to same teams and location",
 		})
-	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
+	@AutoRefPermission(console=true)
 
 	public boolean reloadMap(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 		throws IOException
 	{
 		if (match == null) return false;
+
+		// in practice mode, this command is available to anyone
+		if ((!match.isPracticeMode() || match.getCurrentState().isBeforeMatch())
+			&& !sender.hasPermission("autoreferee.admin")) return false;
 
 		String name = match.getMapName();
 		if (args.length > 0) name = StringUtils.join(args, ' ');
