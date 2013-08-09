@@ -1,7 +1,5 @@
 package org.mctourney.autoreferee.commands;
 
-import java.util.Map;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -24,19 +22,13 @@ import org.mctourney.autoreferee.util.commands.CommandHandler;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
 
-import com.google.common.collect.Maps;
-
 public class SpectatorCommands implements CommandHandler
 {
 	AutoReferee plugin;
 
-	// save previous location before teleport
-	private Map<String, Location> prevLocation;
-
 	public SpectatorCommands(Plugin plugin)
 	{
 		this.plugin = (AutoReferee) plugin;
-		prevLocation = Maps.newHashMap();
 	}
 
 	@AutoRefCommand(name={"announce"},
@@ -176,8 +168,7 @@ public class SpectatorCommands implements CommandHandler
 		}
 		else if (options.hasOption('r'))
 		{
-			// get location in lookup table, or null
-			tplocation = prevLocation.get(player.getName());
+			tplocation = match.getSpectator(player).prevLocation();
 		}
 		else if (args.length > 0)
 		{
@@ -191,7 +182,7 @@ public class SpectatorCommands implements CommandHandler
 		// if we ever found a valid teleport, take it!
 		if (tplocation != null && tplocation.getWorld() == player.getWorld())
 		{
-			prevLocation.put(player.getName(), player.getLocation());
+			match.getSpectator(player).setPrevLocation(player.getLocation());
 			player.setFlying(true); player.teleport(tplocation);
 		}
 		else player.sendMessage(ChatColor.DARK_GRAY + "You cannot teleport to this location: invalid or unsafe. " + ChatColor.GRAY + targetcoords);

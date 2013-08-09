@@ -136,6 +136,7 @@ public class SpectatorListener implements PluginMessageListener, Listener
 					"You cannot teleport to this location: invalid or unsafe.");
 				else
 				{
+					plugin.getMatch(player.getWorld()).getSpectator(player).setPrevLocation(player.getLocation());
 					player.teleport(TeleportationUtil.locationTeleport(loc));
 					player.setFlying(true);
 				}
