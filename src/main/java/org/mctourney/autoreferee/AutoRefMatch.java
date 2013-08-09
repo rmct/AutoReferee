@@ -1809,6 +1809,22 @@ public class AutoRefMatch implements Metadatable
 		}
 	}
 
+	protected class PlayerEjectTask extends BukkitRunnable
+	{
+		private Player player;
+		private Location target;
+
+		protected PlayerEjectTask(Player player, Location target)
+		{
+			this.player = player;
+			this.target = target;
+		}
+
+		@Override
+		public void run()
+		{ player.teleport(target); }
+	}
+
 	public void ejectPlayer(Player player)
 	{
 		PlayerMatchLeaveEvent event = new PlayerMatchLeaveEvent(player, this);
@@ -1826,7 +1842,7 @@ public class AutoRefMatch implements Metadatable
 		if (target != null)
 		{
 			PlayerUtil.setGameMode(player, GameMode.SURVIVAL);
-			player.teleport(target.getSpawnLocation());
+			new PlayerEjectTask(player, target.getSpawnLocation()).runTask(AutoReferee.getInstance());
 		}
 
 		// otherwise, kick them from the server
@@ -2519,7 +2535,7 @@ public class AutoRefMatch implements Metadatable
 	}
 
 	// helper class for terminating world, synchronous task
-	private class MatchEndTask extends BukkitRunnable
+	private class MatchUnloadTask extends BukkitRunnable
 	{
 		public void run()
 		{ destroy(MatchUnloadEvent.Reason.COMPLETE); }
@@ -2625,7 +2641,7 @@ public class AutoRefMatch implements Metadatable
 			"delay-seconds.completed", COMPLETED_SECONDS);
 
 		if (plugin.getLobbyWorld() != null)
-			new MatchEndTask().runTaskLater(plugin, termDelay * 20L);
+			new MatchUnloadTask().runTaskLater(plugin, termDelay * 20L);
 
 		if (itemElevatorDetectionTask != null) itemElevatorDetectionTask.cancel();
 		itemElevatorDetectionTask = null;
