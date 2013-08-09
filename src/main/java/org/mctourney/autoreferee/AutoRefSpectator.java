@@ -17,6 +17,8 @@ public class AutoRefSpectator extends AutoRefPlayer
 	private boolean viewInventory = true;
 	private boolean invisible = true;
 	private boolean streamer;
+	
+	private Location prevLocation = null;
 
 	public AutoRefSpectator(String name, AutoRefMatch match)
 	{
@@ -107,4 +109,10 @@ public class AutoRefSpectator extends AutoRefPlayer
 
 	public void setViewInventory(boolean vi)
 	{ this.viewInventory = vi; }
+	
+	public Location prevLocation()
+	{ return prevLocation;}
+	
+	public void setPrevLocation(Location l)
+	{ this.prevLocation = l;}
 }
