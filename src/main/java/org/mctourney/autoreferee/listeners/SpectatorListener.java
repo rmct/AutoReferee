@@ -134,7 +134,11 @@ public class SpectatorListener implements PluginMessageListener, Listener
 				// teleport to the location, if any
 				if (loc == null) player.sendMessage(ChatColor.DARK_GRAY +
 					"You cannot teleport to this location: invalid or unsafe.");
-				else player.teleport(TeleportationUtil.locationTeleport(loc));
+				else 
+				{
+					player.teleport(TeleportationUtil.locationTeleport(loc));
+					player.setFlying(true);
+				}
 			}
 			else if ("inventory".equalsIgnoreCase(parts[0]))
 			{
