@@ -10,6 +10,8 @@ var searchData=
   ['clearentities',['clearEntities',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_match.html#a9ba9b5520276b45f0522f4ab01e18b5d',1,'org::mctourney::autoreferee::AutoRefMatch']]],
   ['clearinventory',['clearInventory',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_player.html#adf6c62b6badb004e69d88ec38244a281',1,'org::mctourney::autoreferee::AutoRefPlayer']]],
   ['clearmatch',['clearMatch',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_referee.html#a8e01dbb9627051cd989c450e26aee970',1,'org::mctourney::autoreferee::AutoReferee']]],
+  ['clearspawnregions',['clearSpawnRegions',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_team.html#a294d49b6c8cf5b10f7617604507828c5',1,'org::mctourney::autoreferee::AutoRefTeam']]],
+  ['cleartntowner',['clearTNTOwner',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_referee.html#a2a044fd2aca29b16c3774e64fbe775fe',1,'org::mctourney::autoreferee::AutoReferee']]],
   ['colormessage',['colorMessage',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_match.html#ac141dd6f38423cd9e4b035a087d732ce',1,'org::mctourney::autoreferee::AutoRefMatch']]],
   ['creatematch',['createMatch',['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_map.html#aa5e0bfb76fc233da96ac0d9bdcad90b9',1,'org.mctourney.autoreferee.AutoRefMap.createMatch(String map, String world)'],['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_map.html#a0055c2798ea65cf627259da74e6e7247',1,'org.mctourney.autoreferee.AutoRefMap.createMatch(AutoRefMap map, String world)'],['../classorg_1_1mctourney_1_1autoreferee_1_1_auto_ref_map.html#aab508dd47b4358eb6ea10a503e100799',1,'org.mctourney.autoreferee.AutoRefMap.createMatch(AutoRefMatch.MatchParams params)']]]
 ];

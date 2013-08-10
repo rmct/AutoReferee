@@ -120,13 +120,16 @@ implements java.lang.Comparable&lt;<a href="../../../org/mctourney/autoreferee/A
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>protected </code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#AutoRefMap(java.lang.String)">AutoRefMap</a></strong>(java.lang.String&nbsp;csv)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#AutoRefMap(java.lang.String, java.lang.String, java.io.File)">AutoRefMap</a></strong>(java.lang.String&nbsp;name,
+          java.lang.String&nbsp;version,
+          java.io.File&nbsp;zip)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>protected </code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#AutoRefMap(java.lang.String, java.lang.String, java.io.File)">AutoRefMap</a></strong>(java.lang.String&nbsp;name,
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#AutoRefMap(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">AutoRefMap</a></strong>(java.lang.String&nbsp;name,
           java.lang.String&nbsp;version,
-          java.io.File&nbsp;folder)</code>&nbsp;</td>
+          java.lang.String&nbsp;filename,
+          java.lang.String&nbsp;md5sum)</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -178,10 +181,8 @@ implements java.lang.Comparable&lt;<a href="../../../org/mctourney/autoreferee/A
 </td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>java.io.File</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#getFolder()">getFolder</a></strong>()</code>
-<div class="block">Gets root folder for this map, downloading if necessary.</div>
-</td>
+<td class="colFirst"><code>static Element</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#getConfigFileData(java.io.File)">getConfigFileData</a></strong>(java.io.File&nbsp;zip)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static java.util.Set&lt;<a href="../../../org/mctourney/autoreferee/AutoRefMap.html" title="class in org.mctourney.autoreferee">AutoRefMap</a>&gt;</code></td>
@@ -196,58 +197,58 @@ implements java.lang.Comparable&lt;<a href="../../../org/mctourney/autoreferee/A
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>static java.io.File</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#getMapFolder(java.lang.String)">getMapFolder</a></strong>(java.lang.String&nbsp;name)</code>
-<div class="block">Gets root folder of map with the given name, downloading if necessary.</div>
-</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../org/mctourney/autoreferee/AutoRefMap.html" title="class in org.mctourney.autoreferee">AutoRefMap</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#getMapFromURL(java.lang.String)">getMapFromURL</a></strong>(java.lang.String&nbsp;url)</code>
 <div class="block">Gets map object associated with the zip file at the provided URL.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../org/mctourney/autoreferee/AutoRefMap.html" title="class in org.mctourney.autoreferee">AutoRefMap</a></code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#getMapInfo(java.io.File)">getMapInfo</a></strong>(java.io.File&nbsp;folder)</code>
-<div class="block">Get map info object associated with a folder</div>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#getMapInfo(java.io.File)">getMapInfo</a></strong>(java.io.File&nbsp;zip)</code>
+<div class="block">Get map info object associated with a zip</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static java.io.File</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#getMapLibrary()">getMapLibrary</a></strong>()</code>
 <div class="block">Gets root folder of map library, generating folder if necessary.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#getName()">getName</a></strong>()</code>
 <div class="block">Gets the name of the map</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static java.util.Set&lt;<a href="../../../org/mctourney/autoreferee/AutoRefMap.html" title="class in org.mctourney.autoreferee">AutoRefMap</a>&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#getRemoteMaps()">getRemoteMaps</a></strong>()</code>
 <div class="block">Gets maps that are not installed, but may be downloaded.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#getUpdates(CommandSender, boolean)">getUpdates</a></strong>(CommandSender&nbsp;sender,
           boolean&nbsp;force)</code>
 <div class="block">Downloads updates to all maps installed on the server.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#getVersion()">getVersion</a></strong>()</code>
 <div class="block">Gets the version of the map</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#getVersionString()">getVersionString</a></strong>()</code>
 <div class="block">Gets human-readable name of map, including version number.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.io.File</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#getZip()">getZip</a></strong>()</code>
+<div class="block">Gets root zip for this map, downloading if necessary.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -255,9 +256,23 @@ implements java.lang.Comparable&lt;<a href="../../../org/mctourney/autoreferee/A
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#hashCode()">hashCode</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#install()">install</a></strong>()</code>
+<div class="block">Installs the map if it is not already installed.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#isInstalled()">isInstalled</a></strong>()</code>
 <div class="block">Gets whether the map has been installed.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMap.html#loadMap(CommandSender, org.mctourney.autoreferee.AutoRefMap, java.lang.String)">loadMap</a></strong>(CommandSender&nbsp;sender,
+       <a href="../../../org/mctourney/autoreferee/AutoRefMap.html" title="class in org.mctourney.autoreferee">AutoRefMap</a>&nbsp;map,
+       java.lang.String&nbsp;worldname)</code>
+<div class="block">Loads a map by name.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -312,16 +327,22 @@ implements java.lang.Comparable&lt;<a href="../../../org/mctourney/autoreferee/A
 <h4>AutoRefMap</h4>
 <pre>protected&nbsp;AutoRefMap(java.lang.String&nbsp;name,
           java.lang.String&nbsp;version,
-          java.io.File&nbsp;folder)</pre>
+          java.io.File&nbsp;zip)
+              throws java.io.IOException</pre>
+<dl><dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
 </li>
 </ul>
-<a name="AutoRefMap(java.lang.String)">
+<a name="AutoRefMap(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>AutoRefMap</h4>
-<pre>protected&nbsp;AutoRefMap(java.lang.String&nbsp;csv)</pre>
+<pre>protected&nbsp;AutoRefMap(java.lang.String&nbsp;name,
+          java.lang.String&nbsp;version,
+          java.lang.String&nbsp;filename,
+          java.lang.String&nbsp;md5sum)</pre>
 </li>
 </ul>
 </li>
@@ -376,18 +397,28 @@ implements java.lang.Comparable&lt;<a href="../../../org/mctourney/autoreferee/A
 <dl><dt><span class="strong">Returns:</span></dt><dd>true if map is installed, otherwise false</dd></dl>
 </li>
 </ul>
-<a name="getFolder()">
+<a name="getZip()">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>getFolder</h4>
-<pre>public&nbsp;java.io.File&nbsp;getFolder()
-                       throws java.io.IOException</pre>
-<div class="block">Gets root folder for this map, downloading if necessary.</div>
-<dl><dt><span class="strong">Returns:</span></dt><dd>root folder for map</dd>
+<h4>getZip</h4>
+<pre>public&nbsp;java.io.File&nbsp;getZip()
+                    throws java.io.IOException</pre>
+<div class="block">Gets root zip for this map, downloading if necessary.</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>root zip for map</dd>
 <dt><span class="strong">Throws:</span></dt>
 <dd><code>java.io.IOException</code> - if map download fails</dd></dl>
+</li>
+</ul>
+<a name="install()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>install</h4>
+<pre>public&nbsp;void&nbsp;install()</pre>
+<div class="block">Installs the map if it is not already installed.</div>
 </li>
 </ul>
 <a name="hashCode()">
@@ -526,21 +557,6 @@ implements java.lang.Comparable&lt;<a href="../../../org/mctourney/autoreferee/A
 <dd><code>java.io.IOException</code> - if map cannot be unpackaged</dd></dl>
 </li>
 </ul>
-<a name="getMapFolder(java.lang.String)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getMapFolder</h4>
-<pre>public static&nbsp;java.io.File&nbsp;getMapFolder(java.lang.String&nbsp;name)
-                                 throws java.io.IOException</pre>
-<div class="block">Gets root folder of map with the given name, downloading if necessary.</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>name</code> - name of map to load</dd>
-<dt><span class="strong">Returns:</span></dt><dd>root folder of map</dd>
-<dt><span class="strong">Throws:</span></dt>
-<dd><code>java.io.IOException</code> - if map download fails</dd></dl>
-</li>
-</ul>
 <a name="getAvailableMaps()">
 <!--   -->
 </a>
@@ -586,16 +602,30 @@ implements java.lang.Comparable&lt;<a href="../../../org/mctourney/autoreferee/A
 <dl><dt><span class="strong">Returns:</span></dt><dd>set of all maps available to load immediately</dd></dl>
 </li>
 </ul>
+<a name="getConfigFileData(java.io.File)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getConfigFileData</h4>
+<pre>public static&nbsp;Element&nbsp;getConfigFileData(java.io.File&nbsp;zip)
+                                 throws java.io.IOException,
+                                        JDOMException</pre>
+<dl><dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd>
+<dd><code>JDOMException</code></dd></dl>
+</li>
+</ul>
 <a name="getMapInfo(java.io.File)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>getMapInfo</h4>
-<pre>public static&nbsp;<a href="../../../org/mctourney/autoreferee/AutoRefMap.html" title="class in org.mctourney.autoreferee">AutoRefMap</a>&nbsp;getMapInfo(java.io.File&nbsp;folder)</pre>
-<div class="block">Get map info object associated with a folder</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>folder</code> - folder containing a configuration file</dd>
-<dt><span class="strong">Returns:</span></dt><dd>map info object if folder contains a map, otherwise null</dd></dl>
+<pre>public static&nbsp;<a href="../../../org/mctourney/autoreferee/AutoRefMap.html" title="class in org.mctourney.autoreferee">AutoRefMap</a>&nbsp;getMapInfo(java.io.File&nbsp;zip)</pre>
+<div class="block">Get map info object associated with a zip</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>zip</code> - zip file containing a configuration file</dd>
+<dt><span class="strong">Returns:</span></dt><dd>map info object if zip contains a map, otherwise null</dd></dl>
 </li>
 </ul>
 <a name="loadMap(CommandSender, java.lang.String, java.lang.String)">
@@ -609,6 +639,19 @@ implements java.lang.Comparable&lt;<a href="../../../org/mctourney/autoreferee/A
            java.lang.String&nbsp;worldname)</pre>
 <div class="block">Loads a map by name.</div>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>sender</code> - user receiving progress updates</dd><dd><code>name</code> - name of map to be loaded</dd><dd><code>worldname</code> - name of custom world folder, possibly null</dd></dl>
+</li>
+</ul>
+<a name="loadMap(CommandSender, org.mctourney.autoreferee.AutoRefMap, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>loadMap</h4>
+<pre>public static&nbsp;void&nbsp;loadMap(CommandSender&nbsp;sender,
+           <a href="../../../org/mctourney/autoreferee/AutoRefMap.html" title="class in org.mctourney.autoreferee">AutoRefMap</a>&nbsp;map,
+           java.lang.String&nbsp;worldname)</pre>
+<div class="block">Loads a map by name.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>sender</code> - user receiving progress updates</dd><dd><code>map</code> - map to be loaded</dd><dd><code>worldname</code> - name of custom world folder, possibly null</dd></dl>
 </li>
 </ul>
 <a name="loadMapFromURL(CommandSender, java.lang.String, java.lang.String)">

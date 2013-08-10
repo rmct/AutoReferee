@@ -2,13 +2,13 @@
 <!-- NewPage -->
 <html lang="en">
 <head>
-<title>QueryServer</title>
+<title>AutoRefMatch.PlayerEjectTask</title>
 <link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
 </head>
 <body>
 <script type="text/javascript"><!--
     if (location.href.indexOf('is-external=true') == -1) {
-        parent.document.title="QueryServer";
+        parent.document.title="AutoRefMatch.PlayerEjectTask";
     }
 //-->
 </script>
@@ -32,12 +32,12 @@
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../org/mctourney/autoreferee/AutoRefTeam.html" title="class in org.mctourney.autoreferee"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../org/mctourney/autoreferee/ReportGenerator.html" title="class in org.mctourney.autoreferee"><span class="strong">Next Class</span></a></li>
+<li><a href="../../../org/mctourney/autoreferee/AutoRefMatch.MatchStatus.html" title="enum in org.mctourney.autoreferee"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/mctourney/autoreferee/AutoRefMatch.RespawnMode.html" title="enum in org.mctourney.autoreferee"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
-<li><a href="../../../index.html?org/mctourney/autoreferee/QueryServer.html" target="_top">Frames</a></li>
-<li><a href="QueryServer.html" target="_top">No Frames</a></li>
+<li><a href="../../../index.html?org/mctourney/autoreferee/AutoRefMatch.PlayerEjectTask.html" target="_top">Frames</a></li>
+<li><a href="AutoRefMatch.PlayerEjectTask.html" target="_top">No Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_top">
 <li><a href="../../../allclasses-noframe.html">All Classes</a></li>
@@ -76,24 +76,33 @@
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
 <div class="subTitle">org.mctourney.autoreferee</div>
-<h2 title="Class QueryServer" class="title">Class QueryServer</h2>
+<h2 title="Class AutoRefMatch.PlayerEjectTask" class="title">Class AutoRefMatch.PlayerEjectTask</h2>
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li>org.mctourney.autoreferee.QueryServer</li>
+<li>BukkitRunnable</li>
+<li>
+<ul class="inheritance">
+<li>org.mctourney.autoreferee.AutoRefMatch.PlayerEjectTask</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 <div class="description">
 <ul class="blockList">
 <li class="blockList">
+<dl>
+<dt>Enclosing class:</dt>
+<dd><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html" title="class in org.mctourney.autoreferee">AutoRefMatch</a></dd>
+</dl>
 <hr>
 <br>
-<pre>public class <span class="strong">QueryServer</span>
-extends java.lang.Object</pre>
+<pre>protected class <span class="strong">AutoRefMatch.PlayerEjectTask</span>
+extends BukkitRunnable</pre>
 </li>
 </ul>
 </div>
@@ -109,11 +118,13 @@ extends java.lang.Object</pre>
 <table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
 <caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
 <tr>
-<th class="colOne" scope="col">Constructor and Description</th>
+<th class="colFirst" scope="col">Modifier</th>
+<th class="colLast" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><strong><a href="../../../org/mctourney/autoreferee/QueryServer.html#QueryServer(java.lang.String, java.lang.String)">QueryServer</a></strong>(java.lang.String&nbsp;qurl,
-           java.lang.String&nbsp;key)</code>&nbsp;</td>
+<td class="colFirst"><code>protected </code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.PlayerEjectTask.html#AutoRefMatch.PlayerEjectTask(Player, Location)">AutoRefMatch.PlayerEjectTask</a></strong>(Player&nbsp;player,
+                            Location&nbsp;target)</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -131,28 +142,8 @@ extends java.lang.Object</pre>
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/QueryServer.html#ack()">ack</a></strong>()</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefMatch.MatchParams.html" title="class in org.mctourney.autoreferee">AutoRefMatch.MatchParams</a></code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/QueryServer.html#getNextMatch()">getNextMatch</a></strong>()</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>static java.lang.String</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/QueryServer.html#syncGetQuery(java.lang.String, java.lang.String)">syncGetQuery</a></strong>(java.lang.String&nbsp;path,
-            java.lang.String&nbsp;params)</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>static java.lang.String</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/QueryServer.html#syncPostQuery(java.lang.String, java.lang.String)">syncPostQuery</a></strong>(java.lang.String&nbsp;path,
-             java.lang.String&nbsp;params)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>static java.lang.String</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/QueryServer.html#syncQuery(java.lang.String, java.lang.String, java.lang.String)">syncQuery</a></strong>(java.lang.String&nbsp;path,
-         java.lang.String&nbsp;getParams,
-         java.lang.String&nbsp;postParams)</code>&nbsp;</td>
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.PlayerEjectTask.html#run()">run</a></strong>()</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -176,14 +167,14 @@ extends java.lang.Object</pre>
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="QueryServer(java.lang.String, java.lang.String)">
+<a name="AutoRefMatch.PlayerEjectTask(Player, Location)">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>QueryServer</h4>
-<pre>public&nbsp;QueryServer(java.lang.String&nbsp;qurl,
-           java.lang.String&nbsp;key)</pre>
+<h4>AutoRefMatch.PlayerEjectTask</h4>
+<pre>protected&nbsp;AutoRefMatch.PlayerEjectTask(Player&nbsp;player,
+                            Location&nbsp;target)</pre>
 </li>
 </ul>
 </li>
@@ -194,53 +185,13 @@ extends java.lang.Object</pre>
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="ack()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>ack</h4>
-<pre>public&nbsp;boolean&nbsp;ack()</pre>
-</li>
-</ul>
-<a name="getNextMatch()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getNextMatch</h4>
-<pre>public&nbsp;<a href="../../../org/mctourney/autoreferee/AutoRefMatch.MatchParams.html" title="class in org.mctourney.autoreferee">AutoRefMatch.MatchParams</a>&nbsp;getNextMatch()</pre>
-</li>
-</ul>
-<a name="syncGetQuery(java.lang.String, java.lang.String)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>syncGetQuery</h4>
-<pre>public static&nbsp;java.lang.String&nbsp;syncGetQuery(java.lang.String&nbsp;path,
-                            java.lang.String&nbsp;params)</pre>
-</li>
-</ul>
-<a name="syncPostQuery(java.lang.String, java.lang.String)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>syncPostQuery</h4>
-<pre>public static&nbsp;java.lang.String&nbsp;syncPostQuery(java.lang.String&nbsp;path,
-                             java.lang.String&nbsp;params)</pre>
-</li>
-</ul>
-<a name="syncQuery(java.lang.String, java.lang.String, java.lang.String)">
+<a name="run()">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>syncQuery</h4>
-<pre>public static&nbsp;java.lang.String&nbsp;syncQuery(java.lang.String&nbsp;path,
-                         java.lang.String&nbsp;getParams,
-                         java.lang.String&nbsp;postParams)</pre>
+<h4>run</h4>
+<pre>public&nbsp;void&nbsp;run()</pre>
 </li>
 </ul>
 </li>
@@ -267,12 +218,12 @@ extends java.lang.Object</pre>
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../org/mctourney/autoreferee/AutoRefTeam.html" title="class in org.mctourney.autoreferee"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../org/mctourney/autoreferee/ReportGenerator.html" title="class in org.mctourney.autoreferee"><span class="strong">Next Class</span></a></li>
+<li><a href="../../../org/mctourney/autoreferee/AutoRefMatch.MatchStatus.html" title="enum in org.mctourney.autoreferee"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/mctourney/autoreferee/AutoRefMatch.RespawnMode.html" title="enum in org.mctourney.autoreferee"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
-<li><a href="../../../index.html?org/mctourney/autoreferee/QueryServer.html" target="_top">Frames</a></li>
-<li><a href="QueryServer.html" target="_top">No Frames</a></li>
+<li><a href="../../../index.html?org/mctourney/autoreferee/AutoRefMatch.PlayerEjectTask.html" target="_top">Frames</a></li>
+<li><a href="AutoRefMatch.PlayerEjectTask.html" target="_top">No Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_bottom">
 <li><a href="../../../allclasses-noframe.html">All Classes</a></li>

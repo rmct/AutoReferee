@@ -90,10 +90,19 @@
 <div class="description">
 <ul class="blockList">
 <li class="blockList">
+<dl>
+<dt>All Implemented Interfaces:</dt>
+<dd>org.mctourney.autoreferee.util.Metadatable</dd>
+</dl>
+<dl>
+<dt>Direct Known Subclasses:</dt>
+<dd><a href="../../../org/mctourney/autoreferee/FreeForAllMatch.html" title="class in org.mctourney.autoreferee">FreeForAllMatch</a></dd>
+</dl>
 <hr>
 <br>
 <pre>public class <span class="strong">AutoRefMatch</span>
-extends java.lang.Object</pre>
+extends java.lang.Object
+implements org.mctourney.autoreferee.util.Metadatable</pre>
 <div class="block">Represents a game world controlled by AutoReferee.</div>
 </li>
 </ul>
@@ -118,6 +127,14 @@ extends java.lang.Object</pre>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.AccessType.html" title="enum in org.mctourney.autoreferee">AutoRefMatch.AccessType</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.BedUpdateTask.html" title="class in org.mctourney.autoreferee">AutoRefMatch.BedUpdateTask</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected class&nbsp;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.MatchClockTask.html" title="class in org.mctourney.autoreferee">AutoRefMatch.MatchClockTask</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>static class&nbsp;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.MatchParams.html" title="class in org.mctourney.autoreferee">AutoRefMatch.MatchParams</a></strong></code>
 <div class="block">Parameters necessary to configure a match.</div>
@@ -130,20 +147,24 @@ extends java.lang.Object</pre>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>static class&nbsp;</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.RespawnMode.html" title="enum in org.mctourney.autoreferee">AutoRefMatch.RespawnMode</a></strong></code>&nbsp;</td>
+<td class="colFirst"><code>protected class&nbsp;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.PlayerEjectTask.html" title="class in org.mctourney.autoreferee">AutoRefMatch.PlayerEjectTask</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static class&nbsp;</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.Role.html" title="enum in org.mctourney.autoreferee">AutoRefMatch.Role</a></strong></code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.RespawnMode.html" title="enum in org.mctourney.autoreferee">AutoRefMatch.RespawnMode</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>static class&nbsp;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.Role.html" title="enum in org.mctourney.autoreferee">AutoRefMatch.Role</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>static class&nbsp;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.StartMechanism.html" title="class in org.mctourney.autoreferee">AutoRefMatch.StartMechanism</a></strong></code>
 <div class="block">A redstone mechanism necessary to start a match.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static class&nbsp;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.TranscriptEvent.html" title="class in org.mctourney.autoreferee">AutoRefMatch.TranscriptEvent</a></strong></code>
 <div class="block">An event to be later reported in match statistics.</div>
@@ -169,16 +190,120 @@ extends java.lang.Object</pre>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#access">access</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>protected boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#allowFriendlyFire">allowFriendlyFire</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected static boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#allowTies">allowTies</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>protected <a href="../../../org/mctourney/autoreferee/AutoRefMatch.MatchClockTask.html" title="class in org.mctourney.autoreferee">AutoRefMatch.MatchClockTask</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#clockTask">clockTask</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>static int</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#COMPLETED_SECONDS">COMPLETED_SECONDS</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>protected boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#currentlyTied">currentlyTied</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.util.Map&lt;java.util.UUID,java.lang.Boolean&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#elevatedItem">elevatedItem</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#giveMatchInfoBooks">giveMatchInfoBooks</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#inexactRange">inexactRange</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>protected Scoreboard</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#infoboard">infoboard</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected Objective</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#infoboardObjective">infoboardObjective</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>protected org.mctourney.autoreferee.AutoRefMatch.ItemElevatorDetectionTask</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#itemElevatorDetectionTask">itemElevatorDetectionTask</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected java.util.Map&lt;java.lang.String,org.mctourney.autoreferee.util.PlayerKit&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#kits">kits</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>protected boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#lockTime">lockTime</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected java.util.Collection&lt;java.lang.String&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#mapAuthors">mapAuthors</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>protected java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#mapName">mapName</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected org.mctourney.autoreferee.AutoRefMatch.CountdownTask</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#matchStarter">matchStarter</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>protected java.util.Map&lt;java.lang.String,java.lang.Object&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#metadata">metadata</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>protected java.util.Map&lt;java.lang.String,java.lang.String&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#playerCapes">playerCapes</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>protected boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#playersBecomeSpectators">playersBecomeSpectators</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#previewMode">previewMode</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>protected java.util.Set&lt;org.mctourney.autoreferee.util.BlockData&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#prohibitCraft">prohibitCraft</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>static int</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#READY_SECONDS">READY_SECONDS</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>protected Scoreboard</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#scoreboard">scoreboard</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected java.util.Set&lt;<a href="../../../org/mctourney/autoreferee/AutoRefMatch.StartMechanism.html" title="class in org.mctourney.autoreferee">AutoRefMatch.StartMechanism</a>&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#startMechanisms">startMechanisms</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>protected java.util.Set&lt;<a href="../../../org/mctourney/autoreferee/AutoRefTeam.html" title="class in org.mctourney.autoreferee">AutoRefTeam</a>&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#teams">teams</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected java.util.List&lt;<a href="../../../org/mctourney/autoreferee/AutoRefMatch.TranscriptEvent.html" title="class in org.mctourney.autoreferee">AutoRefMatch.TranscriptEvent</a>&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#transcript">transcript</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>protected java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#versionString">versionString</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected Element</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#worldConfig">worldConfig</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>protected java.io.File</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#worldConfigFile">worldConfigFile</a></strong></code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -219,69 +344,67 @@ extends java.lang.Object</pre>
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>protected void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#_startMatch()">_startMatch</a></strong>()</code>
+<div class="block">Starts the match.</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#addCape(OfflinePlayer, java.lang.String)">addCape</a></strong>(OfflinePlayer&nbsp;opl,
        java.lang.String&nbsp;cape)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#addCape(java.lang.String, java.lang.String)">addCape</a></strong>(java.lang.String&nbsp;name,
        java.lang.String&nbsp;cape)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#addEvent(org.mctourney.autoreferee.AutoRefMatch.TranscriptEvent)">addEvent</a></strong>(<a href="../../../org/mctourney/autoreferee/AutoRefMatch.TranscriptEvent.html" title="class in org.mctourney.autoreferee">AutoRefMatch.TranscriptEvent</a>&nbsp;event)</code>
 <div class="block">Adds an event to the match transcript.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#addExpectedPlayer(OfflinePlayer)">addExpectedPlayer</a></strong>(OfflinePlayer&nbsp;opl)</code>
 <div class="block">Adds a player to the list of expected players, without a team affiliation.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#addExpectedPlayer(OfflinePlayer, java.lang.String)">addExpectedPlayer</a></strong>(OfflinePlayer&nbsp;opl,
                  java.lang.String&nbsp;cape)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#addIllegalCraft(org.mctourney.autoreferee.util.BlockData)">addIllegalCraft</a></strong>(org.mctourney.autoreferee.util.BlockData&nbsp;blockdata)</code>
 <div class="block">Prohibits an item from being crafted during a match.</div>
 </td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#addMetadata(java.lang.String, java.lang.Object)">addMetadata</a></strong>(java.lang.String&nbsp;key,
+           java.lang.Object&nbsp;value)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#addRegion(org.mctourney.autoreferee.regions.AutoRefRegion)">addRegion</a></strong>(org.mctourney.autoreferee.regions.AutoRefRegion&nbsp;reg)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefMatch.StartMechanism.html" title="class in org.mctourney.autoreferee">AutoRefMatch.StartMechanism</a></code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#addStartMech(Block, boolean)">addStartMech</a></strong>(Block&nbsp;block,
-            boolean&nbsp;state)</code>
-<div class="block">Adds a new start mechanism for this map.</div>
-</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#addStartRegion(org.mctourney.autoreferee.regions.AutoRefRegion)">addStartRegion</a></strong>(org.mctourney.autoreferee.regions.AutoRefRegion&nbsp;reg)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#allowFriendlyFire()">allowFriendlyFire</a></strong>()</code>
 <div class="block">Checks if friendly fire is allowed in this match.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#allowObjectiveCraft()">allowObjectiveCraft</a></strong>()</code>
 <div class="block">Checks if players are allowed to craft objectives in this match.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>java.io.File</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#archiveMapData()">archiveMapData</a></strong>()</code>
-<div class="block">Archives this map and stores a clean copy in the map library.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -292,13 +415,13 @@ extends java.lang.Object</pre>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#broadcast(java.lang.String)">broadcast</a></strong>(java.lang.String&nbsp;msg)</code>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#broadcast(java.lang.String...)">broadcast</a></strong>(java.lang.String...&nbsp;msgs)</code>
 <div class="block">Sends a message to all players in this match, including referees and streamers.</div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#broadcastSync(java.lang.String)">broadcastSync</a></strong>(java.lang.String&nbsp;msg)</code>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#broadcastSync(java.lang.String...)">broadcastSync</a></strong>(java.lang.String...&nbsp;msgs)</code>
 <div class="block">Force a broadcast to be sent synchronously.</div>
 </td>
 </tr>
@@ -346,23 +469,21 @@ extends java.lang.Object</pre>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#clearRegions()">clearRegions</a></strong>()</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#clearMetadata()">clearMetadata</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#clearRegions()">clearRegions</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#colorMessage(java.lang.String)">colorMessage</a></strong>(java.lang.String&nbsp;message)</code>
 <div class="block">Colors a message with team and objective colors.</div>
 </td>
 </tr>
-<tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#debug(java.lang.String)">debug</a></strong>(java.lang.String&nbsp;msg)</code>
-<div class="block">Sends a debug message to the debug recipient.</div>
-</td>
-</tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#destroy()">destroy</a></strong>()</code>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#destroy(org.mctourney.autoreferee.event.match.MatchUnloadEvent.Reason)">destroy</a></strong>(org.mctourney.autoreferee.event.match.MatchUnloadEvent.Reason&nbsp;reason)</code>
 <div class="block">Unloads and cleans up this match.</div>
 </td>
 </tr>
@@ -417,36 +538,54 @@ extends java.lang.Object</pre>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getAuthorList()">getAuthorList</a></strong>()</code>
+<div class="block">Gets the creators of the map for this match.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>java.util.Set&lt;<a href="../../../org/mctourney/autoreferee/AutoRefPlayer.html" title="class in org.mctourney.autoreferee">AutoRefPlayer</a>&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getCachedPlayers()">getCachedPlayers</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefMatch.MatchStatus.html" title="enum in org.mctourney.autoreferee">AutoRefMatch.MatchStatus</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getCurrentState()">getCurrentState</a></strong>()</code>
 <div class="block">Gets the current status of this match.</div>
 </td>
 </tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getCycleNextPlayer(java.lang.String)">getCycleNextPlayer</a></strong>(java.lang.String&nbsp;name)</code>&nbsp;</td>
+</tr>
 <tr class="rowColor">
+<td class="colFirst"><code>protected java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getCyclePrevPlayer(java.lang.String)">getCyclePrevPlayer</a></strong>(java.lang.String&nbsp;name)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getDisplayName(Player)">getDisplayName</a></strong>(Player&nbsp;player)</code>
 <div class="block">Gets colored player name for a specified player.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>long</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getElapsedSeconds()">getElapsedSeconds</a></strong>()</code>
 <div class="block">Gets the number of seconds elapsed in this match.</div>
 </td>
 </tr>
-<tr class="rowColor">
-<td class="colFirst"><code>java.util.Set&lt;OfflinePlayer&gt;</code></td>
+<tr class="altColor">
+<td class="colFirst"><code>java.util.Set&lt;java.lang.String&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getExpectedPlayers()">getExpectedPlayers</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getInexactRange()">getInexactRange</a></strong>()</code>
 <div class="block">Gets the distance an objective may be placed from its target location.</div>
 </td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>org.mctourney.autoreferee.util.PlayerKit</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getKit(java.lang.String)">getKit</a></strong>(java.lang.String&nbsp;name)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>Location</code></td>
@@ -469,48 +608,56 @@ extends java.lang.Object</pre>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getLastTeleportLocation()">getLastTeleportLocation</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefMap.html" title="class in org.mctourney.autoreferee">AutoRefMap</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getMap()">getMap</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.Collection&lt;java.lang.String&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getMapAuthors()">getMapAuthors</a></strong>()</code>
 <div class="block">Gets the creators of the map for this match.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>org.mctourney.autoreferee.regions.CuboidRegion</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getMapCuboid()">getMapCuboid</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.awt.image.RenderedImage</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getMapImage()">getMapImage</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getMapName()">getMapName</a></strong>()</code>
 <div class="block">Gets the name of the map for this match.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getMapRepo()">getMapRepo</a></strong>()</code>
 <div class="block">Get the base url for the map repository</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getMapVersion()">getMapVersion</a></strong>()</code>
 <div class="block">Gets the version number of the map for this match.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>ItemStack</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getMatchInfoBook()">getMatchInfoBook</a></strong>()</code>
 <div class="block">Gets the book given to players upon joining this match.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getMatchName()">getMatchName</a></strong>()</code>
 <div class="block">Gets the name of this match.</div>
 </td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.Object</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getMetadata(java.lang.String)">getMetadata</a></strong>(java.lang.String&nbsp;key)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefPlayer.html" title="class in org.mctourney.autoreferee">AutoRefPlayer</a></code></td>
@@ -573,24 +720,44 @@ extends java.lang.Object</pre>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getRegions(org.mctourney.autoreferee.AutoRefTeam)">getRegions</a></strong>(<a href="../../../org/mctourney/autoreferee/AutoRefTeam.html" title="class in org.mctourney.autoreferee">AutoRefTeam</a>&nbsp;team)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/ReportGenerator.html" title="class in org.mctourney.autoreferee">ReportGenerator</a></code></td>
+<td class="colFirst"><code>&lt;T extends org.mctourney.autoreferee.regions.AutoRefRegion&gt;&nbsp;<br>java.util.Set&lt;T&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getRegions(java.lang.Class)">getRegions</a></strong>(java.lang.Class&lt;T&gt;&nbsp;clazz)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>org.mctourney.autoreferee.util.ReportGenerator</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getReportGenerator()">getReportGenerator</a></strong>()</code>
 <div class="block">Gets the mutable report generator object.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefMatch.RespawnMode.html" title="enum in org.mctourney.autoreferee">AutoRefMatch.RespawnMode</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getRespawnMode()">getRespawnMode</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefMatch.Role.html" title="enum in org.mctourney.autoreferee">AutoRefMatch.Role</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getRole(OfflinePlayer)">getRole</a></strong>(OfflinePlayer&nbsp;player)</code>
 <div class="block">Gets the role that this player has in this match.</div>
 </td>
 </tr>
+<tr class="rowColor">
+<td class="colFirst"><code>Scoreboard</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getScoreboard()">getScoreboard</a></strong>()</code>&nbsp;</td>
+</tr>
 <tr class="altColor">
-<td class="colFirst"><code>protected java.util.List&lt;<a href="../../../org/mctourney/autoreferee/AutoRefTeam.html" title="class in org.mctourney.autoreferee">AutoRefTeam</a>&gt;</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getSortedTeams()">getSortedTeams</a></strong>()</code>&nbsp;</td>
+<td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefSpectator.html" title="class in org.mctourney.autoreferee">AutoRefSpectator</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getSpectator(Player)">getSpectator</a></strong>(Player&nbsp;player)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.Set&lt;Player&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getSpectators()">getSpectators</a></strong>()</code>
+<div class="block">Gets all match spectators (spectators, referees, and streamers).</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>Location</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getSpectatorSpawn()">getSpectatorSpawn</a></strong>()</code>
+<div class="block">Gets the global spawn location for this match.</div>
+</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>long</code></td>
@@ -600,7 +767,7 @@ extends java.lang.Object</pre>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefMatch.StartMechanism.html" title="class in org.mctourney.autoreferee">AutoRefMatch.StartMechanism</a></code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getStartMechanism(Location)">getStartMechanism</a></strong>(Location&nbsp;loc)</code>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getStartMechanism(Block)">getStartMechanism</a></strong>(Block&nbsp;block)</code>
 <div class="block">Gets the start mechanism associated with this location.</div>
 </td>
 </tr>
@@ -615,9 +782,19 @@ extends java.lang.Object</pre>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>long</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getStartTime()">getStartTime</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>java.util.Set&lt;Player&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getStreamers()">getStreamers</a></strong>()</code>
 <div class="block">Gets streamers present in this match.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefTeam.html" title="class in org.mctourney.autoreferee">AutoRefTeam</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#getTeam(java.lang.String)">getTeam</a></strong>(java.lang.String&nbsp;name)</code>
+<div class="block">Finds a team whose name matches the given string.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -691,6 +868,15 @@ extends java.lang.Object</pre>
 </td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#giveMatchInfoBook(Player)">giveMatchInfoBook</a></strong>(Player&nbsp;player)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#giveMatchInfoBook(Player, boolean)">giveMatchInfoBook</a></strong>(Player&nbsp;player,
+                 boolean&nbsp;force)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#hasFlag(Location, org.mctourney.autoreferee.regions.AutoRefRegion.Flag)">hasFlag</a></strong>(Location&nbsp;loc,
        org.mctourney.autoreferee.regions.AutoRefRegion.Flag&nbsp;flag)</code>
@@ -703,32 +889,30 @@ extends java.lang.Object</pre>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#hasMetadata(java.lang.String)">hasMetadata</a></strong>(java.lang.String&nbsp;key)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#hasTimeLimit()">hasTimeLimit</a></strong>()</code>
 <div class="block">Checks if this match has a set time limit.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#inStartRegion(Location)">inStartRegion</a></strong>(Location&nbsp;loc)</code>
 <div class="block">Checks if a specified location is within the start region.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#isCompatible(World)">isCompatible</a></strong>(World&nbsp;world)</code>
 <div class="block">Checks if the given world is compatible with AutoReferee</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#isCountdownRunning()">isCountdownRunning</a></strong>()</code>
 <div class="block">Checks if the match start countdown is running.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#isDebugMode()">isDebugMode</a></strong>()</code>
-<div class="block">Checks if the match is in debug mode.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -742,6 +926,14 @@ extends java.lang.Object</pre>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#isPlayerExpected(OfflinePlayer)">isPlayerExpected</a></strong>(OfflinePlayer&nbsp;opl)</code>
 <div class="block">Checks if the specified player is expected to join this match.</div>
 </td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#isPracticeMode()">isPracticeMode</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#isPreviewMode()">isPreviewMode</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
@@ -767,7 +959,7 @@ extends java.lang.Object</pre>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#isStartMechanism(Location)">isStartMechanism</a></strong>(Location&nbsp;loc)</code>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#isStartMechanism(Block)">isStartMechanism</a></strong>(Block&nbsp;block)</code>
 <div class="block">Checks if a specified block location is a start mechanism for this match.</div>
 </td>
 </tr>
@@ -778,49 +970,68 @@ extends java.lang.Object</pre>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#isTemporaryWorld()">isTemporaryWorld</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#joinMatch(Player)">joinMatch</a></strong>(Player&nbsp;player)</code>
 <div class="block">Teleports a player to a match they have been added to, joining the team inviting them.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#joinTeam(Player, org.mctourney.autoreferee.AutoRefTeam, boolean)">joinTeam</a></strong>(Player&nbsp;player,
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#joinTeam(Player, org.mctourney.autoreferee.AutoRefTeam, org.mctourney.autoreferee.event.player.PlayerTeamJoinEvent.Reason, boolean)">joinTeam</a></strong>(Player&nbsp;player,
         <a href="../../../org/mctourney/autoreferee/AutoRefTeam.html" title="class in org.mctourney.autoreferee">AutoRefTeam</a>&nbsp;team,
+        org.mctourney.autoreferee.event.player.PlayerTeamJoinEvent.Reason&nbsp;reason,
         boolean&nbsp;force)</code>
 <div class="block">Adds a player to the specified team.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#leaveTeam(Player, boolean)">leaveTeam</a></strong>(Player&nbsp;player,
          boolean&nbsp;force)</code>
 <div class="block">Removes player from all teams.</div>
 </td>
 </tr>
+<tr class="rowColor">
+<td class="colFirst"><code>protected void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#loadWorldConfiguration()">loadWorldConfiguration</a></strong>()</code>&nbsp;</td>
+</tr>
 <tr class="altColor">
-<td class="colFirst"><code>void</code></td>
+<td class="colFirst"><code>protected void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#loadWorldConfiguration(java.io.InputStream)">loadWorldConfiguration</a></strong>(java.io.InputStream&nbsp;cfg)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#messageReferee(Player, java.lang.String...)">messageReferee</a></strong>(Player&nbsp;ref,
               java.lang.String...&nbsp;parts)</code>
 <div class="block">Sends a referee plugin channel message to a specific referee, properly delimited.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#messageReferees(java.lang.String...)">messageReferees</a></strong>(java.lang.String...&nbsp;parts)</code>
 <div class="block">Sends a referee plugin channel message to all referees, properly delimited.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#normalizeMapName(java.lang.String)">normalizeMapName</a></strong>(java.lang.String&nbsp;name)</code>
 <div class="block">Removes any non-alphanumeric characters from a map name.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#notify(Location, java.lang.String)">notify</a></strong>(Location&nbsp;loc,
       java.lang.String&nbsp;message)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static long</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#parseTimeString(java.lang.String)">parseTimeString</a></strong>(java.lang.String&nbsp;time)</code>
+<div class="block">Converts a human-readable time to a clock tick in Minecraft.</div>
+</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
@@ -839,47 +1050,45 @@ extends java.lang.Object</pre>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>java.lang.Object</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#removeMetadata(java.lang.String)">removeMetadata</a></strong>(java.lang.String&nbsp;key)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#removeRegion(org.mctourney.autoreferee.regions.AutoRefRegion)">removeRegion</a></strong>(org.mctourney.autoreferee.regions.AutoRefRegion&nbsp;reg)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#saveMapImage()">saveMapImage</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#saveWorldConfiguration()">saveWorldConfiguration</a></strong>()</code>
 <div class="block">Saves copy of autoreferee.xml back to the world folder.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#sendMatchInfo(CommandSender)">sendMatchInfo</a></strong>(CommandSender&nbsp;sender)</code>
 <div class="block">Send updated match information to a player.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#setAllowTies(boolean)">setAllowTies</a></strong>(boolean&nbsp;b)</code>
 <div class="block">Sets whether ties are allowed on this server.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#setCurrentState(org.mctourney.autoreferee.AutoRefMatch.MatchStatus)">setCurrentState</a></strong>(<a href="../../../org/mctourney/autoreferee/AutoRefMatch.MatchStatus.html" title="enum in org.mctourney.autoreferee">AutoRefMatch.MatchStatus</a>&nbsp;status)</code>
 <div class="block">Sets the current status of this match.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#setCustomMatchInfoBook(ItemStack)">setCustomMatchInfoBook</a></strong>(ItemStack&nbsp;book)</code>
 <div class="block">Sets a custom book given to players upon joining this match.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#setDebug(CommandSender)">setDebug</a></strong>(CommandSender&nbsp;recipient)</code>
-<div class="block">Sets the recipient of debug messages for this match.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -924,40 +1133,44 @@ extends java.lang.Object</pre>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#setPreviewMode(boolean)">setPreviewMode</a></strong>(boolean&nbsp;b)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#setReadyDelay(int)">setReadyDelay</a></strong>(int&nbsp;delay)</code>
 <div class="block">Sets number of seconds between start of countdown and match starting.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#setRefereeReady(boolean)">setRefereeReady</a></strong>(boolean&nbsp;r)</code>
 <div class="block">Sets whether the referees are ready for the match to start.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#setRespawnMode(org.mctourney.autoreferee.AutoRefMatch.RespawnMode)">setRespawnMode</a></strong>(<a href="../../../org/mctourney/autoreferee/AutoRefMatch.RespawnMode.html" title="enum in org.mctourney.autoreferee">AutoRefMatch.RespawnMode</a>&nbsp;mode)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#setSpectatorMode(Player, boolean)">setSpectatorMode</a></strong>(Player&nbsp;player,
-                boolean&nbsp;b)</code>
-<div class="block">Sets whether a specified player is in spectator mode.</div>
-</td>
-</tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#setSpectatorMode(Player, boolean, GameMode)">setSpectatorMode</a></strong>(Player&nbsp;player,
-                boolean&nbsp;b,
-                GameMode&nbsp;gamemode)</code>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#setSpectatorMode(Player, boolean)">setSpectatorMode</a></strong>(Player&nbsp;player,
+                boolean&nbsp;spec)</code>
 <div class="block">Sets whether a specified player is in spectator mode, explicitly setting gamemode.</div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#setSpectatorSpawn(Location)">setSpectatorSpawn</a></strong>(Location&nbsp;loc)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#setStartClock(long)">setStartClock</a></strong>(long&nbsp;time)</code>
 <div class="block">Sets the time that will be set at the start of the match.</div>
 </td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#setStartTime(long)">setStartTime</a></strong>(long&nbsp;time)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
@@ -975,6 +1188,17 @@ extends java.lang.Object</pre>
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#setupSpectators(Player)">setupSpectators</a></strong>(Player&nbsp;player)</code>
 <div class="block">Reconfigures spectator mode for a single player.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#setupVanish(Player, Player)">setupVanish</a></strong>(Player&nbsp;view,
+           Player&nbsp;subj)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#setupVisibility(Player)">setupVisibility</a></strong>(Player&nbsp;player)</code>
+<div class="block">Reconfigures visibility, to and from the specified player.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -996,26 +1220,33 @@ extends java.lang.Object</pre>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#start()">start</a></strong>()</code>
-<div class="block">Starts the match.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#startCountdown(int, boolean)">startCountdown</a></strong>(int&nbsp;delay,
               boolean&nbsp;start)</code>
 <div class="block">Starts a countdown.</div>
 </td>
 </tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#startMatch(org.mctourney.autoreferee.event.match.MatchStartEvent.Reason)">startMatch</a></strong>(org.mctourney.autoreferee.event.match.MatchStartEvent.Reason&nbsp;reason)</code>&nbsp;</td>
+</tr>
 <tr class="rowColor">
-<td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefTeam.html" title="class in org.mctourney.autoreferee">AutoRefTeam</a></code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#teamNameLookup(java.lang.String)">teamNameLookup</a></strong>(java.lang.String&nbsp;name)</code>
-<div class="block">Finds a team whose name matches the given string.</div>
-</td>
+<td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html" title="class in org.mctourney.autoreferee">AutoRefMatch</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#temporary()">temporary</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#toggleProtection(java.util.UUID)">toggleProtection</a></strong>(java.util.UUID&nbsp;uuid)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefMatch.StartMechanism.html" title="class in org.mctourney.autoreferee">AutoRefMatch.StartMechanism</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#toggleStartMech(Block, boolean)">toggleStartMech</a></strong>(Block&nbsp;block,
+               boolean&nbsp;state)</code>
+<div class="block">Adds a new start mechanism for this map.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#toString()">toString</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
@@ -1036,6 +1267,10 @@ extends java.lang.Object</pre>
                  int&nbsp;newArmor)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>protected void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#updatePlayerList()">updatePlayerList</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html#updateReferee(Player)">updateReferee</a></strong>(Player&nbsp;ref)</code>
 <div class="block">Sends all information to a single referee necessary to sync a match's current status.</div>
@@ -1047,7 +1282,7 @@ extends java.lang.Object</pre>
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;java.lang.Object</h3>
-<code>clone, equals, finalize, getClass, notify, notifyAll, toString, wait, wait, wait</code></li>
+<code>clone, equals, finalize, getClass, notify, notifyAll, wait, wait, wait</code></li>
 </ul>
 </li>
 </ul>
@@ -1063,6 +1298,24 @@ extends java.lang.Object</pre>
 <!--   -->
 </a>
 <h3>Field Detail</h3>
+<a name="giveMatchInfoBooks">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>giveMatchInfoBooks</h4>
+<pre>public static&nbsp;boolean giveMatchInfoBooks</pre>
+</li>
+</ul>
+<a name="metadata">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>metadata</h4>
+<pre>protected&nbsp;java.util.Map&lt;java.lang.String,java.lang.Object&gt; metadata</pre>
+</li>
+</ul>
 <a name="access">
 <!--   -->
 </a>
@@ -1070,6 +1323,195 @@ extends java.lang.Object</pre>
 <li class="blockList">
 <h4>access</h4>
 <pre>public&nbsp;<a href="../../../org/mctourney/autoreferee/AutoRefMatch.AccessType.html" title="enum in org.mctourney.autoreferee">AutoRefMatch.AccessType</a> access</pre>
+</li>
+</ul>
+<a name="currentlyTied">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>currentlyTied</h4>
+<pre>protected&nbsp;boolean currentlyTied</pre>
+</li>
+</ul>
+<a name="previewMode">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>previewMode</h4>
+<pre>protected&nbsp;boolean previewMode</pre>
+</li>
+</ul>
+<a name="lockTime">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>lockTime</h4>
+<pre>protected&nbsp;boolean lockTime</pre>
+</li>
+</ul>
+<a name="scoreboard">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>scoreboard</h4>
+<pre>protected final&nbsp;Scoreboard scoreboard</pre>
+</li>
+</ul>
+<a name="infoboard">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>infoboard</h4>
+<pre>protected final&nbsp;Scoreboard infoboard</pre>
+</li>
+</ul>
+<a name="infoboardObjective">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>infoboardObjective</h4>
+<pre>protected&nbsp;Objective infoboardObjective</pre>
+</li>
+</ul>
+<a name="teams">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>teams</h4>
+<pre>protected&nbsp;java.util.Set&lt;<a href="../../../org/mctourney/autoreferee/AutoRefTeam.html" title="class in org.mctourney.autoreferee">AutoRefTeam</a>&gt; teams</pre>
+</li>
+</ul>
+<a name="kits">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>kits</h4>
+<pre>protected&nbsp;java.util.Map&lt;java.lang.String,org.mctourney.autoreferee.util.PlayerKit&gt; kits</pre>
+</li>
+</ul>
+<a name="worldConfigFile">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>worldConfigFile</h4>
+<pre>protected&nbsp;java.io.File worldConfigFile</pre>
+</li>
+</ul>
+<a name="worldConfig">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>worldConfig</h4>
+<pre>protected&nbsp;Element worldConfig</pre>
+</li>
+</ul>
+<a name="mapName">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>mapName</h4>
+<pre>protected&nbsp;java.lang.String mapName</pre>
+</li>
+</ul>
+<a name="mapAuthors">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>mapAuthors</h4>
+<pre>protected&nbsp;java.util.Collection&lt;java.lang.String&gt; mapAuthors</pre>
+</li>
+</ul>
+<a name="versionString">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>versionString</h4>
+<pre>protected&nbsp;java.lang.String versionString</pre>
+</li>
+</ul>
+<a name="matchStarter">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>matchStarter</h4>
+<pre>protected&nbsp;org.mctourney.autoreferee.AutoRefMatch.CountdownTask matchStarter</pre>
+</li>
+</ul>
+<a name="startMechanisms">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>startMechanisms</h4>
+<pre>protected&nbsp;java.util.Set&lt;<a href="../../../org/mctourney/autoreferee/AutoRefMatch.StartMechanism.html" title="class in org.mctourney.autoreferee">AutoRefMatch.StartMechanism</a>&gt; startMechanisms</pre>
+</li>
+</ul>
+<a name="playersBecomeSpectators">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>playersBecomeSpectators</h4>
+<pre>protected&nbsp;boolean playersBecomeSpectators</pre>
+</li>
+</ul>
+<a name="allowFriendlyFire">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>allowFriendlyFire</h4>
+<pre>protected&nbsp;boolean allowFriendlyFire</pre>
+</li>
+</ul>
+<a name="allowTies">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>allowTies</h4>
+<pre>protected static&nbsp;boolean allowTies</pre>
+</li>
+</ul>
+<a name="prohibitCraft">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>prohibitCraft</h4>
+<pre>protected&nbsp;java.util.Set&lt;org.mctourney.autoreferee.util.BlockData&gt; prohibitCraft</pre>
+</li>
+</ul>
+<a name="inexactRange">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>inexactRange</h4>
+<pre>protected&nbsp;int inexactRange</pre>
+</li>
+</ul>
+<a name="transcript">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>transcript</h4>
+<pre>protected&nbsp;java.util.List&lt;<a href="../../../org/mctourney/autoreferee/AutoRefMatch.TranscriptEvent.html" title="class in org.mctourney.autoreferee">AutoRefMatch.TranscriptEvent</a>&gt; transcript</pre>
 </li>
 </ul>
 <a name="READY_SECONDS">
@@ -1090,6 +1532,33 @@ extends java.lang.Object</pre>
 <h4>COMPLETED_SECONDS</h4>
 <pre>public static final&nbsp;int COMPLETED_SECONDS</pre>
 <dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.mctourney.autoreferee.AutoRefMatch.COMPLETED_SECONDS">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="elevatedItem">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>elevatedItem</h4>
+<pre>public&nbsp;java.util.Map&lt;java.util.UUID,java.lang.Boolean&gt; elevatedItem</pre>
+</li>
+</ul>
+<a name="itemElevatorDetectionTask">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>itemElevatorDetectionTask</h4>
+<pre>protected&nbsp;org.mctourney.autoreferee.AutoRefMatch.ItemElevatorDetectionTask itemElevatorDetectionTask</pre>
+</li>
+</ul>
+<a name="clockTask">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>clockTask</h4>
+<pre>protected&nbsp;<a href="../../../org/mctourney/autoreferee/AutoRefMatch.MatchClockTask.html" title="class in org.mctourney.autoreferee">AutoRefMatch.MatchClockTask</a> clockTask</pre>
 </li>
 </ul>
 <a name="playerCapes">
@@ -1160,6 +1629,72 @@ extends java.lang.Object</pre>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>url</code> - url of new map repository to use</dd></dl>
 </li>
 </ul>
+<a name="addMetadata(java.lang.String, java.lang.Object)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addMetadata</h4>
+<pre>public&nbsp;void&nbsp;addMetadata(java.lang.String&nbsp;key,
+               java.lang.Object&nbsp;value)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code>addMetadata</code>&nbsp;in interface&nbsp;<code>org.mctourney.autoreferee.util.Metadatable</code></dd>
+</dl>
+</li>
+</ul>
+<a name="getMetadata(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getMetadata</h4>
+<pre>public&nbsp;java.lang.Object&nbsp;getMetadata(java.lang.String&nbsp;key)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code>getMetadata</code>&nbsp;in interface&nbsp;<code>org.mctourney.autoreferee.util.Metadatable</code></dd>
+</dl>
+</li>
+</ul>
+<a name="hasMetadata(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>hasMetadata</h4>
+<pre>public&nbsp;boolean&nbsp;hasMetadata(java.lang.String&nbsp;key)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code>hasMetadata</code>&nbsp;in interface&nbsp;<code>org.mctourney.autoreferee.util.Metadatable</code></dd>
+</dl>
+</li>
+</ul>
+<a name="removeMetadata(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>removeMetadata</h4>
+<pre>public&nbsp;java.lang.Object&nbsp;removeMetadata(java.lang.String&nbsp;key)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code>removeMetadata</code>&nbsp;in interface&nbsp;<code>org.mctourney.autoreferee.util.Metadatable</code></dd>
+</dl>
+</li>
+</ul>
+<a name="clearMetadata()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>clearMetadata</h4>
+<pre>public&nbsp;void&nbsp;clearMetadata()</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code>clearMetadata</code>&nbsp;in interface&nbsp;<code>org.mctourney.autoreferee.util.Metadatable</code></dd>
+</dl>
+</li>
+</ul>
 <a name="setWorldSpawn(Location)">
 <!--   -->
 </a>
@@ -1167,6 +1702,42 @@ extends java.lang.Object</pre>
 <li class="blockList">
 <h4>setWorldSpawn</h4>
 <pre>public&nbsp;void&nbsp;setWorldSpawn(Location&nbsp;loc)</pre>
+</li>
+</ul>
+<a name="setSpectatorSpawn(Location)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setSpectatorSpawn</h4>
+<pre>public&nbsp;void&nbsp;setSpectatorSpawn(Location&nbsp;loc)</pre>
+</li>
+</ul>
+<a name="isPracticeMode()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isPracticeMode</h4>
+<pre>public&nbsp;boolean&nbsp;isPracticeMode()</pre>
+</li>
+</ul>
+<a name="setPreviewMode(boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setPreviewMode</h4>
+<pre>public&nbsp;void&nbsp;setPreviewMode(boolean&nbsp;b)</pre>
+</li>
+</ul>
+<a name="isPreviewMode()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isPreviewMode</h4>
+<pre>public&nbsp;boolean&nbsp;isPreviewMode()</pre>
 </li>
 </ul>
 <a name="getWorld()">
@@ -1193,6 +1764,19 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
+<a name="toString()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>toString</h4>
+<pre>public&nbsp;java.lang.String&nbsp;toString()</pre>
+<dl>
+<dt><strong>Overrides:</strong></dt>
+<dd><code>toString</code>&nbsp;in class&nbsp;<code>java.lang.Object</code></dd>
+</dl>
+</li>
+</ul>
 <a name="getWorldSpawn()">
 <!--   -->
 </a>
@@ -1202,6 +1786,35 @@ extends java.lang.Object</pre>
 <pre>public&nbsp;Location&nbsp;getWorldSpawn()</pre>
 <div class="block">Gets the global spawn location for this match.</div>
 <dl><dt><span class="strong">Returns:</span></dt><dd>global spawn location</dd></dl>
+</li>
+</ul>
+<a name="getSpectatorSpawn()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getSpectatorSpawn</h4>
+<pre>public&nbsp;Location&nbsp;getSpectatorSpawn()</pre>
+<div class="block">Gets the global spawn location for this match.</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>global spawn location</dd></dl>
+</li>
+</ul>
+<a name="temporary()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>temporary</h4>
+<pre>public&nbsp;<a href="../../../org/mctourney/autoreferee/AutoRefMatch.html" title="class in org.mctourney.autoreferee">AutoRefMatch</a>&nbsp;temporary()</pre>
+</li>
+</ul>
+<a name="isTemporaryWorld()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isTemporaryWorld</h4>
+<pre>public&nbsp;boolean&nbsp;isTemporaryWorld()</pre>
 </li>
 </ul>
 <a name="getStartClock()">
@@ -1248,6 +1861,15 @@ extends java.lang.Object</pre>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>status</code> - new match status</dd></dl>
 </li>
 </ul>
+<a name="getScoreboard()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getScoreboard</h4>
+<pre>public&nbsp;Scoreboard&nbsp;getScoreboard()</pre>
+</li>
+</ul>
 <a name="getTeams()">
 <!--   -->
 </a>
@@ -1257,15 +1879,6 @@ extends java.lang.Object</pre>
 <pre>public&nbsp;java.util.Set&lt;<a href="../../../org/mctourney/autoreferee/AutoRefTeam.html" title="class in org.mctourney.autoreferee">AutoRefTeam</a>&gt;&nbsp;getTeams()</pre>
 <div class="block">Gets the teams participating in this match.</div>
 <dl><dt><span class="strong">Returns:</span></dt><dd>set of teams</dd></dl>
-</li>
-</ul>
-<a name="getSortedTeams()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getSortedTeams</h4>
-<pre>protected&nbsp;java.util.List&lt;<a href="../../../org/mctourney/autoreferee/AutoRefTeam.html" title="class in org.mctourney.autoreferee">AutoRefTeam</a>&gt;&nbsp;getSortedTeams()</pre>
 </li>
 </ul>
 <a name="getTeamList()">
@@ -1296,6 +1909,15 @@ extends java.lang.Object</pre>
 <h4>setWinningTeam</h4>
 <pre>public&nbsp;void&nbsp;setWinningTeam(<a href="../../../org/mctourney/autoreferee/AutoRefTeam.html" title="class in org.mctourney.autoreferee">AutoRefTeam</a>&nbsp;team)</pre>
 <div class="block">Sets the team that won this match.</div>
+</li>
+</ul>
+<a name="getKit(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getKit</h4>
+<pre>public&nbsp;org.mctourney.autoreferee.util.PlayerKit&nbsp;getKit(java.lang.String&nbsp;name)</pre>
 </li>
 </ul>
 <a name="getStartRegions()">
@@ -1403,15 +2025,53 @@ extends java.lang.Object</pre>
 <dl><dt><span class="strong">Returns:</span></dt><dd>version string</dd></dl>
 </li>
 </ul>
+<a name="getMap()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getMap</h4>
+<pre>public&nbsp;<a href="../../../org/mctourney/autoreferee/AutoRefMap.html" title="class in org.mctourney.autoreferee">AutoRefMap</a>&nbsp;getMap()</pre>
+</li>
+</ul>
 <a name="getMapAuthors()">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>getMapAuthors</h4>
-<pre>public&nbsp;java.lang.String&nbsp;getMapAuthors()</pre>
+<pre>public&nbsp;java.util.Collection&lt;java.lang.String&gt;&nbsp;getMapAuthors()</pre>
+<div class="block">Gets the creators of the map for this match.</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>collection of names</dd></dl>
+</li>
+</ul>
+<a name="getAuthorList()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getAuthorList</h4>
+<pre>public&nbsp;java.lang.String&nbsp;getAuthorList()</pre>
 <div class="block">Gets the creators of the map for this match.</div>
 <dl><dt><span class="strong">Returns:</span></dt><dd>string list of names</dd></dl>
+</li>
+</ul>
+<a name="getStartTime()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getStartTime</h4>
+<pre>public&nbsp;long&nbsp;getStartTime()</pre>
+</li>
+</ul>
+<a name="setStartTime(long)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setStartTime</h4>
+<pre>public&nbsp;void&nbsp;setStartTime(long&nbsp;time)</pre>
 </li>
 </ul>
 <a name="getElapsedSeconds()">
@@ -1623,46 +2283,13 @@ extends java.lang.Object</pre>
 <div class="block">Sets whether the referees are ready for the match to start.</div>
 </li>
 </ul>
-<a name="isDebugMode()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>isDebugMode</h4>
-<pre>public&nbsp;boolean&nbsp;isDebugMode()</pre>
-<div class="block">Checks if the match is in debug mode.</div>
-<dl><dt><span class="strong">Returns:</span></dt><dd>true if match is in debug mode, otherwise false</dd></dl>
-</li>
-</ul>
-<a name="debug(java.lang.String)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>debug</h4>
-<pre>public&nbsp;void&nbsp;debug(java.lang.String&nbsp;msg)</pre>
-<div class="block">Sends a debug message to the debug recipient.</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>msg</code> - debug message</dd></dl>
-</li>
-</ul>
-<a name="setDebug(CommandSender)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setDebug</h4>
-<pre>public&nbsp;void&nbsp;setDebug(CommandSender&nbsp;recipient)</pre>
-<div class="block">Sets the recipient of debug messages for this match.</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>recipient</code> - a recipient for debug messages, or null to disable debug</dd></dl>
-</li>
-</ul>
 <a name="getReportGenerator()">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>getReportGenerator</h4>
-<pre>public&nbsp;<a href="../../../org/mctourney/autoreferee/ReportGenerator.html" title="class in org.mctourney.autoreferee">ReportGenerator</a>&nbsp;getReportGenerator()</pre>
+<pre>public&nbsp;org.mctourney.autoreferee.util.ReportGenerator&nbsp;getReportGenerator()</pre>
 <div class="block">Gets the mutable report generator object.</div>
 <dl><dt><span class="strong">Returns:</span></dt><dd>report generator object</dd></dl>
 </li>
@@ -1682,7 +2309,10 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>getMapImage</h4>
-<pre>public&nbsp;java.awt.image.RenderedImage&nbsp;getMapImage()</pre>
+<pre>public&nbsp;java.awt.image.RenderedImage&nbsp;getMapImage()
+                                         throws java.io.IOException</pre>
+<dl><dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
 </li>
 </ul>
 <a name="getReadyDelay()">
@@ -1839,6 +2469,17 @@ extends java.lang.Object</pre>
 <pre>public&nbsp;java.util.Set&lt;<a href="../../../org/mctourney/autoreferee/AutoRefPlayer.html" title="class in org.mctourney.autoreferee">AutoRefPlayer</a>&gt;&nbsp;getCachedPlayers()</pre>
 </li>
 </ul>
+<a name="getSpectators()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getSpectators</h4>
+<pre>public&nbsp;java.util.Set&lt;Player&gt;&nbsp;getSpectators()</pre>
+<div class="block">Gets all match spectators (spectators, referees, and streamers).</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>collection of spectators</dd></dl>
+</li>
+</ul>
 <a name="getReferees()">
 <!--   -->
 </a>
@@ -1906,6 +2547,15 @@ extends java.lang.Object</pre>
 <dl><dt><span class="strong">Returns:</span></dt><dd>true if player is a spectator, otherwise false</dd></dl>
 </li>
 </ul>
+<a name="getSpectator(Player)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getSpectator</h4>
+<pre>public&nbsp;<a href="../../../org/mctourney/autoreferee/AutoRefSpectator.html" title="class in org.mctourney.autoreferee">AutoRefSpectator</a>&nbsp;getSpectator(Player&nbsp;player)</pre>
+</li>
+</ul>
 <a name="getRole(OfflinePlayer)">
 <!--   -->
 </a>
@@ -1939,6 +2589,24 @@ extends java.lang.Object</pre>
 <div class="block">Reloads world configuration from config file.</div>
 </li>
 </ul>
+<a name="loadWorldConfiguration()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>loadWorldConfiguration</h4>
+<pre>protected&nbsp;void&nbsp;loadWorldConfiguration()</pre>
+</li>
+</ul>
+<a name="loadWorldConfiguration(java.io.InputStream)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>loadWorldConfiguration</h4>
+<pre>protected&nbsp;void&nbsp;loadWorldConfiguration(java.io.InputStream&nbsp;cfg)</pre>
+</li>
+</ul>
 <a name="saveWorldConfiguration()">
 <!--   -->
 </a>
@@ -1965,7 +2633,7 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>messageReferee</h4>
-<pre>public&nbsp;void&nbsp;messageReferee(Player&nbsp;ref,
+<pre>public static&nbsp;void&nbsp;messageReferee(Player&nbsp;ref,
                   java.lang.String...&nbsp;parts)</pre>
 <div class="block">Sends a referee plugin channel message to a specific referee, properly delimited.</div>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>ref</code> - referee to recieve the plugin channel message</dd></dl>
@@ -1979,29 +2647,29 @@ extends java.lang.Object</pre>
 <h4>updateReferee</h4>
 <pre>public&nbsp;void&nbsp;updateReferee(Player&nbsp;ref)</pre>
 <div class="block">Sends all information to a single referee necessary to sync a match's current status.</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>ref</code> - referee to recieve the plugin channel messages</dd></dl>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>ref</code> - referee to receive the plugin channel messages</dd></dl>
 </li>
 </ul>
-<a name="broadcast(java.lang.String)">
+<a name="broadcast(java.lang.String...)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>broadcast</h4>
-<pre>public&nbsp;void&nbsp;broadcast(java.lang.String&nbsp;msg)</pre>
+<pre>public&nbsp;void&nbsp;broadcast(java.lang.String...&nbsp;msgs)</pre>
 <div class="block">Sends a message to all players in this match, including referees and streamers.</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>msg</code> - message to be sent</dd></dl>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>msgs</code> - messages to be sent</dd></dl>
 </li>
 </ul>
-<a name="broadcastSync(java.lang.String)">
+<a name="broadcastSync(java.lang.String...)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>broadcastSync</h4>
-<pre>public&nbsp;void&nbsp;broadcastSync(java.lang.String&nbsp;msg)</pre>
+<pre>public&nbsp;void&nbsp;broadcastSync(java.lang.String...&nbsp;msgs)</pre>
 <div class="block">Force a broadcast to be sent synchronously. Safe to use from an asynchronous task.</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>msg</code> - message to be sent</dd></dl>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>msgs</code> - messages to be sent</dd></dl>
 </li>
 </ul>
 <a name="normalizeMapName(java.lang.String)">
@@ -2030,21 +2698,6 @@ extends java.lang.Object</pre>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>world</code> - loaded AutoReferee-compatible world</dd><dd><code>tmp</code> - whether this world should be unloaded when the match completes</dd></dl>
 </li>
 </ul>
-<a name="archiveMapData()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>archiveMapData</h4>
-<pre>public&nbsp;java.io.File&nbsp;archiveMapData()
-                            throws java.io.IOException</pre>
-<div class="block">Archives this map and stores a clean copy in the map library. Clears unnecessary
- files and attempts to generate a minimal copy of the map, ready for distribution.</div>
-<dl><dt><span class="strong">Returns:</span></dt><dd>root folder of the archived map</dd>
-<dt><span class="strong">Throws:</span></dt>
-<dd><code>java.io.IOException</code> - if archive cannot be created</dd></dl>
-</li>
-</ul>
 <a name="distributeMap()">
 <!--   -->
 </a>
@@ -2068,13 +2721,13 @@ extends java.lang.Object</pre>
 <pre>public&nbsp;void&nbsp;ejectPlayer(Player&nbsp;player)</pre>
 </li>
 </ul>
-<a name="destroy()">
+<a name="destroy(org.mctourney.autoreferee.event.match.MatchUnloadEvent.Reason)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>destroy</h4>
-<pre>public&nbsp;void&nbsp;destroy()</pre>
+<pre>public&nbsp;void&nbsp;destroy(org.mctourney.autoreferee.event.match.MatchUnloadEvent.Reason&nbsp;reason)</pre>
 <div class="block">Unloads and cleans up this match. Players will be teleported out or kicked,
  the map will be unloaded, and the map folder may be deleted.</div>
 </li>
@@ -2122,6 +2775,15 @@ extends java.lang.Object</pre>
 <pre>public&nbsp;java.util.Set&lt;org.mctourney.autoreferee.regions.AutoRefRegion&gt;&nbsp;getRegions()</pre>
 </li>
 </ul>
+<a name="getRegions(java.lang.Class)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getRegions</h4>
+<pre>public&nbsp;&lt;T extends org.mctourney.autoreferee.regions.AutoRefRegion&gt;&nbsp;java.util.Set&lt;T&gt;&nbsp;getRegions(java.lang.Class&lt;T&gt;&nbsp;clazz)</pre>
+</li>
+</ul>
 <a name="getRegions(org.mctourney.autoreferee.AutoRefTeam)">
 <!--   -->
 </a>
@@ -2158,14 +2820,14 @@ extends java.lang.Object</pre>
 <pre>public&nbsp;void&nbsp;clearRegions()</pre>
 </li>
 </ul>
-<a name="addStartMech(Block, boolean)">
+<a name="toggleStartMech(Block, boolean)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>addStartMech</h4>
-<pre>public&nbsp;<a href="../../../org/mctourney/autoreferee/AutoRefMatch.StartMechanism.html" title="class in org.mctourney.autoreferee">AutoRefMatch.StartMechanism</a>&nbsp;addStartMech(Block&nbsp;block,
-                                       boolean&nbsp;state)</pre>
+<h4>toggleStartMech</h4>
+<pre>public&nbsp;<a href="../../../org/mctourney/autoreferee/AutoRefMatch.StartMechanism.html" title="class in org.mctourney.autoreferee">AutoRefMatch.StartMechanism</a>&nbsp;toggleStartMech(Block&nbsp;block,
+                                          boolean&nbsp;state)</pre>
 <div class="block">Adds a new start mechanism for this map. These mechanisms are activated automatically
  at the start of a match when using SportBukkit, and players may interact with them
  normally in the start region when using vanilla CraftBukkit.</div>
@@ -2173,36 +2835,46 @@ extends java.lang.Object</pre>
 <dt><span class="strong">Returns:</span></dt><dd>generated start mechanism object</dd><dt><span class="strong">See Also:</span></dt><dd><a href="http://www.github.com/rmct/SportBukkit">SportBukkit</a></dd></dl>
 </li>
 </ul>
-<a name="getStartMechanism(Location)">
+<a name="getStartMechanism(Block)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>getStartMechanism</h4>
-<pre>public&nbsp;<a href="../../../org/mctourney/autoreferee/AutoRefMatch.StartMechanism.html" title="class in org.mctourney.autoreferee">AutoRefMatch.StartMechanism</a>&nbsp;getStartMechanism(Location&nbsp;loc)</pre>
+<pre>public&nbsp;<a href="../../../org/mctourney/autoreferee/AutoRefMatch.StartMechanism.html" title="class in org.mctourney.autoreferee">AutoRefMatch.StartMechanism</a>&nbsp;getStartMechanism(Block&nbsp;block)</pre>
 <div class="block">Gets the start mechanism associated with this location.</div>
 <dl><dt><span class="strong">Returns:</span></dt><dd>start mechanism located at that position, otherwise null</dd></dl>
 </li>
 </ul>
-<a name="isStartMechanism(Location)">
+<a name="isStartMechanism(Block)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>isStartMechanism</h4>
-<pre>public&nbsp;boolean&nbsp;isStartMechanism(Location&nbsp;loc)</pre>
+<pre>public&nbsp;boolean&nbsp;isStartMechanism(Block&nbsp;block)</pre>
 <div class="block">Checks if a specified block location is a start mechanism for this match.</div>
 <dl><dt><span class="strong">Returns:</span></dt><dd>true if a start mechanism is located at that position, otherwise false</dd></dl>
 </li>
 </ul>
-<a name="start()">
+<a name="_startMatch()">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>start</h4>
-<pre>public&nbsp;void&nbsp;start()</pre>
+<h4>_startMatch</h4>
+<pre>protected&nbsp;void&nbsp;_startMatch()</pre>
 <div class="block">Starts the match.</div>
+</li>
+</ul>
+<a name="setupVanish(Player, Player)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setupVanish</h4>
+<pre>protected&nbsp;void&nbsp;setupVanish(Player&nbsp;view,
+               Player&nbsp;subj)</pre>
 </li>
 </ul>
 <a name="setupSpectators()">
@@ -2227,6 +2899,16 @@ extends java.lang.Object</pre>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>player</code> - player to configure spectator mode for</dd></dl>
 </li>
 </ul>
+<a name="setupVisibility(Player)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setupVisibility</h4>
+<pre>public&nbsp;void&nbsp;setupVisibility(Player&nbsp;player)</pre>
+<div class="block">Reconfigures visibility, to and from the specified player.</div>
+</li>
+</ul>
 <a name="setSpectatorMode(Player, boolean)">
 <!--   -->
 </a>
@@ -2234,22 +2916,9 @@ extends java.lang.Object</pre>
 <li class="blockList">
 <h4>setSpectatorMode</h4>
 <pre>public&nbsp;void&nbsp;setSpectatorMode(Player&nbsp;player,
-                    boolean&nbsp;b)</pre>
-<div class="block">Sets whether a specified player is in spectator mode.</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>player</code> - player to set spectator mode for</dd><dd><code>b</code> - true to set spectator mode on, false to set spectator mode off</dd></dl>
-</li>
-</ul>
-<a name="setSpectatorMode(Player, boolean, GameMode)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setSpectatorMode</h4>
-<pre>public&nbsp;void&nbsp;setSpectatorMode(Player&nbsp;player,
-                    boolean&nbsp;b,
-                    GameMode&nbsp;gamemode)</pre>
+                    boolean&nbsp;spec)</pre>
 <div class="block">Sets whether a specified player is in spectator mode, explicitly setting gamemode.</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>player</code> - player to set spectator mode for</dd><dd><code>b</code> - true to set spectator mode on, false to set spectator mode off</dd><dd><code>gamemode</code> - player's new gamemode</dd></dl>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>player</code> - player to set spectator mode for</dd><dd><code>spec</code> - true to set spectator mode on, false to set spectator mode off</dd></dl>
 </li>
 </ul>
 <a name="clearEntities()">
@@ -2281,6 +2950,15 @@ extends java.lang.Object</pre>
 <h4>cancelCountdown</h4>
 <pre>public&nbsp;void&nbsp;cancelCountdown()</pre>
 <div class="block">Cancels the match countdown in progress.</div>
+</li>
+</ul>
+<a name="startMatch(org.mctourney.autoreferee.event.match.MatchStartEvent.Reason)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>startMatch</h4>
+<pre>public&nbsp;void&nbsp;startMatch(org.mctourney.autoreferee.event.match.MatchStartEvent.Reason&nbsp;reason)</pre>
 </li>
 </ul>
 <a name="startCountdown(int, boolean)">
@@ -2346,13 +3024,13 @@ extends java.lang.Object</pre>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>team</code> - winning team, or null for no winner</dd></dl>
 </li>
 </ul>
-<a name="teamNameLookup(java.lang.String)">
+<a name="getTeam(java.lang.String)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>teamNameLookup</h4>
-<pre>public&nbsp;<a href="../../../org/mctourney/autoreferee/AutoRefTeam.html" title="class in org.mctourney.autoreferee">AutoRefTeam</a>&nbsp;teamNameLookup(java.lang.String&nbsp;name)</pre>
+<h4>getTeam</h4>
+<pre>public&nbsp;<a href="../../../org/mctourney/autoreferee/AutoRefTeam.html" title="class in org.mctourney.autoreferee">AutoRefTeam</a>&nbsp;getTeam(java.lang.String&nbsp;name)</pre>
 <div class="block">Finds a team whose name matches the given string.</div>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>name</code> - team name to look up, either custom team name or base team name</dd>
 <dt><span class="strong">Returns:</span></dt><dd>team object matching the name if one exists, otherwise null</dd></dl>
@@ -2364,7 +3042,7 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>getExpectedPlayers</h4>
-<pre>public&nbsp;java.util.Set&lt;OfflinePlayer&gt;&nbsp;getExpectedPlayers()</pre>
+<pre>public&nbsp;java.util.Set&lt;java.lang.String&gt;&nbsp;getExpectedPlayers()</pre>
 </li>
 </ul>
 <a name="addCape(java.lang.String, java.lang.String)">
@@ -2449,7 +3127,7 @@ extends java.lang.Object</pre>
 <div class="block">Teleports a player to a match they have been added to, joining the team inviting them.</div>
 </li>
 </ul>
-<a name="joinTeam(Player, org.mctourney.autoreferee.AutoRefTeam, boolean)">
+<a name="joinTeam(Player, org.mctourney.autoreferee.AutoRefTeam, org.mctourney.autoreferee.event.player.PlayerTeamJoinEvent.Reason, boolean)">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -2457,6 +3135,7 @@ extends java.lang.Object</pre>
 <h4>joinTeam</h4>
 <pre>public&nbsp;boolean&nbsp;joinTeam(Player&nbsp;player,
                <a href="../../../org/mctourney/autoreferee/AutoRefTeam.html" title="class in org.mctourney.autoreferee">AutoRefTeam</a>&nbsp;team,
+               org.mctourney.autoreferee.event.player.PlayerTeamJoinEvent.Reason&nbsp;reason,
                boolean&nbsp;force)</pre>
 <div class="block">Adds a player to the specified team. Removes the player from any other teams first,
  if necessary. Roster changes are restricted while a match is in progress, unless forced.</div>
@@ -2474,6 +3153,33 @@ extends java.lang.Object</pre>
              boolean&nbsp;force)</pre>
 <div class="block">Removes player from all teams.</div>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>player</code> - player to be removed</dd><dd><code>force</code> - should player be removed, even if match is in progress</dd></dl>
+</li>
+</ul>
+<a name="updatePlayerList()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>updatePlayerList</h4>
+<pre>protected&nbsp;void&nbsp;updatePlayerList()</pre>
+</li>
+</ul>
+<a name="getCycleNextPlayer(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getCycleNextPlayer</h4>
+<pre>protected&nbsp;java.lang.String&nbsp;getCycleNextPlayer(java.lang.String&nbsp;name)</pre>
+</li>
+</ul>
+<a name="getCyclePrevPlayer(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getCyclePrevPlayer</h4>
+<pre>protected&nbsp;java.lang.String&nbsp;getCyclePrevPlayer(java.lang.String&nbsp;name)</pre>
 </li>
 </ul>
 <a name="getRespawnMode()">
@@ -2676,6 +3382,19 @@ extends java.lang.Object</pre>
 <dt><span class="strong">Returns:</span></dt><dd>colored message</dd></dl>
 </li>
 </ul>
+<a name="parseTimeString(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>parseTimeString</h4>
+<pre>public static&nbsp;long&nbsp;parseTimeString(java.lang.String&nbsp;time)</pre>
+<div class="block">Converts a human-readable time to a clock tick in Minecraft. Converts times such as "8am",
+ "1600", or "3:45p" to a valid clock tick setting that can be used to change the world time.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>time</code> - A string representing a human-readable time.</dd>
+<dt><span class="strong">Returns:</span></dt><dd>Equivalent clock tick</dd></dl>
+</li>
+</ul>
 <a name="setCustomMatchInfoBook(ItemStack)">
 <!--   -->
 </a>
@@ -2695,6 +3414,25 @@ extends java.lang.Object</pre>
 <h4>getMatchInfoBook</h4>
 <pre>public&nbsp;ItemStack&nbsp;getMatchInfoBook()</pre>
 <div class="block">Gets the book given to players upon joining this match.</div>
+</li>
+</ul>
+<a name="giveMatchInfoBook(Player, boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>giveMatchInfoBook</h4>
+<pre>public&nbsp;void&nbsp;giveMatchInfoBook(Player&nbsp;player,
+                     boolean&nbsp;force)</pre>
+</li>
+</ul>
+<a name="giveMatchInfoBook(Player)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>giveMatchInfoBook</h4>
+<pre>public&nbsp;void&nbsp;giveMatchInfoBook(Player&nbsp;player)</pre>
 </li>
 </ul>
 <a name="sendMatchInfo(CommandSender)">

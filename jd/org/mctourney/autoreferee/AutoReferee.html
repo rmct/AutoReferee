@@ -131,32 +131,24 @@ extends JavaPlugin</pre>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#COMPLETED_KICK_MESSAGE">COMPLETED_KICK_MESSAGE</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>protected org.mctourney.autoreferee.util.metrics.IncrementPlotter</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#matchesPlayed">matchesPlayed</a></strong></code>&nbsp;</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#NO_LOGIN_MESSAGE">NO_LOGIN_MESSAGE</a></strong></code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#NO_WEBSTATS_MESSAGE">NO_WEBSTATS_MESSAGE</a></strong></code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>protected org.mctourney.autoreferee.util.metrics.PieChartGraph</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#playedMapsTracker">playedMapsTracker</a></strong></code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#PLUGIN_CHANNEL_ENC">PLUGIN_CHANNEL_ENC</a></strong></code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#REFEREE_PLUGIN_CHANNEL">REFEREE_PLUGIN_CHANNEL</a></strong></code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>protected org.mctourney.autoreferee.plugin.AutoRefPluginManager</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#subpluginManager">subpluginManager</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
@@ -201,85 +193,95 @@ extends JavaPlugin</pre>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>static void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#callEvent(Event)">callEvent</a></strong>(Event&nbsp;event)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#clearMatch(org.mctourney.autoreferee.AutoRefMatch)">clearMatch</a></strong>(<a href="../../../org/mctourney/autoreferee/AutoRefMatch.html" title="class in org.mctourney.autoreferee">AutoRefMatch</a>&nbsp;match)</code>
 <div class="block">Removes a match from the server.</div>
 </td>
 </tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefPlayer.html" title="class in org.mctourney.autoreferee">AutoRefPlayer</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#clearTNTOwner(Entity)">clearTNTOwner</a></strong>(Entity&nbsp;entity)</code>
+<div class="block">Clears out a primed TNT from the tracked list.</div>
+</td>
+</tr>
 <tr class="altColor">
-<td class="colFirst"><code>static void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#fireEvent(org.mctourney.autoreferee.event.AutoRefereeEvent)">fireEvent</a></strong>(org.mctourney.autoreferee.event.AutoRefereeEvent&nbsp;event)</code>&nbsp;</td>
+<td class="colFirst"><code>org.mctourney.autoreferee.util.commands.CommandManager</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#getCommandManager()">getCommandManager</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#getCommit()">getCommit</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>World</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#getConsoleWorld()">getConsoleWorld</a></strong>()</code>
 <div class="block">Gets the world that the console user has selected.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>ChunkGenerator</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#getDefaultWorldGenerator(java.lang.String, java.lang.String)">getDefaultWorldGenerator</a></strong>(java.lang.String&nbsp;worldname,
                         java.lang.String&nbsp;id)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefTeam.html" title="class in org.mctourney.autoreferee">AutoRefTeam</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#getExpectedTeam(Player)">getExpectedTeam</a></strong>(Player&nbsp;player)</code>
 <div class="block">Gets the team the player is expected to join.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../org/mctourney/autoreferee/AutoReferee.html" title="class in org.mctourney.autoreferee">AutoReferee</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#getInstance()">getInstance</a></strong>()</code>
 <div class="block">Gets the singleton instance of AutoReferee</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>World</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#getLobbyWorld()">getLobbyWorld</a></strong>()</code>
 <div class="block">Gets the world designated as the lobby world.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefMatch.html" title="class in org.mctourney.autoreferee">AutoRefMatch</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#getMatch(World)">getMatch</a></strong>(World&nbsp;world)</code>
 <div class="block">Gets match object associated with the given world.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>java.util.Collection&lt;<a href="../../../org/mctourney/autoreferee/AutoRefMatch.html" title="class in org.mctourney.autoreferee">AutoRefMatch</a>&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#getMatches()">getMatches</a></strong>()</code>
 <div class="block">Gets all existing match objects for this server.</div>
 </td>
 </tr>
-<tr class="altColor">
-<td class="colFirst"><code>java.lang.String</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#getMD5sum()">getMD5sum</a></strong>()</code>&nbsp;</td>
-</tr>
 <tr class="rowColor">
-<td class="colFirst"><code>org.mctourney.autoreferee.plugin.AutoRefPluginManager</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#getPluginManager()">getPluginManager</a></strong>()</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code>World</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#getSenderWorld(CommandSender)">getSenderWorld</a></strong>(CommandSender&nbsp;sender)</code>
 <div class="block">Gets the world associated with a command sender.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefTeam.html" title="class in org.mctourney.autoreferee">AutoRefTeam</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#getTeam(Player)">getTeam</a></strong>(Player&nbsp;player)</code>
 <div class="block">Gets team object associated with a player.</div>
 </td>
 </tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../org/mctourney/autoreferee/AutoRefPlayer.html" title="class in org.mctourney.autoreferee">AutoRefPlayer</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#getTNTOwner(Entity)">getTNTOwner</a></strong>(Entity&nbsp;entity)</code>
+<div class="block">Gets the player responsible for a primed TNT.</div>
+</td>
+</tr>
 <tr class="altColor">
-<td class="colFirst"><code>WorldEditPlugin</code></td>
+<td class="colFirst"><code>static WorldEditPlugin</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#getWorldEdit()">getWorldEdit</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#isAutoMode()">isAutoMode</a></strong>()</code>
-<div class="block">Checks if the server is in fully-automated mode.</div>
-</td>
+<td class="colFirst"><code>Scoreboard</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#getWorldScoreboard(World)">getWorldScoreboard</a></strong>(World&nbsp;world)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>protected boolean</code></td>
@@ -295,42 +297,19 @@ extends JavaPlugin</pre>
    java.util.logging.Level&nbsp;level)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#onCommand(CommandSender, Command, java.lang.String, java.lang.String[])">onCommand</a></strong>(CommandSender&nbsp;sender,
-         Command&nbsp;cmd,
-         java.lang.String&nbsp;label,
-         java.lang.String[]&nbsp;args)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#onDisable()">onDisable</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#onEnable()">onEnable</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
-<td class="colFirst"><code>static long</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#parseTimeString(java.lang.String)">parseTimeString</a></strong>(java.lang.String&nbsp;time)</code>
-<div class="block">Converts a human-readable time to a clock tick in Minecraft.</div>
-</td>
-</tr>
 <tr class="rowColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#playerWhitelisted(Player)">playerWhitelisted</a></strong>(Player&nbsp;player)</code>
-<div class="block">Checks if the player should be white-listed on this server.</div>
-</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#sendMessageSync(CommandSender, java.lang.String)">sendMessageSync</a></strong>(CommandSender&nbsp;sender,
-               java.lang.String&nbsp;msg)</code>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#sendMessageSync(CommandSender, java.lang.String...)">sendMessageSync</a></strong>(CommandSender&nbsp;recipient,
+               java.lang.String...&nbsp;msgs)</code>
 <div class="block">Force a message to be sent synchronously.</div>
 </td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>protected boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#setAutoMode(boolean)">setAutoMode</a></strong>(boolean&nbsp;auto)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
@@ -342,6 +321,13 @@ extends JavaPlugin</pre>
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#setLobbyWorld(World)">setLobbyWorld</a></strong>(World&nbsp;world)</code>
 <div class="block">Sets the world designated as the lobby world.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/mctourney/autoreferee/AutoReferee.html#setTNTOwner(Entity, org.mctourney.autoreferee.AutoRefPlayer)">setTNTOwner</a></strong>(Entity&nbsp;entity,
+           <a href="../../../org/mctourney/autoreferee/AutoRefPlayer.html" title="class in org.mctourney.autoreferee">AutoRefPlayer</a>&nbsp;apl)</code>
+<div class="block">Sets the player responsible for a primed TNT.</div>
 </td>
 </tr>
 </table>
@@ -445,31 +431,13 @@ extends JavaPlugin</pre>
 <pre>protected&nbsp;org.mctourney.autoreferee.util.commands.CommandManager commandManager</pre>
 </li>
 </ul>
-<a name="subpluginManager">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>subpluginManager</h4>
-<pre>protected&nbsp;org.mctourney.autoreferee.plugin.AutoRefPluginManager subpluginManager</pre>
-</li>
-</ul>
 <a name="playedMapsTracker">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>playedMapsTracker</h4>
-<pre>protected&nbsp;org.mctourney.autoreferee.util.metrics.PieChartGraph playedMapsTracker</pre>
-</li>
-</ul>
-<a name="matchesPlayed">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>matchesPlayed</h4>
-<pre>protected&nbsp;org.mctourney.autoreferee.util.metrics.IncrementPlotter matchesPlayed</pre>
+<h4>playedMapsTracker</h4>
+<pre>protected&nbsp;org.mctourney.autoreferee.util.metrics.PieChartGraph playedMapsTracker</pre>
 </li>
 </ul>
 </li>
@@ -527,31 +495,31 @@ extends JavaPlugin</pre>
 <pre>public static&nbsp;void&nbsp;log(java.lang.String&nbsp;msg)</pre>
 </li>
 </ul>
-<a name="getMD5sum()">
+<a name="getCommit()">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>getMD5sum</h4>
-<pre>public&nbsp;java.lang.String&nbsp;getMD5sum()</pre>
+<h4>getCommit</h4>
+<pre>public&nbsp;java.lang.String&nbsp;getCommit()</pre>
 </li>
 </ul>
-<a name="getPluginManager()">
+<a name="getCommandManager()">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>getPluginManager</h4>
-<pre>public&nbsp;org.mctourney.autoreferee.plugin.AutoRefPluginManager&nbsp;getPluginManager()</pre>
+<h4>getCommandManager</h4>
+<pre>public&nbsp;org.mctourney.autoreferee.util.commands.CommandManager&nbsp;getCommandManager()</pre>
 </li>
 </ul>
-<a name="fireEvent(org.mctourney.autoreferee.event.AutoRefereeEvent)">
+<a name="callEvent(Event)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>fireEvent</h4>
-<pre>public static&nbsp;void&nbsp;fireEvent(org.mctourney.autoreferee.event.AutoRefereeEvent&nbsp;event)</pre>
+<h4>callEvent</h4>
+<pre>public static&nbsp;void&nbsp;callEvent(Event&nbsp;event)</pre>
 </li>
 </ul>
 <a name="getLobbyWorld()">
@@ -575,26 +543,6 @@ extends JavaPlugin</pre>
 <pre>public&nbsp;void&nbsp;setLobbyWorld(World&nbsp;world)</pre>
 <div class="block">Sets the world designated as the lobby world.</div>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>world</code> - lobby world</dd></dl>
-</li>
-</ul>
-<a name="isAutoMode()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>isAutoMode</h4>
-<pre>public&nbsp;boolean&nbsp;isAutoMode()</pre>
-<div class="block">Checks if the server is in fully-automated mode.</div>
-<dl><dt><span class="strong">Returns:</span></dt><dd>true if in automated mode, otherwise false</dd></dl>
-</li>
-</ul>
-<a name="setAutoMode(boolean)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setAutoMode</h4>
-<pre>protected&nbsp;boolean&nbsp;setAutoMode(boolean&nbsp;auto)</pre>
 </li>
 </ul>
 <a name="isConsoleLoggingEnabled()">
@@ -648,6 +596,40 @@ extends JavaPlugin</pre>
 <div class="block">Removes a match from the server.</div>
 </li>
 </ul>
+<a name="getTNTOwner(Entity)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getTNTOwner</h4>
+<pre>public&nbsp;<a href="../../../org/mctourney/autoreferee/AutoRefPlayer.html" title="class in org.mctourney.autoreferee">AutoRefPlayer</a>&nbsp;getTNTOwner(Entity&nbsp;entity)</pre>
+<div class="block">Gets the player responsible for a primed TNT.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>entity</code> - primed tnt entity</dd></dl>
+</li>
+</ul>
+<a name="setTNTOwner(Entity, org.mctourney.autoreferee.AutoRefPlayer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setTNTOwner</h4>
+<pre>public&nbsp;void&nbsp;setTNTOwner(Entity&nbsp;entity,
+               <a href="../../../org/mctourney/autoreferee/AutoRefPlayer.html" title="class in org.mctourney.autoreferee">AutoRefPlayer</a>&nbsp;apl)</pre>
+<div class="block">Sets the player responsible for a primed TNT.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>entity</code> - primed tnt entity</dd><dd><code>apl</code> - player responsible for tnt</dd></dl>
+</li>
+</ul>
+<a name="clearTNTOwner(Entity)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>clearTNTOwner</h4>
+<pre>public&nbsp;<a href="../../../org/mctourney/autoreferee/AutoRefPlayer.html" title="class in org.mctourney.autoreferee">AutoRefPlayer</a>&nbsp;clearTNTOwner(Entity&nbsp;entity)</pre>
+<div class="block">Clears out a primed TNT from the tracked list.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>entity</code> - primed tnt entity</dd></dl>
+</li>
+</ul>
 <a name="getTeam(Player)">
 <!--   -->
 </a>
@@ -696,18 +678,7 @@ extends JavaPlugin</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>getWorldEdit</h4>
-<pre>public&nbsp;WorldEditPlugin&nbsp;getWorldEdit()</pre>
-</li>
-</ul>
-<a name="playerWhitelisted(Player)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>playerWhitelisted</h4>
-<pre>public&nbsp;boolean&nbsp;playerWhitelisted(Player&nbsp;player)</pre>
-<div class="block">Checks if the player should be white-listed on this server. Only used in auto-mode.</div>
-<dl><dt><span class="strong">Returns:</span></dt><dd>true if player should be whitelisted, otherwise false</dd></dl>
+<pre>public static&nbsp;WorldEditPlugin&nbsp;getWorldEdit()</pre>
 </li>
 </ul>
 <a name="getConsoleWorld()">
@@ -741,6 +712,15 @@ extends JavaPlugin</pre>
 <div class="block">Gets the world associated with a command sender.</div>
 </li>
 </ul>
+<a name="getWorldScoreboard(World)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getWorldScoreboard</h4>
+<pre>public&nbsp;Scoreboard&nbsp;getWorldScoreboard(World&nbsp;world)</pre>
+</li>
+</ul>
 <a name="getDefaultWorldGenerator(java.lang.String, java.lang.String)">
 <!--   -->
 </a>
@@ -751,41 +731,16 @@ extends JavaPlugin</pre>
                                       java.lang.String&nbsp;id)</pre>
 </li>
 </ul>
-<a name="onCommand(CommandSender, Command, java.lang.String, java.lang.String[])">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>onCommand</h4>
-<pre>public&nbsp;boolean&nbsp;onCommand(CommandSender&nbsp;sender,
-                Command&nbsp;cmd,
-                java.lang.String&nbsp;label,
-                java.lang.String[]&nbsp;args)</pre>
-</li>
-</ul>
-<a name="sendMessageSync(CommandSender, java.lang.String)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>sendMessageSync</h4>
-<pre>public&nbsp;void&nbsp;sendMessageSync(CommandSender&nbsp;sender,
-                   java.lang.String&nbsp;msg)</pre>
-<div class="block">Force a message to be sent synchronously. Safe to use from an asynchronous task.</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>msg</code> - message to be sent</dd></dl>
-</li>
-</ul>
-<a name="parseTimeString(java.lang.String)">
+<a name="sendMessageSync(CommandSender, java.lang.String...)">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>parseTimeString</h4>
-<pre>public static&nbsp;long&nbsp;parseTimeString(java.lang.String&nbsp;time)</pre>
-<div class="block">Converts a human-readable time to a clock tick in Minecraft. Converts times such as "8am",
- "1600", or "3:45p" to a valid clock tick setting that can be used to change the world time.</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>time</code> - A string representing a human-readable time.</dd>
-<dt><span class="strong">Returns:</span></dt><dd>Equivalent clock tick</dd></dl>
+<h4>sendMessageSync</h4>
+<pre>public&nbsp;void&nbsp;sendMessageSync(CommandSender&nbsp;recipient,
+                   java.lang.String...&nbsp;msgs)</pre>
+<div class="block">Force a message to be sent synchronously. Safe to use from an asynchronous task.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>msgs</code> - messages to be sent</dd></dl>
 </li>
 </ul>
 </li>
