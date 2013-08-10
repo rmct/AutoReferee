@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>	  <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>		 <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>		 <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title>AutoReferee -- Command Listing</title>
+		<meta name="description" content="">
+		<meta name="viewport" content="width=device-width">
+
+		<link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Archivo+Narrow:400,700' />
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/bootstrap-glyphicons.css">
+
+		<style>
+			body, html { font-family: sans-serif; line-height: 180%; }
+
+			li {
+				padding-bottom: 5px;
+			}
+		</style>
+		<link rel="stylesheet" href="css/bootstrap-responsive.min.css">
+		<link rel="stylesheet" href="css/docs.css">
+
+		<script src="js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+	</head>
+	<body>
+		<!--[if lt IE 7]>
+			<p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+		<![endif]-->
+
+		<!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
+
+		<div class="container masthead">
+			<h3 class="muted">AutoReferee</h3>
+			<div class="navbar">
+				<div class="navbar-inner">
+					<div class="container">
+						<ul class="nav">
+							<li><a href="home.html">Home</a></li>
+							<li class="active"><a href="commands.html">Commands</a></li>
+							<li><a href="server.html">Server Admin</a></li>
+							<li><a href="mapdev.html">Mapdev</a></li>
+							<li><a href="addons.html">Addons</a></li>
+							<li><a href="api/">API</a></li>
+						</ul>
+					</div>
+				</div>
+			</div><!-- /.navbar -->
+		</div>
+
+		<div class="container">
+			<div class="jumbotron autoreferee-banner">
+				<h1>AutoReferee</h1>
+				<p class="lead">Competitive Minecraft Made Easy!</p>
+			</div>
+
+			<div id="command-list">
+				<div class="page-header">
+					<h1>Command Listing</h1>
+				</div>
+
+				<p>The following commands are available via the base AutoReferee plugin. Hover over any command to get a description of what the command does. Any argument passed to a command containing spaces needs to be <strong>"quoted"</strong>. If a permissions node is specified, players must have any listed permissions to execute the command. Likewise, If a role is mentioned, the user must have that role or higher to execute the command.</p>
+
+				<p>Use <code>/help AutoReferee</code> or <code>/help &lt;command&gt;</code> to see this information in-game. All commands support tab completion to assist with subcommands.</p>
+
+				<div class="command-container">
+					{{#commands}}
+					<div class="command well" id="{{id}}">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> {{cmd}}</p>
+						<p>{{desc}}</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>{{usage}}</code></p>
+							{{#opthelp}}
+							<ul class="command-args">
+								{{#args}}
+								<li><code>-{{arg}}</code> {{argdesc}}</li>
+								{{/args}}
+							</ul>
+							{{/opthelp}}
+							<p><strong>Permission:</strong> {{role}}{{#perm}}, <code>{{node}}</code>{{/perm}}</p>
+							{{#console}}<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>{{/console}}
+						</div>
+					</div>
+
+					{{/commands}}
+				</div>
+			</div>
+		</div> <!-- /container -->
+
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+		<script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.1.min.js"><\/script>')</script>
+
+		<script src="js/vendor/bootstrap.min.js"></script>
+		<script src="js/main.js"></script>
+
+		<script>
+			var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
+			(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+			g.src='//www.google-analytics.com/ga.js';
+			s.parentNode.insertBefore(g,s)}(document,'script'));
+		</script>
+	</body>
+</html>

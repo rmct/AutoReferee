@@ -1,434 +1,674 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if lt IE 7]>	  <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>		 <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>		 <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>AutoReferee Commands</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title>AutoReferee -- Command Listing</title>
+		<meta name="description" content="">
+		<meta name="viewport" content="width=device-width">
 
-        <link rel="stylesheet" href="css/bootstrap.min.css">
-        
-        <!-- fonts -->
-        <link href='http://fonts.googleapis.com/css?family=Archivo+Narrow:400,700' rel='stylesheet' />
+		<link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Archivo+Narrow:400,700' />
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/bootstrap-glyphicons.css">
 
-        <style>
-            body {
-                padding-top: 60px;
-                padding-bottom: 40px;
-            }
-            .navbar {
-                font-family: 'Archivo Narrow', sans-serif;
-            }
-        </style>
-        <link rel="stylesheet" href="css/bootstrap-responsive.min.css">
-        <link rel="stylesheet" href="css/commands.css">
-        <link rel="stylesheet" href="css/tablesorter/style.css">
+		<style>
+			body, html { font-family: sans-serif; line-height: 180%; }
 
-        <script src="js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
-    </head>
-    <body>
-        <!--[if lt IE 7]>
-            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
-        <![endif]-->
+			li {
+				padding-bottom: 5px;
+			}
+		</style>
+		<link rel="stylesheet" href="css/bootstrap-responsive.min.css">
+		<link rel="stylesheet" href="css/docs.css">
 
-        <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
+		<script src="js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+	</head>
+	<body>
+		<!--[if lt IE 7]>
+			<p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+		<![endif]-->
 
-        <div class="navbar navbar-inverse navbar-fixed-top">
-            <div class="navbar-inner">
-                <div class="container">
-                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </a>
-                    <a class="brand" href="#">AutoReferee</a>
-                    <div class="nav-collapse collapse">
-                        <ul class="nav">
-                            <li><a href="index.html"><i class="icon-white icon-download-alt"></i> Get AutoReferee</a></li>
-                            <li><a href="http://www.rmct.tv/"><i class="icon-white icon-star"></i> RMCT</a></li>
-                            <li><a href="http://www.reddit.com/r/mctourney"><i class="icon-white icon-comment"></i> Subreddit</a></li>
-                        </ul>
-                        <p class="navbar-text pull-right">
-                            Command List
-                        </p>
-                    </div><!--/.nav-collapse -->
-                </div>
-            </div>
-        </div>
+		<!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
 
-        <div class="container">
+		<div class="container masthead">
+			<h3 class="muted">AutoReferee</h3>
+			<div class="navbar">
+				<div class="navbar-inner">
+					<div class="container">
+						<ul class="nav">
+							<li><a href="home.html">Home</a></li>
+							<li class="active"><a href="commands.html">Commands</a></li>
+							<li><a href="server.html">Server Admin</a></li>
+							<li><a href="mapdev.html">Mapdev</a></li>
+							<li><a href="addons.html">Addons</a></li>
+							<li><a href="api/">API</a></li>
+						</ul>
+					</div>
+				</div>
+			</div><!-- /.navbar -->
+		</div>
 
-            <p class="well">The following commands are available via AutoReferee. Hover over any command to get a description of what the command does. Any argument passed to a command containing spaces needs to be <strong>"quoted"</strong>. If a permissions node is specified, players must have any listed permissions to execute the command. Likewise, If a role is mentioned, the user must have that role or higher to execute the command. Click any column header to sort the table by that column.</p>
+		<div class="container">
+			<div class="jumbotron autoreferee-banner">
+				<h1>AutoReferee</h1>
+				<p class="lead">Competitive Minecraft Made Easy!</p>
+			</div>
 
-            <table class="table table-hover table-corner tablesorter">
-                <thead>
-                    <tr>
-                        <th>Command</th>
-                        <th>Options</th>
-                        <th>Permission</th>
-                        <th>Role</th>
-                        <th>Console?</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="command-row role-4" data-toggle="tooltip" data-placement="bottom" title="Announce a message to your current match. Your name will be shown. Console can can use this command.">
-                        <td class="command-usage">/announce</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-4">Referee</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-2" data-toggle="tooltip" data-placement="bottom" title="AutoReferee teleportation tools. Console can not can use this command.">
-                        <td class="command-usage">/artp</td>
-                        <td class="command-options">b*d*l*t*s*o*v*r</td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-2">Spectator</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Package the map and configuration into the maps/ directory. Console can can use this command.">
-                        <td class="command-usage">/autoref archive</td>
-                        <td class="command-options">z</td>
-                        <td class="command-perm">autoreferee.configure</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Invite player(s) to participate in match. Works for offline players as well. Console can can use this command.">
-                        <td class="command-usage">/autoref autoinvite</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm">autoreferee.admin</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Initialize a blank configuration file for this map. Console can can use this command.">
-                        <td class="command-usage">/autoref cfg init</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm">autoreferee.configure</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Reload the configuration file from disk for this map. Console can can use this command.">
-                        <td class="command-usage">/autoref cfg reload</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm">autoreferee.configure</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Save the configuration file for this map. Console can can use this command.">
-                        <td class="command-usage">/autoref cfg save</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm">autoreferee.configure</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Set the currently selected WorldEdit region to be a team&#x27;s core. Console can not can use this command.">
-                        <td class="command-usage">/autoref core</td>
-                        <td class="command-options">r+</td>
-                        <td class="command-perm">autoreferee.configure</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-4" data-toggle="tooltip" data-placement="bottom" title="Begin a generic countdown. Console can can use this command.">
-                        <td class="command-usage">/autoref countdown</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-4">Referee</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-2" data-toggle="tooltip" data-placement="bottom" title="Cycle through players. Console can not can use this command.">
-                        <td class="command-usage">/autoref cycle</td>
-                        <td class="command-options">np</td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-2">Spectator</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Turn on debugging mode. Console can can use this command.">
-                        <td class="command-usage">/autoref debug</td>
-                        <td class="command-options">c</td>
-                        <td class="command-perm">autoreferee.configure</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-4" data-toggle="tooltip" data-placement="bottom" title="Ends the current match by decision. Specify a team name to declare them the winner, or &#x27;tie&#x27; to announce a tie. Console can can use this command.">
-                        <td class="command-usage">/autoref endmatch</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-4">Referee</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-4" data-toggle="tooltip" data-placement="bottom" title="Give a kit to the specified player. Console can can use this command.">
-                        <td class="command-usage">/autoref givekit</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-4">Referee</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-4" data-toggle="tooltip" data-placement="bottom" title="If using the AutoReferee client mod, swaps sides for the two team listings. Console can not can use this command.">
-                        <td class="command-usage">/autoref hud swap</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-4">Referee</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Invite players to your current match. Console can can use this command.">
-                        <td class="command-usage">/autoref invite</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Loads a map by name, case insensitive. Console can can use this command.">
-                        <td class="command-usage">/autoref load</td>
-                        <td class="command-options">c+x</td>
-                        <td class="command-perm">autoreferee.admin</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Loads a map from a remote zip file, taking the URL as a parameter. Console can can use this command.">
-                        <td class="command-usage">/autoref loadurl</td>
-                        <td class="command-options">c+x</td>
-                        <td class="command-perm">autoreferee.admin</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="List all maps available, both on this server and in the repository. Console can can use this command.">
-                        <td class="command-usage">/autoref maplist</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm">autoreferee.admin</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-2" data-toggle="tooltip" data-placement="bottom" title="Toggles permanent night vision for a spectator. Console can not can use this command.">
-                        <td class="command-usage">/autoref nightvis</td>
-                        <td class="command-options">01</td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-2">Spectator</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Prohibit the item in hand from being crafted during a match. Console can not can use this command.">
-                        <td class="command-usage">/autoref nocraft</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm">autoreferee.configure</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Switch to practice mode or activate practice mode menu. Console can not can use this command.">
-                        <td class="command-usage">/autoref practice</td>
-                        <td class="command-options">t*</td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Protect all entities currently on the map. Console can not can use this command.">
-                        <td class="command-usage">/autoref protectall</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm">autoreferee.configure</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Reloads the current map to its original, unmodified state. Players are migrated to the new copy. Console can can use this command.">
-                        <td class="command-usage">/autoref reload</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm">autoreferee.admin</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Restrict all team zones to be within a given height. Console can can use this command.">
-                        <td class="command-usage">/autoref setheight</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm">autoreferee.configure</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Sets the current world to be the AutoReferee lobby world. Console can not can use this command.">
-                        <td class="command-usage">/autoref setlobby</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm">autoreferee.admin</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Set the current location as the global spawn. If a team name is provided, sets team spawn. Console can not can use this command.">
-                        <td class="command-usage">/autoref setspawn</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm">autoreferee.configure</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-2" data-toggle="tooltip" data-placement="bottom" title="Swaps the players and custom names of both teams. Console can can use this command.">
-                        <td class="command-usage">/autoref swapteams</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-2">Spectator</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-4" data-toggle="tooltip" data-placement="bottom" title="Rename a team. Console can can use this command.">
-                        <td class="command-usage">/autoref teamname</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-4">Referee</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-4" data-toggle="tooltip" data-placement="bottom" title="Specify the total time allowed for this match, in minutes. Console can can use this command.">
-                        <td class="command-usage">/autoref timelimit</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-4">Referee</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Get the tool used to configure protected entities (will not be butchered before match). Console can not can use this command.">
-                        <td class="command-usage">/autoref tool protect</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm">autoreferee.configure</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Get the tool used to configure start mechanisms. Console can not can use this command.">
-                        <td class="command-usage">/autoref tool startmech</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm">autoreferee.configure</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Get the tool used to configure win conditions. Console can not can use this command.">
-                        <td class="command-usage">/autoref tool wincond</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm">autoreferee.configure</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Unloads the current map. Connected players are either moved to the lobby or kicked. Console can can use this command.">
-                        <td class="command-usage">/autoref unload</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm">autoreferee.admin</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Updates maps installed on server. Use -f to force an update. Console can can use this command.">
-                        <td class="command-usage">/autoref update</td>
-                        <td class="command-options">f</td>
-                        <td class="command-perm">autoreferee.admin</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Returns the version information for the plugin. Console can can use this command.">
-                        <td class="command-usage">/autoref version</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Specifies the name of the world for console commands to modify. Console can can use this command.">
-                        <td class="command-usage">/autoref world</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm">autoreferee.admin</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-4" data-toggle="tooltip" data-placement="bottom" title="Broadcast a message to your current match. No name will be shown. Console can can use this command.">
-                        <td class="command-usage">/broadcast</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-4">Referee</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Join the match of the named player. If no player is named, lists available matches. Console can not can use this command.">
-                        <td class="command-usage">/joinmatch</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Join a random team. If a team name is specified, that team will be joined. Console can not can use this command.">
-                        <td class="command-usage">/jointeam</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Leave the current match. Console can can use this command.">
-                        <td class="command-usage">/leavematch</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Leave a team. Console can not can use this command.">
-                        <td class="command-usage">/leaveteam</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Get info regarding the current match. Console can can use this command.">
-                        <td class="command-usage">/matchinfo</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Notifies spectators of your location. Follow this command with a message to provide further info. Console can not can use this command.">
-                        <td class="command-usage">/notify</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Mark your team as ready. Referees may use this command to begin a match. Console can can use this command.">
-                        <td class="command-usage">/ready</td>
-                        <td class="command-options">tfyns+</td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Changes access type of the current match: PUBLIC or PRIVATE. Console can can use this command.">
-                        <td class="command-usage">/setaccess</td>
-                        <td class="command-options">q</td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                    <tr class="command-row role-2" data-toggle="tooltip" data-placement="bottom" title="View the inventory of the nearest player. Specify a name to show that player&#x27;s inventory. Console can not can use this command.">
-                        <td class="command-usage">/viewinventory</td>
-                        <td class="command-options">p</td>
-                        <td class="command-perm"></td>
-                        <td class="command-role role-2">Spectator</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="Set the currently selected WorldEdit region to be a team&#x27;s zone. Console can not can use this command.">
-                        <td class="command-usage">/zone</td>
-                        <td class="command-options">bnseXS</td>
-                        <td class="command-perm">autoreferee.configure</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-remove"></i></td>
-                    </tr>
-                    <tr class="command-row role-0" data-toggle="tooltip" data-placement="bottom" title="List all configured regions on the map. Console can can use this command.">
-                        <td class="command-usage">/zones</td>
-                        <td class="command-options"></td>
-                        <td class="command-perm">autoreferee.configure</td>
-                        <td class="command-role role-0">Any</td>
-                        <td class="command-console"><i class="icon-ok"></i></td>
-                    </tr>
-                </tbody>
-            </table>
+			<div id="command-list">
+				<div class="page-header">
+					<h1>Command Listing</h1>
+				</div>
 
-            <hr>
+				<p>The following commands are available via the base AutoReferee plugin. Hover over any command to get a description of what the command does. Any argument passed to a command containing spaces needs to be <strong>"quoted"</strong>. If a permissions node is specified, players must have any listed permissions to execute the command. Likewise, If a role is mentioned, the user must have that role or higher to execute the command.</p>
 
-            <footer>
-                <p>&copy; RMCT 2013</p>
-            </footer>
+				<p>Use <code>/help AutoReferee</code> or <code>/help &lt;command&gt;</code> to see this information in-game. All commands support tab completion to assist with subcommands.</p>
 
-        </div> <!-- /container -->
+				<div class="command-container">
+					<div class="command well" id="command-announce">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /announce</p>
+						<p>Announce a message to your current match. Your name will be shown.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/announce &lt;announcement message&gt;</code></p>
+							<p><strong>Permission:</strong> Referee</p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
 
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
+					<div class="command well" id="command-artp">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /artp</p>
+						<p>AutoReferee teleportation tools.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/artp [&lt;player name&gt;]</code></p>
+							<ul class="command-args">
+								<li><code>-b</code> teleport to player&#x27;s bed location</li>
+								<li><code>-d</code> teleport to player&#x27;s death location</li>
+								<li><code>-l</code> teleport to player&#x27;s logout location</li>
+								<li><code>-t</code> teleport to player&#x27;s teleport location</li>
+								<li><code>-s</code> teleport to player&#x27;s spawn location</li>
+								<li><code>-o</code> teleport to team&#x27;s objective location</li>
+								<li><code>-v</code> teleport to team&#x27;s victory monument</li>
+								<li><code>-r</code> teleport to previous location</li>
+							</ul>
+							<p><strong>Permission:</strong> Spectator</p>
+							
+						</div>
+					</div>
 
-        <script src="js/vendor/jquery.tablesorter.min.js"></script>
-        <script src="js/vendor/bootstrap.min.js"></script>
+					<div class="command well" id="command-autoref-archive">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref archive</p>
+						<p>Package the map and configuration into the maps/ directory.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref archive</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.configure</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
 
-        <script src="js/plugins.js"></script>
-        <script src="js/commands.js"></script>
-    </body>
+					<div class="command well" id="command-autoref-autoinvite">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref autoinvite</p>
+						<p>Invite player(s) to participate in match. Works for offline players as well.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref autoinvite &lt;player names...&gt;</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.admin</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-cfg-apply">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref cfg apply</p>
+						<p>Apply a known map configuration file to the current map.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref cfg apply &lt;map name&gt;</code></p>
+							<ul class="command-args">
+								<li><code>-v</code> new map version number</li>
+							</ul>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.configure</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-cfg-init">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref cfg init</p>
+						<p>Initialize a blank configuration file for this map.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref cfg init</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.configure</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-cfg-reload">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref cfg reload</p>
+						<p>Reload the configuration file from disk for this map.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref cfg reload</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.configure</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-cfg-save">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref cfg save</p>
+						<p>Save the configuration file for this map.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref cfg save</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.configure</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-core">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref core</p>
+						<p>Set the currently selected WorldEdit region to be a team&#x27;s core.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref core &lt;team name&gt;</code></p>
+							<ul class="command-args">
+								<li><code>-r</code> specify the range of the core</li>
+							</ul>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.configure</code></p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-countdown">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref countdown</p>
+						<p>Begin a generic countdown.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref countdown [&lt;countdown length&gt;]</code></p>
+							<p><strong>Permission:</strong> Referee</p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-cycle">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref cycle</p>
+						<p>Cycle through players.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref cycle</code></p>
+							<ul class="command-args">
+								<li><code>-n</code> next player in cycle (default)</li>
+								<li><code>-p</code> previous player in cycle</li>
+							</ul>
+							<p><strong>Permission:</strong> Spectator</p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-endmatch">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref endmatch</p>
+						<p>Ends the current match by decision. Specify a team name to declare them the winner, or &#x27;tie&#x27; to announce a tie.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref endmatch [&lt;winning team&gt;]</code></p>
+							<p><strong>Permission:</strong> Referee</p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-givekit">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref givekit</p>
+						<p>Give a kit to the specified player.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref givekit &lt;kit name&gt; &lt;player name&gt;</code></p>
+							<p><strong>Permission:</strong> Referee</p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-hud-swap">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref hud swap</p>
+						<p>If using the AutoReferee client mod, swaps sides for the two team listings.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref hud swap</code></p>
+							<p><strong>Permission:</strong> Referee</p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-invite">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref invite</p>
+						<p>Invite players to your current match.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref invite &lt;player names...&gt;</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.player</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-load">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref load</p>
+						<p>Loads a map by name, case insensitive.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref load &lt;map name&gt;</code></p>
+							<ul class="command-args">
+								<li><code>-c</code> specify a custom world name</li>
+								<li><code>-x</code> load world without AutoReferee</li>
+							</ul>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.admin</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-loadurl">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref loadurl</p>
+						<p>Loads a map from a remote zip file, taking the URL as a parameter.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref loadurl &lt;url&gt;</code></p>
+							<ul class="command-args">
+								<li><code>-c</code> specify a custom world name</li>
+								<li><code>-x</code> load world without AutoReferee</li>
+							</ul>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.admin</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-maplist">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref maplist</p>
+						<p>List all maps available, both on this server and in the repository.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref maplist</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.admin</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-nightvis">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref nightvis</p>
+						<p>Toggles permanent night vision for a spectator.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref nightvis</code></p>
+							<ul class="command-args">
+								<li><code>-x</code> explicitly disable night vision</li>
+							</ul>
+							<p><strong>Permission:</strong> Spectator</p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-nocraft">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref nocraft</p>
+						<p>Prohibit the item in hand from being crafted during a match.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref nocraft</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.configure</code></p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-pmsend">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref pmsend</p>
+						<p>Send plugin message (for debugging client mods).</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref pmsend &lt;plugin message&gt;</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.admin</code></p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-practice">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref practice</p>
+						<p>Switch to practice mode or activate practice mode menu.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref practice</code></p>
+							<ul class="command-args">
+								<li><code>-t</code> teleport to specified player</li>
+							</ul>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.player</code></p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-preview">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref preview</p>
+						<p>Cycle through players.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref preview</code></p>
+							<ul class="command-args">
+								<li><code>-y</code> activate match preview mode</li>
+								<li><code>-n</code> deactivate match preview mode</li>
+							</ul>
+							<p><strong>Permission:</strong> Referee</p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-profile">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref profile</p>
+						<p>Get all available debugging info.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref profile</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.admin</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-protectall">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref protectall</p>
+						<p>Protect all entities currently on the map.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref protectall</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.configure</code></p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-reload">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref reload</p>
+						<p>Reloads the current map (or specified map) to its original, unmodified state. Players are migrated to the new copy.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref reload [&lt;map name&gt;]</code></p>
+							<ul class="command-args">
+								<li><code>-x</code> transfer players to same teams and location</li>
+							</ul>
+							<p><strong>Permission:</strong> Any</p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-setheight">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref setheight</p>
+						<p>Restrict all team zones to be within a given height.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref setheight &lt;height&gt;</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.configure</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-setlobby">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref setlobby</p>
+						<p>Sets the current world to be the AutoReferee lobby world.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref setlobby</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.admin</code></p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-setspawn">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref setspawn</p>
+						<p>Set the current location as the global spawn. If a team name is provided, sets team spawn.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref setspawn [&lt;team name&gt;]</code></p>
+							<ul class="command-args">
+								<li><code>-a</code> add an additional spawn location</li>
+								<li><code>-s</code> set spectator spawn</li>
+							</ul>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.configure</code></p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-streamer">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref streamer</p>
+						<p>Toggles streamer</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref streamer [&lt;player name&gt;]</code></p>
+							<ul class="command-args">
+								<li><code>-x</code> explicitly disable streamer mode</li>
+							</ul>
+							<p><strong>Permission:</strong> Spectator</p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-swapteams">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref swapteams</p>
+						<p>Swaps the players and custom names of both teams.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref swapteams &lt;team1&gt; &lt;team2&gt;</code></p>
+							<p><strong>Permission:</strong> Spectator</p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-teamname">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref teamname</p>
+						<p>Rename a team.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref teamname &lt;old name&gt; &lt;new name&gt;</code></p>
+							<p><strong>Permission:</strong> Referee</p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-timelimit">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref timelimit</p>
+						<p>Specify the total time allowed for this match, in minutes.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref timelimit &lt;time limit&gt;</code></p>
+							<p><strong>Permission:</strong> Referee</p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-tool-protect">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref tool protect</p>
+						<p>Get the tool used to configure protected entities (will not be butchered before match).</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref tool protect</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.configure</code></p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-tool-startmech">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref tool startmech</p>
+						<p>Get the tool used to configure start mechanisms.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref tool startmech</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.configure</code></p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-tool-wincond">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref tool wincond</p>
+						<p>Get the tool used to configure win conditions.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref tool wincond</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.configure</code></p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-unload">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref unload</p>
+						<p>Unloads the current map. Connected players are either moved to the lobby or kicked.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref unload</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.admin</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-update">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref update</p>
+						<p>Updates maps installed on server. Use -f to force an update.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref update</code></p>
+							<ul class="command-args">
+								<li><code>-f</code> force an update of all maps</li>
+							</ul>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.admin</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-version">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref version</p>
+						<p>Returns the version information for the plugin.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref version</code></p>
+							<p><strong>Permission:</strong> Any</p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-autoref-world">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /autoref world</p>
+						<p>Specifies the world for console commands to modify.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/autoref world &lt;world or player name&gt;</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.admin</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-broadcast">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /broadcast</p>
+						<p>Broadcast a message to your current match. No name will be shown.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/broadcast &lt;broadcast message&gt;</code></p>
+							<p><strong>Permission:</strong> Referee</p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-joinmatch">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /joinmatch</p>
+						<p>Join the match of the named player. If no player is named, lists available matches.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/joinmatch &lt;player name&gt;</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.player</code></p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-jointeam">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /jointeam</p>
+						<p>Join a random team. If a team name is specified, that team will be joined.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/jointeam [&lt;team name&gt;] [&lt;player names...&gt;]</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.player</code></p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-leavematch">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /leavematch</p>
+						<p>Leave the current match.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/leavematch [&lt;player name&gt;]</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.player</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-leaveteam">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /leaveteam</p>
+						<p>Leave a team.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/leaveteam [&lt;player names...&gt;]</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.player</code></p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-listmatches">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /listmatches</p>
+						<p>Lists all available matches.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/listmatches</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.player</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-matchinfo">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /matchinfo</p>
+						<p>Get info regarding the current match.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/matchinfo</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.player</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-notify">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /notify</p>
+						<p>Notifies spectators of your location. Follow this command with a message to provide further info.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/notify &lt;notification message&gt;</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.player</code></p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-ready">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /ready</p>
+						<p>Mark your team as ready. Referees may use this command to begin a match.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/ready &lt;args...&gt;</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.player</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-setaccess">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /setaccess</p>
+						<p>Changes access type of the current match: PUBLIC or PRIVATE.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/setaccess &lt;access&gt;</code></p>
+							<ul class="command-args">
+								<li><code>-q</code> set quietly (don&#x27;t announce to lobby)</li>
+							</ul>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.player</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+					<div class="command well" id="command-viewinventory">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /viewinventory</p>
+						<p>View the inventory of the nearest player. Specify a name to show that player&#x27;s inventory.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/viewinventory [&lt;player name&gt;]</code></p>
+							<ul class="command-args">
+								<li><code>-p</code> show last inventory (pre-death)</li>
+							</ul>
+							<p><strong>Permission:</strong> Spectator</p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-zone">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /zone</p>
+						<p>Set the currently selected WorldEdit region to be a team&#x27;s zone.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/zone [&lt;team names...&gt;]</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.configure</code></p>
+							
+						</div>
+					</div>
+
+					<div class="command well" id="command-zones">
+						<p class="lead"><span class="glyphicon glyphicon-tag"></span> /zones</p>
+						<p>List all configured regions on the map.</p>
+						<div class="command-details">
+							<p><strong>Usage:</strong> <code>/zones [&lt;team name&gt;]</code></p>
+							<p><strong>Permission:</strong> Any, <code>autoreferee.configure</code></p>
+							<p><span class="glyphicon glyphicon-ok"></span> Console may use this command.</p>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div> <!-- /container -->
+
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+		<script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.1.min.js"><\/script>')</script>
+
+		<script src="js/vendor/bootstrap.min.js"></script>
+		<script src="js/main.js"></script>
+
+		<script>
+			var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
+			(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+			g.src='//www.google-analytics.com/ga.js';
+			s.parentNode.insertBefore(g,s)}(document,'script'));
+		</script>
+	</body>
 </html>
