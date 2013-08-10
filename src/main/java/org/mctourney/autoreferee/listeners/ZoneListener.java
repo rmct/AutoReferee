@@ -229,6 +229,22 @@ public class ZoneListener implements Listener
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
+	public void blockFall(EntityChangeBlockEvent event)
+	{
+		// if this isn't a match, skip it
+		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
+		if (match == null) return;
+
+		Block block = event.getBlock();
+		if (event.getEntityType() == EntityType.FALLING_BLOCK)
+		{
+			for (AutoRefRegion reg : match.getRegions())
+				if (reg.is(AutoRefRegion.Flag.NO_BUILD) && reg.containsBlock(block))
+				{ event.setCancelled(true); return; }
+		}
+	}
+
+	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void blockBreak(BlockBreakEvent event)
 	{
 		Player player = event.getPlayer();
