@@ -1051,17 +1051,18 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 
 		// show the requested inventory view
 		if (v != null) pl.openInventory(v);
-		return v == null;
+		return v != null;
 	}
 
 	/**
 	 * Shows this player's inventory to the specified player.
 	 *
+	 * @param old show saved inventory if true, otherwise show current inventory
 	 * @return true if the inventory can be shown, otherwise false
 	 */
 	public boolean showInventory(Player player, boolean old)
 	{
-		Inventory which = old ? this.getInventoryView() : this.getLastInventoryView();
+		Inventory which = old ? this.getLastInventoryView() : this.getInventoryView();
 		return this.showInventory(player, which);
 	}
 
