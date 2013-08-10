@@ -394,6 +394,9 @@ public class ZoneListener implements Listener
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void playerTeleport(PlayerTeleportEvent event)
 	{
+		// just to be safe? (apparently Bukkit lets you teleport a player to null)
+		if (event.getTo() == null) return;
+
 		AutoRefMatch match = plugin.getMatch(event.getTo().getWorld());
 		if (match == null || match.getCurrentState() == MatchStatus.NONE) return;
 

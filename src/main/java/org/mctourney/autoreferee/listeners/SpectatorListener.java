@@ -114,11 +114,9 @@ public class SpectatorListener implements PluginMessageListener, Listener
 					AutoRefPlayer apl = match.getPlayer(parts[2]);
 					if (apl != null)
 					{
-						// by default, go to player location
-						loc = apl.getLocation();
-
-						if ("spawn".equalsIgnoreCase(parts[3])) loc = apl.getSpawnLocation();
-						else if ("bed".equalsIgnoreCase(parts[3])) loc = apl.getBedLocation();
+						if ("player".equalsIgnoreCase(parts[3])) loc = apl.getLocation();
+						else if ("death".equalsIgnoreCase(parts[3])) loc = apl.getLastDeathLocation();
+						else if ("spawn".equalsIgnoreCase(parts[3])) loc = apl.getBedLocation();
 					}
 				}
 				else if ("team".equalsIgnoreCase(parts[1]))
@@ -132,20 +130,26 @@ public class SpectatorListener implements PluginMessageListener, Listener
 				}
 
 				// teleport to the location, if any
+				loc = TeleportationUtil.locationTeleport(loc);
 				if (loc == null) player.sendMessage(ChatColor.DARK_GRAY +
 					"You cannot teleport to this location: invalid or unsafe.");
 				else
 				{
-					plugin.getMatch(player.getWorld()).getSpectator(player).setPrevLocation(player.getLocation());
-					player.teleport(TeleportationUtil.locationTeleport(loc));
-					player.setFlying(true);
+					match.getSpectator(player).setPrevLocation(player.getLocation());
+					player.teleport(loc); player.setFlying(true);
 				}
 			}
 			else if ("inventory".equalsIgnoreCase(parts[0]))
 			{
-				AutoRefPlayer apl = match.getPlayer(parts[1]);
-				boolean old = parts.length > 2 && "prev".equalsIgnoreCase(parts[2]);
-				if (apl != null) apl.showInventory(player, old);
+				if ("player".equalsIgnoreCase(parts[1]))
+				{
+					AutoRefPlayer apl = match.getPlayer(parts[2]);
+					boolean old = parts.length > 3 && "prev".equalsIgnoreCase(parts[3]);
+
+					// if we are unable to show the inventory, tell the streamer that
+					if (apl == null || !apl.showInventory(player, old))
+						player.sendMessage(ChatColor.DARK_GRAY + "Cannot show inventory for " + parts[2]);
+				}
 			}
 		}
 		catch (UnsupportedEncodingException e)

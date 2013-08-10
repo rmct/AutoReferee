@@ -9,6 +9,7 @@ import java.util.Set;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
 
@@ -164,6 +165,9 @@ public abstract class AutoRefRegion
 
 	public boolean contains(Location loc)
 	{ return distanceToRegion(loc) <= 0.0; }
+
+	public boolean containsBlock(Block block)
+	{ return this.contains(block.getLocation().clone().add(0.5, 0.5, 0.5)); }
 
 	public boolean is(Flag flag)
 	{ return 0 != (flag.getValue() & this.flags); }
