@@ -932,7 +932,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 
 	private void saveInventoryView()
 	{
-		String invname = this.getDisplayName() + "'s Inventory (@ " + getMatch().getTimestamp(":") + ")";
+		String invname = this.getDisplayName() + " @ " + getMatch().getTimestamp(":");
 		this.lastInventoryView = getInventoryView(invname);
 		this.lastInventoryViewSavedMillis = ManagementFactory.getRuntimeMXBean().getUptime();
 	}
@@ -967,8 +967,9 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		if (player == null) return null;
 
 		PlayerInventory pInventory = player.getInventory();
+		String inventoryName = name.length() > 32 ? name.substring(0, 32) : name;
 		Inventory inventoryView = Bukkit.getServer().createInventory(null,
-			pInventory.getSize() + 9, name);
+			pInventory.getSize() + 9, inventoryName);
 
 		ItemStack[] oldContents = pInventory.getContents();
 		ItemStack[] newContents = inventoryView.getContents();
