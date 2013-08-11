@@ -770,6 +770,8 @@ public class AutoRefMatch implements Metadatable
 			min.getBlockX(), max.getBlockX(), min.getBlockZ(), max.getBlockZ());
 	}
 
+	protected GameMode gamemode;
+
 	// number of seconds for each phase
 	public static final int READY_SECONDS = 15;
 	public static final int COMPLETED_SECONDS = 180;
@@ -1223,6 +1225,8 @@ public class AutoRefMatch implements Metadatable
 		infoboardObjective = infoboard.registerNewObjective(
 			String.format("ar%x#scores", System.currentTimeMillis() % (1L << 16)), "dummy");
 
+		this.gamemode = GameMode.SURVIVAL;
+
 		// get the extra settings cached
 		Element meta = worldConfig.getChild("meta");
 		if (meta != null)
@@ -1349,6 +1353,18 @@ public class AutoRefMatch implements Metadatable
 		{
 			for (Element item : gameplay.getChild("nocraft").getChildren("item"))
 				this.addIllegalCraft(BlockData.unserialize(item.getAttributeValue("id")));
+		}
+
+		if (gameplay.getChild("gamemode") != null)
+		{
+			String gm = gameplay.getChildTextNormalize("gamemode");
+			this.gamemode = GameMode.valueOf(gm.toUpperCase());
+
+			try { this.gamemode = GameMode.getByValue(Integer.parseInt(gm)); }
+			catch (NumberFormatException e) {  }
+
+			if (this.gamemode == null)
+				this.gamemode = GameMode.SURVIVAL;
 		}
 	}
 
@@ -2300,7 +2316,7 @@ public class AutoRefMatch implements Metadatable
 	 */
 	public void setSpectatorMode(Player player, boolean spec)
 	{
-		PlayerUtil.setSpectatorSettings(player, spec);
+		PlayerUtil.setSpectatorSettings(player, spec, this.gamemode);
 		player.setScoreboard(spec ? getInfoboard() : getScoreboard());
 		for (AutoRefTeam team : getTeams()) team.updateObjectives();
 

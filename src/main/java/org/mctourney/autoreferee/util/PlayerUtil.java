@@ -154,10 +154,10 @@ public class PlayerUtil
 	public static void setGameMode(Player player, GameMode gamemode, boolean flight)
 	{ BufferedGameModeChangeTask.change(player, gamemode, flight); }
 
-	public static void setSpectatorSettings(Player player, boolean spec)
+	public static void setSpectatorSettings(Player player, boolean spec, GameMode pgm)
 	{
 		// gamemode is the obvious issue
-		PlayerUtil.setGameMode(player, spec ? GameMode.CREATIVE : GameMode.SURVIVAL);
+		PlayerUtil.setGameMode(player, spec ? GameMode.CREATIVE : pgm);
 
 		// basic player settings depending on role
 		player.setAllowFlight(spec);
