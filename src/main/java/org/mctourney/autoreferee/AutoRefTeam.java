@@ -137,6 +137,8 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	private String name = null;
 	private String customName = null;
 
+	protected String scoreboardTeamName = null;
+
 	/**
 	 * Gets the default name of the team.
 	 */
@@ -405,6 +407,11 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		// get name from map
 		if (null == (newTeam.name = elt.getChildTextTrim("name"))) return null;
 
+		String sbattr = elt.getAttributeValue("scoreboard");
+		String sbteam = sbattr != null ? sbattr : "ar#" + newTeam.name;
+		if (sbteam.length() > 16) sbteam = sbteam.substring(0, 16);
+		newTeam.scoreboardTeamName = sbteam;
+
 		String clr = elt.getAttributeValue("color");
 		String maxsz = elt.getAttributeValue("maxsize");
 		String minsz = elt.getAttributeValue("minsize");
@@ -463,18 +470,15 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		return newTeam;
 	}
 
-	private void setupScoreboard()
+	protected void setupScoreboard()
 	{
-		String teamslug = "ar#" + name;
-		if (teamslug.length() > 16) teamslug = teamslug.substring(0, 16);
-
 		// set team data on spectators' scoreboard
-		infoboardTeam = match.getInfoboard().registerNewTeam(teamslug);
+		infoboardTeam = match.getInfoboard().registerNewTeam(scoreboardTeamName);
 		infoboardTeam.setPrefix(color.toString());
 		infoboardTeam.setDisplayName(getName());
 
 		// set team data on players' scoreboard
-		scoreboardTeam = match.getScoreboard().registerNewTeam(teamslug);
+		scoreboardTeam = match.getScoreboard().registerNewTeam(scoreboardTeamName);
 		scoreboardTeam.setPrefix(color.toString());
 		scoreboardTeam.setDisplayName(getName());
 

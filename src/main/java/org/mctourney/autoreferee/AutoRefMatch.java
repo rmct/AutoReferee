@@ -2693,6 +2693,20 @@ public class AutoRefMatch implements Metadatable
 		return mteam;
 	}
 
+	/**
+	 * Finds a team whose scoreboard team name matches the given string.
+	 *
+	 * @param name scoreboard team name to look up
+	 * @return team object matching the name if one exists, otherwise null
+	 */
+	public AutoRefTeam getScoreboardTeam(String name)
+	{
+		for (AutoRefTeam t : teams)
+			if (name.equalsIgnoreCase(t.scoreboardTeamName))
+				return t;
+		return null;
+	}
+
 	Set<String> expectedPlayers = Sets.newHashSet();
 
 	public Set<String> getExpectedPlayers()

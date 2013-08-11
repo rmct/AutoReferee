@@ -386,7 +386,7 @@ public class ScoreboardCommands implements CommandHandler
 							// AUTOREFEREE START - check for AutoRefTeam
 							if (match != null)
 							{
-								AutoRefTeam autorefteam = match.getTeam(teamName);
+								AutoRefTeam autorefteam = match.getScoreboardTeam(teamName);
 								if (autorefteam != null && player != null)
 								{
 									PlayerTeamJoinEvent.Reason reason = PlayerTeamJoinEvent.Reason.AUTOMATIC;
