@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Set;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -14,6 +15,7 @@ import org.bukkit.entity.NPC;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scoreboard.Scoreboard;
 
 import org.mctourney.autoreferee.AutoRefMap;
 import org.mctourney.autoreferee.AutoRefMatch;
@@ -494,6 +496,27 @@ public class ConfigurationCommands implements CommandHandler
 		{ AutoReferee.log("Could not save world config: " + world.getName()); return true; }
 
 		AutoRefMatch.setupWorld(world, false);
+		return true;
+	}
+
+	@AutoRefCommand(name={"autoref", "scoreboard", "save"}, argmax=0, options="m",
+		description="Save the current world's scoreboard to file.",
+		opthelp=
+		{
+			"m", "save the main server scoreboard",
+		})
+	@AutoRefPermission(console=true, nodes={"autoreferee.configure"})
+
+	public boolean scoreboardSave(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		if (match == null || !match.getCurrentState().isBeforeMatch()) return false;
+
+		Scoreboard scoreboard = match.getScoreboard();
+		if (options.hasOption('m')) scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+
+		match.saveScoreboardData(scoreboard);
+		sender.sendMessage(ChatColor.GREEN + "Scoreboard saved to file.");
+
 		return true;
 	}
 }

@@ -175,6 +175,9 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		this.updateObjectives();
 	}
 
+	public String getScoreboardTeamName()
+	{ return scoreboardTeamName == null ? ("ar#" + name) : scoreboardTeamName; }
+
 	/**
 	 * Gets the colored name of the team.
 	 */
@@ -407,10 +410,12 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		// get name from map
 		if (null == (newTeam.name = elt.getChildTextTrim("name"))) return null;
 
-		String sbattr = elt.getAttributeValue("scoreboard");
-		String sbteam = sbattr != null ? sbattr : "ar#" + newTeam.name;
-		if (sbteam.length() > 16) sbteam = sbteam.substring(0, 16);
-		newTeam.scoreboardTeamName = sbteam;
+		String sbteam = elt.getAttributeValue("scoreboard");
+		if (sbteam != null)
+		{
+			if (sbteam.length() > 16) sbteam = sbteam.substring(0, 16);
+			newTeam.scoreboardTeamName = sbteam;
+		}
 
 		String clr = elt.getAttributeValue("color");
 		String maxsz = elt.getAttributeValue("maxsize");
@@ -472,25 +477,37 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 
 	protected void setupScoreboard()
 	{
+		String sbteam = this.getScoreboardTeamName();
+
 		// set team data on spectators' scoreboard
-		infoboardTeam = match.getInfoboard().registerNewTeam(scoreboardTeamName);
+		infoboardTeam = match.getInfoboard().registerNewTeam(sbteam);
 		infoboardTeam.setPrefix(color.toString());
 		infoboardTeam.setDisplayName(getName());
 
 		// set team data on players' scoreboard
-		scoreboardTeam = match.getScoreboard().registerNewTeam(scoreboardTeamName);
-		scoreboardTeam.setPrefix(color.toString());
-		scoreboardTeam.setDisplayName(getName());
+		AutoReferee.log("Setting up scoreboard for " + sbteam);
+		scoreboardTeam = match.getScoreboard().getTeam(sbteam);
+		if (scoreboardTeam == null && this.scoreboardTeamName == null)
+			scoreboardTeam = match.getScoreboard().registerNewTeam(sbteam);
 
-		// this stuff is only really necessary for the players themselves
-		scoreboardTeam.setAllowFriendlyFire(match.allowFriendlyFire());
-		scoreboardTeam.setCanSeeFriendlyInvisibles(true);
+		if (scoreboardTeam != null)
+		{
+			scoreboardTeam.setPrefix(color.toString());
+			scoreboardTeam.setDisplayName(getName());
+
+			// this stuff is only really necessary for the players themselves
+			scoreboardTeam.setAllowFriendlyFire(match.allowFriendlyFire());
+			scoreboardTeam.setCanSeeFriendlyInvisibles(true);
+		}
 	}
 
 	public Element toElement()
 	{
 		Element elt = new Element("team");
 		elt.addContent(new Element("name").setText(getDefaultName()));
+
+		if (scoreboardTeamName != null)
+			elt.setAttribute("scoreboard", scoreboardTeamName);
 
 		if (this.getColor() != ChatColor.RESET) elt.setAttribute("color", this.getColor().name());
 		if (this.maxsize != null) elt.setAttribute("maxsize", Integer.toString(this.maxsize));

@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -117,6 +119,9 @@ import com.google.common.collect.Sets;
  */
 public class AutoRefMatch implements Metadatable
 {
+	// modify the internal NMS scoreboard instance with a custom scoreboard
+	private static final boolean REPLACE_INTERNAL_SCOREBOARD = false;
+
 	private static final String GENERIC_NOTIFICATION_MESSAGE =
 		"A notification has been sent. Type /artp to teleport.";
 
@@ -984,6 +989,26 @@ public class AutoRefMatch implements Metadatable
 		scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
 		 infoboard = Bukkit.getScoreboardManager().getNewScoreboard();
 
+		if (AutoRefMatch.REPLACE_INTERNAL_SCOREBOARD) try
+		{
+			Method wHandle = world.getClass().getDeclaredMethod("getHandle");
+			Object nmsWorld = wHandle.invoke(world);
+
+			Method sHandle = scoreboard.getClass().getDeclaredMethod("getHandle");
+			Object nmsScoreboard = sHandle.invoke(scoreboard);
+
+			Field fScoreboard = nmsWorld.getClass().getField("scoreboard");
+			fScoreboard.setAccessible(true);
+			fScoreboard.set(nmsWorld, nmsScoreboard);
+		}
+		catch (Exception e)
+		{
+			AutoReferee.log("A problem occured whilst modifying NMS scoreboard internal values.");
+			AutoReferee.log("Are you sure you are using a CraftBukkit variant?");
+			AutoReferee.log("Please file a bug report, as this is a somewhat serious error.");
+			e.printStackTrace();
+		}
+
 		loadWorldConfiguration();
 
 		messageReferees("match", getWorld().getName(), "init");
@@ -1186,6 +1211,118 @@ public class AutoRefMatch implements Metadatable
 		catch (FileNotFoundException e) {  }
 	}
 
+	protected void clearScoreboardData(Scoreboard sb)
+	{
+		// unregister all old objectives (created by AutoReferee)
+		for (Objective obj : scoreboard.getObjectives())
+			if (obj.getName().startsWith("ar#")) obj.unregister();
+
+		// unregister all old teams (created by AutoReferee)
+		for (Team team : scoreboard.getTeams())
+			if (team.getName().startsWith("ar#")) team.unregister();
+	}
+
+	protected void loadScoreboardData()
+	{
+		clearScoreboardData(scoreboard);
+		clearScoreboardData( infoboard);
+
+		// register our custom objective for the sideboard
+		long randx = System.currentTimeMillis() % (1L << 16);
+		infoboardObjective = infoboard.registerNewObjective(
+			String.format("ar#scores_%x", randx), "dummy");
+
+		try
+		{
+			File dataFolder = new File(primaryWorld.getWorldFolder(), "data");
+			File scoreboardFile = new File(dataFolder, "scoreboard.xml");
+			Element sbroot = new SAXBuilder().build(scoreboardFile).getRootElement();
+
+			for (Element teamnode : sbroot.getChild("teams").getChildren("team"))
+			{
+				Team team = scoreboard.registerNewTeam(teamnode.getAttributeValue("name"));
+				team.setPrefix(teamnode.getAttributeValue("prefix"));
+				team.setSuffix(teamnode.getAttributeValue("suffix"));
+			}
+
+			for (Element objroot : sbroot.getChild("objectives").getChildren("objective"))
+			{
+				Objective obj = scoreboard.registerNewObjective(
+					objroot.getAttributeValue("name"),
+					objroot.getAttributeValue("criteria"));
+
+				if (objroot.getAttributeValue("display") != null)
+					obj.setDisplaySlot(DisplaySlot.valueOf(objroot.getAttributeValue("display")));
+			}
+
+			AutoReferee.log("Loaded custom scoreboard data.");
+		}
+		catch (Exception e)
+		{  }
+	}
+
+	public void saveScoreboardData()
+	{ saveScoreboardData(scoreboard); }
+
+	public void saveScoreboardData(Scoreboard sb)
+	{
+		Element teams = new Element("teams");
+		for (Team team : sb.getTeams())
+		{
+			Element teamnode = new Element("team");
+			teamnode.setAttribute("name", team.getName());
+			teamnode.setAttribute("prefix", team.getPrefix());
+			teamnode.setAttribute("suffix", team.getSuffix());
+			teams.addContent(teamnode);
+		}
+
+		teams.sortChildren(new Comparator<Element>()
+		{
+			@Override
+			public int compare(Element a, Element b)
+			{
+				String aname = a.getAttributeValue("name");
+				String bname = b.getAttributeValue("name");
+				return aname.compareToIgnoreCase(bname);
+			}
+		});
+
+		Element objectives = new Element("objectives");
+		for (Objective objective : sb.getObjectives())
+		{
+			Element objnode = new Element("objective");
+			objnode.setAttribute("name", objective.getName());
+			objnode.setAttribute("criteria", objective.getCriteria());
+			if (objective.getDisplaySlot() != null)
+				objnode.setAttribute("display", objective.getDisplaySlot().name());
+			objectives.addContent(objnode);
+		}
+
+		objectives.sortChildren(new Comparator<Element>()
+		{
+			@Override
+			public int compare(Element a, Element b)
+			{
+				String aname = a.getAttributeValue("name");
+				String bname = b.getAttributeValue("name");
+				return aname.compareToIgnoreCase(bname);
+			}
+		});
+
+		Element sbroot = new Element("scoreboard");
+		sbroot.addContent(teams);
+		sbroot.addContent(objectives);
+
+		try
+		{
+			XMLOutputter xmlout = new XMLOutputter(Format.getPrettyFormat());
+			File dataFolder = new File(primaryWorld.getWorldFolder(), "data");
+			xmlout.output(sbroot, new FileOutputStream(new File(dataFolder, "scoreboard.xml")));
+		}
+		catch (java.io.IOException e)
+		{ AutoReferee.log("Could not save scoreboard data: " + primaryWorld.getName()); }
+	}
+
 	protected void loadWorldConfiguration(InputStream cfg)
 	{
 		try
@@ -1213,17 +1350,7 @@ public class AutoRefMatch implements Metadatable
 		}
 		catch (Exception e) { e.printStackTrace(); return; }
 
-		// unregister any old objectives
-		for (Objective obj :  infoboard.getObjectives()) obj.unregister();
-		for (Objective obj : scoreboard.getObjectives()) obj.unregister();
-
-		// unregister any old teams
-		for (Team team :  infoboard.getTeams()) team.unregister();
-		for (Team team : scoreboard.getTeams()) team.unregister();
-
-		// register our custom objective for the sideboard
-		infoboardObjective = infoboard.registerNewObjective(
-			String.format("ar%x#scores", System.currentTimeMillis() % (1L << 16)), "dummy");
+		loadScoreboardData();
 
 		this.gamemode = GameMode.SURVIVAL;
 
@@ -1729,6 +1856,7 @@ public class AutoRefMatch implements Metadatable
 	private static final IOFileFilter DATA_FOLDER_FILTER =
 		FileFilterUtils.asFileFilter(new FilenameSetFilter(Sets.newHashSet
 		(   "scoreboard.dat"
+		,	"scoreboard.xml"
 		)));
 
 	/**
@@ -2702,7 +2830,7 @@ public class AutoRefMatch implements Metadatable
 	public AutoRefTeam getScoreboardTeam(String name)
 	{
 		for (AutoRefTeam t : teams)
-			if (name.equalsIgnoreCase(t.scoreboardTeamName))
+			if (name.equalsIgnoreCase(t.getScoreboardTeamName()))
 				return t;
 		return null;
 	}
