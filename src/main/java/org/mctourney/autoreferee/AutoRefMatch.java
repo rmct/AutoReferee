@@ -215,7 +215,7 @@ public class AutoRefMatch implements Metadatable
 
 		int existingteams = 0;
 		for (AutoRefTeam team : this.getTeams())
-			if (!team.getPlayers().isEmpty()) ++existingteams;
+			if (!team.isEmptyTeam()) ++existingteams;
 		return existingteams < 2;
 	}
 
@@ -2506,7 +2506,7 @@ public class AutoRefMatch implements Metadatable
 			}
 
 			// if the countdown has ended...
-			else if (remainingSeconds == 0)
+			else if (remainingSeconds <= 0)
 			{
 				// setup world to go!
 				if (this.start) match._startMatch();
@@ -2744,15 +2744,8 @@ public class AutoRefMatch implements Metadatable
 		if (team != null) this.broadcast(team.getDisplayName() + " Wins!");
 		else this.broadcast("Match terminated!");
 
-		new BukkitRunnable()
-		{
-			@Override public void run()
-			{
-				// remove all mobs, animals, and items
-				clearEntities();
-			}
-		// run a second later
-		}.runTaskLater(plugin, 20L);
+		// don't have to delay this anymore :)
+		clearEntities();
 
 		for (AutoRefPlayer apl : getPlayers())
 		{
@@ -2780,7 +2773,6 @@ public class AutoRefMatch implements Metadatable
 
 		if (clockTask != null) clockTask.cancel();
 
-		// increment the metrics for number of matches played
 		int termDelay = plugin.getConfig().getInt(
 			"delay-seconds.completed", COMPLETED_SECONDS);
 
@@ -2813,7 +2805,7 @@ public class AutoRefMatch implements Metadatable
 			int msz = t.matches(name);
 
 			// update the best match (null if multiple matches)
-			if (msz >  bsz) { mteam = t; bsz = msz; }
+			if (msz > bsz) { mteam = t; bsz = msz; }
 			else if (msz == bsz) mteam = null;
 		}
 

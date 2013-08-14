@@ -295,7 +295,8 @@ public class SpectatorListener implements PluginMessageListener, Listener
 			CreatureSpawner spawner = (CreatureSpawner) event.getClickedBlock().getState();
 			String spawnerType = spawner.getCreatureTypeName();
 
-			switch (spawner.getSpawnedType())
+			if (spawner.getSpawnedType() == null) spawnerType = "<Unknown>";
+			else switch (spawner.getSpawnedType())
 			{
 				case DROPPED_ITEM:
 					// TODO - Not implemented in CraftBukkit:
