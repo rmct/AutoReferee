@@ -611,7 +611,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		if (!match.getCurrentState().isBeforeMatch() && !force) return false;
 
 		// prepare the player
-		if (!match.getCurrentState().inProgress())
+		if (!match.getCurrentState().inProgress() && !this.spawnRegions.isEmpty())
 			player.teleport(this.getSpawnLocation());
 
 		Location bed = player.getBedSpawnLocation();
@@ -675,7 +675,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 
 		// by the time this is actually called, they may have left the world to join
 		// a different match. this teleport shouldn't occur if they aren't in this world
-		if (player.getWorld() == match.getWorld())
+		if (player.getWorld() == match.getWorld() && !match.inStartRegion(player.getLocation()))
 			player.teleport(match.getWorldSpawn());
 
 		match.messageReferees("team", getName(), "player", "-" + apl.getName());
