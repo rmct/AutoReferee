@@ -1,26 +1,22 @@
 package org.mctourney.autoreferee.goals;
 
-import java.util.Map;
-
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.util.BlockData;
 
 import org.jdom2.Element;
 
-import com.google.common.collect.Maps;
-
 public class ScoreDummyGoal extends ScoreGoal
 {
-	private static Map<String, ScoreDummyGoal> dummygoals = Maps.newHashMap();
 	private final String goalname;
+	private double score = 0.0;
 
 	public ScoreDummyGoal(AutoRefTeam team, String name)
 	{
 		super(team); this.goalname = name;
-		dummygoals.put(name, this);
 	}
 
 	public ScoreDummyGoal(AutoRefTeam team, Element elt)
@@ -29,8 +25,14 @@ public class ScoreDummyGoal extends ScoreGoal
 	public ScoreDummyGoal(AutoRefTeam team, ScoreDummyGoal scoreDummyGoal)
 	{ this(team, scoreDummyGoal.getName()); }
 
-	private String getName()
+	public String getName()
 	{ return goalname; }
+
+	public double getScore(AutoRefMatch match)
+	{ return this.score; }
+
+	public void setScore(double score)
+	{ this.score = score; }
 
 	@Override
 	public ScoreDummyGoal copy()
@@ -64,7 +66,4 @@ public class ScoreDummyGoal extends ScoreGoal
 		elt.setAttribute("name", this.goalname);
 		return elt;
 	}
-
-	public static ScoreDummyGoal getDummyGoal(String name)
-	{ return dummygoals.get(name); }
 }

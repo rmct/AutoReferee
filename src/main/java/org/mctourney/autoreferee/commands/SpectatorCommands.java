@@ -12,6 +12,7 @@ import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoRefSpectator;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
+import org.mctourney.autoreferee.goals.ScoreDummyGoal;
 import org.mctourney.autoreferee.util.PlayerKit;
 import org.mctourney.autoreferee.util.TeleportationUtil;
 import org.mctourney.autoreferee.util.LocationUtil;
@@ -347,6 +348,39 @@ public class SpectatorCommands implements CommandHandler
 
 		// set the time limit
 		match.setTimeLimit(time);
+		return true;
+	}
+
+	@AutoRefCommand(name={"autoref", "setscore"}, argmin=3, argmax=3,
+		description="Sets the score for a dummy goal.",
+		usage="<command> <team> <goal> <score>")
+	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
+
+	public boolean setScore(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		if (match == null || !match.getCurrentState().inProgress()) return false;
+
+		// get the named team
+		AutoRefTeam team = match.getTeam(args[0]);
+		if (team == null) return false;
+
+		// find the named goal for this team
+		ScoreDummyGoal goal = null;
+		for (ScoreDummyGoal dgoal : team.getTeamGoals(ScoreDummyGoal.class))
+			if (args[1].equalsIgnoreCase(dgoal.getName())) goal = dgoal;
+		if (goal == null) return false;
+
+		try
+		{
+			// go ahead and set the goal to the new score
+			goal.setScore(Double.parseDouble(args[2]));
+
+			// update objectives and recheck win conditions
+			team.updateObjectives();
+			match.checkWinConditions();
+		}
+		catch (NumberFormatException e) {  }
+
 		return true;
 	}
 
