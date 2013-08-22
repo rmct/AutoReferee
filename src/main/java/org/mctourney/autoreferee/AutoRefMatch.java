@@ -48,6 +48,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -61,6 +62,7 @@ import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.material.Attachable;
 import org.bukkit.material.Button;
 import org.bukkit.material.Lever;
 import org.bukkit.material.MaterialData;
@@ -2310,8 +2312,8 @@ public class AutoRefMatch implements Metadatable
 		// remove all mobs, animals, and items (again)
 		this.clearEntities();
 
-		// loop through all the redstone mechanisms required to start / FIXME BUKKIT-1858
-		if (SportBukkitUtil.hasSportBukkitApi()) for (StartMechanism sm : startMechanisms)
+		// loop through all the redstone mechanisms required to start
+		for (StartMechanism sm : startMechanisms)
 		{
 			MaterialData mdata = sm.getBlockState().getData();
 			switch (sm.getBlockState().getType())
@@ -2339,6 +2341,24 @@ public class AutoRefMatch implements Metadatable
 			// save the block state and fire an update
 			sm.getBlockState().setData(mdata);
 			sm.getBlockState().update(true);
+
+			// FIXME BUKKIT-1858
+			if (!SportBukkitUtil.hasSportBukkitApi()) {
+				// Determine attached block
+				BlockFace face = BlockFace.SELF;
+				if (mdata instanceof Attachable) {
+					face = ((Attachable) mdata).getAttachedFace();
+				} else if (mdata instanceof PressurePlate) {
+					face = BlockFace.DOWN;
+				}
+
+				// Apply a force-update to the attached block
+				Block atch = sm.getBlock().getRelative(face);
+				BlockState stat = atch.getState(); // Store the state, to reapply it
+				// Trying to update with no changes does nothing, so we first set it to air, with no physics (so that the mechanism doesn't come off).
+				atch.setTypeId(0, false);
+				stat.update(true);
+			}
 		}
 
 		// set teams as started
