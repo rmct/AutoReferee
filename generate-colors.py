@@ -2,7 +2,7 @@ import urllib.request
 import re
 
 # these colors are borrowed from webbukkit/DynmapCore
-COLOR_FILE = 'http://raw.github.com/webbukkit/DynmapCore/master/colorschemes/default.txt'
+COLOR_FILE = 'https://raw.github.com/webbukkit/DynmapCore/master/src/main/resources/extracted/colorschemes/default.txt'
 
 def check(line):
 	parts = line.split()
