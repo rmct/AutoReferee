@@ -25,6 +25,7 @@ import org.mctourney.autoreferee.AutoRefMatch.RespawnMode;
 import org.mctourney.autoreferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
 import org.mctourney.autoreferee.goals.BlockGoal;
+import org.mctourney.autoreferee.listeners.GoalsInventorySnapshot;
 import org.mctourney.autoreferee.util.AchievementPoints;
 import org.mctourney.autoreferee.util.ArmorPoints;
 import org.mctourney.autoreferee.util.BlockData;
@@ -36,6 +37,7 @@ import org.mctourney.autoreferee.util.PlayerUtil;
 import org.apache.commons.collections.map.DefaultedMap;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.MapDifference;
 import com.google.common.collect.Sets;
 
 /**
@@ -336,7 +338,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	{ return totalDeaths; }
 
 	// tracking objective items
-	private Set<BlockData> carrying;
+	private GoalsInventorySnapshot carrying;
 
 	private int currentHealth = 20;
 	private int currentArmor = 0;
@@ -346,8 +348,15 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 *
 	 * @return set of objectives
 	 */
-	public Set<BlockData> getCarrying()
-	{ return carrying; }
+	public GoalsInventorySnapshot getCarrying()
+	{
+		if (carrying != null) return carrying;
+
+		Player p = getPlayer();
+		AutoRefTeam t = getTeam();
+		if (p == null || t == null) return new GoalsInventorySnapshot();
+		return new GoalsInventorySnapshot(p.getInventory(), t.getObjectives());
+	}
 
 	// streak information - kill streak, domination, revenge
 	private int totalStreak = 0;
@@ -545,7 +554,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		this.setTeam(team);
 
 		// setup the carrying list
-		this.carrying = Sets.newHashSet();
+		this.carrying = getCarrying();
 
 		// streak information
 		playerStreak = new DefaultedMap(0);
@@ -879,6 +888,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 
 	public void updateCarrying()
 	{
+		carrying = null;
 		Player player = getPlayer();
 		if (player != null)
 			updateCarrying(player.getInventory());
@@ -886,20 +896,18 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 
 	private void updateCarrying(Inventory inv)
 	{
-		Set<BlockData> newCarrying = Sets.newHashSet();
 		if (getTeam() != null)
 		{
-			if (inv != null) for (ItemStack itm : inv)
-				if (itm != null) newCarrying.add(BlockData.fromItemStack(itm));
-			newCarrying.retainAll(getTeam().getObjectives());
+			GoalsInventorySnapshot oldCarrying = carrying;
+			carrying = null; // invalidate old value
+			carrying = getCarrying();
 
-			Set<BlockData> oldCarrying = carrying;
-			carrying = newCarrying;
+			MapDifference<BlockData, Integer> diff = oldCarrying.subtract(carrying);
 
-			if (newCarrying != oldCarrying)
+			if (!diff.areEqual())
 			{
 				for (BlockGoal goal : getTeam().getTeamGoals(BlockGoal.class))
-					if (goal.getItemStatus() == AutoRefGoal.ItemStatus.NONE && newCarrying.contains(goal.getItem()))
+					if (goal.getItemStatus() == AutoRefGoal.ItemStatus.NONE && carrying.containsKey(goal.getItem()))
 					{
 						// generate a transcript event for seeing the box
 						String m = String.format("%s is carrying %s", getDisplayName(), goal.getItem().getDisplayName());
@@ -910,7 +918,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 						// store the player's location as the last objective location
 						getTeam().setLastObjectiveLocation(getLocation());
 					}
-				getTeam().updateCarrying(this, oldCarrying, newCarrying);
+				getTeam().updateCarrying(this, oldCarrying, carrying);
 			}
 		}
 	}

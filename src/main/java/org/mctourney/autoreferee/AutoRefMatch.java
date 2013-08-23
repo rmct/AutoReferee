@@ -35,6 +35,7 @@ import javax.imageio.ImageIO;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -98,6 +99,7 @@ import org.mctourney.autoreferee.event.player.PlayerTeamJoinEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
 import org.mctourney.autoreferee.goals.TimeGoal;
 import org.mctourney.autoreferee.goals.scoreboard.AutoRefObjective;
+import org.mctourney.autoreferee.listeners.GoalsInventorySnapshot;
 import org.mctourney.autoreferee.listeners.SpectatorListener;
 import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
@@ -3305,17 +3307,14 @@ public class AutoRefMatch implements Metadatable
 		return false;
 	}
 
-	public void updateCarrying(AutoRefPlayer apl, Set<BlockData> oldCarrying, Set<BlockData> newCarrying)
+	public void updateCarrying(AutoRefPlayer apl, GoalsInventorySnapshot oldCarrying, GoalsInventorySnapshot newCarrying)
 	{
-		Set<BlockData> add = Sets.newHashSet(newCarrying);
-		add.removeAll(oldCarrying);
-
-		Set<BlockData> rem = Sets.newHashSet(oldCarrying);
-		rem.removeAll(newCarrying);
+		MapDifference<BlockData, Integer> diff = oldCarrying.subtract(newCarrying);
 
 		Player player = apl.getPlayer();
-		for (BlockData bd : add) messageReferees("player", player.getName(), "goal", "+" + bd.serialize());
-		for (BlockData bd : rem) messageReferees("player", player.getName(), "goal", "-" + bd.serialize());
+		// TODO send quantities too next protocol update
+		for (BlockData bd : diff.entriesOnlyOnRight().keySet()) messageReferees("player", player.getName(), "goal", "+" + bd.serialize());
+		for (BlockData bd : diff.entriesOnlyOnLeft().keySet()) messageReferees("player", player.getName(), "goal", "-" + bd.serialize());
 	}
 
 	public void updateHealthArmor(AutoRefPlayer apl, int oldHealth,
