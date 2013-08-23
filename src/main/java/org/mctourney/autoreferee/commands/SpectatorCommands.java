@@ -1,5 +1,7 @@
 package org.mctourney.autoreferee.commands;
 
+import java.util.Set;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -13,12 +15,15 @@ import org.mctourney.autoreferee.AutoRefSpectator;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.goals.ScoreDummyGoal;
+import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.PlayerKit;
 import org.mctourney.autoreferee.util.TeleportationUtil;
 import org.mctourney.autoreferee.util.LocationUtil;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
 import org.mctourney.autoreferee.util.commands.CommandHandler;
+import org.mctourney.autoreferee.util.worldsearch.ObjectiveExhaustion;
+import org.mctourney.autoreferee.util.worldsearch.ObjectiveExhaustionMasterTask;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
@@ -478,6 +483,37 @@ public class SpectatorCommands implements CommandHandler
 				sender.sendMessage(ChatColor.GREEN + enabled + " streamer mode for " + player.getName());
 			}
 		}
+		return true;
+	}
+
+	@AutoRefCommand(name={"autoref", "exhaust"}, argmax=1,
+			description="Check if a team is completly out of any goal blocks.",
+			usage="<command> [team]")
+	@AutoRefPermission(console=true, role=AutoRefMatch.Role.REFEREE)
+
+	public boolean checkExhaustedObjective(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		if (match == null || match.getCurrentState().isBeforeMatch()) {
+			sender.sendMessage(ChatColor.RED + "Exhaustion will not be checked if the game has not started");
+			return true;
+		}
+
+		if (args.length > 0) {
+			AutoRefTeam team = match.getTeam(args[0]);
+			Set<BlockData> searching = ObjectiveExhaustion.startSearch(team, plugin);
+			if (searching != null && !searching.isEmpty())
+			{
+				StringBuilder sb = new StringBuilder(ChatColor.YELLOW + "Search started for team ");
+				sb.append(team.getDisplayName());
+				sb.append(" for the blocks ");
+				for (BlockData bd : searching) {
+					sb.append(bd.getDisplayName()).append(", ");
+				}
+				sender.sendMessage(sb.toString());
+			} else
+				sender.sendMessage(ChatColor.AQUA + "All objectives are either held by a player or on monument. Search not started.");
+		} else
+			sender.sendMessage(ChatColor.RED + "Please specify a team");
 		return true;
 	}
 }
