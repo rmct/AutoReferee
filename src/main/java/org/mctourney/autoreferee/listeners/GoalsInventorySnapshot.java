@@ -5,16 +5,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.MapDifference;
+import com.google.common.collect.MapDifference.ValueDifference;
+import com.google.common.collect.Maps;
+
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.mctourney.autoreferee.util.BlockData;
-
-import com.google.common.collect.MapDifference;
-import com.google.common.collect.MapDifference.ValueDifference;
-import com.google.common.collect.Maps;
 
 @SuppressWarnings("serial")
 public class GoalsInventorySnapshot extends HashMap<BlockData, Integer>
@@ -67,7 +67,7 @@ public class GoalsInventorySnapshot extends HashMap<BlockData, Integer>
 		this.putAll(diff.entriesOnlyOnLeft());
 		for (Map.Entry<BlockData, Integer> entry : diff.entriesOnlyOnRight().entrySet())
 		{
-			this.put(entry.getKey(), Integer.valueOf(-entry.getValue().intValue()));
+			this.put(entry.getKey(), -entry.getValue());
 		}
 		for (Map.Entry<BlockData, ValueDifference<Integer>> entry : diff.entriesDiffering().entrySet())
 		{
