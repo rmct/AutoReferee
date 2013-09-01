@@ -902,7 +902,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 			carrying = null; // invalidate old value
 			carrying = getCarrying();
 
-			MapDifference<BlockData, Integer> diff = oldCarrying.subtract(carrying);
+			MapDifference<BlockData, Integer> diff = oldCarrying.getDiff(carrying);
 
 			if (!diff.areEqual())
 			{

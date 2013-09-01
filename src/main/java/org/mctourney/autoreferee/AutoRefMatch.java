@@ -3309,7 +3309,7 @@ public class AutoRefMatch implements Metadatable
 
 	public void updateCarrying(AutoRefPlayer apl, GoalsInventorySnapshot oldCarrying, GoalsInventorySnapshot newCarrying)
 	{
-		MapDifference<BlockData, Integer> diff = oldCarrying.subtract(newCarrying);
+		MapDifference<BlockData, Integer> diff = oldCarrying.getDiff(newCarrying);
 
 		Player player = apl.getPlayer();
 		// TODO send quantities too next protocol update
@@ -3339,6 +3339,30 @@ public class AutoRefMatch implements Metadatable
 	{
 		public enum EventVisibility
 		{ NONE, REFEREES, ALL }
+
+		public enum ObjectiveDetailType
+		{
+			// player dropping an item
+			TOSS,
+			// player picking up an item
+			PICKUP,
+			// player placing objective in the world
+			PLACE,
+			// player breaking a placed objective
+			BREAK_PLAYER,
+			// something other than a player (explosion?) breaking a placed objective
+			BREAK_NONPLAYER,
+			// player dying with the objective
+			DEATH,
+			// dropped objective item destroyed
+			DESTROY,
+			// objective placed into container
+			STORE,
+			// objective removed from container
+			TAKE,
+			// container with objective broken
+			CONTAINER_DEATH
+		}
 
 		public enum EventType
 		{

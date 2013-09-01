@@ -25,7 +25,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoRefTeam;
@@ -37,6 +36,7 @@ import org.mctourney.autoreferee.goals.BlockGoal;
 import org.mctourney.autoreferee.goals.CoreGoal;
 import org.mctourney.autoreferee.util.AchievementPoints;
 import org.mctourney.autoreferee.util.BlockData;
+import org.mctourney.autoreferee.util.LocationUtil;
 
 public class ObjectiveTracker implements Listener
 {
