@@ -2324,7 +2324,7 @@ public class AutoRefMatch implements Metadatable
 					spec.teleport(specSpawn.getLocation());
 
         for (Player spec : this.getSpectators())
-        { spec.getInventory().setItem(0, new ItemStack(345)); spec.getInventory().setItem(1, new ItemStack(288)); }
+		{ spec.getInventory().setItem(0, new ItemStack(345)); spec.getInventory().setItem(1, new ItemStack(288)); }
 
 		// set the current state to playing
 		setCurrentState(MatchStatus.PLAYING);
