@@ -3354,7 +3354,9 @@ public class AutoRefMatch implements Metadatable
 
 			// objective events should not be broadcast to players
 			OBJECTIVE_FOUND("objective-found", true, EventVisibility.REFEREES),
-			OBJECTIVE_PLACED("objective-place", true, EventVisibility.REFEREES);
+			OBJECTIVE_PLACED("objective-place", true, EventVisibility.REFEREES),
+			OBJECTIVE_DETAIL("objective-detail", true, EventVisibility.REFEREES),
+			;
 
 			private String eventClass;
 			private EventVisibility visibility;
