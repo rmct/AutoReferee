@@ -4,17 +4,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
-
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
@@ -26,15 +29,34 @@ import org.mctourney.autoreferee.util.LocationUtil;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
 
 public class ObjectiveExhaustionMasterTask implements Runnable
 {
-	AutoReferee plugin = AutoReferee.getInstance();
+	final AutoReferee plugin = AutoReferee.getInstance();
 	final AutoRefTeam team;
+
+	// Safety strategy: Immutable set
 	final Set<BlockData> originalSearch;
-	private Set<BlockData> searching;
-	private Map<BlockData, Vector> results = Maps.newHashMap();
+	// Safety strategy: Copy on write
+	Set<BlockData> searching;
+	// Safety strategy: Only read once
+	Map<BlockData, Vector> results = Maps.newHashMap();
+
+	/**
+	 * A stop-flag for the chunk snapshot worker threads.
+	 */
+	volatile boolean all_snapshots_added;
+	ConcurrentLinkedQueue<Vector> entitychunks = Queues.newConcurrentLinkedQueue();
+	LinkedBlockingQueue<ChunkSnapshot> snapshots = Queues.newLinkedBlockingQueue();
+	ConcurrentLinkedQueue<_Entry<BlockData, Vector>> found = Queues.newConcurrentLinkedQueue();
+	ConcurrentLinkedQueue<Vector> foundContainers = Queues.newConcurrentLinkedQueue();
+
+	private WorkerEntitySearch entsearcher;
+	private List<WorkerAsyncSearchSnapshots> searchers;
+	private WorkerValidateResults resultChecker;
+	private WorkerSearchContainers containerSearcher;
 
 	public ObjectiveExhaustionMasterTask(AutoRefTeam team, Set<BlockData> goals)
 	{
@@ -45,32 +67,46 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 
 	@Override
 	// REMINDER: This is run async!
-	// There are some thread-safety breaks, however, in the interest of efficency.
-	// For example, team.getRegions() isn't factually thread-safe, but we treat it that way (and it really is close enough).
 	public void run()
 	{
 		List<Vector> chunks = Lists.newArrayList(getChunkVectors());
-		List<SearchChunkSnapshot> searches = Lists.newLinkedList();
-		Set<Vector> chests = Sets.newHashSet();
+
+		// Start entity searcher
+		entitychunks.addAll(chunks);
+		entsearcher = new WorkerEntitySearch(this);
+		entsearcher.runTaskTimer(plugin, 0, 3);
+
+		// Start up chunk snapshot searchers
+		// TODO pick a count
+		searchers = Lists.newLinkedList();
+		WorkerAsyncSearchSnapshots tmp_searcher = new WorkerAsyncSearchSnapshots(this);
+		tmp_searcher.runTaskAsynchronously(plugin);
+		searchers.add(tmp_searcher);
+		tmp_searcher = new WorkerAsyncSearchSnapshots(this);
+		tmp_searcher.runTaskAsynchronously(plugin);
+		searchers.add(tmp_searcher);
+
+		// Start result checker
+		resultChecker = new WorkerValidateResults(this);
+		resultChecker.runTaskTimer(plugin, 1, 3);
+
+		// Start container checker
+		containerSearcher = new WorkerSearchContainers(this);
+		containerSearcher.runTaskTimer(plugin, 2, 3);
 
 		final int _chunks_size = chunks.size();
 		for (int i = 0; i < _chunks_size; i += 10)
 		{
-			checkSearches(searches, chests);
 			if (checkComplete())
-			{
-				for (SearchChunkSnapshot s : searches)
-					s.cancel(true);
-				return;
-			}
+			{ cleanup(); return; }
 
 			int max = Math.max(_chunks_size, i + 10);
 			List<Vector> sublist = chunks.subList(i, max);
-			Future<List<ChunkSnapshot>> future = Bukkit.getScheduler().callSyncMethod(plugin, new GetChunkSnapshots(sublist, team.getMatch()));
+			Future<List<ChunkSnapshot>> future = Bukkit.getScheduler().callSyncMethod(plugin, new CallableGetSnapshots(sublist, team.getMatch().getWorld()));
 			List<ChunkSnapshot> value;
 			try
 			{
-				// Doing the get inside the loop rate-limits our search.
+				// Do the get inside the loop to rate-limit.
 				value = future.get();
 			}
 			catch (ExecutionException e)
@@ -78,42 +114,23 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 			catch (InterruptedException e)
 			{ e.printStackTrace(); quit("thread interrupted"); return; }
 
-			SearchChunkSnapshot search = new SearchChunkSnapshot(value, searching, team);
-			searches.add(search);
-			Bukkit.getScheduler().runTaskAsynchronously(plugin, search);
+			// Memory consistency: variable set happens-before adding of final snapshots
+			if (i + 10 >= _chunks_size)
+				all_snapshots_added = true;
+			snapshots.addAll(value);
 		}
 		chunks = null; // drop
-
-		// Wait for async searches to complete
-		int i = 1;
-		while (!searches.isEmpty())
-		{
-			try
-			{ Thread.sleep(++i);}
-			catch (InterruptedException e)
-			{ e.printStackTrace(); quit("thread interrupted"); return; }
-
-			checkSearches(searches, chests);
-		}
+		snapshots.add(null); // poison-value, signal to stop trying to take
 
 		if (checkComplete())
 			return;
 
-		searches = null;
-		// Start searching chests.
-		SearchChests chestSearch = new SearchChests(chests, team, searching);
-		Bukkit.getScheduler().runTaskTimer(plugin, chestSearch, 0, 1);
+	}
 
-		while (!chestSearch.isDone())
-		{
-			try
-			{ Thread.sleep(49);}
-			catch (InterruptedException e)
-			{ e.printStackTrace(); quit("thread interrupted"); return; }
-		}
-		Map<BlockData, Vector> blocks = chestSearch.getResults();
-		results.putAll(blocks);
-		searching.removeAll(blocks.keySet());
+	private void cleanup()
+	{
+		// TODO Auto-generated method stub
+
 	}
 
 	// unsafe
@@ -133,7 +150,7 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 		Set<AutoRefRegion> regions = team.getRegions();
 		for (AutoRefRegion region : regions)
 		{
-			addChunks(chunks, region.getBoundingCuboid());
+			addChunks(chunks, team.getMatch().getMapCuboid());
 		}
 		return chunks;
 	}
@@ -146,29 +163,6 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 		for (int cx = (int) Math.floor(bound.x1) >> 4; cx < cxmax; cx++)
 			for (int cz = czmin; cz < czmax; cz++)
 				chunks.add(new Vector(cx, 0, cz));
-	}
-
-	private void checkSearches(List<SearchChunkSnapshot> searches, Set<Vector> chests)
-	{
-		Iterator<SearchChunkSnapshot> iter = searches.iterator();
-		while (iter.hasNext())
-		{
-			SearchChunkSnapshot search = iter.next();
-			// note: isReady() is synchronized, so the results should be updated after this
-			if (!search.isReady()) continue;
-
-			if (search.foundBlocks())
-			{
-				Map<BlockData, Vector> blocks = search.getBlockResults();
-				results.putAll(blocks);
-				searching.removeAll(blocks.keySet());
-			}
-			if (search.foundContainers())
-			{
-				chests.addAll(search.getContainerResults());
-			}
-			iter.remove();
-		}
 	}
 
 	private boolean checkComplete()
