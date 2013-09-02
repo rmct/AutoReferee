@@ -1,8 +1,5 @@
 package org.mctourney.autoreferee.util.worldsearch;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -13,7 +10,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.mctourney.autoreferee.util.BlockData;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 /**
@@ -31,19 +27,6 @@ public class WorkerAsyncSearchSnapshots extends BukkitRunnable
 {
 	public volatile boolean finished = false;
 	private ObjectiveExhaustionMasterTask master;
-
-	public static final int[] CONTAINER_BLOCKS = new int[]
-			{
-		Material.BEACON.getId(),
-		Material.BREWING_STAND.getId(),
-		Material.CHEST.getId(),
-		Material.TRAPPED_CHEST.getId(),
-		Material.DISPENSER.getId(),
-		Material.DROPPER.getId(),
-		Material.FURNACE.getId(),
-		Material.HOPPER.getId(),
-		Material.JUKEBOX.getId(),
-			};
 
 	public WorkerAsyncSearchSnapshots(ObjectiveExhaustionMasterTask task)
 	{
@@ -71,14 +54,16 @@ public class WorkerAsyncSearchSnapshots extends BukkitRunnable
 				consume(snap);
 			}
 		}
-		catch (IllegalArgumentException e)
+		catch (IllegalArgumentException poisonSignal)
 		{
+			// thrown if null is recieved, which means we're done
 		}
 		catch (InterruptedException e)
 		{
 			e.printStackTrace();
 			wasInterrupted = true;
 		}
+		// Re-add null to the list, for the other workers to take
 		master.snapshots.offer(null);
 
 		finished = true;
@@ -109,33 +94,23 @@ public class WorkerAsyncSearchSnapshots extends BukkitRunnable
 						if (ArrayUtils.contains(interesting, block))
 						{
 							Vector pos = new Vector(baseX + ix, py, baseZ + iz);
-							if (ArrayUtils.contains(CONTAINER_BLOCKS, block))
-								master.foundContainers.add(pos);
-							else
-							{
-								BlockData bd = new BlockData(Material.getMaterial(block), (byte) snap.getBlockData(ix, py, iz));
-								for (BlockData data : goals)
-									if (data.equals(bd))
-										master.found.add(new _Entry<BlockData, Vector>(data, pos));
-							}
+							BlockData bd = new BlockData(Material.getMaterial(block), (byte) snap.getBlockData(ix, py, iz));
+							for (BlockData data : goals)
+								if (data.equals(bd))
+									master.found.add(new _Entry<BlockData, Vector>(data, pos));
 						}
 					}
 		}
 	}
 
+	// Often this will just return the equivalent of new int[] { 35 } but whatever.
 	private static int[] buildInteresting(Set<BlockData> goals)
 	{
-		Set<BlockData> filterGoals = Sets.newHashSet();
+		Set<Integer> filterGoals = Sets.newHashSet();
 		for (BlockData data : goals)
 		{
-			filterGoals.add(new BlockData(data.getMaterial()));
+			filterGoals.add(data.getMaterial().getId());
 		}
-		int[] tmp = new int[filterGoals.size()];
-		int i = 0;
-		for (BlockData data : filterGoals)
-		{
-			tmp[i++] = data.getMaterial().getId();
-		}
-		return ArrayUtils.addAll(CONTAINER_BLOCKS, tmp);
+		return ArrayUtils.toPrimitive(filterGoals.toArray(new Integer[filterGoals.size()]));
 	}
 }

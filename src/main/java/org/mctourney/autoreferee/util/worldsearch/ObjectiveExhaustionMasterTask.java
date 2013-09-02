@@ -49,14 +49,14 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 	 */
 	volatile boolean all_snapshots_added;
 	ConcurrentLinkedQueue<Vector> entitychunks = Queues.newConcurrentLinkedQueue();
+	ConcurrentLinkedQueue<Vector> contchunks = Queues.newConcurrentLinkedQueue();
 	LinkedBlockingQueue<ChunkSnapshot> snapshots = Queues.newLinkedBlockingQueue();
 	ConcurrentLinkedQueue<_Entry<BlockData, Vector>> found = Queues.newConcurrentLinkedQueue();
-	ConcurrentLinkedQueue<Vector> foundContainers = Queues.newConcurrentLinkedQueue();
 
-	private WorkerEntitySearch entsearcher;
+	private WorkerEntitySearch entSearcher;
+	private WorkerContainerSearch containerSearcher;
 	private List<WorkerAsyncSearchSnapshots> searchers;
 	private WorkerValidateResults resultChecker;
-	private WorkerSearchContainers containerSearcher;
 
 	public ObjectiveExhaustionMasterTask(AutoRefTeam team, Set<BlockData> goals)
 	{
@@ -73,8 +73,13 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 
 		// Start entity searcher
 		entitychunks.addAll(chunks);
-		entsearcher = new WorkerEntitySearch(this);
-		entsearcher.runTaskTimer(plugin, 0, 3);
+		entSearcher = new WorkerEntitySearch(this);
+		entSearcher.runTaskTimer(plugin, 0, 3);
+
+		// Start container searcher
+		contchunks.addAll(chunks);
+		containerSearcher = new WorkerContainerSearch(this);
+		containerSearcher.runTaskTimer(plugin, 1, 3);
 
 		// Start up chunk snapshot searchers
 		// TODO pick a count
@@ -85,14 +90,13 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 		tmp_searcher = new WorkerAsyncSearchSnapshots(this);
 		tmp_searcher.runTaskAsynchronously(plugin);
 		searchers.add(tmp_searcher);
+		tmp_searcher = new WorkerAsyncSearchSnapshots(this);
+		tmp_searcher.runTaskAsynchronously(plugin);
+		searchers.add(tmp_searcher);
 
 		// Start result checker
 		resultChecker = new WorkerValidateResults(this);
-		resultChecker.runTaskTimer(plugin, 1, 3);
-
-		// Start container checker
-		containerSearcher = new WorkerSearchContainers(this);
-		containerSearcher.runTaskTimer(plugin, 2, 3);
+		resultChecker.runTaskTimer(plugin, 2, 3);
 
 		final int _chunks_size = chunks.size();
 		for (int i = 0; i < _chunks_size; i += 10)
