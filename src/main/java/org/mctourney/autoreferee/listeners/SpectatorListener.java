@@ -73,6 +73,7 @@ public class SpectatorListener implements PluginMessageListener, Listener
 		TOOL_PROTECT(Material.GOLD_SWORD),
 
 		SPECTATOR_CYCLE(Material.FEATHER),
+		SPECTATOR_TELEPORT(Material.COMPASS),
 		;
 
 		public final Material tooltype;
