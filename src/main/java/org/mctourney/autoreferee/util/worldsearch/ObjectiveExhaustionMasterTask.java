@@ -126,15 +126,43 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 		chunks = null; // drop
 		snapshots.add(null); // poison-value, signal to stop trying to take
 
-		if (checkComplete())
-			return;
+		while (true)
+		{
+			try
+			{
+				Thread.sleep(50);
+			}
+			catch (InterruptedException e) { }
+
+			if (checkComplete())
+			{
+				cleanup();
+				return;
+			}
+		}
 
 	}
 
 	private void cleanup()
 	{
-		// TODO Auto-generated method stub
+		// Cancel timer tasks first
+		tryCancel(entSearcher);
+		tryCancel(containerSearcher);
+		tryCancel(resultChecker);
 
+		// Prepare all the "done" signals
+		all_snapshots_added = true;
+		snapshots.clear();
+		snapshots.add(null);
+		for (WorkerAsyncSearchSnapshots searcher : searchers) {
+			tryCancel(searcher);
+		}
+	}
+
+	private void tryCancel(BukkitRunnable r)
+	{
+		try { r.cancel(); }
+		catch (IllegalStateException e) { }
 	}
 
 	// unsafe
