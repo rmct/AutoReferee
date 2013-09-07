@@ -66,9 +66,7 @@ public class WorkerContainerSearch extends BukkitRunnable
 			BlockData bd = BlockData.fromItemStack(item);
 			for (BlockData data : goals)
 				if (data.equals(bd))
-				{
 					master.found.add(new _Entry<BlockData, Vector>(data, loc.toVector()));
-				}
 		}
 	}
 }

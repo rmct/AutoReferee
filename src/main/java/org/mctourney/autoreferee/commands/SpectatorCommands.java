@@ -23,7 +23,6 @@ import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
 import org.mctourney.autoreferee.util.commands.CommandHandler;
 import org.mctourney.autoreferee.util.worldsearch.ObjectiveExhaustion;
-import org.mctourney.autoreferee.util.worldsearch.ObjectiveExhaustionMasterTask;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
@@ -493,22 +492,23 @@ public class SpectatorCommands implements CommandHandler
 
 	public boolean checkExhaustedObjective(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
-		if (match == null || match.getCurrentState().isBeforeMatch()) {
+		if (match == null || match.getCurrentState().isBeforeMatch())
+		{
 			sender.sendMessage(ChatColor.RED + "Exhaustion will not be checked if the game has not started");
 			return true;
 		}
 
-		if (args.length > 0) {
+		if (args.length > 0)
+		{
 			AutoRefTeam team = match.getTeam(args[0]);
 			Set<BlockData> searching = ObjectiveExhaustion.startSearch(team, plugin);
 			if (searching != null && !searching.isEmpty())
 			{
 				StringBuilder sb = new StringBuilder(ChatColor.YELLOW + "Search started for team ");
-				sb.append(team.getDisplayName());
+				sb.append(team.getDisplayName()).append(ChatColor.RESET).append(ChatColor.YELLOW);
 				sb.append(" for the blocks ");
-				for (BlockData bd : searching) {
+				for (BlockData bd : searching)
 					sb.append(bd.getDisplayName()).append(", ");
-				}
 				sender.sendMessage(sb.toString());
 			} else
 				sender.sendMessage(ChatColor.AQUA + "All objectives are either held by a player or on monument. Search not started.");

@@ -1,6 +1,5 @@
 package org.mctourney.autoreferee.util.worldsearch;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,7 +10,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -34,24 +32,24 @@ import com.google.common.collect.Sets;
 
 public class ObjectiveExhaustionMasterTask implements Runnable
 {
-	final AutoReferee plugin = AutoReferee.getInstance();
-	final AutoRefTeam team;
+	public final AutoReferee plugin = AutoReferee.getInstance();
+	public final AutoRefTeam team;
 
 	// Safety strategy: Immutable set
-	final Set<BlockData> originalSearch;
+	public final Set<BlockData> originalSearch;
 	// Safety strategy: Copy on write
-	Set<BlockData> searching;
+	public Set<BlockData> searching;
 	// Safety strategy: Only read once
-	Map<BlockData, Vector> results = Maps.newHashMap();
+	public Map<BlockData, Vector> results = Maps.newHashMap();
 
 	/**
 	 * A stop-flag for the chunk snapshot worker threads.
 	 */
-	volatile boolean all_snapshots_added;
-	ConcurrentLinkedQueue<Vector> entitychunks = Queues.newConcurrentLinkedQueue();
-	ConcurrentLinkedQueue<Vector> contchunks = Queues.newConcurrentLinkedQueue();
-	LinkedBlockingQueue<ChunkSnapshot> snapshots = Queues.newLinkedBlockingQueue();
-	ConcurrentLinkedQueue<_Entry<BlockData, Vector>> found = Queues.newConcurrentLinkedQueue();
+	public volatile boolean all_snapshots_added;
+	public ConcurrentLinkedQueue<Vector> entitychunks = Queues.newConcurrentLinkedQueue();
+	public ConcurrentLinkedQueue<Vector> contchunks = Queues.newConcurrentLinkedQueue();
+	public LinkedBlockingQueue<ChunkSnapshot> snapshots = Queues.newLinkedBlockingQueue();
+	public ConcurrentLinkedQueue<_Entry<BlockData, Vector>> found = Queues.newConcurrentLinkedQueue();
 
 	private WorkerEntitySearch entSearcher;
 	private WorkerContainerSearch containerSearcher;
@@ -154,7 +152,8 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 		all_snapshots_added = true;
 		snapshots.clear();
 		snapshots.add(null);
-		for (WorkerAsyncSearchSnapshots searcher : searchers) {
+		for (WorkerAsyncSearchSnapshots searcher : searchers)
+		{
 			tryCancel(searcher);
 		}
 	}
@@ -166,12 +165,8 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 	}
 
 	// unsafe
-	private void quit() {
-		for (Player p : team.getMatch().getReferees())
-			p.sendMessage(ChatColor.RED + "The exhaustion search for " + team.getDisplayName() + " was " + ChatColor.DARK_RED + "aborted.");
-	}
-	// unsafe
-	private void quit(String message) {
+	private void quit(String message)
+	{
 		for (Player p : team.getMatch().getReferees())
 			p.sendMessage(ChatColor.RED + "The exhaustion search for " + team.getDisplayName() + " was stopped: " + ChatColor.DARK_RED + message);
 	}
@@ -182,7 +177,7 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 		Set<AutoRefRegion> regions = team.getRegions();
 		for (AutoRefRegion region : regions)
 		{
-			addChunks(chunks, team.getMatch().getMapCuboid());
+			addChunks(chunks, region.getBoundingCuboid());
 		}
 		return chunks;
 	}

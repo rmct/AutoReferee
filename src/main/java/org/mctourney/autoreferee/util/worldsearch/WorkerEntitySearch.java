@@ -147,11 +147,7 @@ public class WorkerEntitySearch extends BukkitRunnable
 	private void submitMatches(BlockData found, Entity ent, Set<BlockData> goals)
 	{
 		for (BlockData bd : goals)
-		{
 			if (bd.equals(found))
-			{
 				master.found.add(new _Entry<BlockData, Vector>(bd, ent.getLocation().toVector()));
-			}
-		}
 	}
 }

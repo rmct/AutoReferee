@@ -10,9 +10,11 @@ import org.bukkit.util.Vector;
 
 public class CallableGetSnapshots implements Callable<List<ChunkSnapshot>>
 {
-	List<Vector> coords;
-	World world;
-	public CallableGetSnapshots(List<Vector> coords, World world) {
+	private List<Vector> coords;
+	private World world;
+
+	public CallableGetSnapshots(List<Vector> coords, World world)
+	{
 		this.coords = coords;
 		this.world = world;
 	}
@@ -21,10 +23,8 @@ public class CallableGetSnapshots implements Callable<List<ChunkSnapshot>>
 	public List<ChunkSnapshot> call() throws Exception
 	{
 		List<ChunkSnapshot> ret = new ArrayList<ChunkSnapshot>();
-		for (Vector v : coords) {
+		for (Vector v : coords)
 			ret.add(world.getChunkAt(v.getBlockX(), v.getBlockZ()).getChunkSnapshot());
-		}
 		return ret;
 	}
-
 }

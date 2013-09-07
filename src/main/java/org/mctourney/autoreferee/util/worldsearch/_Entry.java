@@ -2,27 +2,32 @@ package org.mctourney.autoreferee.util.worldsearch;
 
 import java.util.Map;
 
-final class _Entry<K, V> implements Map.Entry<K, V> {
+public final class _Entry<K, V> implements Map.Entry<K, V>
+{
     private final K key;
     private V value;
 
-    public _Entry(K key, V value) {
+    public _Entry(K key, V value)
+    {
         this.key = key;
         this.value = value;
     }
 
     @Override
-    public K getKey() {
+    public K getKey()
+    {
         return key;
     }
 
     @Override
-    public V getValue() {
+    public V getValue()
+    {
         return value;
     }
 
     @Override
-    public V setValue(V value) {
+    public V setValue(V value)
+    {
         V old = this.value;
         this.value = value;
         return old;
@@ -44,16 +49,13 @@ final class _Entry<K, V> implements Map.Entry<K, V> {
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (!(obj instanceof _Entry)) return false;
-		_Entry other = (_Entry) obj;
+		_Entry<?, ?> other = (_Entry<?, ?>) obj;
 		if (key == null)
-		{
 			if (other.key != null) return false;
-		}
 		else if (!key.equals(other.key)) return false;
+
 		if (value == null)
-		{
 			if (other.value != null) return false;
-		}
 		else if (!value.equals(other.value)) return false;
 		return true;
 	}
