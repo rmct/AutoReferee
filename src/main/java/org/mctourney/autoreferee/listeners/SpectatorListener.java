@@ -542,9 +542,8 @@ public class SpectatorListener implements PluginMessageListener, Listener
 
 			Material type = event.getClickedBlock().getType();
 
-			if ((event.getClickedBlock().getType().getData().equals(PressurePlate.class))
-				&& event.getAction().equals(Action.PHYSICAL) && match.getCurrentState().inProgress())
-			{ event.setCancelled(true); return; }
+			if (PressurePlate.class.isAssignableFrom(type.getData()) && event.getAction().equals(Action.PHYSICAL)
+				&& match.getCurrentState().inProgress()) { event.setCancelled(true); return; }
 
 			if (event.getClickedBlock().getState() instanceof InventoryHolder
 				&& event.getAction() == Action.RIGHT_CLICK_BLOCK && match.getCurrentState().inProgress()
