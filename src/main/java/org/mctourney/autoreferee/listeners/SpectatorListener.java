@@ -33,7 +33,7 @@ import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.PressureSensor;
+import org.bukkit.material.PressurePlate;
 import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.event.Listener;
@@ -541,12 +541,14 @@ public class SpectatorListener implements PluginMessageListener, Listener
 				event.setCancelled(true);
 
 			Material type = event.getClickedBlock().getType();
-			if (event.getClickedBlock().getState() instanceof PressureSensor
-				&& match.getCurrentState().inProgress()) { event.setCancelled(true); return; }
+
+			if ((event.getClickedBlock().getType().getData().equals(PressurePlate.class))
+					&& event.getAction().equals(Action.PHYSICAL) && match.getCurrentState().inProgress())
+			{ event.setCancelled(true); return; }
 
 			if (event.getClickedBlock().getState() instanceof InventoryHolder
-				&& event.getAction() == Action.RIGHT_CLICK_BLOCK && match.getCurrentState().inProgress()
-				&& !event.getPlayer().isSneaking())
+					&& event.getAction() == Action.RIGHT_CLICK_BLOCK && match.getCurrentState().inProgress()
+					&& !event.getPlayer().isSneaking())
 			{
 				InventoryHolder invh = (InventoryHolder) event.getClickedBlock().getState();
 				Inventory inv = invh.getInventory(), newinv;
