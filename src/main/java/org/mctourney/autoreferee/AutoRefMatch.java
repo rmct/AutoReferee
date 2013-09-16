@@ -977,6 +977,7 @@ public class AutoRefMatch implements Metadatable
 	public AutoRefMatch(World world, boolean tmp)
 	{
 		setPrimaryWorld(world);
+		world.setKeepSpawnInMemory(true);
 
 		// is this world a temporary world?
 		this.tmp = tmp;
