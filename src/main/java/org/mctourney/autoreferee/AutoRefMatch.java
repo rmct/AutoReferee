@@ -376,6 +376,8 @@ public class AutoRefMatch implements Metadatable
 	protected final Scoreboard  infoboard;
 	protected Objective infoboardObjective;
 
+	protected List<Objective> allInfoObjectives;
+
 	public Scoreboard getScoreboard()
 	{ return scoreboard; }
 
@@ -1232,6 +1234,20 @@ public class AutoRefMatch implements Metadatable
 		long randx = System.currentTimeMillis() % (1L << 16);
 		infoboardObjective = infoboard.registerNewObjective(
 			String.format("ar#scores_%x", randx), "dummy");
+
+		// kill count objective
+		Objective infoKillCount = infoboard.registerNewObjective(
+			String.format("ar#kills_%x", randx), "playerKillCount");
+		infoKillCount.setDisplayName(ChatColor.BOLD + "Kills");
+
+		// death count objective
+		Objective infoDeathCount = infoboard.registerNewObjective(
+			String.format("ar#deaths_%x", randx), "deathCount");
+		infoDeathCount.setDisplayName(ChatColor.BOLD + "Deaths");
+
+		// objectives list (for cycling through after the match)
+		allInfoObjectives = Lists.newArrayList(
+			infoboardObjective, infoKillCount, infoDeathCount);
 
 		try
 		{
