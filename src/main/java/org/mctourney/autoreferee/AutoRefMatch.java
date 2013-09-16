@@ -1450,6 +1450,16 @@ public class AutoRefMatch implements Metadatable
 		{
 			startClock = AutoRefMatch.parseTimeString(gameplay.getChildText("clockstart"));
 			lockTime = gameplay.getChild("clockstart").getAttributeValue("lock") != null;
+
+			// @since 1.6.1, "doDaylightCycle=false" locks time
+			if (primaryWorld.isGameRule("doDaylightCycle"))
+			{
+				// set the gamerule to lock the time (or don't lock the time, see if I care!)
+				primaryWorld.setGameRuleValue("doDaylightCycle", "" + !lockTime);
+
+				// disable here to prevent the version based on setting the time
+				lockTime = false;
+			}
 		}
 
 		// allow or disallow friendly fire
