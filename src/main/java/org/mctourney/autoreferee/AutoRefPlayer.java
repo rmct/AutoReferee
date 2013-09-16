@@ -974,27 +974,12 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		ItemStack[] oldContents = pInventory.getContents();
 		ItemStack[] newContents = inventoryView.getContents();
 
-		for (int i = 0; i < oldContents.length; ++i)
-			if (oldContents[i] != null) newContents[i] = oldContents[i];
+		newContents[oldContents.length + 0] = copyItem(pInventory.getHelmet());
+		newContents[oldContents.length + 1] = copyItem(pInventory.getChestplate());
+		newContents[oldContents.length + 2] = copyItem(pInventory.getLeggings());
+		newContents[oldContents.length + 3] = copyItem(pInventory.getBoots());
 
-		newContents[oldContents.length + 0] = pInventory.getHelmet();
-		newContents[oldContents.length + 1] = pInventory.getChestplate();
-		newContents[oldContents.length + 2] = pInventory.getLeggings();
-		newContents[oldContents.length + 3] = pInventory.getBoots();
-
-		if (player.getLevel() > 0)
-		{
-			ItemStack level = new ItemStack(Material.EXP_BOTTLE, player.getLevel());
-			ItemMeta meta = level.getItemMeta();
-
-			meta.setDisplayName(ChatColor.GREEN + "" + ChatColor.ITALIC + "Player XP Level");
-			meta.setLore(Lists.newArrayList(ChatColor.GRAY + "" + ChatColor.ITALIC +
-				String.format("%d %s", player.getLevel(), player.getLevel() == 1 ? "level" : "levels")));
-
-			level.setItemMeta(meta);
-			newContents[oldContents.length + 5] = level;
-		}
-
+		// SLOT 6: ACTIVE POTION EFFECTS
 		if (player.getActivePotionEffects().size() > 0)
 		{
 			ItemStack potion = new Potion(PotionType.POISON).toItemStack(1);
@@ -1009,9 +994,24 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 			meta.setLore(effects);
 
 			potion.setItemMeta(meta);
-			newContents[oldContents.length + 6] = potion;
+			newContents[oldContents.length + 5] = potion;
 		}
 
+		// SLOT 7: CURRENT PLAYER LEVEL
+		if (player.getLevel() > 0)
+		{
+			ItemStack level = new ItemStack(Material.EXP_BOTTLE, player.getLevel());
+			ItemMeta meta = level.getItemMeta();
+
+			meta.setDisplayName(ChatColor.GREEN + "" + ChatColor.ITALIC + "Player XP Level");
+			meta.setLore(Lists.newArrayList(ChatColor.GRAY + "" + ChatColor.ITALIC +
+				String.format("%d %s", player.getLevel(), player.getLevel() == 1 ? "level" : "levels")));
+
+			level.setItemMeta(meta);
+			newContents[oldContents.length + 6] = level;
+		}
+
+		// SLOT 8: PLAYER HEALTH
 		{
 			ItemStack health = new ItemStack(Material.APPLE, player.getHealth());
 			ItemMeta meta = health.getItemMeta();
@@ -1024,6 +1024,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 			newContents[oldContents.length + 7] = health;
 		}
 
+		// SLOT 9: PLAYER HUNGER
 		{
 			ItemStack hunger = new ItemStack(Material.COOKED_BEEF, player.getFoodLevel());
 			ItemMeta meta = hunger.getItemMeta();
@@ -1037,11 +1038,14 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		}
 
 		for (int i = 0; i < oldContents.length; ++i)
-			if (newContents[i] != null) newContents[i] = newContents[i].clone();
+			newContents[i] = copyItem(oldContents[i]);
 
 		inventoryView.setContents(newContents);
 		return inventoryView;
 	}
+
+	private ItemStack copyItem(ItemStack item)
+	{ return item == null ? null : item.clone(); }
 
 	private boolean showInventory(Player pl, Inventory v)
 	{
