@@ -33,7 +33,7 @@ import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.PressureSensor;
+import org.bukkit.material.PressurePlate;
 import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.event.Listener;
@@ -541,7 +541,8 @@ public class SpectatorListener implements PluginMessageListener, Listener
 				event.setCancelled(true);
 
 			Material type = event.getClickedBlock().getType();
-			if (event.getClickedBlock().getState() instanceof PressureSensor
+
+			if (PressurePlate.class.isAssignableFrom(type.getData()) && event.getAction().equals(Action.PHYSICAL)
 				&& match.getCurrentState().inProgress()) { event.setCancelled(true); return; }
 
 			if (event.getClickedBlock().getState() instanceof InventoryHolder
