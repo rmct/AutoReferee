@@ -32,6 +32,14 @@ import org.mctourney.autoreferee.goals.AutoRefGoal;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
 
 /**
  * Formats HTML match reports.
@@ -66,12 +74,12 @@ public class ReportGenerator
 		String htm, css, js, images = "";
 		try
 		{
-			htm = getResourceString("webstats/report.htm");
-			css = getResourceString("webstats/report.css");
-			js  = getResourceString("webstats/report.js" );
+			htm = getExternalResourceString("webstats/report.htm");
+			css = getExternalResourceString("webstats/report.css");
+			js  = getExternalResourceString("webstats/report.js" );
 
-			images += getResourceString("webstats/image-block.css");
-			images += getResourceString("webstats/image-header.css");
+			images += getExternalResourceString("webstats/image-block.css");
+			images += getExternalResourceString("webstats/image-header.css");
 		//	images += getResourceString("webstats/image-items.css");
 		}
 		catch (IOException e) { return null; }
@@ -155,11 +163,11 @@ public class ReportGenerator
 	}
 
 	// helper method
-	private static String getResourceString(String path) throws IOException
+	private static String getExternalResourceString(String path) throws IOException
 	{
-		StringWriter buffer = new StringWriter();
-		IOUtils.copy(AutoReferee.getInstance().getResource(path), buffer);
-		return buffer.toString();
+		File dataFolder = AutoReferee.getInstance().getDataFolder();
+		File resourceFile = new File(dataFolder, path);
+		return IOUtils.toString(new FileInputStream(resourceFile));
 	}
 
 	// generate player.css
@@ -419,4 +427,33 @@ public class ReportGenerator
 			"<td class='message'>%s</td><td class='timestamp'>%s</td></tr>\n";
 		return String.format(fmt, StringUtils.join(rowClasses, " "), coords, tagdata, m, e.getTimestamp());
 	}
+	
+	public static void extractResources()
+	{
+		AutoReferee plugin = AutoReferee.getInstance();
+		File dataFolder = plugin.getDataFolder();
+		File webstatsFolder = new File(dataFolder, "webstats");
+		
+		webstatsFolder.mkdir();
+		
+		writeStreamToFile(plugin.getResource("webstats/report.htm"), new File(webstatsFolder, "report.htm"));
+		writeStreamToFile(plugin.getResource("webstats/report.css"), new File(webstatsFolder, "report.css"));
+		writeStreamToFile(plugin.getResource("webstats/report.js"), new File(webstatsFolder, "report.js"));
+		writeStreamToFile(plugin.getResource("webstats/image-block.css"), new File(webstatsFolder, "image-block.css"));
+		writeStreamToFile(plugin.getResource("webstats/image-header.css"), new File(webstatsFolder, "image-header.css"));
+		writeStreamToFile(plugin.getResource("webstats/image-items.css"), new File(webstatsFolder, "image-items.css"));
+	}
+	
+	private static void writeStreamToFile(InputStream stream, File file) 
+	{
+		if(file.exists()) {
+			return;
+		}
+		try {
+			FileUtils.copyInputStreamToFile(stream, file);
+		} catch (IOException ex) {
+			Logger.getLogger(ReportGenerator.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	}
+	
 }

@@ -56,6 +56,7 @@ import org.mctourney.autoreferee.util.metrics.PieChartGraph;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.mctourney.autoreferee.util.ReportGenerator;
 
 /**
  * Base plugin class
@@ -358,6 +359,10 @@ public class AutoReferee extends JavaPlugin
 		// update maps automatically if auto-update is enabled
 		if (getConfig().getBoolean("auto-update", true))
 			AutoRefMap.getUpdates(Bukkit.getConsoleSender(), false);
+		
+		// extract the webstats folder if it doesn't already exist
+		ReportGenerator.extractResources();
+		
 	}
 
 	public void onDisable()
