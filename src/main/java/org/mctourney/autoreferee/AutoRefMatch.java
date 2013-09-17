@@ -2211,6 +2211,8 @@ public class AutoRefMatch implements Metadatable
 	(	Material.LEVER
 	,	Material.STONE_BUTTON
 	,	Material.WOOD_BUTTON
+	,	Material.STONE_PLATE
+	,	Material.WOOD_PLATE
 	);
 
 	/**
@@ -2219,13 +2221,12 @@ public class AutoRefMatch implements Metadatable
 	 * normally in the start region when using vanilla CraftBukkit.
 	 *
 	 * @param block block containing the start mechanism
-	 * @param state whether this mechanism should be set powered or unpowered
+	 * @param state intended state of the redstone mechanism
 	 * @return generated start mechanism object
-	 * @see <a href="http://www.github.com/rmct/SportBukkit">SportBukkit</a>
+	 * @see <a href="http://www.github.com/OvercastNetwork/SportBukkit">SportBukkit</a>
 	 */
 	public StartMechanism toggleStartMech(Block block, boolean state)
 	{
-		if (block.getType() != Material.LEVER) state = true;
 		StartMechanism sm = new StartMechanism(block, state);
 
 		boolean adding = startMechanisms.add(sm);
@@ -2234,6 +2235,22 @@ public class AutoRefMatch implements Metadatable
 		if (adding && !EXPECTED_MECHANISMS.contains(block.getType()))
 			AutoReferee.log("Unexpected start mechanism: " + block.getType().name(), Level.WARNING);
 		return sm;
+	}
+
+	/**
+	 * Adds a new start mechanism for this map. These mechanisms are activated automatically
+	 * at the start of a match when using SportBukkit, and players may interact with them
+	 * normally in the start region when using vanilla CraftBukkit.
+	 *
+	 * @param block block containing the start mechanism
+	 * @return generated start mechanism object
+	 * @see <a href="http://www.github.com/OvercastNetwork/SportBukkit">SportBukkit</a>
+	 */
+	public StartMechanism toggleStartMech(Block block)
+	{
+		boolean state = block.getType() != Material.LEVER ||
+			((Redstone) block.getState().getData()).isPowered();
+		return this.toggleStartMech(block, state);
 	}
 
 	/**

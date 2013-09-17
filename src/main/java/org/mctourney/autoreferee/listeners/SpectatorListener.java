@@ -34,7 +34,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.PressureSensor;
-import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.event.Listener;
 import org.bukkit.event.EventHandler;
@@ -432,20 +431,16 @@ public class SpectatorListener implements PluginMessageListener, Listener
 				block = event.getClickedBlock();
 				blockState = block.getState();
 
-				if (blockState.getData() instanceof Redstone)
-				{
-					// get the start mechanism
-					AutoRefMatch.StartMechanism sm = match.toggleStartMech(block,
-						((Redstone) blockState.getData()).isPowered());
+				// get the start mechanism
+				AutoRefMatch.StartMechanism sm = match.toggleStartMech(block);
 
-					if (sm != null) event.getPlayer().sendMessage(ChatColor.RED +
-						"" + sm + ChatColor.RESET + " is a start mechanism.");
-					else
-					{
-						String coords = LocationUtil.toBlockCoords(block.getLocation());
-						event.getPlayer().sendMessage(ChatColor.RED + "" +
-							coords + ChatColor.RESET + " is NOT a start mechanism.");
-					}
+				if (sm != null) event.getPlayer().sendMessage(ChatColor.RED +
+					"" + sm + ChatColor.RESET + " is a start mechanism.");
+				else
+				{
+					String coords = LocationUtil.toBlockCoords(block.getLocation());
+					event.getPlayer().sendMessage(ChatColor.RED + "" +
+						coords + ChatColor.RESET + " is NOT a start mechanism.");
 				}
 
 				break;
