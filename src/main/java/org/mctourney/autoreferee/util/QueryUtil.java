@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -34,7 +35,13 @@ public class QueryUtil
 	public static String syncPostQuery(String path, String params) throws IOException
 	{ return syncQuery(path, null, params); }
 
+	public static String syncPutQuery(String path, String params) throws IOException
+	{ return syncQuery(path, "PUT", null, params); }
+
 	public static String syncQuery(String path, String getParams, String postParams) throws IOException
+	{ return syncQuery(path, null, getParams, postParams); }
+
+	public static String syncQuery(String path, String method, String getParams, String postParams) throws IOException
 	{
 		OutputStreamWriter wr = null;
 		InputStream rd = null;
@@ -42,12 +49,18 @@ public class QueryUtil
 		try
 		{
 			URL url = new URL(getParams == null ? path : String.format("%s?%s", path, getParams));
-			URLConnection conn = url.openConnection();
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setDoOutput(true);
 
 			AutoReferee instance = AutoReferee.getInstance();
 			String pluginName = instance.getDescription().getFullName();
 			conn.setRequestProperty("User-Agent", String.format("%s (%s)", pluginName, instance.getCommit()));
+
+			if (method != null)
+			{
+				conn.setRequestMethod(method);
+				conn.addRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			}
 
 			if (postParams != null)
 			{

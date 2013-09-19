@@ -32,7 +32,12 @@ import java.util.zip.ZipOutputStream;
 
 import javax.imageio.ImageIO;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -109,10 +114,6 @@ import org.mctourney.autoreferee.util.QueryUtil;
 import org.mctourney.autoreferee.util.ReportGenerator;
 import org.mctourney.autoreferee.util.SportBukkitUtil;
 import org.mctourney.autoreferee.util.TeleportationUtil;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 /**
  * Represents a game world controlled by AutoReferee.
@@ -1014,9 +1015,10 @@ public class AutoRefMatch implements Metadatable
 			e.printStackTrace();
 		}
 
+		messageReferees("match", getWorld().getName(), "init");
 		loadWorldConfiguration();
 
-		messageReferees("match", getWorld().getName(), "init");
+		messageReferees("match", getWorld().getName(), "map", getMapName());
 		setCurrentState(MatchStatus.WAITING);
 
 		// restore competitive settings and some default values
@@ -1666,6 +1668,17 @@ public class AutoRefMatch implements Metadatable
 	public void messageReferees(String ...parts)
 	{
 		for (Player ref : getReferees(false)) messageReferee(ref, parts);
+
+		// if there is a URI set for a node server receiving match messages, send
+		if (AutoReferee.getInstance().getConfig().isSet("node-api-url")) try
+		{
+			String url = AutoReferee.getInstance().getConfig().getString("node-api-url");
+			QueryUtil.syncPutQuery(url, QueryUtil.prepareParams(ImmutableMap.of(
+					"msg", StringUtils.join(parts, SpectatorListener.DELIMITER),
+					"world", getWorld().getName()
+			)));
+		}
+		catch (IOException e) {}
 	}
 
 	/**
