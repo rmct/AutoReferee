@@ -52,6 +52,10 @@
           <groupId>org.spout</groupId>
           <artifactId>spoutapi</artifactId>
         </exclusion>
+	<exclusion>
+	  <groupId>org.spout</groupId>
+          <artifactId>vanilla</artifactId>
+	</exclusion>
       </exclusions>
     </dependency>
 
