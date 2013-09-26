@@ -1014,9 +1014,11 @@ public class AutoRefMatch implements Metadatable
 			e.printStackTrace();
 		}
 
+		messageReferees("match", getWorld().getName(), "init");
+
 		loadWorldConfiguration();
 
-		messageReferees("match", getWorld().getName(), "init");
+		messageReferees("match", getWorld().getName(), "map", getMapName());
 		setCurrentState(MatchStatus.WAITING);
 
 		// restore competitive settings and some default values
@@ -1666,6 +1668,22 @@ public class AutoRefMatch implements Metadatable
 	public void messageReferees(String ...parts)
 	{
 		for (Player ref : getReferees(false)) messageReferee(ref, parts);
+		messageRefereeAPI(parts);
+	}
+
+	public void messageRefereeAPI(String ...parts)
+	{
+		if(!AutoReferee.getInstance().getConfig().isSet("AutoRefereeNode-api-url"))
+			return;
+
+		try
+		{
+			String msg = StringUtils.join(parts, SpectatorListener.DELIMITER);
+			String url = AutoReferee.getInstance().getConfig().getString("AutoRefereeNode-api-url", null);
+			QueryUtil.syncPutQuery(url,"world=" + URLEncoder.encode(getWorld().getName(), "UTF-8") + 
+					"&msg=" + URLEncoder.encode(msg, "UTF-8"));
+		}
+		catch (IOException e) {}
 	}
 
 	/**
@@ -3243,7 +3261,7 @@ public class AutoRefMatch implements Metadatable
 			// submit our request to pastehtml, get back a link to the report
 			return QueryUtil.syncQuery("http://pastehtml.com/upload/create",
 				"input_type=html&result=address&minecraft=1",
-				"txt=" + URLEncoder.encode(report, "UTF-8"));
+				"txt=" + URLEncoder.encode(report, "UTF-8"), null);
 		}
 		catch (IOException e) { failure = e.getLocalizedMessage(); }
 
