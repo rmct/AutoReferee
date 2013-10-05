@@ -62,7 +62,7 @@ public class SportBukkitUtil
 	{
 		if (mAffectsSpawning != null) try
 		{ mAffectsSpawning.invoke(player, affectsSpawning); }
-		catch (Exception e) {  }
+		catch (Throwable ignored) {  }
 	}
 
 	/**
@@ -76,7 +76,7 @@ public class SportBukkitUtil
 	{
 		if (mCollidesWithEntities != null) try
 		{ mCollidesWithEntities.invoke(player, collidesWithEntities); }
-		catch (Exception e) {  }
+		catch (Throwable ignored) {  }
 	}
 
 	/**
@@ -93,7 +93,7 @@ public class SportBukkitUtil
 		if (mSetOverheadName != null) try
 		{ mSetOverheadName.invoke(player, overheadName.trim()
 			.replaceAll(ChatColor.RESET.toString(), "")); }
-		catch (Exception e) {  }
+		catch (Throwable ignored) {  }
 	}
 
 	/**

@@ -85,7 +85,7 @@ public class QueryUtil
 				if (rd != null) rd.close();
 			}
 			// meh. don't bother, if something goes wrong here.
-			catch (Exception e) {  }
+			catch (Exception ignored) {  }
 		}
 	}
 
