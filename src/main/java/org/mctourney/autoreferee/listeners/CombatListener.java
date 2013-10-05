@@ -222,6 +222,9 @@ public class CombatListener implements Listener
 			AutoRefPlayer aapl = match.getPlayer(damager);
 			AutoRefPlayer vapl = match.getPlayer(damaged);
 
+			// FIXME - define behavior for when attacker or victim is not actually in the match
+			// (and therefore aapl/vapl is null)
+
 			if (!aapl.isInsideLane())
 			{ event.setCancelled(true); return; }
 

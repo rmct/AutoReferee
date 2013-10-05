@@ -258,7 +258,7 @@ public class AutoReferee extends JavaPlugin
 		{
 			// if the player is expected for any of these teams
 			for (AutoRefTeam team : match.getTeams())
-				if (team.getExpectedPlayers().contains(player))
+				if (team.getExpectedPlayers().contains(player.getName()))
 					return team;
 		}
 
@@ -428,6 +428,11 @@ public class AutoReferee extends JavaPlugin
 		{
 			Player player = getServer().getPlayer(name);
 			if (player != null) world = player.getWorld();
+		}
+		if (world == null)
+		{
+			consoleWorld = null;
+			return;
 		}
 
 		this.setConsoleWorld(world);

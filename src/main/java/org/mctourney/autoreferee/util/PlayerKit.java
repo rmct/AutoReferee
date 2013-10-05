@@ -157,8 +157,8 @@ public class PlayerKit
 				int count = 1, damage = 0;
 
 				// cheating here a bit. Exception covers both NumberFormatException and NullPointerException
-				try { count = Integer.parseInt(gear.getAttributeValue("count")); } catch (Exception e) {  }
-				try { damage = Integer.parseInt(gear.getAttributeValue("damage")); } catch (Exception e) {  }
+				try { count = Integer.parseInt(gear.getAttributeValue("count")); } catch (Exception ignored) {  }
+				try { damage = Integer.parseInt(gear.getAttributeValue("damage")); } catch (Exception ignored) {  }
 
 				// get item stack locally so we can inspect it a bit first
 				ItemStack item = new ItemStack(type, count, (short) damage);

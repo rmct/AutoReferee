@@ -375,6 +375,11 @@ public class ConfigurationCommands implements CommandHandler
 			CuboidSelection csel = (CuboidSelection) sel;
 			reg = new CuboidRegion(csel.getMinimumPoint(), csel.getMaximumPoint());
 		}
+		else
+		{
+			sender.sendMessage("You must have a selection with WorldEdit already to run this method.");
+			return true;
+		}
 
 		CoreGoal core = new CoreGoal(team, reg);
 		if (options.hasOption('r'))

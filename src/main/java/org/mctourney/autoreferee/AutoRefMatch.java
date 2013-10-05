@@ -2276,6 +2276,11 @@ public class AutoRefMatch implements Metadatable
 
 	/**
 	 * Parameters necessary to configure a match.
+	 * <p>
+	 * This class is serialized in through JSON.
+	 * <p>
+	 * TODO allow modification thru commands during map publication prep?
+	 *
 	 * @author authorblues
 	 */
 	public static class MatchParams
