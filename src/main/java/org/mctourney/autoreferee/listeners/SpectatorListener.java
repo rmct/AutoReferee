@@ -51,6 +51,7 @@ import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.goals.BlockGoal;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
 import org.mctourney.autoreferee.util.LocationUtil;
+import org.mctourney.autoreferee.util.PlayerUtil;
 import org.mctourney.autoreferee.util.TeleportationUtil;
 
 public class SpectatorListener implements PluginMessageListener, Listener
@@ -165,7 +166,7 @@ public class SpectatorListener implements PluginMessageListener, Listener
 		if (AutoReferee.REFEREE_PLUGIN_CHANNEL.equals(event.getChannel()) && match != null)
 		{
 			// if this is a player, complain and force them to quit their team!
-			if (match.isPlayer(pl))
+			if (match.isPlayer(pl) && !pl.isOp())
 			{
 				AutoRefPlayer apl = match.getPlayer(pl);
 				for (Player ref : match.getReferees(true)) ref.sendMessage(apl.getDisplayName() +
@@ -372,8 +373,7 @@ public class SpectatorListener implements PluginMessageListener, Listener
 		if (match != null && match.getCurrentState().inProgress()
 			&& !match.isPlayer(event.getPlayer())) event.setCancelled(true);
 
-		if (event.getPlayer().getListeningPluginChannels().contains(
-			AutoReferee.REFEREE_PLUGIN_CHANNEL)) event.setCancelled(true);
+		if (PlayerUtil.hasClientMod(event.getPlayer())) event.setCancelled(true);
 	}
 
 	@EventHandler

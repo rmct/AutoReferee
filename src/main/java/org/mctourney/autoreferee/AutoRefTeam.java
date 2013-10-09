@@ -30,6 +30,8 @@ import org.mctourney.autoreferee.regions.AutoRefRegion;
 import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.Metadatable;
 import org.mctourney.autoreferee.util.PlayerKit;
+import org.mctourney.autoreferee.util.PlayerUtil;
+
 import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Sets;
@@ -603,8 +605,8 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		AutoReferee.callEvent(event);
 		if (event.isCancelled()) return false;
 
-		// if this player is using the client mod, they may not join
-		if (player.getListeningPluginChannels().contains(AutoReferee.REFEREE_PLUGIN_CHANNEL))
+		// if this player is using the client mod and is not an op, they may not join
+		if (!player.isOp() && PlayerUtil.hasClientMod(player))
 		{
 			if (!getMatch().isReferee(player))
 				player.sendMessage("You may not join a team with a modified client");

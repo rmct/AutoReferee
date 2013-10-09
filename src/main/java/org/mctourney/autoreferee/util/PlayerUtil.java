@@ -192,4 +192,10 @@ public class PlayerUtil
 
 		return String.format("%s (%d:%02d)", name, time/60, time%60);
 	}
+
+	public static boolean hasClientMod(Player player)
+	{
+		if (player == null) return false;
+		return player.getListeningPluginChannels().contains(AutoReferee.REFEREE_PLUGIN_CHANNEL);
+	}
 }

@@ -450,7 +450,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 * @return true if using client mod, otherwise false
 	 */
 	public boolean hasClientMod()
-	{ return getPlayer().getListeningPluginChannels().contains(AutoReferee.REFEREE_PLUGIN_CHANNEL); }
+	{ return PlayerUtil.hasClientMod(getPlayer()); }
 
 	/**
 	 * Gets location of this player's bed.
