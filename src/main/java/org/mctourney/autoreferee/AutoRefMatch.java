@@ -2046,6 +2046,9 @@ public class AutoRefMatch implements Metadatable
 		AutoReferee.callEvent(event);
 		if (event.isCancelled()) return;
 
+		// for cleanup purposes, BEFORE we eject all of the players
+		this.messageReferees("world", getWorld().getName(), "destroy");
+
 		// first, handle all the players
 		for (Player p : primaryWorld.getPlayers()) this.ejectPlayer(p);
 
