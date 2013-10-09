@@ -391,7 +391,7 @@ public class AutoRefMatch implements Metadatable
 	{ return infoboardObjective; }
 
 	// teams participating in the match
-	protected Set<AutoRefTeam> teams;
+	protected Set<AutoRefTeam> teams = Sets.newHashSet();
 
 	/**
 	 * Gets the teams participating in this match.
