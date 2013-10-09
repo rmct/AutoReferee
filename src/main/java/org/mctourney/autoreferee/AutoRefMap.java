@@ -487,15 +487,23 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 
 	public static Element getConfigFileData(File zip) throws IOException, JDOMException
 	{
-		ZipFile zfile = new ZipFile(zip);
-		Enumeration<? extends ZipEntry> entries = zfile.entries();
-
-		// if it doesn't have an autoreferee config file
-		while (entries.hasMoreElements())
+		try
 		{
-			ZipEntry entry = entries.nextElement();
-			if (entry.getName().endsWith(AutoReferee.CFG_FILENAME))
-				return new SAXBuilder().build(zfile.getInputStream(entry)).getRootElement();
+			ZipFile zfile = new ZipFile(zip);
+			Enumeration<? extends ZipEntry> entries = zfile.entries();
+
+			// if it doesn't have an autoreferee config file
+			while (entries.hasMoreElements())
+			{
+				ZipEntry entry = entries.nextElement();
+				if (entry.getName().endsWith(AutoReferee.CFG_FILENAME))
+					return new SAXBuilder().build(zfile.getInputStream(entry)).getRootElement();
+			}
+		}
+		catch (Exception e)
+		{
+			// if the zip file is malformed in some way, tell which file caused the problem
+			AutoReferee.log("Error opening or processing " + zip.getName() + ": " + e.getMessage());
 		}
 		return null;
 	}
