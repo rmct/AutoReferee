@@ -1483,6 +1483,14 @@ public class AutoRefMatch implements Metadatable
 			}
 		}
 
+		// set any specified gamerules (future-proof?)
+		if (gameplay.getChild("gamerules") != null)
+		{
+			for (Element rulenode : gameplay.getChild("gamerule").getChildren())
+				if (primaryWorld.isGameRule(rulenode.getName()))
+					primaryWorld.setGameRuleValue(rulenode.getName(), rulenode.getTextNormalize());
+		}
+
 		// allow or disallow friendly fire
 		if (gameplay.getChild("friendlyfire") != null)
 			setFriendlyFire(Boolean.parseBoolean(gameplay.getChildText("friendlyfire")));
