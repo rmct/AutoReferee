@@ -21,6 +21,7 @@ import org.mctourney.autoreferee.AutoReferee;
 public class QueryUtil
 {
 	private static final String ENCODING = "UTF-8";
+	private static final int TIMEOUT = 5000;
 
 	public static String getUserAgent()
 	{
@@ -55,6 +56,9 @@ public class QueryUtil
 			AutoReferee instance = AutoReferee.getInstance();
 			String pluginName = instance.getDescription().getFullName();
 			conn.setRequestProperty("User-Agent", String.format("%s (%s)", pluginName, instance.getCommit()));
+
+			conn.setConnectTimeout(TIMEOUT);
+			conn.setReadTimeout(TIMEOUT);
 
 			if (method != null)
 			{
