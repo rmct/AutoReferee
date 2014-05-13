@@ -360,6 +360,33 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		return carrying;
 	}
 
+	private GoalsInventorySnapshot beforeOpeningInventory;
+	private String inventoryDescription;
+	private Location inventoryLocation;
+
+	public GoalsInventorySnapshot getBeforeOpeningInventorySnapshot()
+	{ return beforeOpeningInventory; }
+
+	public String getInventoryDescription()
+	{ return inventoryDescription; }
+
+	public Location getInventoryLocation()
+	{ return inventoryLocation; }
+
+	public void setActiveInventoryInfo(GoalsInventorySnapshot mySnap, Location loc, String description)
+	{
+		beforeOpeningInventory = mySnap;
+		inventoryDescription = description;
+		inventoryLocation = loc;
+	}
+
+	public void clearActiveInventoryInfo()
+	{
+		beforeOpeningInventory = null;
+		inventoryLocation = null;
+		inventoryDescription = null;
+	}
+
 	// streak information - kill streak, domination, revenge
 	private int totalStreak = 0;
 	private Map<AutoRefPlayer, Integer> playerStreak;

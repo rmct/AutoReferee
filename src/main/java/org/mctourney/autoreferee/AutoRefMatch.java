@@ -3378,7 +3378,7 @@ public class AutoRefMatch implements Metadatable
 
 			// objective events should not be broadcast to players
 			OBJECTIVE_FOUND("objective-found", true, EventVisibility.REFEREES),
-			OBJECTIVE_PLACED("objective-place", true, EventVisibility.REFEREES),
+			OBJECTIVE_PLACED("objective-place", true, EventVisibility.ALL),
 			OBJECTIVE_DETAIL("objective-detail", true, EventVisibility.REFEREES),
 			;
 
@@ -3457,7 +3457,7 @@ public class AutoRefMatch implements Metadatable
 
 		@Override
 		public String toString()
-		{ return String.format("[%s] %s", this.getTimestamp(), this.getMessage()); }
+		{ return String.format("[%s] %s", this.getTimestamp(), this.getColoredMessage()); }
 
 		public Location getLocation()
 		{ return location; }
@@ -3485,14 +3485,18 @@ public class AutoRefMatch implements Metadatable
 			default: break;
 		}
 
-		ChatColor clr = event.getType().getColor();
 		String message = event.getColoredMessage();
 
 		if (recipients != null) for (Player player : recipients)
 			player.sendMessage(message);
 
 		if (plugin.isConsoleLoggingEnabled())
-			AutoReferee.log(event.toString());
+		{
+			if (plugin.isColoredConsoleLoggingEnabled())
+				Bukkit.getConsoleSender().sendMessage("[AR] " + event.toString());
+			else
+				AutoReferee.log(event.toString());
+		}
 	}
 
 	/**

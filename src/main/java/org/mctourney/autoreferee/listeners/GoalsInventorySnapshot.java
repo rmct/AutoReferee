@@ -87,6 +87,36 @@ public class GoalsInventorySnapshot extends HashMap<BlockData, Integer>
 		}
 	}
 
+	public GoalsInventorySnapshot(MapDifference<BlockData, Integer> diff, boolean leftSideOnly)
+	{
+		super();
+		if (leftSideOnly)
+			this.putAll(diff.entriesOnlyOnLeft());
+		else
+			this.putAll(diff.entriesOnlyOnRight());
+
+		// Only positive differences
+		for (Map.Entry<BlockData, ValueDifference<Integer>> entry : diff.entriesDiffering().entrySet())
+		{
+			int count;
+			if (leftSideOnly)
+				count = entry.getValue().leftValue() - entry.getValue().rightValue();
+			else
+				count = entry.getValue().rightValue() - entry.getValue().leftValue();
+
+			if (count > 0)
+				this.put(entry.getKey(), count);
+		}
+	}
+
+	public int getInt(BlockData key)
+	{
+		Integer val = get(key);
+		if (val == null) return 0;
+
+		return val;
+	}
+
 	@Override
 	public Integer put(BlockData key, Integer value)
 	{
@@ -105,10 +135,17 @@ public class GoalsInventorySnapshot extends HashMap<BlockData, Integer>
 	{
 		return Maps.difference(this, other);
 	}
-	
-	public GoalsInventorySnapshot getSubtracted(GoalsInventorySnapshot other)
+
+	public void subtractInPlace(GoalsInventorySnapshot other)
 	{
-		return new GoalsInventorySnapshot(getDiff(other));
+		for (Map.Entry<BlockData, Integer> entry : other.entrySet())
+			subtractInPlace(entry.getKey(), entry.getValue());
+	}
+
+	public void subtractInPlace(BlockData key, Integer value)
+	{
+		Validate.notNull(value);
+		put(key, getInt(key) - value);
 	}
 
 	private static int itemSum(BlockData data, ItemStack[] items)
@@ -154,12 +191,16 @@ public class GoalsInventorySnapshot extends HashMap<BlockData, Integer>
 		// Desired output: RED WOOL, GREEN WOOL, YELLOW WOOL x5, BLUE WOOL x20
 		for (Map.Entry<BlockData, Integer> entry : this.entrySet())
 		{
-			if (!first) sb.append(", ");
-			sb.append(entry.getKey().getDisplayName());
-			sb.append(ChatColor.RESET);
+			if (!first)
+			{ sb.append(", "); }
+			else
+			{ first = false; }
+
 			int count = entry.getValue();
 			if (count != 1)
-				sb.append(ChatColor.YELLOW).append("x").append(Integer.toString(count)).append(ChatColor.RESET);
+				sb.append(ChatColor.YELLOW).append(Integer.toString(count)).append(" x ").append(ChatColor.RESET);
+			sb.append(entry.getKey().getDisplayName());
+			sb.append(ChatColor.RESET);
 		}
 		return sb.toString();
 	}

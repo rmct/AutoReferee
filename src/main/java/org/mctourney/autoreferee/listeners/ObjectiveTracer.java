@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.MapDifference;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
@@ -12,7 +13,9 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -22,6 +25,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.InventoryHolder;
@@ -44,6 +49,107 @@ public class ObjectiveTracer implements Listener
 	public ObjectiveTracer(Plugin p)
 	{
 		plugin = (AutoReferee) p;
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void saveOnOpen(InventoryOpenEvent event)
+	{
+		HumanEntity he = event.getPlayer();
+		if (!(he instanceof Player)) return;
+		Player pl = (Player) he;
+
+		AutoRefMatch match = plugin.getMatch(pl.getWorld());
+		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
+
+		if (match == null || apl == null)
+		{ return; }
+		if (apl.getTeam() == null)
+		{ return; }
+
+		InventoryHolder holder = event.getInventory().getHolder();
+
+		if (holder == pl)
+		{ apl.clearActiveInventoryInfo(); return; }
+
+		String holderDescription;
+		Location location;
+		if (holder instanceof BlockState)
+		{
+			BlockState h = (BlockState) holder;
+			location = h.getLocation();
+			holderDescription = h.getType().toString().toLowerCase();
+		}
+		else if (holder instanceof DoubleChest)
+		{
+			DoubleChest c = (DoubleChest) holder;
+			location = c.getLocation();
+			holderDescription = "double chest";
+		}
+		else if (holder instanceof Entity)
+		{
+			Entity e = (Entity) holder;
+			location = e.getLocation();
+			holderDescription = e.getType().toString().toLowerCase();
+		}
+		else
+		{
+			holderDescription = "unknown container";
+			location = pl.getLocation();
+		}
+
+		apl.setActiveInventoryInfo(apl.getCarrying(), location, holderDescription);
+	}
+
+
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onClose(InventoryCloseEvent event)
+	{
+		HumanEntity he = event.getPlayer();
+		if (!(he instanceof Player)) return;
+		Player pl = (Player) he;
+
+		AutoRefMatch match = plugin.getMatch(pl.getWorld());
+		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
+
+		if (match == null || apl == null)
+		{ return; }
+		if (apl.getTeam() == null)
+		{ return; }
+
+		GoalsInventorySnapshot before = apl.getBeforeOpeningInventorySnapshot();
+		GoalsInventorySnapshot snap = apl.getCarrying();
+
+		if (before == null)
+		{ return; }
+
+		MapDifference<BlockData, Integer> diff = before.getDiff(snap);
+		if (diff.areEqual())
+		{ return; }
+
+		GoalsInventorySnapshot droppedOff = new GoalsInventorySnapshot(diff, true);
+		GoalsInventorySnapshot pickedUp = new GoalsInventorySnapshot(diff, false);
+
+		if (!droppedOff.isEmpty())
+		{
+			match.addEvent(new TranscriptEvent(match,
+					TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+					"%s has dropped off %s in a %s (@ %s)", apl.getDisplayName(),
+					droppedOff, apl.getInventoryDescription(),
+					LocationUtil.toBlockCoords(apl.getInventoryLocation())),
+					apl.getInventoryLocation(), unpack(droppedOff, apl)
+			));
+		}
+		if (!pickedUp.isEmpty())
+		{
+			match.addEvent(new TranscriptEvent(match,
+					TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+					"%s has picked up %s from a %s (@ %s)", apl.getDisplayName(),
+					pickedUp, apl.getInventoryDescription(),
+					LocationUtil.toBlockCoords(apl.getInventoryLocation())),
+					apl.getInventoryLocation(), unpack(pickedUp, apl)
+			));
+		}
+		apl.clearActiveInventoryInfo();
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
@@ -140,8 +246,8 @@ public class ObjectiveTracer implements Listener
 			{
 				match.addEvent(new TranscriptEvent(match,
 						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
-						"%s has tossed a %s (@ %s)", apl.getDisplayName(),
-						b.getDisplayName(),
+						"%s has tossed %s (@ %s)", apl.getDisplayName(),
+						new GoalsInventorySnapshot(event.getItemDrop().getItemStack(), b),
 						LocationUtil.toBlockCoords(pl.getLocation())), pl.getLocation(), apl, b
 				));
 			}
@@ -213,12 +319,17 @@ public class ObjectiveTracer implements Listener
 		{
 			if (b.equals(item))
 			{
+				GoalsInventorySnapshot snap = new GoalsInventorySnapshot(event.getItem().getItemStack(), b);
 				match.addEvent(new TranscriptEvent(match,
 						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
 						"%s has picked up a %s (@ %s)", apl.getDisplayName(),
-						b.getDisplayName(),
+						snap,
 						LocationUtil.toBlockCoords(pl.getLocation())), pl.getLocation(), apl, b
 				));
+
+				GoalsInventorySnapshot inventorySnapshot = apl.getBeforeOpeningInventorySnapshot();
+				if (inventorySnapshot != null)
+				{ inventorySnapshot.subtractInPlace(snap); }
 			}
 		}
 	}

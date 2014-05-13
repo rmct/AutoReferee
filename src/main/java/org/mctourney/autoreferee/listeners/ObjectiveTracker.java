@@ -69,7 +69,7 @@ public class ObjectiveTracker implements Listener
 					if (goal.isSatisfied(match))
 					{
 						match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.OBJECTIVE_PLACED,
-							String.format("%s has placed %s", apl.getDisplayName(), b.getDisplayName()), goal.getTarget(), apl, b));
+							String.format("%s has placed the %s on the Victory Monument", apl.getDisplayName(), b.getDisplayName()), goal.getTarget(), apl, b));
 						apl.addPoints(AchievementPoints.OBJECTIVE_PLACE);
 					}
 				}

@@ -159,10 +159,14 @@ public class AutoReferee extends JavaPlugin
 		}
 	}
 
-	private boolean consoleLog = false;
+	private boolean consoleLog = true;
+	private boolean consoleLogInColor = true;
 
 	protected boolean isConsoleLoggingEnabled()
 	{ return consoleLog; }
+
+	protected boolean isColoredConsoleLoggingEnabled()
+	{ return consoleLogInColor; }
 
 	// get the match associated with the world
 	private Map<UUID, AutoRefMatch> matches = Maps.newHashMap();
@@ -348,7 +352,8 @@ public class AutoReferee extends JavaPlugin
 		AutoRefMatch.setAllowTies(getConfig().getBoolean("allow-ties", false));
 
 		// log messages to console?
-		consoleLog = getConfig().getBoolean("console-log", false);
+		consoleLog = getConfig().getBoolean("console-log", true);
+		consoleLogInColor = getConfig().getBoolean("console-colors", true);
 
 		// setup the map library folder
 		AutoRefMap.getMapLibrary();
