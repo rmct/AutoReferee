@@ -21,7 +21,9 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefPlayer;
@@ -52,22 +54,23 @@ public class ObjectiveTracer implements Listener
 		AutoRefMatch match = plugin.getMatch(block.getWorld());
 		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
 
-		if (match != null && apl != null)
+		if (match == null || apl == null)
+		{ return; }
+		if (apl.getTeam() == null)
+		{ return; }
+
+		for (BlockData b : apl.getTeam().getObjectives())
 		{
-			if (apl.getTeam() != null)
-				for (BlockData b : apl.getTeam().getObjectives())
-				{
-					if (b.matchesBlock(block))
-					{
-						// TranscriptEvent.ObjectiveDetailType.PLACE
-						match.addEvent(new TranscriptEvent(match,
-								TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
-										"%s has placed a %s (@ %s)", apl.getDisplayName(),
-										b.getDisplayName(),
-										LocationUtil.toBlockCoords(block.getLocation())), block
-										.getLocation(), apl, b));
-					}
-				}
+			if (b.matchesBlock(block))
+			{
+				// TranscriptEvent.ObjectiveDetailType.PLACE
+				match.addEvent(new TranscriptEvent(match,
+						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+								"%s has placed a %s (@ %s)", apl.getDisplayName(),
+								b.getDisplayName(),
+								LocationUtil.toBlockCoords(block.getLocation())), block
+								.getLocation(), apl, b));
+			}
 		}
 	}
 
@@ -80,28 +83,55 @@ public class ObjectiveTracer implements Listener
 		AutoRefMatch match = plugin.getMatch(block.getWorld());
 		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
 
-		if (match != null && apl != null)
+		if (match == null || apl == null)
+		{ return; }
+		if (apl.getTeam() == null)
+		{ return; }
+
+		checkContainerBreak(block, apl.getTeam().getObjectives(), match,
+				apl.getDisplayName());
+		for (BlockData b : apl.getTeam().getObjectives())
 		{
-			if (apl.getTeam() != null)
+			if (b.matchesBlock(block))
 			{
-				checkContainerBreak(block, apl.getTeam().getObjectives(), match,
-						apl.getDisplayName());
-				for (BlockData b : apl.getTeam().getObjectives())
-				{
-					if (b.matchesBlock(block))
-					{
-						// TranscriptEvent.ObjectiveDetailType.BREAK_PLAYER
-						match.addEvent(new TranscriptEvent(match,
-								TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
-										"%s has broken a %s (@ %s)", apl.getDisplayName(),
-										b.getDisplayName(),
-										LocationUtil.toBlockCoords(block.getLocation())), block
-										.getLocation(), apl, b));
-					}
-				}
+				// TranscriptEvent.ObjectiveDetailType.BREAK_PLAYER
+				match.addEvent(new TranscriptEvent(match,
+						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+								"%s has broken a %s (@ %s)", apl.getDisplayName(),
+								b.getDisplayName(),
+								LocationUtil.toBlockCoords(block.getLocation())), block
+								.getLocation(), apl, b));
 			}
 		}
 	}
+
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void traceThrow(PlayerDropItemEvent event)
+	{
+		Player pl = event.getPlayer();
+		BlockData item = new BlockData(event.getItemDrop().getItemStack());
+
+		AutoRefMatch match = plugin.getMatch(pl.getWorld());
+		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
+
+		if (match == null || apl == null)
+		{ return; }
+		if (apl.getTeam() == null)
+		{ return; }
+
+		for (BlockData b : apl.getTeam().getObjectives())
+		{
+			if (b.equals(item))
+			{
+				match.addEvent(new TranscriptEvent(match,
+						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+						"%s has tossed a %s (@ %s)", apl.getDisplayName(),
+						b.getDisplayName(),
+						pl.getLocation()), pl.getLocation(), apl, b));
+			}
+		}
+	}
+
 
 	// This is done due to ordering of event handler calls - the monitor
 	// listener that removes the entry might be called before us, so we fetch it
