@@ -187,7 +187,7 @@ public class ObjectiveTracer implements Listener
 			Entity entity = event.getEntity();
 			Location loc = block.getLocation();
 
-			Set<AutoRefTeam> teams = teamsWithAccess(block.getLocation(), match);
+			Set<AutoRefTeam> teams = teamsWithAccess(block.getLocation(), match, 0.1);
 			Set<BlockData> goals = Sets.newHashSet();
 			for (AutoRefTeam te : teams)
 				goals.addAll(te.getObjectives());
@@ -274,7 +274,7 @@ public class ObjectiveTracer implements Listener
 		List<Object> arr = Lists.newArrayList(others);
 		for (Map.Entry<BlockData, Integer> entry : snap.entrySet())
 		{
-			final int count = entry.getValue().intValue();
+			final int count = entry.getValue();
 			for (int i = 0; i < count; i++)
 				arr.add(entry.getKey());
 		}
@@ -286,19 +286,19 @@ public class ObjectiveTracer implements Listener
 		List<Object> arr = Lists.newArrayList();
 		for (Map.Entry<BlockData, Integer> entry : snap.entrySet())
 		{
-			final int count = entry.getValue().intValue();
+			final int count = entry.getValue();
 			for (int i = 0; i < count; i++)
 				arr.add(entry.getKey());
 		}
 		return arr.toArray();
 	}
 
-	private Set<AutoRefTeam> teamsWithAccess(Location loc, AutoRefMatch match)
+	private Set<AutoRefTeam> teamsWithAccess(Location loc, AutoRefMatch match, double distance)
 	{
 		Set<AutoRefTeam> teams = Sets.newHashSet();
 		for (AutoRefTeam team : match.getTeams())
 		{
-			if (team.canEnter(loc, 1.3D)) teams.add(team);
+			if (team.canEnter(loc, distance)) teams.add(team);
 		}
 		return teams;
 	}
@@ -308,13 +308,9 @@ public class ObjectiveTracer implements Listener
 		Validate.isTrue(match.getWorld().equals(loc.getWorld()),
 				"The provided location must be within the provided match!");
 		if (match.inStartRegion(loc)) return "the starting area";
-		Set<AutoRefTeam> teamsDirect = Sets.newHashSet();
-		Set<AutoRefTeam> teamsNearby = Sets.newHashSet();
-		for (AutoRefTeam t : match.getTeams())
-		{
-			if (t.canEnter(loc, 0D)) teamsDirect.add(t);
-			if (t.canEnter(loc, 3.0D)) teamsNearby.add(t);
-		}
+		Set<AutoRefTeam> teamsDirect = teamsWithAccess(loc, match, 0);
+		Set<AutoRefTeam> teamsNearby = teamsWithAccess(loc, match, 3);
+
 		if (teamsDirect.isEmpty())
 		{
 			if (teamsNearby.isEmpty())
