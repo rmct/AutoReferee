@@ -1,5 +1,6 @@
 package org.mctourney.autoreferee.listeners;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -105,10 +106,22 @@ public class ObjectiveTracer implements Listener
 		}
 	}
 
+	/**
+	 * A set of players who have recently died, and therefore to ignore
+	 * PlayerDropEvents from.
+	 *
+	 * Players should only ever remain in this Set for less than 1 tick.
+	 */
+	private final HashSet<Player> dropSkipPlayers = new HashSet<Player>();
+
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void traceThrow(PlayerDropItemEvent event)
 	{
 		Player pl = event.getPlayer();
+
+		if (dropSkipPlayers.contains(pl))
+		{ return; }
+
 		BlockData item = new BlockData(event.getItemDrop().getItemStack());
 
 		AutoRefMatch match = plugin.getMatch(pl.getWorld());
@@ -132,6 +145,44 @@ public class ObjectiveTracer implements Listener
 		}
 	}
 
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onDeath(PlayerDeathEvent ev)
+	{
+		final Player pl = ev.getEntity();
+
+		// Ignore PlayerDropItemEvent for 1 tick
+		dropSkipPlayers.add(pl);
+		plugin.getServer().getScheduler().runTask(plugin, new Runnable()
+		{
+			public void run()
+			{
+				dropSkipPlayers.remove(pl);
+			}
+		});
+
+		AutoRefMatch match = plugin.getMatch(pl.getWorld());
+		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
+
+		if (match == null || apl == null)
+		{ return; }
+		if (apl.getTeam() == null)
+		{ return; }
+
+		GoalsInventorySnapshot snapshot = GoalsInventorySnapshot
+				.fromItemsAndGoals(ev.getDrops(), apl.getTeam().getObjectives());
+
+		if (snapshot.isEmpty())
+		{ return; }
+
+		match.addEvent(new TranscriptEvent(
+						match,
+						TranscriptEvent.EventType.OBJECTIVE_DETAIL,
+						String.format("%s has dropped %s when dying (@ %s)",
+								apl.getDisplayName(), snapshot, apl.getLocation()),
+						apl.getLocation(), unpack(snapshot, apl, apl.getKiller())
+				)
+		);
+	}
 
 	// This is done due to ordering of event handler calls - the monitor
 	// listener that removes the entry might be called before us, so we fetch it
@@ -155,55 +206,55 @@ public class ObjectiveTracer implements Listener
 		AutoRefMatch match = plugin.getMatch(blocks.get(0).getWorld());
 		Location loc = event.getLocation();
 
-		if (match != null)
+		if (match == null)
+		{ return; }
+
+		Set<AutoRefTeam> teams = match.getTeams();
+		Set<BlockData> goals = Sets.newHashSet();
+		for (AutoRefTeam te : teams)
+			goals.addAll(te.getObjectives());
+		if (goals.isEmpty()) return; // not an objective match
+
+		String causeStr;
+
+		if (currentResponsibleTntPlayer != null)
 		{
-			Set<AutoRefTeam> teams = match.getTeams();
-			Set<BlockData> goals = Sets.newHashSet();
-			for (AutoRefTeam te : teams)
-				goals.addAll(te.getObjectives());
-			if (goals.isEmpty()) return; // not an objective match
+			causeStr = currentResponsibleTntPlayer.getDisplayName();
+		}
+		else if (cause != null)
+		{
+			causeStr = "A " + StringUtils.capitalize(cause.getType().toString().toLowerCase());
+		}
+		else
+		{
+			causeStr = "An explosion";
+		}
 
-			String causeStr;
+		for (Block b : blocks)
+			checkContainerBreak(b, goals, match, causeStr, "exploded");
 
-			if (currentResponsibleTntPlayer != null)
-			{
-				causeStr = currentResponsibleTntPlayer.getDisplayName();
-			}
-			else if (cause != null)
-			{
-				causeStr = "A " + StringUtils.capitalize(cause.getType().toString().toLowerCase());
-			}
-			else
-			{
-				causeStr = "An explosion";
-			}
+		GoalsInventorySnapshot snap = new GoalsInventorySnapshot(blocks, goals);
+		if (snap.isEmpty()) return;
 
-			for (Block b : blocks)
-				checkContainerBreak(b, goals, match, causeStr, "exploded");
-
-			GoalsInventorySnapshot snap = new GoalsInventorySnapshot(blocks, goals);
-			if (snap.isEmpty()) return;
-
-			if (currentResponsibleTntPlayer != null)
-			{
-				// TranscriptEvent.ObjectiveDetailType.BREAK_PLAYER
-				match.addEvent(new TranscriptEvent(
-						match,
-						TranscriptEvent.EventType.OBJECTIVE_DETAIL,
-						String.format("%s has exploded %s in %s (@ %s)", causeStr, snap,
-								getLocationDescription(loc, match), LocationUtil.toBlockCoords(loc)),
-						loc, unpack(snap, currentResponsibleTntPlayer)));
-			}
-			else
-			{
-				// TranscriptEvent.ObjectiveDetailType.BREAK_NONPLAYER
-				match.addEvent(new TranscriptEvent(
-						match,
-						TranscriptEvent.EventType.OBJECTIVE_DETAIL,
-						String.format("%s has exploded %s in %s (@ %s)", causeStr, snap,
-								getLocationDescription(loc, match), LocationUtil.toBlockCoords(loc)),
-						loc, unpack(snap)));
-			}
+		if (currentResponsibleTntPlayer != null)
+		{
+			// TranscriptEvent.ObjectiveDetailType.BREAK_PLAYER
+			match.addEvent(new TranscriptEvent(
+					match,
+					TranscriptEvent.EventType.OBJECTIVE_DETAIL,
+					String.format("%s has exploded %s in %s (@ %s)", causeStr, snap,
+							getLocationDescription(loc, match), LocationUtil.toBlockCoords(loc)),
+					loc, unpack(snap, currentResponsibleTntPlayer)));
+		}
+		else
+		{
+			// TranscriptEvent.ObjectiveDetailType.BREAK_NONPLAYER
+			match.addEvent(new TranscriptEvent(
+					match,
+					TranscriptEvent.EventType.OBJECTIVE_DETAIL,
+					String.format("%s has exploded %s in %s (@ %s)", causeStr, snap,
+							getLocationDescription(loc, match), LocationUtil.toBlockCoords(loc)),
+					loc, unpack(snap)));
 		}
 	}
 
@@ -261,12 +312,6 @@ public class ObjectiveTracer implements Listener
 		}
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR)
-	public void onDeath(PlayerDeathEvent ev)
-	{
-
-	}
-
 	// Not an @EventHandler
 	public void checkContainerBreak(Block block, Set<BlockData> goals, AutoRefMatch match,
 			String causeStr)
@@ -302,6 +347,8 @@ public class ObjectiveTracer implements Listener
 	private Object[] unpack(GoalsInventorySnapshot snap, Object... others)
 	{
 		List<Object> arr = Lists.newArrayList(others);
+		arr.remove(null); arr.remove(null);
+
 		for (Map.Entry<BlockData, Integer> entry : snap.entrySet())
 		{
 			final int count = entry.getValue();

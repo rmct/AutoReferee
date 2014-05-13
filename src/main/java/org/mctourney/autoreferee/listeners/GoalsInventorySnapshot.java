@@ -12,6 +12,7 @@ import com.google.common.collect.Maps;
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.mctourney.autoreferee.util.BlockData;
@@ -38,6 +39,17 @@ public class GoalsInventorySnapshot extends HashMap<BlockData, Integer>
 		super();
 		if (goal.equals(BlockData.fromItemStack(item)))
 			this.put(goal, item.getAmount());
+	}
+
+	public static GoalsInventorySnapshot fromItemsAndGoals(Collection<ItemStack> items, Set<BlockData> goals)
+	{
+		GoalsInventorySnapshot ret = new GoalsInventorySnapshot();
+		for (BlockData goal : goals)
+		{
+			int count = itemSum(goal, items);
+			ret.put(goal, count);
+		}
+		return ret;
 	}
 
 	public GoalsInventorySnapshot(Inventory inv, Set<BlockData> goals)
@@ -100,6 +112,18 @@ public class GoalsInventorySnapshot extends HashMap<BlockData, Integer>
 	}
 
 	private static int itemSum(BlockData data, ItemStack[] items)
+	{
+		int count = 0;
+		for (ItemStack it : items)
+		{
+			if (it == null) continue;
+			if (data.equals(BlockData.fromItemStack(it)))
+				count += it.getAmount();
+		}
+		return count;
+	}
+
+	private static int itemSum(BlockData data, Collection<ItemStack> items)
 	{
 		int count = 0;
 		for (ItemStack it : items)
