@@ -889,7 +889,6 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 
 	public void updateCarrying()
 	{
-		carrying = null;
 		Player player = getPlayer();
 		if (player != null)
 			updateCarrying(player.getInventory());
@@ -902,6 +901,9 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 			GoalsInventorySnapshot oldCarrying = carrying;
 			carrying = null; // invalidate old value
 			carrying = getCarrying();
+
+			if (oldCarrying == null)
+			{ return; }
 
 			MapDifference<BlockData, Integer> diff = oldCarrying.getDiff(carrying);
 
