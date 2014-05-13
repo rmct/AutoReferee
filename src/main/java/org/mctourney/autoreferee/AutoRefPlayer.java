@@ -350,8 +350,6 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 */
 	public GoalsInventorySnapshot getCarrying()
 	{
-		if (carrying != null) return carrying;
-
 		Player p = getPlayer();
 		AutoRefTeam t = getTeam();
 		if (p == null || t == null)
@@ -890,12 +888,8 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	public void updateCarrying()
 	{
 		Player player = getPlayer();
-		if (player != null)
-			updateCarrying(player.getInventory());
-	}
+		if (player == null) return;
 
-	private void updateCarrying(Inventory inv)
-	{
 		if (getTeam() != null)
 		{
 			GoalsInventorySnapshot oldCarrying = carrying;
@@ -912,8 +906,8 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 				for (BlockGoal goal : getTeam().getTeamGoals(BlockGoal.class))
 					if (goal.getItemStatus() == AutoRefGoal.ItemStatus.NONE && carrying.containsKey(goal.getItem()))
 					{
-						// generate a transcript event for seeing the box
-						String m = String.format("%s is carrying %s", getDisplayName(), goal.getItem().getDisplayName());
+						// generate a transcript event for being the first
+						String m = String.format("%s is carrying the first %s!", getDisplayName(), goal.getItem().getDisplayName());
 						getMatch().addEvent(new TranscriptEvent(getMatch(),
 							TranscriptEvent.EventType.OBJECTIVE_FOUND, m, getLocation(), this, goal.getItem()));
 						this.addPoints(AchievementPoints.OBJECTIVE_FOUND);

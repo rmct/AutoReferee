@@ -23,8 +23,8 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefPlayer;
@@ -67,10 +67,11 @@ public class ObjectiveTracer implements Listener
 				// TranscriptEvent.ObjectiveDetailType.PLACE
 				match.addEvent(new TranscriptEvent(match,
 						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
-								"%s has placed a %s (@ %s)", apl.getDisplayName(),
-								b.getDisplayName(),
-								LocationUtil.toBlockCoords(block.getLocation())), block
-								.getLocation(), apl, b));
+						"%s has placed a %s (@ %s)", apl.getDisplayName(),
+						b.getDisplayName(),
+						LocationUtil.toBlockCoords(block.getLocation())), block
+						.getLocation(), apl, b
+				));
 			}
 		}
 	}
@@ -98,10 +99,11 @@ public class ObjectiveTracer implements Listener
 				// TranscriptEvent.ObjectiveDetailType.BREAK_PLAYER
 				match.addEvent(new TranscriptEvent(match,
 						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
-								"%s has broken a %s (@ %s)", apl.getDisplayName(),
-								b.getDisplayName(),
-								LocationUtil.toBlockCoords(block.getLocation())), block
-								.getLocation(), apl, b));
+						"%s has broken a %s (@ %s)", apl.getDisplayName(),
+						b.getDisplayName(),
+						LocationUtil.toBlockCoords(block.getLocation())), block
+						.getLocation(), apl, b
+				));
 			}
 		}
 	}
@@ -109,7 +111,7 @@ public class ObjectiveTracer implements Listener
 	/**
 	 * A set of players who have recently died, and therefore to ignore
 	 * PlayerDropEvents from.
-	 *
+	 * <p/>
 	 * Players should only ever remain in this Set for less than 1 tick.
 	 */
 	private final HashSet<Player> dropSkipPlayers = new HashSet<Player>();
@@ -140,7 +142,8 @@ public class ObjectiveTracer implements Listener
 						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
 						"%s has tossed a %s (@ %s)", apl.getDisplayName(),
 						b.getDisplayName(),
-						pl.getLocation()), pl.getLocation(), apl, b));
+						LocationUtil.toBlockCoords(pl.getLocation())), pl.getLocation(), apl, b
+				));
 			}
 		}
 	}
@@ -178,10 +181,46 @@ public class ObjectiveTracer implements Listener
 						match,
 						TranscriptEvent.EventType.OBJECTIVE_DETAIL,
 						String.format("%s has dropped %s when dying (@ %s)",
-								apl.getDisplayName(), snapshot, apl.getLocation()),
+								apl.getDisplayName(), snapshot, LocationUtil.toBlockCoords(
+										apl.getLocation())
+						),
 						apl.getLocation(), unpack(snapshot, apl, apl.getKiller())
 				)
 		);
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void tracePickup(PlayerPickupItemEvent event)
+	{
+		Player pl = event.getPlayer();
+
+		if (event.getItem() == null)
+		{ return; }
+		if (event.getItem().getItemStack() == null)
+		{ return; }
+
+		BlockData item = new BlockData(event.getItem().getItemStack());
+
+		AutoRefMatch match = plugin.getMatch(pl.getWorld());
+		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
+
+		if (match == null || apl == null)
+		{ return; }
+		if (apl.getTeam() == null)
+		{ return; }
+
+		for (BlockData b : apl.getTeam().getObjectives())
+		{
+			if (b.equals(item))
+			{
+				match.addEvent(new TranscriptEvent(match,
+						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+						"%s has picked up a %s (@ %s)", apl.getDisplayName(),
+						b.getDisplayName(),
+						LocationUtil.toBlockCoords(pl.getLocation())), pl.getLocation(), apl, b
+				));
+			}
+		}
 	}
 
 	// This is done due to ordering of event handler calls - the monitor
@@ -213,6 +252,7 @@ public class ObjectiveTracer implements Listener
 		Set<BlockData> goals = Sets.newHashSet();
 		for (AutoRefTeam te : teams)
 			goals.addAll(te.getObjectives());
+
 		if (goals.isEmpty()) return; // not an objective match
 
 		String causeStr;
@@ -244,7 +284,8 @@ public class ObjectiveTracer implements Listener
 					TranscriptEvent.EventType.OBJECTIVE_DETAIL,
 					String.format("%s has exploded %s in %s (@ %s)", causeStr, snap,
 							getLocationDescription(loc, match), LocationUtil.toBlockCoords(loc)),
-					loc, unpack(snap, currentResponsibleTntPlayer)));
+					loc, unpack(snap, currentResponsibleTntPlayer)
+			));
 		}
 		else
 		{
@@ -254,7 +295,8 @@ public class ObjectiveTracer implements Listener
 					TranscriptEvent.EventType.OBJECTIVE_DETAIL,
 					String.format("%s has exploded %s in %s (@ %s)", causeStr, snap,
 							getLocationDescription(loc, match), LocationUtil.toBlockCoords(loc)),
-					loc, unpack(snap)));
+					loc, unpack(snap)
+			));
 		}
 	}
 
@@ -263,52 +305,54 @@ public class ObjectiveTracer implements Listener
 	{
 		Block block = event.getBlock();
 		AutoRefMatch match = plugin.getMatch(block.getWorld());
-		if (match != null)
+		if (match == null)
+		{ return; }
+
+		Entity entity = event.getEntity();
+		Location loc = block.getLocation();
+
+		Set<AutoRefTeam> teams = teamsWithAccess(block.getLocation(), match, 0.1);
+		Set<BlockData> goals = Sets.newHashSet();
+		for (AutoRefTeam te : teams)
+			goals.addAll(te.getObjectives());
+		if (goals.isEmpty()) return; // not a block objectives match
+
+		BlockData former = BlockData.fromBlock(block);
+		BlockData after = new BlockData(event.getTo(), event.getData());
+
+		String causeStr = "A " + StringUtils.capitalize(entity.getType().toString().toLowerCase());
+
+		for (BlockData goal : goals)
 		{
-			Entity entity = event.getEntity();
-			Location loc = block.getLocation();
-
-			Set<AutoRefTeam> teams = teamsWithAccess(block.getLocation(), match, 0.1);
-			Set<BlockData> goals = Sets.newHashSet();
-			for (AutoRefTeam te : teams)
-				goals.addAll(te.getObjectives());
-			if (goals.isEmpty()) return; // not a block objectives match
-
-			BlockData former = BlockData.fromBlock(block);
-			BlockData after = new BlockData(event.getTo(), event.getData());
-
-			String causeStr = "A " + StringUtils.capitalize(entity.getType().toString().toLowerCase());
-
-			for (BlockData goal : goals)
+			if (goal.equals(former))
 			{
-				if (goal.equals(former))
-				{
-					// process break
-					// TranscriptEvent.ObjectiveDetailType.BREAK_NONPLAYER
-					match.addEvent(new TranscriptEvent(match,
-							TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
-									"%s has broken a %s in %s (@ %s)", causeStr, goal,
-									getLocationDescription(loc, match),
-									LocationUtil.toBlockCoords(loc)), entity.getLocation(), goal));
-				}
-				else if (goal.equals(after))
-				{
-					// process place
-					// TranscriptEvent.ObjectiveDetailType.PLACE
-					match.addEvent(new TranscriptEvent(match,
-							TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
-									"%s has placed a %s in %s (@ %s)", causeStr, goal,
-									getLocationDescription(loc, match),
-									LocationUtil.toBlockCoords(loc)), entity.getLocation(), goal));
-
-				}
+				// process break
+				// TranscriptEvent.ObjectiveDetailType.BREAK_NONPLAYER
+				match.addEvent(new TranscriptEvent(match,
+						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+						"%s has broken a %s in %s (@ %s)", causeStr, goal,
+						getLocationDescription(loc, match),
+						LocationUtil.toBlockCoords(loc)), entity.getLocation(), goal
+				));
 			}
-
-			if (block.getType() != Material.AIR)
+			else if (goal.equals(after))
 			{
-				// process potential break
-				checkContainerBreak(block, goals, match, causeStr);
+				// process place
+				// TranscriptEvent.ObjectiveDetailType.PLACE
+				match.addEvent(new TranscriptEvent(match,
+						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+						"%s has placed a %s in %s (@ %s)", causeStr, goal,
+						getLocationDescription(loc, match),
+						LocationUtil.toBlockCoords(loc)), entity.getLocation(), goal
+				));
+
 			}
+		}
+
+		if (block.getType() != Material.AIR)
+		{
+			// process potential break
+			checkContainerBreak(block, goals, match, causeStr);
 		}
 	}
 
@@ -325,8 +369,7 @@ public class ObjectiveTracer implements Listener
 		BlockState state = block.getState();
 		if (state instanceof InventoryHolder)
 		{
-			GoalsInventorySnapshot snap = new GoalsInventorySnapshot(
-					((InventoryHolder) state).getInventory(), goals);
+			GoalsInventorySnapshot snap = new GoalsInventorySnapshot(((InventoryHolder) state).getInventory(), goals);
 			if (snap.isEmpty()) return;
 			Location loc = block.getLocation();
 
@@ -336,9 +379,11 @@ public class ObjectiveTracer implements Listener
 							"%s has %s a %s, spilling %s in %s (@ %s)", causeStr, actionStr,
 							ChatColor.GOLD
 									+ StringUtils.capitalize(block.getType().toString()
-											.toLowerCase()) + ChatColor.RESET, snap, ChatColor.BLUE
+									.toLowerCase()) + ChatColor.RESET, snap, ChatColor.BLUE
 									+ getLocationDescription(loc, match),
-							LocationUtil.toBlockCoords(loc)), loc, unpack(snap)));
+							LocationUtil.toBlockCoords(loc)
+					), loc, unpack(snap)
+			));
 		}
 	}
 
@@ -347,7 +392,8 @@ public class ObjectiveTracer implements Listener
 	private Object[] unpack(GoalsInventorySnapshot snap, Object... others)
 	{
 		List<Object> arr = Lists.newArrayList(others);
-		arr.remove(null); arr.remove(null);
+		arr.remove(null);
+		arr.remove(null);
 
 		for (Map.Entry<BlockData, Integer> entry : snap.entrySet())
 		{
@@ -375,7 +421,8 @@ public class ObjectiveTracer implements Listener
 		Set<AutoRefTeam> teams = Sets.newHashSet();
 		for (AutoRefTeam team : match.getTeams())
 		{
-			if (team.canEnter(loc, distance)) teams.add(team);
+			if (team.canEnter(loc, distance))
+				teams.add(team);
 		}
 		return teams;
 	}
@@ -384,7 +431,9 @@ public class ObjectiveTracer implements Listener
 	{
 		Validate.isTrue(match.getWorld().equals(loc.getWorld()),
 				"The provided location must be within the provided match!");
-		if (match.inStartRegion(loc)) return "the starting area";
+		if (match.inStartRegion(loc))
+			return "the starting area";
+
 		Set<AutoRefTeam> teamsDirect = teamsWithAccess(loc, match, 0);
 		Set<AutoRefTeam> teamsNearby = teamsWithAccess(loc, match, 3);
 
@@ -404,8 +453,7 @@ public class ObjectiveTracer implements Listener
 			return teamsDirect.iterator().next().getDisplayName() + "'s lane" + ChatColor.RESET;
 		else
 		{
-			return "the shared area"; // TODO improve for modes where both teams
-										// share the whole map
+			return "the shared area"; // TODO improve for modes where both teams share the whole map
 		}
 	}
 }
