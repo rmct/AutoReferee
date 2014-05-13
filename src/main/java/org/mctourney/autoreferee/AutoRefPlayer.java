@@ -354,8 +354,12 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 
 		Player p = getPlayer();
 		AutoRefTeam t = getTeam();
-		if (p == null || t == null) return new GoalsInventorySnapshot();
-		return new GoalsInventorySnapshot(p.getInventory(), t.getObjectives());
+		if (p == null || t == null)
+		{ carrying = new GoalsInventorySnapshot(); }
+		else
+		{ carrying = new GoalsInventorySnapshot(p.getInventory(), t.getObjectives()); }
+
+		return carrying;
 	}
 
 	// streak information - kill streak, domination, revenge
@@ -552,9 +556,6 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		// save the player and team as references
 		this.setName(name);
 		this.setTeam(team);
-
-		// setup the carrying list
-		this.carrying = getCarrying();
 
 		// streak information
 		playerStreak = new DefaultedMap(0);
