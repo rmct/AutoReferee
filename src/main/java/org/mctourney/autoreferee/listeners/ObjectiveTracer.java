@@ -77,7 +77,7 @@ public class ObjectiveTracer implements Listener
 		{
 			BlockState h = (BlockState) holder;
 			location = h.getLocation();
-			holderDescription = h.getType().toString().toLowerCase();
+			holderDescription = h.getType().toString();
 		}
 		else if (holder instanceof DoubleChest)
 		{
@@ -89,7 +89,7 @@ public class ObjectiveTracer implements Listener
 		{
 			Entity e = (Entity) holder;
 			location = e.getLocation();
-			holderDescription = e.getType().toString().toLowerCase();
+			holderDescription = e.getType().toString();
 		}
 		else
 		{

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -368,7 +369,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	{ return beforeOpeningInventory; }
 
 	public String getInventoryDescription()
-	{ return inventoryDescription; }
+	{ return ChatColor.GOLD + StringUtils.capitalize(inventoryDescription.toLowerCase()); }
 
 	public Location getInventoryLocation()
 	{ return inventoryLocation; }
