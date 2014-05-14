@@ -39,7 +39,7 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 	public final Set<BlockData> originalSearch;
 	// Safety strategy: Copy on write
 	public Set<BlockData> searching;
-	// Safety strategy: Only read once
+	// Safety strategy: Single writer, single reader
 	public Map<BlockData, Vector> results = Maps.newHashMap();
 
 	/**
@@ -67,6 +67,8 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 	// REMINDER: This is run async!
 	public void run()
 	{
+		boolean interrupted = Thread.interrupted();
+
 		List<Vector> chunks = Lists.newArrayList(getChunkVectors());
 
 		// Start entity searcher
@@ -112,9 +114,9 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 				value = future.get();
 			}
 			catch (ExecutionException e)
-			{ e.printStackTrace(); quit(e.toString()); return; }
+			{ e.printStackTrace(); quit(e.toString(), interrupted); return; }
 			catch (InterruptedException e)
-			{ e.printStackTrace(); quit("thread interrupted"); return; }
+			{ e.printStackTrace(); quit("thread interrupted", true); return; }
 
 			// Memory consistency: variable set happens-before adding of final snapshots
 			if (i + 10 >= _chunks_size)
@@ -130,7 +132,8 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 			{
 				Thread.sleep(50);
 			}
-			catch (InterruptedException e) { }
+			catch (InterruptedException e)
+			{ interrupted = true; }
 
 			if (checkComplete())
 			{
@@ -138,7 +141,6 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 				return;
 			}
 		}
-
 	}
 
 	private void cleanup()
@@ -161,14 +163,17 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 	private void tryCancel(BukkitRunnable r)
 	{
 		try { r.cancel(); }
-		catch (IllegalStateException e) { }
+		catch (IllegalStateException ignored) { }
 	}
 
 	// unsafe
-	private void quit(String message)
+	private void quit(String message, boolean interrupted)
 	{
 		for (Player p : team.getMatch().getReferees())
 			p.sendMessage(ChatColor.RED + "The exhaustion search for " + team.getDisplayName() + " was stopped: " + ChatColor.DARK_RED + message);
+
+		if (interrupted)
+			Thread.currentThread().interrupt();
 	}
 
 	private Set<Vector> getChunkVectors()
@@ -202,12 +207,12 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 				AutoRefMatch match = team.getMatch();
 				World world = match.getWorld();
 				StringBuilder sb = new StringBuilder();
-				sb.append(ChatColor.GREEN + "Objective search for " + team.getDisplayName() + ChatColor.GREEN + " complete.");
+				sb.append(ChatColor.GREEN).append("Objective search for ").append(team.getDisplayName()).append(ChatColor.GREEN).append(" complete.");
 				sb.append('\n');
 				for (BlockData bd : originalSearch)
 				{
 					Location loc = results.get(bd).toLocation(world);
-					sb.append(bd.getDisplayName() + ChatColor.GRAY + " is at " + ChatColor.RED + LocationUtil.toBlockCoords(loc));
+					sb.append(bd.getDisplayName()).append(ChatColor.GRAY).append(" is at ").append(ChatColor.RED).append(LocationUtil.toBlockCoords(loc));
 					sb.append('\n');
 				}
 				String[] message = sb.toString().split("\n");
