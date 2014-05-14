@@ -173,7 +173,7 @@ public class ObjectiveTracer implements Listener
 				// TranscriptEvent.ObjectiveDetailType.PLACE
 				match.addEvent(new TranscriptEvent(match,
 						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
-						"%s has placed a %s (@ %s)", apl.getDisplayName(),
+						"%s has placed a %s block (@ %s)", apl.getDisplayName(),
 						b.getDisplayName(),
 						LocationUtil.toBlockCoords(block.getLocation())), block
 						.getLocation(), apl, b
@@ -205,7 +205,7 @@ public class ObjectiveTracer implements Listener
 				// TranscriptEvent.ObjectiveDetailType.BREAK_PLAYER
 				match.addEvent(new TranscriptEvent(match,
 						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
-						"%s has broken a %s (@ %s)", apl.getDisplayName(),
+						"%s has broken a %s block (@ %s)", apl.getDisplayName(),
 						b.getDisplayName(),
 						LocationUtil.toBlockCoords(block.getLocation())), block
 						.getLocation(), apl, b
@@ -322,7 +322,7 @@ public class ObjectiveTracer implements Listener
 				GoalsInventorySnapshot snap = new GoalsInventorySnapshot(event.getItem().getItemStack(), b);
 				match.addEvent(new TranscriptEvent(match,
 						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
-						"%s has picked up a %s (@ %s)", apl.getDisplayName(),
+						"%s has picked up %s (@ %s)", apl.getDisplayName(),
 						snap,
 						LocationUtil.toBlockCoords(pl.getLocation())), pl.getLocation(), apl, b
 				));

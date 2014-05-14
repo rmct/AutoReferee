@@ -3337,32 +3337,9 @@ public class AutoRefMatch implements Metadatable
 	 */
 	public static class TranscriptEvent
 	{
+		// TODO: TEAM visibility would be nice
 		public enum EventVisibility
 		{ NONE, REFEREES, ALL }
-
-		public enum ObjectiveDetailType
-		{
-			// player dropping an item
-			TOSS,
-			// player picking up an item
-			PICKUP,
-			// player placing objective in the world
-			PLACE,
-			// player breaking a placed objective
-			BREAK_PLAYER,
-			// something other than a player (explosion?) breaking a placed objective
-			BREAK_NONPLAYER,
-			// player dying with the objective
-			DEATH,
-			// dropped objective item destroyed
-			DESTROY,
-			// objective placed into container
-			STORE,
-			// objective removed from container
-			TAKE,
-			// container with objective broken
-			CONTAINER_DEATH
-		}
 
 		public enum EventType
 		{
@@ -3378,7 +3355,7 @@ public class AutoRefMatch implements Metadatable
 
 			// objective events should not be broadcast to players
 			OBJECTIVE_FOUND("objective-found", true, EventVisibility.REFEREES),
-			OBJECTIVE_PLACED("objective-place", true, EventVisibility.ALL),
+			OBJECTIVE_PLACED("objective-place", true, EventVisibility.REFEREES),
 			OBJECTIVE_DETAIL("objective-detail", true, EventVisibility.REFEREES),
 			;
 
