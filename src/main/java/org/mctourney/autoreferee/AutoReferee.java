@@ -121,8 +121,6 @@ public class AutoReferee extends JavaPlugin
 	public static void callEvent(Event event)
 	{ Bukkit.getServer().getPluginManager().callEvent(event); }
 
-	private LobbyListener lobbyListener = null;
-
 	private World lobby = null;
 
 	/**
@@ -296,7 +294,7 @@ public class AutoReferee extends JavaPlugin
 		PracticeCommands practice = new PracticeCommands(this);
 
 		String lobbymode = getConfig().getString("lobby.mode", "manual");
-		lobbyListener = LobbyMode.fromConfig(lobbymode).getInstance(this);
+		LobbyListener lobbyListener = LobbyMode.fromConfig(lobbymode).getInstance(this);
 
 		// listener utility classes, subdivided for organization
 		pm.registerEvents(new TeamListener(this), this);
@@ -477,7 +475,7 @@ public class AutoReferee extends JavaPlugin
 			messageQueue.addMessage(recipient, msg);
 
 		try { messageQueue.runTask(this); }
-		catch (IllegalStateException e) {  }
+		catch (IllegalStateException ignored) {  }
 	}
 
 	private class SyncMessageTask extends BukkitRunnable

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -39,14 +40,9 @@ public class AdminCommands implements CommandHandler
 
 	@AutoRefCommand(name={"autoref"})
 	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
-
 	public boolean detectAutoReferee(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
-		/**
-		 * This command only exists to allow map authors to determine if AutoReferee is loaded, by
-		 * adding a command block that executes "/autoref" with a comparator receiving the input.
-		 * If the signal is high, AutoReferee is loaded. If the signal is low, AutoReferee is not loaded.
-		 */
+		Bukkit.dispatchCommand(sender, "help AutoReferee");
 		return true;
 	}
 

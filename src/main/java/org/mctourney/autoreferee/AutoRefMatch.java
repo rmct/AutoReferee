@@ -150,10 +150,10 @@ public class AutoRefMatch implements Metadatable
 	// set this to false to not give match info books to players
 	public static boolean giveMatchInfoBooks = true;
 
-	// local storage locations
-	private static File matchSummaryDirectory = null;
 	static
 	{
+		File matchSummaryDirectory;
+
 		// determine the location of the match-summary directory
 		FileConfiguration config = AutoReferee.getInstance().getConfig();
 		if (config.isString("local-storage.match-summary.directory"))
@@ -182,7 +182,7 @@ public class AutoRefMatch implements Metadatable
 	{ this.metadata.clear(); }
 
 	public enum AccessType
-	{ PRIVATE, PUBLIC; }
+	{ PRIVATE, PUBLIC }
 
 	public AccessType access = AccessType.PRIVATE;
 
@@ -285,14 +285,6 @@ public class AutoRefMatch implements Metadatable
 	{ return startClock; }
 
 	/**
-	 * Sets the time that will be set at the start of the match.
-	 *
-	 * @param time world time in ticks to set at start of the match
-	 */
-	public void setStartClock(long time)
-	{ this.startClock = time; }
-
-	/**
 	 * Represents the status of a match.
 	 *
 	 * @author authorblues
@@ -388,9 +380,6 @@ public class AutoRefMatch implements Metadatable
 
 	Scoreboard getInfoboard()
 	{ return infoboard; }
-
-	Objective getInfoboardObjective()
-	{ return infoboardObjective; }
 
 	// teams participating in the match
 	protected Set<AutoRefTeam> teams = Sets.newHashSet();
@@ -1252,8 +1241,7 @@ public class AutoRefMatch implements Metadatable
 		infoDeathCount.setDisplayName(ChatColor.BOLD + "Deaths");
 
 		// objectives list (for cycling through after the match)
-		allInfoObjectives = Lists.newArrayList(
-			infoboardObjective, infoKillCount, infoDeathCount);
+		allInfoObjectives = Lists.newArrayList(infoboardObjective, infoKillCount, infoDeathCount);
 
 		try
 		{
