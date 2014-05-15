@@ -67,6 +67,19 @@ public class AdminCommands implements CommandHandler
 		return true;
 	}
 
+	@AutoRefCommand(name={"autoref", "setname"}, argmin=1, argmax=1,
+			description="Set the name of the current match used in the match report.",
+			usage="<command> <match title>")
+	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
+
+	public boolean setMatchName(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		if (match == null) return false;
+
+		match.setMatchName(args[0]);
+		return true;
+	}
+
 	@AutoRefCommand(name={"autoref", "load"}, argmin=1, options="c+x",
 		description="Loads a map by name, case insensitive.",
 		usage="<command> <map name>",
