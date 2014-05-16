@@ -357,7 +357,7 @@ public class ReportGenerator
 			playerstats.write(String.format("<tr><td>%d</td><td>%s</td>",
 				++rank, playerHTML(apl)));
 			playerstats.write(String.format("<td>%d (%d)</td><td>%d</td><td>%s</td>",
-				apl.getKills(), apl.getAssists(), apl.getDeaths(), apl.getExtendedAccuracyInfo()));
+				apl.getKills(), apl.getAssists(), apl.getDeathCount(), apl.getExtendedAccuracyInfo()));
 			playerstats.write(String.format("<td>%s</td></tr>\n",
 				nms == null ? "none" : playerHTML(nms)));
 		}
