@@ -1229,6 +1229,8 @@ public class AutoRefMatch implements Metadatable
 
 			AutoReferee.log("Loaded custom scoreboard data.");
 		}
+		catch (FileNotFoundException ignored)
+		{ }
 		catch (IOException e)
 		{ e.printStackTrace(); }
 		catch (JDOMException e)
