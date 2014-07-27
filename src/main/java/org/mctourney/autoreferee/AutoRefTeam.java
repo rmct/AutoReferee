@@ -25,6 +25,7 @@ import org.mctourney.autoreferee.event.team.ObjectiveUpdateEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
 import org.mctourney.autoreferee.goals.BlockGoal;
 import org.mctourney.autoreferee.goals.scoreboard.AutoRefObjective;
+import org.mctourney.autoreferee.listeners.GoalsInventorySnapshot;
 import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
 import org.mctourney.autoreferee.util.BlockData;
@@ -851,7 +852,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 
 			for (AutoRefPlayer apl : getPlayers())
 			{
-				if (!apl.getCarrying().contains(goal.getItem())) continue;
+				if (!apl.getCarrying().containsKey(goal.getItem())) continue;
 				changeObjectiveStatus(goal, AutoRefGoal.ItemStatus.CARRYING); continue objloop;
 			}
 
@@ -868,7 +869,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		return score;
 	}
 
-	protected void updateCarrying(AutoRefPlayer apl, Set<BlockData> oldCarrying, Set<BlockData> newCarrying)
+	protected void updateCarrying(AutoRefPlayer apl, GoalsInventorySnapshot oldCarrying, GoalsInventorySnapshot newCarrying)
 	{
 		match.updateCarrying(apl, oldCarrying, newCarrying);
 		this.updateBlockGoals();
