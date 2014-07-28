@@ -87,13 +87,13 @@ public class GoalsInventorySnapshot extends HashMap<BlockData, Integer>
 		}
 	}
 
-	public GoalsInventorySnapshot(MapDifference<BlockData, Integer> diff, boolean leftSideOnly)
+	public static GoalsInventorySnapshot fromDiff(MapDifference<BlockData, Integer> diff, boolean leftSideOnly)
 	{
-		super();
+		GoalsInventorySnapshot snap = new GoalsInventorySnapshot();
 		if (leftSideOnly)
-			this.putAll(diff.entriesOnlyOnLeft());
+			snap.putAll(diff.entriesOnlyOnLeft());
 		else
-			this.putAll(diff.entriesOnlyOnRight());
+			snap.putAll(diff.entriesOnlyOnRight());
 
 		// Only positive differences
 		for (Map.Entry<BlockData, ValueDifference<Integer>> entry : diff.entriesDiffering().entrySet())
@@ -105,8 +105,9 @@ public class GoalsInventorySnapshot extends HashMap<BlockData, Integer>
 				count = entry.getValue().rightValue() - entry.getValue().leftValue();
 
 			if (count > 0)
-				this.put(entry.getKey(), count);
+				snap.put(entry.getKey(), count);
 		}
+		return snap;
 	}
 
 	public int getInt(BlockData key)
@@ -188,7 +189,7 @@ public class GoalsInventorySnapshot extends HashMap<BlockData, Integer>
 		if (this.isEmpty()) return "";
 		StringBuilder sb = new StringBuilder();
 		boolean first = true;
-		// Desired output: RED WOOL, GREEN WOOL, YELLOW WOOL x5, BLUE WOOL x20
+		// Desired output: RED WOOL, GREEN WOOL, 5 x YELLOW WOOL, 20 x BLUE WOOL
 		for (Map.Entry<BlockData, Integer> entry : this.entrySet())
 		{
 			if (!first)

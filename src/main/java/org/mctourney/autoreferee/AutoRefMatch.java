@@ -7,15 +7,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -2601,6 +2593,7 @@ public class AutoRefMatch implements Metadatable
 		// save a copy of the map image quickly before the match starts...
 		saveMapImage();
 
+		// TODO put this behind a config option
 		itemElevatorDetectionTask = new ItemElevatorDetectionTask();
 		itemElevatorDetectionTask.runTaskTimer(AutoReferee.getInstance(),
 			0L, ItemElevatorDetectionTask.INTERVAL);
@@ -3254,7 +3247,7 @@ public class AutoRefMatch implements Metadatable
 	{
 		// TODO: TEAM visibility would be nice
 		public enum EventVisibility
-		{ NONE, REFEREES, ALL }
+		{ NONE, REFEREES, TEAM, ALL }
 
 		public enum EventType
 		{
@@ -3268,9 +3261,9 @@ public class AutoRefMatch implements Metadatable
 			PLAYER_DOMINATE("player-dominate", true, EventVisibility.ALL, ChatColor.DARK_GRAY),
 			PLAYER_REVENGE("player-revenge", true, EventVisibility.ALL, ChatColor.DARK_GRAY),
 
-			// objective events should not be broadcast to players
-			OBJECTIVE_FOUND("objective-found", true, EventVisibility.REFEREES),
-			OBJECTIVE_PLACED("objective-place", true, EventVisibility.REFEREES),
+			// objective events should not be broadcast to the other team
+			OBJECTIVE_FOUND("objective-found", true, EventVisibility.TEAM),
+			OBJECTIVE_PLACED("objective-place", true, EventVisibility.TEAM),
 			OBJECTIVE_DETAIL("objective-detail", true, EventVisibility.REFEREES),
 			;
 
@@ -3307,7 +3300,14 @@ public class AutoRefMatch implements Metadatable
 			{ return supportsFiltering; }
 		}
 
-		public Set<Object> actors;
+		private Set<Object> actors;
+		public Set<Object> getActors()
+		{ return actors; }
+
+		private Set<AutoRefPlayer> playerActors;
+
+		public Set<AutoRefPlayer> getPlayerActors()
+		{ return playerActors; }
 
 		private EventType type;
 
@@ -3325,6 +3325,16 @@ public class AutoRefMatch implements Metadatable
 		private Location location;
 		private long timestamp;
 
+		/**
+		 *
+		 * Supported Actor types: AutoRefPlayer, BlockData
+		 *
+		 * @param match
+		 * @param type
+		 * @param message
+		 * @param loc
+		 * @param actors
+		 */
 		public TranscriptEvent(AutoRefMatch match, EventType type, String message,
 			Location loc, Object ...actors)
 		{
@@ -3336,8 +3346,13 @@ public class AutoRefMatch implements Metadatable
 			this.location = (loc != null) ? loc :
 				match.getWorld().getSpawnLocation();
 
-			this.actors = Sets.newHashSet(actors);
 			this.timestamp = match.getElapsedSeconds();
+
+			this.actors = Sets.newHashSet(actors);
+			this.playerActors = Sets.newHashSet();
+			for (Object o : actors)
+				if (o instanceof AutoRefPlayer)
+					playerActors.add((AutoRefPlayer) o);
 		}
 
 		public String getTimestamp()
@@ -3373,7 +3388,16 @@ public class AutoRefMatch implements Metadatable
 		switch (event.getType().getVisibility())
 		{
 			case REFEREES: recipients = getReferees(false); break;
+			case TEAM:
+				recipients = Sets.newHashSet();
+				for (AutoRefPlayer p : event.getPlayerActors())
+				{
+					for (AutoRefPlayer teamPlayer : p.getTeam().getPlayers())
+					{ recipients.add(teamPlayer.getPlayer()); }
+				}
+				break;
 			case ALL: recipients = getWorld().getPlayers(); break;
+			case NONE: recipients = null; break;
 			default: break;
 		}
 
