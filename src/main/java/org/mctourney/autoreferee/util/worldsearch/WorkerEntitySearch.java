@@ -43,7 +43,6 @@ import org.mctourney.autoreferee.util.BlockData;
  */
 public class WorkerEntitySearch extends BukkitRunnable
 {
-	public static final int MAX_PER_RUN = 4;
 	ObjectiveExhaustionMasterTask master;
 
 	public WorkerEntitySearch(ObjectiveExhaustionMasterTask task)

@@ -115,7 +115,7 @@ public class CombatListener implements Listener
 			{
 				respawn: switch (match.getRespawnMode())
 				{
-					case BEDSONLY:
+					case BEDS_ONLY:
 						// INTENTIONAL FALL-THROUGH HERE!
 						if (vapl.getTeam() != null)
 							for (AutoRefPlayer mate : vapl.getTeam().getPlayers())

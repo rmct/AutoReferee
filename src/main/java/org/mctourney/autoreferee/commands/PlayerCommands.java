@@ -40,6 +40,15 @@ public class PlayerCommands implements CommandHandler
 		this.plugin = (AutoReferee) plugin;
 	}
 
+	@AutoRefCommand(name={"autoref"})
+	@AutoRefPermission(console=true)
+
+	public boolean alternateHelp(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		Bukkit.dispatchCommand(sender, "help AutoReferee");
+		return true;
+	}
+
 	@AutoRefCommand(name={"matchinfo"}, argmax=0,
 		description="Get info regarding the current match.")
 	@AutoRefPermission(console=true, nodes={"autoreferee.player"})

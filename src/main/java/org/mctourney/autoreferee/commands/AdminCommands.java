@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -37,19 +38,6 @@ public class AdminCommands implements CommandHandler
 		this.plugin = (AutoReferee) plugin;
 	}
 
-	@AutoRefCommand(name={"autoref"})
-	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
-
-	public boolean detectAutoReferee(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
-	{
-		/**
-		 * This command only exists to allow map authors to determine if AutoReferee is loaded, by
-		 * adding a command block that executes "/autoref" with a comparator receiving the input.
-		 * If the signal is high, AutoReferee is loaded. If the signal is low, AutoReferee is not loaded.
-		 */
-		return true;
-	}
-
 	@AutoRefCommand(name={"autoref", "world"}, argmin=1, argmax=1,
 		description="Specifies the world for console commands to modify.",
 		usage="<command> <world or player name>")
@@ -76,6 +64,19 @@ public class AdminCommands implements CommandHandler
 		plugin.setLobbyWorld(lobby);
 		sender.sendMessage(ChatColor.GREEN + lobby.getName() +
 			" is the new AutoReferee lobby world.");
+		return true;
+	}
+
+	@AutoRefCommand(name={"autoref", "setname"}, argmin=1, argmax=1,
+			description="Set the name of the current match used in the match report.",
+			usage="<command> <match title>")
+	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
+
+	public boolean setMatchName(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		if (match == null) return false;
+
+		match.setMatchName(args[0]);
 		return true;
 	}
 

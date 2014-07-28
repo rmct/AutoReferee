@@ -36,7 +36,6 @@ import org.mctourney.autoreferee.goals.BlockGoal;
 import org.mctourney.autoreferee.goals.CoreGoal;
 import org.mctourney.autoreferee.util.AchievementPoints;
 import org.mctourney.autoreferee.util.BlockData;
-import org.mctourney.autoreferee.util.LocationUtil;
 
 public class ObjectiveTracker implements Listener
 {
@@ -90,7 +89,7 @@ public class ObjectiveTracker implements Listener
 		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
 
 		if (match != null && apl != null && match.getCurrentState().inProgress()
-			&& match.getRespawnMode() == RespawnMode.BEDSONLY && block.getType() == Material.BED_BLOCK)
+			&& match.getRespawnMode() == RespawnMode.BEDS_ONLY && block.getType() == Material.BED_BLOCK)
 				match.new BedUpdateTask(apl).runTask(plugin);
 	}
 
@@ -105,7 +104,7 @@ public class ObjectiveTracker implements Listener
 			if (b.getType() == Material.BED_BLOCK) bedBroke = true;
 
 		if (match != null && match.getCurrentState().inProgress()
-			&& match.getRespawnMode() == RespawnMode.BEDSONLY && bedBroke)
+			&& match.getRespawnMode() == RespawnMode.BEDS_ONLY && bedBroke)
 				match.new BedUpdateTask(ent).runTask(plugin);
 	}
 
@@ -291,7 +290,7 @@ public class ObjectiveTracker implements Listener
 		healthArmorChange(player);
 
 		AutoRefMatch match = plugin.getMatch(event.getRespawnLocation().getWorld());
-		if (match != null && match.getRespawnMode() == RespawnMode.BEDSONLY)
+		if (match != null && match.getRespawnMode() == RespawnMode.BEDS_ONLY)
 			if (player.getBedSpawnLocation() == null)
 			{
 				match.eliminatePlayer(player);

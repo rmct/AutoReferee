@@ -1,29 +1,13 @@
 package org.mctourney.autoreferee;
 
 import java.awt.image.RenderedImage;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -83,6 +67,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import org.jdom2.Element;
+import org.jdom2.JDOMException;
 import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
@@ -150,10 +135,10 @@ public class AutoRefMatch implements Metadatable
 	// set this to false to not give match info books to players
 	public static boolean giveMatchInfoBooks = true;
 
-	// local storage locations
-	private static File matchSummaryDirectory = null;
 	static
 	{
+		File matchSummaryDirectory;
+
 		// determine the location of the match-summary directory
 		FileConfiguration config = AutoReferee.getInstance().getConfig();
 		if (config.isString("local-storage.match-summary.directory"))
@@ -182,7 +167,7 @@ public class AutoRefMatch implements Metadatable
 	{ this.metadata.clear(); }
 
 	public enum AccessType
-	{ PRIVATE, PUBLIC; }
+	{ PRIVATE, PUBLIC }
 
 	public AccessType access = AccessType.PRIVATE;
 
@@ -285,14 +270,6 @@ public class AutoRefMatch implements Metadatable
 	{ return startClock; }
 
 	/**
-	 * Sets the time that will be set at the start of the match.
-	 *
-	 * @param time world time in ticks to set at start of the match
-	 */
-	public void setStartClock(long time)
-	{ this.startClock = time; }
-
-	/**
 	 * Represents the status of a match.
 	 *
 	 * @author authorblues
@@ -388,9 +365,6 @@ public class AutoRefMatch implements Metadatable
 
 	Scoreboard getInfoboard()
 	{ return infoboard; }
-
-	Objective getInfoboardObjective()
-	{ return infoboardObjective; }
 
 	// teams participating in the match
 	protected Set<AutoRefTeam> teams = Sets.newHashSet();
@@ -554,14 +528,6 @@ public class AutoRefMatch implements Metadatable
 	/**
 	 * Gets the creators of the map for this match.
 	 *
-	 * @return collection of names
-	 */
-	public Collection<String> getMapAuthors()
-	{ return mapAuthors; }
-
-	/**
-	 * Gets the creators of the map for this match.
-	 *
 	 * @return string list of names
 	 */
 	public String getAuthorList()
@@ -684,22 +650,6 @@ public class AutoRefMatch implements Metadatable
 	public void setFriendlyFire(boolean b)
 	{ this.allowFriendlyFire = b; }
 
-	private boolean allowObjectiveCraft = false;
-
-	/**
-	 * Checks if players are allowed to craft objectives in this match.
-	 *
-	 * @return true if players may craft objectives, otherwise false
-	 */
-	public boolean allowObjectiveCraft()
-	{ return allowObjectiveCraft; }
-
-	/**
-	 * Sets whether players are allowed to craft objectives in this match.
-	 */
-	public void setObjectiveCraft(boolean b)
-	{ this.allowObjectiveCraft = b; }
-
 	// provided by configuration file
 	protected static boolean allowTies = false;
 
@@ -751,14 +701,6 @@ public class AutoRefMatch implements Metadatable
 	{ refereeReady = r; }
 
 	private ReportGenerator matchReportGenerator = new ReportGenerator();
-
-	/**
-	 * Gets the mutable report generator object.
-	 *
-	 * @return report generator object
-	 */
-	public ReportGenerator getReportGenerator()
-	{ return matchReportGenerator; }
 
 	public void saveMapImage()
 	{
@@ -1147,8 +1089,7 @@ public class AutoRefMatch implements Metadatable
 	 */
 	public boolean isSpectator(Player player)
 	{
-		if (isReferee(player)) return true;
-		return !getCurrentState().isBeforeMatch() && !isPlayer(player);
+		return isReferee(player) || !getCurrentState().isBeforeMatch() && !isPlayer(player);
 	}
 
 	Map<String, AutoRefSpectator> spectators = Maps.newHashMap();
@@ -1217,7 +1158,8 @@ public class AutoRefMatch implements Metadatable
 			loadWorldConfiguration(f.exists() ? new FileInputStream(f)
 				: AutoReferee.getInstance().getResource("defaults/map.xml"));
 		}
-		catch (FileNotFoundException e) {  }
+		catch (FileNotFoundException e)
+		{ e.printStackTrace(); }
 	}
 
 	protected void clearScoreboardData(Scoreboard sb)
@@ -1252,8 +1194,7 @@ public class AutoRefMatch implements Metadatable
 		infoDeathCount.setDisplayName(ChatColor.BOLD + "Deaths");
 
 		// objectives list (for cycling through after the match)
-		allInfoObjectives = Lists.newArrayList(
-			infoboardObjective, infoKillCount, infoDeathCount);
+		allInfoObjectives = Lists.newArrayList(infoboardObjective, infoKillCount, infoDeathCount);
 
 		try
 		{
@@ -1271,8 +1212,8 @@ public class AutoRefMatch implements Metadatable
 			for (Element objroot : sbroot.getChild("objectives").getChildren("objective"))
 			{
 				Objective obj = scoreboard.registerNewObjective(
-					objroot.getAttributeValue("name"),
-					objroot.getAttributeValue("criteria"));
+						objroot.getAttributeValue("name"),
+						objroot.getAttributeValue("criteria"));
 
 				if (objroot.getAttributeValue("display") != null)
 					obj.setDisplaySlot(DisplaySlot.valueOf(objroot.getAttributeValue("display")));
@@ -1280,8 +1221,12 @@ public class AutoRefMatch implements Metadatable
 
 			AutoReferee.log("Loaded custom scoreboard data.");
 		}
-		catch (Exception e)
-		{  }
+		catch (FileNotFoundException ignored)
+		{ }
+		catch (IOException e)
+		{ e.printStackTrace(); }
+		catch (JDOMException e)
+		{ e.printStackTrace(); }
 	}
 
 	public void saveScoreboardData()
@@ -1413,7 +1358,7 @@ public class AutoRefMatch implements Metadatable
 
 		if (eProtect != null) for (Element c : eProtect.getChildren())
 			try { protectedEntities.add(UUID.fromString(c.getTextTrim())); }
-			catch (Exception e) {  }
+			catch (IllegalArgumentException ignored) {  }
 
 		// get the start region (safe for both teams, no pvp allowed)
 		assert worldConfig.getChild("startregion") != null;
@@ -1461,7 +1406,7 @@ public class AutoRefMatch implements Metadatable
 	{
 		Difficulty diff = Difficulty.valueOf(d.toUpperCase());
 		try { diff = Difficulty.getByValue(Integer.parseInt(d)); }
-		catch (NumberFormatException e) {  }
+		catch (NumberFormatException ignored) {  }
 
 		return diff;
 	}
@@ -1529,7 +1474,7 @@ public class AutoRefMatch implements Metadatable
 			this.gamemode = GameMode.valueOf(gm.toUpperCase());
 
 			try { this.gamemode = GameMode.getByValue(Integer.parseInt(gm)); }
-			catch (NumberFormatException e) {  }
+			catch (NumberFormatException ignored) {  }
 
 			if (this.gamemode == null)
 				this.gamemode = GameMode.SURVIVAL;
@@ -1688,7 +1633,7 @@ public class AutoRefMatch implements Metadatable
 					"world", getWorld().getName()
 			)));
 		}
-		catch (IOException e) {}
+		catch (IOException ignored) {}
 	}
 
 	/**
@@ -1740,7 +1685,7 @@ public class AutoRefMatch implements Metadatable
 	private void updateRefereePlayerInfo(Player ref, AutoRefPlayer apl)
 	{
 		messageReferee(ref, "player", apl.getName(), "kills", Integer.toString(apl.getKills()));
-		messageReferee(ref, "player", apl.getName(), "deaths", Integer.toString(apl.getDeaths()));
+		messageReferee(ref, "player", apl.getName(), "deaths", Integer.toString(apl.getDeathCount()));
 		messageReferee(ref, "player", apl.getName(), "streak", Integer.toString(apl.getStreak()));
 		apl.sendAccuracyUpdate(ref);
 
@@ -1769,7 +1714,7 @@ public class AutoRefMatch implements Metadatable
 
 		@Override public void run()
 		{
-			items: for (Entity e : getWorld().getEntitiesByClasses(Item.class))
+			for (Entity e : getWorld().getEntitiesByClasses(Item.class))
 			{
 				Item item = (Item) e;
 				UUID uuid = item.getUniqueId();
@@ -1778,7 +1723,7 @@ public class AutoRefMatch implements Metadatable
 				Location curr = e.getLocation();
 				Location stop = lastStoppedLocation.get(uuid);
 
-				if (prev == null) continue items;
+				if (prev == null) continue;
 				boolean pass = TeleportationUtil.isBlockPassable(curr.getBlock());
 
 				// if the item is moving upwards and is currently in a passable
@@ -1799,7 +1744,7 @@ public class AutoRefMatch implements Metadatable
 					if (elevatedItem.containsKey(uuid) && elevatedItem.get(uuid) && atrest)
 					{
 						// if the item didn't elevate high enough, don't worry about it
-						if (dy < DISTANCE_THRESHOLD) { elevatedItem.remove(uuid); continue items; }
+						if (dy < DISTANCE_THRESHOLD) { elevatedItem.remove(uuid); continue; }
 						setLastNotificationLocation(curr);
 
 						String coords = LocationUtil.toBlockCoords(curr);
@@ -1850,7 +1795,7 @@ public class AutoRefMatch implements Metadatable
 			broadcastTask.addMessage(msg);
 
 		try { broadcastTask.runTask(AutoReferee.getInstance()); }
-		catch (IllegalStateException e) {  }
+		catch (IllegalStateException ignored) {  }
 	}
 
 	private class SyncBroadcastTask extends BukkitRunnable
@@ -1863,7 +1808,7 @@ public class AutoRefMatch implements Metadatable
 		@Override public void run()
 		{
 			AutoRefMatch.this.broadcastTask = new SyncBroadcastTask();
-			AutoRefMatch.this.broadcast(msgQueue.toArray(new String[]{ }));
+			AutoRefMatch.this.broadcast(msgQueue.toArray(new String[msgQueue.size()]));
 			msgQueue.clear();
 		}
 	}
@@ -2132,6 +2077,7 @@ public class AutoRefMatch implements Metadatable
 	public Set<AutoRefRegion> getRegions()
 	{ return regions; }
 
+	@SuppressWarnings("unchecked")
 	public <T extends AutoRefRegion> Set<T> getRegions(Class<T> clazz)
 	{
 		Set<T> typedRegions = Sets.newHashSet();
@@ -2151,11 +2097,6 @@ public class AutoRefMatch implements Metadatable
 
 	public boolean addRegion(AutoRefRegion reg)
 	{ return reg != null && !regions.contains(reg) && regions.add(reg); }
-
-	public boolean removeRegion(AutoRefRegion reg)
-	{ return regions.remove(reg); }
-
-	public void clearRegions() { regions.clear(); }
 
 	/**
 	 * A redstone mechanism necessary to start a match.
@@ -2182,9 +2123,6 @@ public class AutoRefMatch implements Metadatable
 				.setText(Boolean.toString(flip));
 		}
 
-		public StartMechanism(Block block)
-		{ this(block, true); }
-
 		@Override public int hashCode()
 		{ return block.hashCode() ^ state.hashCode(); }
 
@@ -2193,14 +2131,6 @@ public class AutoRefMatch implements Metadatable
 
 		public String serialize()
 		{ return LocationUtil.toBlockCoords(block.getLocation()) + ":" + Boolean.toString(flip); }
-
-		public static StartMechanism fromElement(Element e, World w)
-		{
-			Block block = w.getBlockAt(LocationUtil.fromCoords(w, e.getAttributeValue("pos")));
-			boolean state = Boolean.parseBoolean(e.getTextTrim());
-
-			return new StartMechanism(block, state);
-		}
 
 		@Override public String toString()
 		{ return state.getType().name() + "(" + this.serialize() + ")"; }
@@ -2228,7 +2158,6 @@ public class AutoRefMatch implements Metadatable
 		public boolean canFlip(AutoRefMatch match)
 		{
 			MatchStatus mstate = match.getCurrentState();
-			if (mstate.isBeforeMatch()) return false;
 			return !mstate.isBeforeMatch() && !active();
 		}
 	}
@@ -2258,7 +2187,7 @@ public class AutoRefMatch implements Metadatable
 		boolean adding = startMechanisms.add(sm);
 		if (!adding) { startMechanisms.remove(sm); return null; }
 
-		if (adding && !EXPECTED_MECHANISMS.contains(block.getType()))
+		if (!EXPECTED_MECHANISMS.contains(block.getType()))
 			AutoReferee.log("Unexpected start mechanism: " + block.getType().name(), Level.WARNING);
 		return sm;
 	}
@@ -2309,7 +2238,7 @@ public class AutoRefMatch implements Metadatable
 	 *
 	 * @author authorblues
 	 */
-	public static class MatchParams
+	public static class MatchParams implements Serializable
 	{
 		public static class TeamInfo
 		{
@@ -2601,13 +2530,7 @@ public class AutoRefMatch implements Metadatable
 
 		public void run()
 		{
-			if (remainingSeconds > 3)
-			{
-				// currently nothing...
-			}
-
-			// if the countdown has ended...
-			else if (remainingSeconds <= 0)
+			if (remainingSeconds <= 0)
 			{
 				// setup world to go!
 				if (this.start) match._startMatch();
@@ -2616,10 +2539,12 @@ public class AutoRefMatch implements Metadatable
 				// cancel the task
 				match.cancelCountdown();
 			}
-
-			// report number of seconds remaining
-			else match.broadcast(">>> " + CountdownTask.COLOR +
-				Integer.toString(remainingSeconds) + "...");
+			else if (remainingSeconds <= 3)
+			{
+				// report number of seconds remaining
+				match.broadcast(
+						">>> " + CountdownTask.COLOR + Integer.toString(remainingSeconds) + "...");
+			}
 
 			// count down
 			--remainingSeconds;
@@ -2668,6 +2593,7 @@ public class AutoRefMatch implements Metadatable
 		// save a copy of the map image quickly before the match starts...
 		saveMapImage();
 
+		// TODO put this behind a config option
 		itemElevatorDetectionTask = new ItemElevatorDetectionTask();
 		itemElevatorDetectionTask.runTaskTimer(AutoReferee.getInstance(),
 			0L, ItemElevatorDetectionTask.INTERVAL);
@@ -2943,17 +2869,11 @@ public class AutoRefMatch implements Metadatable
 	public void addCape(String name, String cape)
 	{ playerCapes.put(name.toLowerCase(), cape); }
 
-	public void addCape(OfflinePlayer opl, String cape)
-	{ addCape(opl.getName(), cape); }
-
 	/**
 	 * Adds a player to the list of expected players, without a team affiliation.
 	 */
 	public void addExpectedPlayer(OfflinePlayer opl)
 	{ expectedPlayers.add(opl.getName().toLowerCase()); }
-
-	public void addExpectedPlayer(OfflinePlayer opl, String cape)
-	{ addExpectedPlayer(opl); addCape(opl, cape); }
 
 	/**
 	 * Gets the team the specified player is expected to join.
@@ -3066,7 +2986,7 @@ public class AutoRefMatch implements Metadatable
 	}
 
 	public enum RespawnMode
-	{ ALLOW, BEDSONLY, DISALLOW; }
+	{ ALLOW, BEDS_ONLY, DISALLOW }
 
 	private RespawnMode respawnMode = RespawnMode.ALLOW;
 
@@ -3268,7 +3188,7 @@ public class AutoRefMatch implements Metadatable
 
 	private String uploadReport(String report)
 	{
-		String failure = "<unknown reason>";
+		String failure;
 		try
 		{
 			// submit our request to pastehtml, get back a link to the report
@@ -3281,18 +3201,6 @@ public class AutoRefMatch implements Metadatable
 		// somewhat quietly log the reason for the failed upload
 		AutoReferee.log("Report upload failed: " + failure, Level.SEVERE);
 		return null;
-	}
-
-	/**
-	 * Gets distance player is from their team's nearest region.
-	 *
-	 * @return distance to team's nearest region
-	 */
-	public double distanceToClosestRegion(Player player)
-	{
-		AutoRefTeam team = getPlayerTeam(player);
-		if (team != null) return team.distanceToClosestRegion(player.getLocation());
-		return Double.MAX_VALUE;
 	}
 
 	/**
@@ -3339,7 +3247,7 @@ public class AutoRefMatch implements Metadatable
 	{
 		// TODO: TEAM visibility would be nice
 		public enum EventVisibility
-		{ NONE, REFEREES, ALL }
+		{ NONE, REFEREES, TEAM, ALL }
 
 		public enum EventType
 		{
@@ -3353,9 +3261,9 @@ public class AutoRefMatch implements Metadatable
 			PLAYER_DOMINATE("player-dominate", true, EventVisibility.ALL, ChatColor.DARK_GRAY),
 			PLAYER_REVENGE("player-revenge", true, EventVisibility.ALL, ChatColor.DARK_GRAY),
 
-			// objective events should not be broadcast to players
-			OBJECTIVE_FOUND("objective-found", true, EventVisibility.REFEREES),
-			OBJECTIVE_PLACED("objective-place", true, EventVisibility.REFEREES),
+			// objective events should not be broadcast to the other team
+			OBJECTIVE_FOUND("objective-found", true, EventVisibility.TEAM),
+			OBJECTIVE_PLACED("objective-place", true, EventVisibility.TEAM),
 			OBJECTIVE_DETAIL("objective-detail", true, EventVisibility.REFEREES),
 			;
 
@@ -3392,7 +3300,14 @@ public class AutoRefMatch implements Metadatable
 			{ return supportsFiltering; }
 		}
 
-		public Set<Object> actors;
+		private Set<Object> actors;
+		public Set<Object> getActors()
+		{ return actors; }
+
+		private Set<AutoRefPlayer> playerActors;
+
+		public Set<AutoRefPlayer> getPlayerActors()
+		{ return playerActors; }
 
 		private EventType type;
 
@@ -3410,6 +3325,16 @@ public class AutoRefMatch implements Metadatable
 		private Location location;
 		private long timestamp;
 
+		/**
+		 *
+		 * Supported Actor types: AutoRefPlayer, BlockData
+		 *
+		 * @param match
+		 * @param type
+		 * @param message
+		 * @param loc
+		 * @param actors
+		 */
 		public TranscriptEvent(AutoRefMatch match, EventType type, String message,
 			Location loc, Object ...actors)
 		{
@@ -3421,8 +3346,13 @@ public class AutoRefMatch implements Metadatable
 			this.location = (loc != null) ? loc :
 				match.getWorld().getSpawnLocation();
 
-			this.actors = Sets.newHashSet(actors);
 			this.timestamp = match.getElapsedSeconds();
+
+			this.actors = Sets.newHashSet(actors);
+			this.playerActors = Sets.newHashSet();
+			for (Object o : actors)
+				if (o instanceof AutoRefPlayer)
+					playerActors.add((AutoRefPlayer) o);
 		}
 
 		public String getTimestamp()
@@ -3458,7 +3388,16 @@ public class AutoRefMatch implements Metadatable
 		switch (event.getType().getVisibility())
 		{
 			case REFEREES: recipients = getReferees(false); break;
+			case TEAM:
+				recipients = Sets.newHashSet();
+				for (AutoRefPlayer p : event.getPlayerActors())
+				{
+					for (AutoRefPlayer teamPlayer : p.getTeam().getPlayers())
+					{ recipients.add(teamPlayer.getPlayer()); }
+				}
+				break;
 			case ALL: recipients = getWorld().getPlayers(); break;
+			case NONE: recipients = null; break;
 			default: break;
 		}
 
@@ -3532,24 +3471,14 @@ public class AutoRefMatch implements Metadatable
 			// ticks (18000 == midnight, 6000 == noon)
 			return (ticks + 18000L) % 24000L;
 		}
-		catch (NumberFormatException e) {  }
+		catch (NumberFormatException ignored) {  }
 
 		// default time: 6am
 		return 0L;
 	}
 
+	// TODO make configurable
 	private ItemStack customMatchInfoBook = null;
-
-	/**
-	 * Sets a custom book given to players upon joining this match.
-	 *
-	 * @param book book given to players, or null for default (generated) book.
-	 */
-	public void setCustomMatchInfoBook(ItemStack book)
-	{
-		if (book != null) assert book.getType() == Material.WRITTEN_BOOK;
-		this.customMatchInfoBook = book;
-	}
 
 	/**
 	 * Gets the book given to players upon joining this match.
@@ -3588,6 +3517,7 @@ public class AutoRefMatch implements Metadatable
 		,	BookUtil.center(" by " + ChatColor.DARK_GRAY + this.getAuthorList())
 		,	BookUtil.center("(v" + this.getMapVersion() + ")")
 		,	""
+				// TODO
 		,	BookUtil.center("Coming soon...")
 		));
 
