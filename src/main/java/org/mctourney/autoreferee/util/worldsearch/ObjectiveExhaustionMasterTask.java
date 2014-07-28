@@ -37,10 +37,13 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 
 	// Safety strategy: Immutable set
 	public final Set<BlockData> originalSearch;
+
 	// Safety strategy: Copy on write
-	public Set<BlockData> searching;
-	// Safety strategy: Single writer, single reader
+	public volatile Set<BlockData> searching;
+
+	// Safety strategy: Single writer, stop before reading by using lock
 	public Map<BlockData, Vector> results = Maps.newHashMap();
+	public final Object _LOCK_RESULTS = new Object();
 
 	/**
 	 * A stop-flag for the chunk snapshot worker threads.
@@ -201,6 +204,10 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 	{
 		if (searching.isEmpty())
 		{
+			synchronized (_LOCK_RESULTS) {
+				// make results safe to read
+				resultChecker.cancel();
+			}
 			// Schedule announce, return true
 			Bukkit.getScheduler().runTask(plugin, new Runnable() { public void run()
 			{

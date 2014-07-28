@@ -31,26 +31,28 @@ public class WorkerValidateResults extends BukkitRunnable
 	@Override
 	public void run()
 	{
-		if (master.found.isEmpty()) return;
+		synchronized (master._LOCK_RESULTS) {
+			if (master.found.isEmpty()) return;
 
-		_Entry<BlockData, Vector> entry;
-		Set<BlockData> newSearch = Sets.newHashSet(master.searching);
-		while ((entry = master.found.poll()) != null)
-		{
-			Vector vec = entry.getValue();
-			if (master.team.canEnter(vec.toLocation(master.team.getMatch().getWorld())))
+			_Entry<BlockData, Vector> entry;
+			Set<BlockData> newSearch = Sets.newHashSet(master.searching);
+			while ((entry = master.found.poll()) != null)
 			{
-				BlockData data = entry.getKey();
-				newSearch.remove(data);
-				// No safety - read-once
-				master.results.put(data, vec);
+				Vector vec = entry.getValue();
+				if (master.team.canEnter(vec.toLocation(master.team.getMatch().getWorld())))
+				{
+					BlockData data = entry.getKey();
+					newSearch.remove(data);
+					// No safety - read-once
+					master.results.put(data, vec);
+				}
 			}
-		}
 
-		if (!newSearch.equals(master.searching))
-		{
-			// Safety: Copy-on-write
-			master.searching = newSearch;
+			if (!newSearch.equals(master.searching))
+			{
+				// Safety: Copy-on-write
+				master.searching = newSearch;
+			}
 		}
 	}
 }
