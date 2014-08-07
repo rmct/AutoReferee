@@ -8,6 +8,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -22,6 +23,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -438,6 +440,20 @@ public class ZoneListener implements Listener
 
 				break;
 		}
+	}
+
+	@EventHandler(priority=EventPriority.MONITOR)
+	public void lobbyDeath(EntityDamageEvent event)
+	{
+		if (event.getEntity().getWorld() != plugin.getLobbyWorld() ||
+			event.getEntityType() != EntityType.PLAYER) return;
+
+		Player player = (Player) event.getEntity();
+		Location loc = player.getLocation();
+
+		if (loc.getY() < -64 && event.getCause() == EntityDamageEvent.DamageCause.VOID)
+			player.teleport(plugin.getLobbyWorld().getSpawnLocation());
+		player.setFallDistance(0);
 	}
 
 	private static Map<Class<? extends Entity>, String> entityRenames = Maps.newHashMap();

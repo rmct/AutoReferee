@@ -115,7 +115,8 @@ public abstract class LobbyListener implements CommandHandler, Listener
 		Location oloc = SportBukkitUtil.getOfflinePlayerLocation(opl);
 
 		// either there is no offline player utility, or check the world like normal
-		if (opl.hasPlayedBefore() && (oloc == null || oloc.getWorld() == null))
+		if (opl.hasPlayedBefore() && SportBukkitUtil.hasSportBukkitApi() &&
+			(oloc == null || oloc.getWorld() == null))
 		{
 			if (!opl.isOnline()) playerLimboLogin.add(opl.getName());
 			// TODO deferred teleportation back on the sync server thread if online
