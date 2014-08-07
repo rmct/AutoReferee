@@ -32,6 +32,7 @@ import org.mctourney.autoreferee.goals.AutoRefGoal;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.mctourney.autoreferee.listeners.GoalsInventorySnapshot;
 
 /**
  * Formats HTML match reports.
@@ -357,7 +358,7 @@ public class ReportGenerator
 			playerstats.write(String.format("<tr><td>%d</td><td>%s</td>",
 				++rank, playerHTML(apl)));
 			playerstats.write(String.format("<td>%d (%d)</td><td>%d</td><td>%s</td>",
-				apl.getKills(), apl.getAssists(), apl.getDeaths(), apl.getExtendedAccuracyInfo()));
+				apl.getKills(), apl.getAssists(), apl.getDeathCount(), apl.getExtendedAccuracyInfo()));
 			playerstats.write(String.format("<td>%s</td></tr>\n",
 				nms == null ? "none" : playerHTML(nms)));
 		}
@@ -385,12 +386,11 @@ public class ReportGenerator
 		String m = e.getMessage(), tagdata = "";
 		Set<String> rowClasses = Sets.newHashSet("type-" + e.getType().getEventClass());
 
-		Set<AutoRefPlayer> players = Sets.newHashSet();
-		for (Object actor : e.actors)
+		for (Object actor : e.getActors())
 		{
 			if (actor instanceof AutoRefPlayer)
 			{
-				AutoRefPlayer apl = (AutoRefPlayer) actor; players.add(apl);
+				AutoRefPlayer apl = (AutoRefPlayer) actor;
 				tagdata += String.format(" data-player='%s'", apl.getName());
 			}
 

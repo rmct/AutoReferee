@@ -17,7 +17,7 @@ public class FindPlayerTest
 		AutoRefPlayer p2 = new AutoRefPlayer("nosrepa" , null);
 		AutoRefPlayer p3 = new AutoRefPlayer("coestar" , null);
 		AutoRefPlayer p4 = new AutoRefPlayer("dewtroid", null);
-		// AutoRefPlayer pX = new AutoRefPlayer("jcllpony", null);
+		AutoRefPlayer pX = new AutoRefPlayer("jcllpony", null);
 
 		team.addPlayer(p1);
 		team.addPlayer(p2);

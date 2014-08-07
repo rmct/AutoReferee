@@ -26,7 +26,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoRefTeam;
@@ -65,12 +64,14 @@ public class ObjectiveTracker implements Listener
 				for (BlockGoal goal : apl.getTeam().getTeamGoals(BlockGoal.class))
 			{
 				BlockData b = goal.getItem();
-				if (goal.isSatisfied(match) && b.matchesBlock(block) &&
-					goal.getItemStatus() != AutoRefGoal.ItemStatus.TARGET)
+				if (b.matchesBlock(block) && goal.getItemStatus() != AutoRefGoal.ItemStatus.TARGET)
 				{
-					match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.OBJECTIVE_PLACED,
-						String.format("%s has placed %s", apl.getDisplayName(), b.getDisplayName()), goal.getTarget(), apl, b));
-					apl.addPoints(AchievementPoints.OBJECTIVE_PLACE);
+					if (goal.isSatisfied(match))
+					{
+						match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.OBJECTIVE_PLACED,
+							String.format("%s has placed the %s on the Victory Monument", apl.getDisplayName(), b.getDisplayName()), goal.getTarget(), apl, b));
+						apl.addPoints(AchievementPoints.OBJECTIVE_PLACE);
+					}
 				}
 			}
 			match.checkWinConditions();
@@ -89,7 +90,7 @@ public class ObjectiveTracker implements Listener
 		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
 
 		if (match != null && apl != null && match.getCurrentState().inProgress()
-			&& match.getRespawnMode() == RespawnMode.BEDSONLY && block.getType() == Material.BED_BLOCK)
+			&& match.getRespawnMode() == RespawnMode.BEDS_ONLY && block.getType() == Material.BED_BLOCK)
 				match.new BedUpdateTask(apl).runTask(plugin);
 	}
 
@@ -104,7 +105,7 @@ public class ObjectiveTracker implements Listener
 			if (b.getType() == Material.BED_BLOCK) bedBroke = true;
 
 		if (match != null && match.getCurrentState().inProgress()
-			&& match.getRespawnMode() == RespawnMode.BEDSONLY && bedBroke)
+			&& match.getRespawnMode() == RespawnMode.BEDS_ONLY && bedBroke)
 				match.new BedUpdateTask(ent).runTask(plugin);
 	}
 
@@ -302,7 +303,7 @@ public class ObjectiveTracker implements Listener
 		healthArmorChange(player);
 
 		AutoRefMatch match = plugin.getMatch(event.getRespawnLocation().getWorld());
-		if (match != null && match.getRespawnMode() == RespawnMode.BEDSONLY)
+		if (match != null && match.getRespawnMode() == RespawnMode.BEDS_ONLY)
 			if (player.getBedSpawnLocation() == null)
 			{
 				match.eliminatePlayer(player);

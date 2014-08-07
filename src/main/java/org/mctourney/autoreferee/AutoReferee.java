@@ -42,6 +42,7 @@ import org.mctourney.autoreferee.commands.ScoreboardCommands;
 import org.mctourney.autoreferee.commands.SpectatorCommands;
 import org.mctourney.autoreferee.listeners.CombatListener;
 import org.mctourney.autoreferee.listeners.ObjectiveTracker;
+import org.mctourney.autoreferee.listeners.ObjectiveTracer;
 import org.mctourney.autoreferee.listeners.SpectatorListener;
 import org.mctourney.autoreferee.listeners.TeamListener;
 import org.mctourney.autoreferee.listeners.WorldListener;
@@ -120,8 +121,6 @@ public class AutoReferee extends JavaPlugin
 	public static void callEvent(Event event)
 	{ Bukkit.getServer().getPluginManager().callEvent(event); }
 
-	private LobbyListener lobbyListener = null;
-
 	private World lobby = null;
 
 	/**
@@ -158,10 +157,14 @@ public class AutoReferee extends JavaPlugin
 		}
 	}
 
-	private boolean consoleLog = false;
+	private boolean consoleLog = true;
+	private boolean consoleLogInColor = true;
 
 	protected boolean isConsoleLoggingEnabled()
 	{ return consoleLog; }
+
+	protected boolean isColoredConsoleLoggingEnabled()
+	{ return consoleLogInColor; }
 
 	// get the match associated with the world
 	private Map<UUID, AutoRefMatch> matches = Maps.newHashMap();
@@ -291,7 +294,7 @@ public class AutoReferee extends JavaPlugin
 		PracticeCommands practice = new PracticeCommands(this);
 
 		String lobbymode = getConfig().getString("lobby.mode", "manual");
-		lobbyListener = LobbyMode.fromConfig(lobbymode).getInstance(this);
+		LobbyListener lobbyListener = LobbyMode.fromConfig(lobbymode).getInstance(this);
 
 		// listener utility classes, subdivided for organization
 		pm.registerEvents(new TeamListener(this), this);
@@ -299,6 +302,7 @@ public class AutoReferee extends JavaPlugin
 		pm.registerEvents(new ZoneListener(this), this);
 		pm.registerEvents(new WorldListener(this), this);
 		pm.registerEvents(new ObjectiveTracker(this), this);
+		pm.registerEvents(new ObjectiveTracer(this), this);
 
 		// save this reference to use for setting up the referee channel later
 		pm.registerEvents(refChannelListener = new SpectatorListener(this), this);
@@ -346,7 +350,8 @@ public class AutoReferee extends JavaPlugin
 		AutoRefMatch.setAllowTies(getConfig().getBoolean("allow-ties", false));
 
 		// log messages to console?
-		consoleLog = getConfig().getBoolean("console-log", false);
+		consoleLog = getConfig().getBoolean("console-log", true);
+		consoleLogInColor = getConfig().getBoolean("console-colors", true);
 
 		// setup the map library folder
 		AutoRefMap.getMapLibrary();
@@ -470,7 +475,7 @@ public class AutoReferee extends JavaPlugin
 			messageQueue.addMessage(recipient, msg);
 
 		try { messageQueue.runTask(this); }
-		catch (IllegalStateException e) {  }
+		catch (IllegalStateException ignored) {  }
 	}
 
 	private class SyncMessageTask extends BukkitRunnable

@@ -117,10 +117,17 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	 */
 	public File getZip() throws IOException
 	{
+		boolean interrupted = false;
 		// if the map is already downloading, just be patient
 		while (this.zip == DOWNLOADING)
+		{
+			interrupted = Thread.interrupted();
 			try { Thread.sleep(500); }
-			catch (InterruptedException e) {  }
+			catch (InterruptedException e) { interrupted = true; }
+		}
+
+		if (interrupted)
+			Thread.currentThread().interrupt();
 
 		if (!isInstalled()) download();
 		return this.zip;
@@ -532,7 +539,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		// skip non-directories
 		if (zip.isDirectory()) return null;
 
-		Element worldConfig = null;
+		Element worldConfig;
 		try { worldConfig = getConfigFileData(zip); }
 		catch (IOException e) { e.printStackTrace(); return null; }
 		catch (JDOMException e) { e.printStackTrace(); return null; }
@@ -591,7 +598,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 				if (!map.isInstalled()) map.download();
 				new MapLoader(sender, map, custom).runTask(AutoReferee.getInstance());
 			}
-			catch (IOException e) {  }
+			catch (IOException e) { e.printStackTrace(); }
 		}
 	}
 
@@ -629,7 +636,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		public void run()
 		{
 			AutoRefMap map = null;
-			try { map = AutoRefMap.getMapFromURL(this.url); } catch (IOException e) {  }
+			try { map = AutoRefMap.getMapFromURL(this.url); } catch (IOException e) { e.printStackTrace(); }
 
 			if (map == null) AutoReferee.getInstance()
 				.sendMessageSync(sender, "Could not load map from URL: " + this.url);
@@ -649,7 +656,7 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 		@Override
 		public void run()
 		{
-			AutoRefMatch match = null;
+			AutoRefMatch match;
 			try { match = AutoRefMap.createMatch(this.map, this.custom); }
 			catch (IOException e) { e.printStackTrace(); return; }
 

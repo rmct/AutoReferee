@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -25,6 +26,7 @@ import org.mctourney.autoreferee.AutoRefMatch.RespawnMode;
 import org.mctourney.autoreferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
 import org.mctourney.autoreferee.goals.BlockGoal;
+import org.mctourney.autoreferee.listeners.GoalsInventorySnapshot;
 import org.mctourney.autoreferee.util.AchievementPoints;
 import org.mctourney.autoreferee.util.ArmorPoints;
 import org.mctourney.autoreferee.util.BlockData;
@@ -36,6 +38,7 @@ import org.mctourney.autoreferee.util.PlayerUtil;
 import org.apache.commons.collections.map.DefaultedMap;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.MapDifference;
 import com.google.common.collect.Sets;
 
 /**
@@ -52,6 +55,10 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	private static final int MIN_DOMINATE = 3;
 
 	private static final long DAMAGE_COOLDOWN_TICKS = 3 * 20L;
+	public static final int SLOT_HELMET = 0;
+	public static final int SLOT_CHEST = 1;
+	public static final int SLOT_LEGS = 2;
+	public static final int SLOT_FEET = 3;
 
 	// stored references
 	private String pname = null;
@@ -149,18 +156,6 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	{ return this.team == null ? null : this.team.getMatch(); }
 
 	/**
-	 * Sets the URL for this player's cape. This cape can be shown by a modified
-	 * client only, as Minecraft does not permit custom capes.
-	 *
-	 * @param url URL of a 64x32 image for the player's cape
-	 */
-	public void setCape(String url)
-	{
-		getMatch().addCape(this.getName(), url);
-		getMatch().messageReferees("player", this.getName(), "cape", getCape());
-	}
-
-	/**
 	 * Gets the URL for this player's cape.
 	 *
 	 * @return cape URL
@@ -194,24 +189,9 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		this.addPoints(AchievementPoints.ARROW_HIT);
 	}
 
-	/**
-	 * Gets the number of arrows fired by this player.
-	 *
-	 * @return number of arrows fired
-	 */
-	public int getShotsFired()
-	{ return this.shotsFired; }
-
-	/**
-	 * Gets the number of arrows this player's arrows that hit a target.
-	 *
-	 * @return number of arrows hit
-	 */
-	public int getShotsHit()
-	{ return this.shotsHit; }
-
 	// number of times this player has killed other players
-	private Map<AutoRefPlayer, Integer> kills;
+	@SuppressWarnings("unchecked")
+	private Map<AutoRefPlayer, Integer> kills = new DefaultedMap(0);
 	private int totalKills = 0;
 	private int teamKills = 0;
 
@@ -225,14 +205,6 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 */
 	public void setFurthestShot(double distance)
 	{ if (distance > furthestShot) furthestShot = distance; }
-
-	/**
-	 * Gets the furthest bow shot.
-	 *
-	 * @return distance of furthest accurate shot
-	 */
-	public double getFurthestShot()
-	{ return furthestShot; }
 
 	private int livesRemaining = -1;
 
@@ -272,7 +244,8 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	public int getKills()
 	{ return totalKills - teamKills; }
 
-	private Map<AutoRefPlayer, Long> lastPlayerDamageMillis = null;
+	@SuppressWarnings("unchecked")
+	private Map<AutoRefPlayer, Long> lastPlayerDamageMillis = new DefaultedMap((Long) 0L);
 	private static final long KILLER_MS = 1000L * 3;
 	private static final long ASSIST_MS = 1000L * 5;
 
@@ -315,7 +288,8 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	}
 
 	// number of times player has died and damage taken
-	private Map<AutoRefPlayer, Integer> deaths;
+	@SuppressWarnings("unchecked")
+	private Map<AutoRefPlayer, Integer> deaths = new DefaultedMap((Integer) 0);
 	private int totalDeaths = 0;
 
 	/**
@@ -332,11 +306,11 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 *
 	 * @return number of deaths
 	 */
-	public int getDeaths()
+	public int getDeathCount()
 	{ return totalDeaths; }
 
 	// tracking objective items
-	private Set<BlockData> carrying;
+	private GoalsInventorySnapshot carrying;
 
 	private int currentHealth = 20;
 	private int currentArmor = 0;
@@ -346,12 +320,49 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 *
 	 * @return set of objectives
 	 */
-	public Set<BlockData> getCarrying()
-	{ return carrying; }
+	public GoalsInventorySnapshot getCarrying()
+	{
+		Player p = getPlayer();
+		AutoRefTeam t = getTeam();
+		if (p == null || t == null)
+		{ carrying = new GoalsInventorySnapshot(); }
+		else
+		{ carrying = new GoalsInventorySnapshot(p.getInventory(), t.getObjectives()); }
+
+		return carrying;
+	}
+
+	private GoalsInventorySnapshot beforeOpeningInventory;
+	private String inventoryDescription;
+	private Location inventoryLocation;
+
+	public GoalsInventorySnapshot getBeforeOpeningInventorySnapshot()
+	{ return beforeOpeningInventory; }
+
+	public String getInventoryDescription()
+	{ return ChatColor.GOLD + StringUtils.capitalize(inventoryDescription.toLowerCase()); }
+
+	public Location getInventoryLocation()
+	{ return inventoryLocation; }
+
+	public void setActiveInventoryInfo(GoalsInventorySnapshot mySnap, Location loc, String description)
+	{
+		beforeOpeningInventory = mySnap;
+		inventoryDescription = description;
+		inventoryLocation = loc;
+	}
+
+	public void clearActiveInventoryInfo()
+	{
+		beforeOpeningInventory = null;
+		inventoryLocation = null;
+		inventoryDescription = null;
+	}
 
 	// streak information - kill streak, domination, revenge
 	private int totalStreak = 0;
-	private Map<AutoRefPlayer, Integer> playerStreak;
+	@SuppressWarnings("unchecked")
+	private final Map<AutoRefPlayer, Integer> playerStreak = new DefaultedMap(0);
 
 	/**
 	 * Gets the number of times this player has consecutively killed another. This
@@ -391,7 +402,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	{ return damageCooldownLength() < DAMAGE_COOLDOWN_TICKS; }
 
 	// amount of time the saved inventory is valid
-	private long SAVED_INVENTORY_LIFESPAN = 1000L * 60 * 3;
+	private static final long SAVED_INVENTORY_LIFESPAN = 1000L * 60 * 3;
 
 	private Inventory lastInventoryView = null;
 	private long lastInventoryViewSavedMillis = -1L;
@@ -402,47 +413,50 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 			lastInventoryViewSavedMillis + SAVED_INVENTORY_LIFESPAN;
 	}
 
-	private int points = 0;
+	// TODO never used
+	// private int points = 0;
 
 	/**
 	 * Adds achievement points for this player.
+	 *
+	 * TODO value is never read
 	 */
 	public void addPoints(AchievementPoints ach, int count)
 	{
-		if (ach == null) return;
-		this.addPoints(ach.getValue() * count);
+		// if (ach == null) return;
+		// this.addPoints(ach.getValue() * count);
 	}
 
 	/**
 	 * Adds achievement points for this player.
 	 */
 	public void addPoints(AchievementPoints ach)
-	{ this.addPoints(ach, 1); }
+	// { this.addPoints(ach, 1); }
+	{ }
 
 	/**
 	 * Adds achievement points for this player. This method can be used to add
 	 * custom point values, if necessary.
 	 */
 	public void addPoints(int points)
-	{
-		this.points += points;
-	}
+	// { this.points += points; }
+	{ }
 
 	/**
 	 * Gets the number of achievement points this player has earned.
 	 *
 	 * @return achievement points
 	 */
-	public int getPoints()
-	{ return points; }
+	// public int getPoints()
+	// { return points; }
 
 	/**
 	 * Gets the normalized number of achievement points this player has earned.
 	 *
 	 * @return normalized achievement points
 	 */
-	public int getDisplayPoints()
-	{ return AchievementPoints.ticksToPoints(points); }
+	// public int getDisplayPoints()
+	// { return AchievementPoints.ticksToPoints(points); }
 
 	/**
 	 * Returns whether or not the player has the AutoReferee client mod installed.
@@ -530,26 +544,12 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	@SuppressWarnings("unchecked")
 	public AutoRefPlayer(String name, AutoRefTeam team)
 	{
-		// detailed statistics
-		kills  = new DefaultedMap(0);
-		deaths = new DefaultedMap(0);
-
-		// damage information
-		lastPlayerDamageMillis = new DefaultedMap(0L);
-
 		// accuracy information
 		this.resetArrowFire();
 
 		// save the player and team as references
 		this.setName(name);
 		this.setTeam(team);
-
-		// setup the carrying list
-		this.carrying = Sets.newHashSet();
-
-		// streak information
-		playerStreak = new DefaultedMap(0);
-		totalStreak = 0;
 	}
 
 	/**
@@ -582,13 +582,15 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	@Override
 	public boolean equals(Object o)
 	{
-		if (!(o instanceof AutoRefPlayer)) return false;
-		return getName().equals(((AutoRefPlayer) o).getName());
+		return o instanceof AutoRefPlayer && getName().equals(((AutoRefPlayer) o).getName());
 	}
 
 	@Override
 	public int compareTo(AutoRefPlayer other)
-	{ return this.pname.compareTo(other.pname); }
+	{
+		if (other == null) return 1;
+		return this.pname.compareTo(other.pname);
+	}
 
 	/**
 	 * Gets name of this player, colored with team colors.
@@ -619,7 +621,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		// "die" when the match isn't in progress just means a teleport
 		if (!getMatch().getCurrentState().inProgress())
 		{
-			player.teleport(getSpawnLocation());
+			player.teleport(getMatch().getPlayerSpawn(player));
 			player.setFallDistance(0.0f);
 		}
 
@@ -640,22 +642,6 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 
 	public boolean isGodMode()
 	{ return this.godmode && getMatch().isPracticeMode(); }
-
-	private Location spawn = null;
-
-	/**
-	 * Gets the spawn location for this player.
-	 *
-	 * @return custom spawn if not on team, otherwise team spawn
-	 */
-	public Location getSpawnLocation()
-	{ return getTeam() == null ? spawn : getTeam().getSpawnLocation(); }
-
-	/**
-	 * Sets custom spawn location.
-	 */
-	public void setSpawnLocation(Location spawn)
-	{ this.spawn = spawn; }
 
 	private boolean active = false;
 
@@ -726,7 +712,8 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 
 		AutoRefMatch match = getMatch();
 		AutoRefPlayer killer = match.getPlayer(e.getEntity().getKiller());
-		deaths.put(killer, 1 + deaths.get(killer)); ++totalDeaths;
+		deaths.put(killer, getDeaths(killer) + 1);
+		totalDeaths++;
 
 		for (AutoRefPlayer apl : this.getKillAssists())
 			if (apl != killer && apl.getTeam() != match.getPlayerTeam(e.getEntity())) ++apl.totalAssists;
@@ -754,9 +741,6 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		this.resetKillStreak();
 		match.messageReferees("player", getName(), "streak", Integer.toString(totalStreak));
 	}
-
-	public void registerDeath(PlayerDeathEvent e)
-	{ registerDeath(e, null); }
 
 	/**
 	 * Resets this player's killstreak.
@@ -792,7 +776,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 			match.messageReferees("player", getName(), "streak", Integer.toString(totalStreak));
 		match.messageReferees("player", getName(), "kills", Integer.toString(totalKills));
 
-		if (playerStreak.get(apl) + 1 == MIN_DOMINATE)
+		if (getStreak(apl) + 1 == MIN_DOMINATE)
 		{
 			match.messageReferees("player", getName(), "dominate", apl.getName());
 			match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DOMINATE,
@@ -808,7 +792,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		}
 
 		// reset player streaks
-		playerStreak.put(apl, playerStreak.get(apl) + 1);
+		playerStreak.put(apl, getStreak(apl) + 1);
 		apl.playerStreak.put(this, 0);
 	}
 
@@ -818,7 +802,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 * @return true if dominating, otherwise false
 	 */
 	public boolean isDominating(AutoRefPlayer apl)
-	{ return playerStreak.get(apl) >= MIN_DOMINATE; }
+	{ return getStreak(apl) >= MIN_DOMINATE; }
 
 	/**
 	 * Checks if this player is in the correct world.
@@ -835,12 +819,6 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 */
 	public int getKDD()
 	{ return totalKills - totalDeaths; }
-
-	/**
-	 * Gets a string representation of this player's accuracy.
-	 */
-	public String getAccuracy()
-	{ return shotsFired == 0 ? "N/A" : (Integer.toString(100 * shotsHit / shotsFired) + "%"); }
 
 	public void sendAccuracyUpdate()
 	{ for (Player ref : getMatch().getReferees(false)) sendAccuracyUpdate(ref); }
@@ -880,29 +858,26 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	public void updateCarrying()
 	{
 		Player player = getPlayer();
-		if (player != null)
-			updateCarrying(player.getInventory());
-	}
+		if (player == null) return;
 
-	private void updateCarrying(Inventory inv)
-	{
-		Set<BlockData> newCarrying = Sets.newHashSet();
 		if (getTeam() != null)
 		{
-			if (inv != null) for (ItemStack itm : inv)
-				if (itm != null) newCarrying.add(BlockData.fromItemStack(itm));
-			newCarrying.retainAll(getTeam().getObjectives());
+			GoalsInventorySnapshot oldCarrying = carrying;
+			carrying = null; // invalidate old value
+			carrying = getCarrying();
 
-			Set<BlockData> oldCarrying = carrying;
-			carrying = newCarrying;
+			if (oldCarrying == null)
+			{ return; }
 
-			if (newCarrying != oldCarrying)
+			MapDifference<BlockData, Integer> diff = oldCarrying.getDiff(carrying);
+
+			if (!diff.areEqual())
 			{
 				for (BlockGoal goal : getTeam().getTeamGoals(BlockGoal.class))
-					if (goal.getItemStatus() == AutoRefGoal.ItemStatus.NONE && newCarrying.contains(goal.getItem()))
+					if (goal.getItemStatus() == AutoRefGoal.ItemStatus.NONE && carrying.containsKey(goal.getItem()))
 					{
-						// generate a transcript event for seeing the box
-						String m = String.format("%s is carrying %s", getDisplayName(), goal.getItem().getDisplayName());
+						// generate a transcript event for being the first
+						String m = String.format("%s is carrying the first %s!", getDisplayName(), goal.getItem().getDisplayName());
 						getMatch().addEvent(new TranscriptEvent(getMatch(),
 							TranscriptEvent.EventType.OBJECTIVE_FOUND, m, getLocation(), this, goal.getItem()));
 						this.addPoints(AchievementPoints.OBJECTIVE_FOUND);
@@ -910,7 +885,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 						// store the player's location as the last objective location
 						getTeam().setLastObjectiveLocation(getLocation());
 					}
-				getTeam().updateCarrying(this, oldCarrying, newCarrying);
+				getTeam().updateCarrying(this, oldCarrying, carrying);
 			}
 		}
 	}
@@ -932,7 +907,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 
 	private void saveInventoryView()
 	{
-		String invname = this.getDisplayName() + " @ " + getMatch().getTimestamp(":");
+		String invname = this.getDisplayName() + " @ " + getMatch().getTimestamp();
 		this.lastInventoryView = getInventoryView(invname);
 		this.lastInventoryViewSavedMillis = ManagementFactory.getRuntimeMXBean().getUptime();
 	}
@@ -974,10 +949,10 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		ItemStack[] oldContents = pInventory.getContents();
 		ItemStack[] newContents = inventoryView.getContents();
 
-		newContents[oldContents.length + 0] = copyItem(pInventory.getHelmet());
-		newContents[oldContents.length + 1] = copyItem(pInventory.getChestplate());
-		newContents[oldContents.length + 2] = copyItem(pInventory.getLeggings());
-		newContents[oldContents.length + 3] = copyItem(pInventory.getBoots());
+		newContents[oldContents.length + SLOT_HELMET] = copyItem(pInventory.getHelmet());
+		newContents[oldContents.length + SLOT_CHEST] = copyItem(pInventory.getChestplate());
+		newContents[oldContents.length + SLOT_LEGS] = copyItem(pInventory.getLeggings());
+		newContents[oldContents.length + SLOT_FEET] = copyItem(pInventory.getBoots());
 
 		// SLOT 6: ACTIVE POTION EFFECTS
 		if (player.getActivePotionEffects().size() > 0)
