@@ -65,6 +65,7 @@ import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.material.Attachable;
@@ -2560,7 +2561,7 @@ public class AutoRefMatch implements Metadatable
 	 */
 	public void clearEntities()
 	{
-		for (Entity e : primaryWorld.getEntitiesByClasses(Arrow.class, Item.class,
+		for (Entity e : primaryWorld.getEntitiesByClasses(Projectile.class, Item.class,
 				Monster.class, Animals.class, Ambient.class, ExperienceOrb.class))
 			if (!protectedEntities.contains(e.getUniqueId())) e.remove();
 	}
