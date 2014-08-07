@@ -212,7 +212,8 @@ public class ZoneListener implements Listener
 		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
 		if (match == null) return;
 
-		if (match.elevatedItem.containsKey(event.getItem().getUniqueId()))
+		if (match.elevatedItem.containsKey(event.getItem().getUniqueId())
+			&& match.isPlayer(event.getPlayer()))
 		{
 			String itemname = new BlockData(event.getItem().getItemStack()).getDisplayName();
 			String msg = match.getDisplayName(event.getPlayer()) + ChatColor.DARK_GRAY +
