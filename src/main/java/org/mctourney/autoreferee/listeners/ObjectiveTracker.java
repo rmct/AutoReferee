@@ -14,6 +14,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -239,7 +240,7 @@ public class ObjectiveTracker implements Listener
 		}
 	}
 
-	/* TRACKING PLAYER HEALTH AND ARMOR */
+	/* TRACKING PLAYER HEALTH, HUNGER, AND ARMOR */
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void playerHealthDown(EntityDamageEvent event)
@@ -248,6 +249,18 @@ public class ObjectiveTracker implements Listener
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void playerHealthUp(EntityRegainHealthEvent event)
 	{ healthArmorChange(event.getEntity()); }
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void playerFoodChange(FoodLevelChangeEvent event)
+	{
+		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
+		if (match != null && event.getEntity().getType() == EntityType.PLAYER)
+		{
+			Player player = (Player) event.getEntity();
+			match.messageReferees("player", player.getName(),
+				"hunger", Integer.toString(event.getFoodLevel()));
+		}
+	}
 
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void playerArmorChange(InventoryClickEvent event)
