@@ -582,9 +582,10 @@ public class AutoRefMatch implements Metadatable
 	 *
 	 * @return current elapsed seconds if match in progress, otherwise 0L
 	 */
+	public long recordedTime = 0L;
 	public long getElapsedSeconds()
 	{
-		if (!getCurrentState().inProgress()) return 0L;
+		if (!getCurrentState().inProgress()) return recordedTime;
 		return (ManagementFactory.getRuntimeMXBean().getUptime() - getStartTime()) / 1000L;
 	}
 
@@ -2855,6 +2856,7 @@ public class AutoRefMatch implements Metadatable
 
 		// update the client clock to ensure it syncs with match summary
 		messageReferees("match", getWorld().getName(), "time", getTimestamp(","));
+		this.recordedTime = this.getElapsedSeconds();
 
 		// send referees the end event
 		if (team != null) messageReferees("match", getWorld().getName(), "end", team.getName());
