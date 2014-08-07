@@ -410,7 +410,7 @@ public class SpectatorCommands implements CommandHandler
 	{
 		if (match != null && sender instanceof Player)
 			AutoRefMatch.messageReferee((Player) sender, "match", match.getWorld().getName(), "swap");
-		return true;
+		return match != null;
 	}
 
 	@AutoRefCommand(name={"autoref", "nightvis"}, argmax=0, options="x",
@@ -431,7 +431,7 @@ public class SpectatorCommands implements CommandHandler
 				sender.sendMessage(ChatColor.GREEN + "Use '/ar nightvis -x' to disable night vision.");
 			else spectator.setNightVision(!options.hasOption('x'));
 		}
-		return true;
+		return match != null;
 	}
 
 	@AutoRefCommand(name={"autoref", "streamer"}, argmax=1, options="x",
@@ -478,6 +478,6 @@ public class SpectatorCommands implements CommandHandler
 				sender.sendMessage(ChatColor.GREEN + enabled + " streamer mode for " + player.getName());
 			}
 		}
-		return true;
+		return match != null;
 	}
 }
