@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -173,6 +174,11 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 	@Override
 	public int compareTo(AutoRefMap other)
 	{ return name.compareTo(other.name); }
+
+	public static int compareVersionStrings(String v1, String v2)
+	{
+		return 0;
+	}
 
 	/**
 	 * Creates match object given map name and an optional custom world name.
@@ -446,10 +452,17 @@ public class AutoRefMap implements Comparable<AutoRefMap>
 					String mapslug = mapfile.substring(0, mapfile.length() - 4);
 					String slugparts[] = mapslug.split("-v");
 
-					String etag = entry.getChildTextTrim("ETag", ns);
-
-					maps.add(new AutoRefMap(slugparts[0], slugparts[1],
-						lastkey, etag.substring(1, etag.length() - 1)));
+					if (slugparts.length < 2)
+					{
+						AutoReferee.log("Invalid map filename: " + mapfile, Level.WARNING);
+						AutoReferee.log("Map files should be of the form \"MapName-vX.X.zip\"", Level.WARNING);
+					}
+					else
+					{
+						String etag = entry.getChildTextTrim("ETag", ns);
+						maps.add(new AutoRefMap(slugparts[0], slugparts[1],
+							lastkey, etag.substring(1, etag.length() - 1)));
+					}
 				}
 
 				// stop looping if the result says that it hasn't been truncated (no more results)
