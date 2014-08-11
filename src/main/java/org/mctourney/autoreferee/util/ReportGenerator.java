@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 
+import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -419,4 +420,31 @@ public class ReportGenerator
 			"<td class='message'>%s</td><td class='timestamp'>%s</td></tr>\n";
 		return String.format(fmt, StringUtils.join(rowClasses, " "), coords, tagdata, m, e.getTimestamp());
 	}
+
+	public String generateJSONReport(AutoRefMatch match)
+	{
+		JSONReport report = new JSONReport();
+		report.map = match.getMapName();
+		report.winner = match.getWinningTeam().getDefaultName();
+
+		report.teams = Maps.newHashMap();
+		for (AutoRefTeam team : match.getTeams())
+			report.teams.put(team.getDefaultName(), team.getJSONTeam());
+
+		report.matchlength = match.getElapsedSeconds();
+		return new Gson().toJson(report);
+	}
+}
+
+class JSONReport
+{
+	public Map<String, AutoRefTeam.JSONTeamData> teams;
+
+	public String map;
+	public String winner;
+
+	public long matchlength; // seconds
+
+	public List<String> referees;
+	public List<String> streamers;
 }

@@ -48,6 +48,16 @@ import com.google.common.collect.Sets;
  */
 public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 {
+	public class JSONPlayerData
+	{
+		public String name, team;
+		public int kills, assists, deaths;
+		public int streak;
+
+		public int arrowfired, arrowhit;
+		public int teamkills;
+	}
+
 	public static final EntityDamageEvent VOID_DEATH =
 		new EntityDamageEvent(null, EntityDamageEvent.DamageCause.VOID, 0);
 
@@ -1060,4 +1070,23 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 */
 	public boolean showSavedInventory(Player player)
 	{ return this.showInventory(player, this.getLastInventoryView()); }
+
+	public JSONPlayerData getJSONPlayer()
+	{
+		JSONPlayerData data = new JSONPlayerData();
+		data.name = this.getName();
+		data.team = this.getTeam().getDefaultName();
+
+		data.kills = this.getKills();
+		data.assists = this.getAssists();
+		data.deaths = this.getDeaths();
+
+		data.teamkills = this.teamKills;
+		data.assists = this.getAssists();
+
+		data.arrowfired = this.shotsFired;
+		data.arrowhit = this.shotsHit;
+
+		return data;
+	}
 }

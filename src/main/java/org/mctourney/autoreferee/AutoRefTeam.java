@@ -44,6 +44,15 @@ import com.google.common.collect.Sets;
  */
 public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 {
+	public class JSONTeamData
+	{
+		public String defaultname;
+		public String customname;
+
+		public Map<String, AutoRefPlayer.JSONPlayerData> players;
+		// TODO goal data?
+	}
+
 	// reference to the match
 	protected AutoRefMatch match = null;
 
@@ -915,5 +924,18 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 
 		team1.customName = t2cname;
 		team2.customName = t1cname;
+	}
+
+	public JSONTeamData getJSONTeam()
+	{
+		JSONTeamData data = new JSONTeamData();
+		data.customname = this.customName;
+		data.defaultname = this.getDefaultName();
+
+		data.players = Maps.newHashMap();
+		for (AutoRefPlayer player : this.getPlayers())
+			data.players.put(player.getName(), player.getJSONPlayer());
+
+		return data;
 	}
 }
