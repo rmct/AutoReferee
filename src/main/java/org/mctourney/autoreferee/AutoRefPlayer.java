@@ -1079,7 +1079,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 
 		data.kills = this.getKills();
 		data.assists = this.getAssists();
-		data.deaths = this.getDeaths();
+		data.deaths = this.getDeathCount();
 
 		data.teamkills = this.teamKills;
 		data.assists = this.getAssists();
