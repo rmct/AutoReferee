@@ -68,7 +68,7 @@ public class WorkerEntitySearch extends BukkitRunnable
 				{
 					Inventory inv = ((InventoryHolder) ent).getInventory();
 					for (ItemStack item : inv.getContents())
-						submitMatches(BlockData.fromItemStack(item), ent, goals);
+						submitMatches(item, ent, goals);
 				}
 
 				// note: players get their armor checked here
@@ -78,18 +78,18 @@ public class WorkerEntitySearch extends BukkitRunnable
 					EntityEquipment eq = ((LivingEntity) ent).getEquipment();
 					for (ItemStack item : eq.getArmorContents())
 					{
-						submitMatches(BlockData.fromItemStack(item), ent, goals);
+						submitMatches(item, ent, goals);
 					}
-					submitMatches(BlockData.fromItemStack(eq.getItemInHand()), ent, goals);
+					submitMatches(eq.getItemInHand(), ent, goals);
 				}
 
 				// these 3 should be obvious
 				if (ent instanceof FallingBlock)
 					submitMatches(new BlockData(((FallingBlock) ent).getMaterial(), ((FallingBlock) ent).getBlockData()), ent, goals);
 				if (ent instanceof Item)
-					submitMatches(BlockData.fromItemStack(((Item) ent).getItemStack()), ent, goals);
+					submitMatches(((Item) ent).getItemStack(), ent, goals);
 				if (ent instanceof ItemFrame)
-					submitMatches(BlockData.fromItemStack(((ItemFrame) ent).getItem()), ent, goals);
+					submitMatches(((ItemFrame) ent).getItem(), ent, goals);
 
 
 				// drops wood when destroyed
@@ -135,12 +135,20 @@ public class WorkerEntitySearch extends BukkitRunnable
 					{
 						List<ItemStack> tradeResults = Unsafe_InspectVillagerTrades.getTradeResults((Villager) ent);
 						for (ItemStack item : tradeResults)
-							submitMatches(BlockData.fromItemStack(item), ent, goals);
+							submitMatches(item, ent, goals);
 					}
 					catch (Throwable ignored) {}
 				}
 			}
 		}
+	}
+
+	private void submitMatches(ItemStack item, Entity ent, Set<BlockData> goals)
+	{
+		if (item == null)
+			return;
+		BlockData found = BlockData.fromItemStack(item);
+		submitMatches(found, ent, goals);
 	}
 
 	private void submitMatches(BlockData found, Entity ent, Set<BlockData> goals)
