@@ -101,13 +101,12 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 		resultChecker = new WorkerValidateResults(this);
 		resultChecker.runTaskTimer(plugin, 2, 3);
 
-		final int _chunks_size = chunks.size();
-		for (int i = 0; i < _chunks_size; i += 10)
+		for (int i = 0; i < chunks.size(); i += 10)
 		{
 			if (checkComplete())
 			{ cleanup(); return; }
 
-			int max = Math.max(_chunks_size, i + 10);
+			int max = Math.max(chunks.size() - 1, i + 10);
 			List<Vector> sublist = chunks.subList(i, max);
 			Future<List<ChunkSnapshot>> future = Bukkit.getScheduler().callSyncMethod(plugin, new CallableGetSnapshots(sublist, team.getMatch().getWorld()));
 			List<ChunkSnapshot> value;
@@ -122,7 +121,7 @@ public class ObjectiveExhaustionMasterTask implements Runnable
 			{ e.printStackTrace(); quit("thread interrupted", true); return; }
 
 			// Memory consistency: variable set happens-before adding of final snapshots
-			if (i + 10 >= _chunks_size)
+			if (i + 10 >= chunks.size())
 				all_snapshots_added = true;
 			snapshots.addAll(value);
 		}
