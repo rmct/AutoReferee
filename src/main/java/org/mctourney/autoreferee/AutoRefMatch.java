@@ -2717,7 +2717,8 @@ public class AutoRefMatch implements Metadatable
 	{
 		public int compare(AutoRefTeam a, AutoRefTeam b)
 		{
-			// break ties based on goal scores (FIXME)
+			// Break ties based on number of completed objectives
+			// (wool on the monument)
 			return (int) Math.signum(b.getObjectiveScore() - a.getObjectiveScore());
 		}
 	}
