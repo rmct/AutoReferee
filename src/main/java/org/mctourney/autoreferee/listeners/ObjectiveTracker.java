@@ -26,12 +26,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.mctourney.autoreferee.AutoRefMatch;
-import org.mctourney.autoreferee.AutoRefPlayer;
-import org.mctourney.autoreferee.AutoRefTeam;
-import org.mctourney.autoreferee.AutoReferee;
+import org.mctourney.autoreferee.*;
 import org.mctourney.autoreferee.AutoRefMatch.RespawnMode;
-import org.mctourney.autoreferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
 import org.mctourney.autoreferee.goals.BlockGoal;
 import org.mctourney.autoreferee.goals.CoreGoal;
@@ -68,7 +64,7 @@ public class ObjectiveTracker implements Listener
 				{
 					if (goal.isSatisfied(match))
 					{
-						match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.OBJECTIVE_PLACED,
+						match.addEvent(new TranscriptEvent(match, TranscriptEventType.OBJECTIVE_PLACED,
 							String.format("%s has placed the %s on the Victory Monument", apl.getDisplayName(), b.getDisplayName()), goal.getTarget(), apl, b));
 						apl.addPoints(AchievementPoints.OBJECTIVE_PLACE);
 					}

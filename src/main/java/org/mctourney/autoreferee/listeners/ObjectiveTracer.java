@@ -2,10 +2,11 @@ package org.mctourney.autoreferee.listeners;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.MapDifference;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
@@ -31,16 +32,9 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.Plugin;
-import org.mctourney.autoreferee.AutoRefMatch;
-import org.mctourney.autoreferee.AutoRefPlayer;
-import org.mctourney.autoreferee.AutoRefTeam;
-import org.mctourney.autoreferee.AutoReferee;
-import org.mctourney.autoreferee.AutoRefMatch.TranscriptEvent;
+import org.mctourney.autoreferee.*;
 import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.LocationUtil;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 public class ObjectiveTracer implements Listener
 {
@@ -132,7 +126,7 @@ public class ObjectiveTracer implements Listener
 		if (!droppedOff.isEmpty() && !pickedUp.isEmpty())
 		{
 			match.addEvent(new TranscriptEvent(match,
-					TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+					TranscriptEventType.OBJECTIVE_DETAIL, String.format(
 					// {player} has dropped off {snap} and picked up {snap} from a {container} (@ {loc})
 					"%s has dropped off %s and picked up %s from a %s (@ %s)", apl.getDisplayName(),
 					droppedOff, pickedUp, apl.getInventoryDescription(),
@@ -143,7 +137,7 @@ public class ObjectiveTracer implements Listener
 		else if (!droppedOff.isEmpty())
 		{
 			match.addEvent(new TranscriptEvent(match,
-					TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+					TranscriptEventType.OBJECTIVE_DETAIL, String.format(
 					// {player} has dropped off {snap} in a {container} (@ {loc})
 					"%s has dropped off %s in a %s (@ %s)", apl.getDisplayName(),
 					droppedOff, apl.getInventoryDescription(),
@@ -154,7 +148,7 @@ public class ObjectiveTracer implements Listener
 		else if (!pickedUp.isEmpty())
 		{
 			match.addEvent(new TranscriptEvent(match,
-					TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+					TranscriptEventType.OBJECTIVE_DETAIL, String.format(
 					// {player} has picked up {snap} from a {container} (@ {loc})
 					"%s has picked up %s from a %s (@ %s)", apl.getDisplayName(),
 					pickedUp, apl.getInventoryDescription(),
@@ -185,7 +179,7 @@ public class ObjectiveTracer implements Listener
 			{
 				// TranscriptEvent.ObjectiveDetailType.PLACE
 				match.addEvent(new TranscriptEvent(match,
-						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+						TranscriptEventType.OBJECTIVE_DETAIL, String.format(
 						// {player} has placed a {goal} block (@ {loc})
 						"%s has placed a %s block (@ %s)", apl.getDisplayName(),
 						b.getDisplayName(),
@@ -218,7 +212,7 @@ public class ObjectiveTracer implements Listener
 			{
 				// TranscriptEvent.ObjectiveDetailType.BREAK_PLAYER
 				match.addEvent(new TranscriptEvent(match,
-						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+						TranscriptEventType.OBJECTIVE_DETAIL, String.format(
 						// {player} has broken a {goal} block (@ {loc})
 						"%s has broken a %s block (@ %s)", apl.getDisplayName(),
 						b.getDisplayName(),
@@ -260,7 +254,7 @@ public class ObjectiveTracer implements Listener
 			if (b.equals(item))
 			{
 				match.addEvent(new TranscriptEvent(match,
-						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+						TranscriptEventType.OBJECTIVE_DETAIL, String.format(
 						// {player} has tossed {snap} (@ {loc})
 						"%s has tossed %s (@ %s)", apl.getDisplayName(),
 						new GoalsInventorySnapshot(event.getItemDrop().getItemStack(), b),
@@ -301,7 +295,7 @@ public class ObjectiveTracer implements Listener
 
 		match.addEvent(new TranscriptEvent(
 						match,
-						TranscriptEvent.EventType.OBJECTIVE_DETAIL,
+						TranscriptEventType.OBJECTIVE_DETAIL,
 						// {player} has dropped {snap} when dying (@ {loc})
 						String.format("%s has dropped %s when dying (@ %s)",
 								apl.getDisplayName(), snapshot, LocationUtil.toBlockCoords(
@@ -338,7 +332,7 @@ public class ObjectiveTracer implements Listener
 			{
 				GoalsInventorySnapshot snap = new GoalsInventorySnapshot(event.getItem().getItemStack(), b);
 				match.addEvent(new TranscriptEvent(match,
-						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+						TranscriptEventType.OBJECTIVE_DETAIL, String.format(
 						// {player} has picked up {snap} (@ {loc})
 						"%s has picked up %s (@ %s)", apl.getDisplayName(),
 						snap,
@@ -410,7 +404,7 @@ public class ObjectiveTracer implements Listener
 			// TranscriptEvent.ObjectiveDetailType.BREAK_PLAYER
 			match.addEvent(new TranscriptEvent(
 					match,
-					TranscriptEvent.EventType.OBJECTIVE_DETAIL,
+					TranscriptEventType.OBJECTIVE_DETAIL,
 					// {entity} has exploded {snap} in {area} (@ {loc})
 					String.format("%s has exploded %s in %s (@ %s)", causeStr, snap,
 							getLocationDescription(loc, match), LocationUtil.toBlockCoords(loc)),
@@ -422,7 +416,7 @@ public class ObjectiveTracer implements Listener
 			// TranscriptEvent.ObjectiveDetailType.BREAK_NONPLAYER
 			match.addEvent(new TranscriptEvent(
 					match,
-					TranscriptEvent.EventType.OBJECTIVE_DETAIL,
+					TranscriptEventType.OBJECTIVE_DETAIL,
 					// {entity} has exploded {snap} in {area} (@ {loc})
 					String.format("%s has exploded %s in %s (@ %s)", causeStr, snap,
 							getLocationDescription(loc, match), LocationUtil.toBlockCoords(loc)),
@@ -460,7 +454,7 @@ public class ObjectiveTracer implements Listener
 				// process break
 				// TranscriptEvent.ObjectiveDetailType.BREAK_NONPLAYER
 				match.addEvent(new TranscriptEvent(match,
-						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+						TranscriptEventType.OBJECTIVE_DETAIL, String.format(
 						// {entity} has broken a {goal} in {area} (@ {loc})
 						"%s has broken a %s in %s (@ %s)", causeStr, goal,
 						getLocationDescription(loc, match),
@@ -472,7 +466,7 @@ public class ObjectiveTracer implements Listener
 				// process place
 				// TranscriptEvent.ObjectiveDetailType.PLACE
 				match.addEvent(new TranscriptEvent(match,
-						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+						TranscriptEventType.OBJECTIVE_DETAIL, String.format(
 						// {entity} has placed a {goal} in {area} (@ {loc})
 						"%s has placed a %s in %s (@ %s)", causeStr, goal,
 						getLocationDescription(loc, match),
@@ -507,7 +501,7 @@ public class ObjectiveTracer implements Listener
 			Location loc = block.getLocation();
 
 			// TranscriptEvent.ObjectiveDetailType.CONTAINER_DEATH
-			match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.OBJECTIVE_DETAIL,
+			match.addEvent(new TranscriptEvent(match, TranscriptEventType.OBJECTIVE_DETAIL,
 					// {entity} has {action}ed a {container}, spilling {snap} in {area} (@ {loc})
 					String.format(
 							"%s has %s a %s, spilling %s in %s (@ %s)", causeStr, actionStr,

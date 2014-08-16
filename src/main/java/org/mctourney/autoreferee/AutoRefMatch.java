@@ -44,7 +44,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Ambient;
 import org.bukkit.entity.Animals;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
@@ -2283,7 +2282,7 @@ public class AutoRefMatch implements Metadatable
 		primaryWorld.setTime(startClock);
 		this.setStartTime(ManagementFactory.getRuntimeMXBean().getUptime());
 
-		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_START, "Match began.", null));
+		addEvent(new TranscriptEvent(this, TranscriptEventType.MATCH_START, "Match began.", null));
 
 		// send referees the start event
 		messageReferees("match", getWorld().getName(), "start");
@@ -2385,7 +2384,7 @@ public class AutoRefMatch implements Metadatable
 				if (minutesRemaining == 0L)
 				{
 					String timelimit = (match.getTimeLimit() / 60L) + " min";
-					match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.MATCH_END,
+					match.addEvent(new TranscriptEvent(match, TranscriptEventType.MATCH_END,
 						"Match time limit reached: " + timelimit, null));
 					match.endMatch();
 				}
@@ -2795,7 +2794,7 @@ public class AutoRefMatch implements Metadatable
 		for (AutoRefPlayer apl : getPlayers()) apl.resetKillStreak();
 
 		String winner = team == null ? "" : (" " + team.getName() + " wins!");
-		addEvent(new TranscriptEvent(this, TranscriptEvent.EventType.MATCH_END, "Match ended." + winner, null));
+		addEvent(new TranscriptEvent(this, TranscriptEventType.MATCH_END, "Match ended." + winner, null));
 		setCurrentState(MatchStatus.COMPLETED);
 
 		setWinningTeam(team);
@@ -3238,142 +3237,6 @@ public class AutoRefMatch implements Metadatable
 
 		if (oldArmor != newArmor) messageReferees("player", player.getName(),
 			"armor", Integer.toString(newArmor));
-	}
-
-	/**
-	 * An event to be later reported in match statistics. Events are announced when they happen,
-	 * and each type has its own visibility level to denote who will see the even happen live.
-	 *
-	 * @author authorblues
-	 */
-	public static class TranscriptEvent
-	{
-		// TODO: TEAM visibility would be nice
-		public enum EventVisibility
-		{ NONE, REFEREES, TEAM, ALL }
-
-		public enum EventType
-		{
-			// generic match start and end events
-			MATCH_START("match-start", false, EventVisibility.NONE),
-			MATCH_END("match-end", false, EventVisibility.NONE),
-
-			// player messages (except kill streak) should be broadcast to players
-			PLAYER_DEATH("player-death", true, EventVisibility.NONE),
-			PLAYER_STREAK("player-killstreak", false, EventVisibility.NONE, ChatColor.DARK_GRAY),
-			PLAYER_DOMINATE("player-dominate", true, EventVisibility.ALL, ChatColor.DARK_GRAY),
-			PLAYER_REVENGE("player-revenge", true, EventVisibility.ALL, ChatColor.DARK_GRAY),
-
-			// objective events should not be broadcast to the other team
-			OBJECTIVE_FOUND("objective-found", true, EventVisibility.TEAM),
-			OBJECTIVE_PLACED("objective-place", true, EventVisibility.TEAM),
-			OBJECTIVE_DETAIL("objective-detail", true, EventVisibility.REFEREES),
-			;
-
-			private String eventClass;
-			private EventVisibility visibility;
-			private ChatColor color;
-			private boolean supportsFiltering;
-
-			EventType(String eventClass, boolean hasFilter, EventVisibility visibility)
-			{ this(eventClass, hasFilter, visibility, null); }
-
-			EventType(String eventClass, boolean hasFilter,
-				EventVisibility visibility, ChatColor color)
-			{
-				this.eventClass = eventClass;
-				this.visibility = visibility;
-				this.color = color;
-				this.supportsFiltering = hasFilter;
-			}
-
-			public String getEventClass()
-			{ return eventClass; }
-
-			public String getEventName()
-			{ return StringUtils.capitalize(name().toLowerCase().replaceAll("_", " ")); }
-
-			public EventVisibility getVisibility()
-			{ return visibility; }
-
-			public ChatColor getColor()
-			{ return color; }
-
-			public boolean hasFilter()
-			{ return supportsFiltering; }
-		}
-
-		private Set<Object> actors;
-		public Set<Object> getActors()
-		{ return actors; }
-
-		private Set<AutoRefPlayer> playerActors;
-
-		public Set<AutoRefPlayer> getPlayerActors()
-		{ return playerActors; }
-
-		private EventType type;
-
-		public EventType getType()
-		{ return type; }
-
-		private String message;
-
-		public String getMessage()
-		{ return ChatColor.stripColor(message); }
-
-		public String getColoredMessage()
-		{ return message; }
-
-		private Location location;
-		private long timestamp;
-
-		/**
-		 *
-		 * Supported Actor types: AutoRefPlayer, BlockData
-		 *
-		 * @param match
-		 * @param type
-		 * @param message
-		 * @param loc
-		 * @param actors
-		 */
-		public TranscriptEvent(AutoRefMatch match, EventType type, String message,
-			Location loc, Object ...actors)
-		{
-			this.type = type;
-			this.message = type.getColor() != null ? type.getColor() + message + ChatColor.RESET :
-				message.contains("" + ChatColor.COLOR_CHAR) ? message : match.colorMessage(message);
-
-			// if no location is given, use the spawn location
-			this.location = (loc != null) ? loc :
-				match.getWorld().getSpawnLocation();
-
-			this.timestamp = match.getElapsedSeconds();
-
-			this.actors = Sets.newHashSet(actors);
-			this.playerActors = Sets.newHashSet();
-			for (Object o : actors)
-				if (o instanceof AutoRefPlayer)
-					playerActors.add((AutoRefPlayer) o);
-		}
-
-		public String getTimestamp()
-		{
-			long t = getSeconds();
-			return String.format("%02d:%02d:%02d",
-				t/3600L, (t/60L)%60L, t%60L);
-		}
-
-		@Override
-		public String toString()
-		{ return String.format("[%s] %s", this.getTimestamp(), this.getColoredMessage()); }
-
-		public Location getLocation()
-		{ return location; }
-
-		public long getSeconds()
-		{ return timestamp; }
 	}
 
 	/**

@@ -23,17 +23,12 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.material.Colorable;
 
-import org.mctourney.autoreferee.AutoRefMatch;
-import org.mctourney.autoreferee.AutoRefPlayer;
-import org.mctourney.autoreferee.AutoRefTeam;
-import org.mctourney.autoreferee.AutoReferee;
-import org.mctourney.autoreferee.AutoRefMatch.TranscriptEvent;
+import org.mctourney.autoreferee.*;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.mctourney.autoreferee.listeners.GoalsInventorySnapshot;
 
 /**
  * Formats HTML match reports.
@@ -83,7 +78,7 @@ public class ReportGenerator
 		for (TranscriptEvent e : match.getTranscript())
 		{
 			transcript.write(transcriptEventHTML(match, e));
-			if (e.getType() != TranscriptEvent.EventType.MATCH_END) endEvent = e;
+			if (e.getType() != TranscriptEventType.MATCH_END) endEvent = e;
 		}
 
 		AutoRefTeam win = match.getWinningTeam();
@@ -150,7 +145,7 @@ public class ReportGenerator
 	private static String getFilterOptions()
 	{
 		List<String> options = Lists.newLinkedList();
-		for (AutoRefMatch.TranscriptEvent.EventType etype : AutoRefMatch.TranscriptEvent.EventType.values())
+		for (TranscriptEventType etype : TranscriptEventType.values())
 			if (etype.hasFilter())
 				options.add("<option value='" + etype.getEventClass() + "'>" + etype.getEventName() + "</option>");
 		return StringUtils.join(options, "");

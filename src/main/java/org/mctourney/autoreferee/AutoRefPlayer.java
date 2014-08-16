@@ -23,7 +23,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
 
 import org.mctourney.autoreferee.AutoRefMatch.RespawnMode;
-import org.mctourney.autoreferee.AutoRefMatch.TranscriptEvent;
 import org.mctourney.autoreferee.goals.AutoRefGoal;
 import org.mctourney.autoreferee.goals.BlockGoal;
 import org.mctourney.autoreferee.listeners.GoalsInventorySnapshot;
@@ -734,7 +733,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		match.messageReferees("player", getName(), "deathpos", LocationUtil.toBlockCoords(loc));
 		match.messageReferees("player", getName(), "deaths", Integer.toString(totalDeaths));
 
-		TranscriptEvent entry = new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DEATH,
+		TranscriptEvent entry = new TranscriptEvent(match, TranscriptEventType.PLAYER_DEATH,
 			e.getDeathMessage(), loc, this, killer);
 
 		match.addEvent(entry);
@@ -759,7 +758,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	{
 		// if it meets the requirements, report it
 		if (totalStreak >= MIN_KILLSTREAK)
-			getMatch().addEvent(new TranscriptEvent(getMatch(), TranscriptEvent.EventType.PLAYER_STREAK,
+			getMatch().addEvent(new TranscriptEvent(getMatch(), TranscriptEventType.PLAYER_STREAK,
 				String.format("%s had a %d-kill streak!", this.getName(), totalStreak), null, this));
 
 		// reset to zero
@@ -789,14 +788,14 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		if (getStreak(apl) + 1 == MIN_DOMINATE)
 		{
 			match.messageReferees("player", getName(), "dominate", apl.getName());
-			match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_DOMINATE,
+			match.addEvent(new TranscriptEvent(match, TranscriptEventType.PLAYER_DOMINATE,
 				String.format("%s is dominating %s", this.getName(), apl.getName()), apl.getLocation(), apl, this));
 		}
 
 		if (apl.isDominating(this))
 		{
 			match.messageReferees("player", getName(), "revenge", apl.getName());
-			match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.PLAYER_REVENGE,
+			match.addEvent(new TranscriptEvent(match, TranscriptEventType.PLAYER_REVENGE,
 				String.format("%s got revenge on %s", this.getName(), apl.getName()), loc, this, apl));
 			this.addPoints(AchievementPoints.REVENGE);
 		}
@@ -889,7 +888,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 						// generate a transcript event for being the first
 						String m = String.format("%s is carrying the first %s!", getDisplayName(), goal.getItem().getDisplayName());
 						getMatch().addEvent(new TranscriptEvent(getMatch(),
-							TranscriptEvent.EventType.OBJECTIVE_FOUND, m, getLocation(), this, goal.getItem()));
+							TranscriptEventType.OBJECTIVE_FOUND, m, getLocation(), this, goal.getItem()));
 						this.addPoints(AchievementPoints.OBJECTIVE_FOUND);
 
 						// store the player's location as the last objective location
