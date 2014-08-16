@@ -310,6 +310,7 @@ public class ObjectiveTracer implements Listener
 						apl.getLocation(), unpack(snapshot, apl, apl.getKiller())
 				)
 		);
+		apl.clearActiveInventoryInfo();
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
