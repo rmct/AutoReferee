@@ -3392,7 +3392,7 @@ public class AutoRefMatch implements Metadatable
 		{
 			case REFEREES: recipients = getReferees(false); break;
 			case TEAM:
-				recipients = Sets.newHashSet();
+				recipients = getReferees(false);
 				for (AutoRefPlayer p : event.getPlayerActors())
 				{
 					for (AutoRefPlayer teamPlayer : p.getTeam().getPlayers())
