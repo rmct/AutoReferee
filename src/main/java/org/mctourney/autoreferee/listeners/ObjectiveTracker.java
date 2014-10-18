@@ -31,9 +31,6 @@ import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.AutoRefMatch.RespawnMode;
-import org.mctourney.autoreferee.AutoRefMatch.TranscriptEvent;
-import org.mctourney.autoreferee.goals.AutoRefGoal;
-import org.mctourney.autoreferee.goals.BlockGoal;
 import org.mctourney.autoreferee.goals.CoreGoal;
 import org.mctourney.autoreferee.util.AchievementPoints;
 import org.mctourney.autoreferee.util.BlockData;
@@ -47,36 +44,7 @@ public class ObjectiveTracker implements Listener
 		plugin = (AutoReferee) p;
 	}
 
-	/* TRACKING OBJECTIVES/WOOL */
-
-	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
-	public void blockPlace(BlockPlaceEvent event)
-	{
-		Player pl = event.getPlayer();
-		Block block = event.getBlock();
-
-		AutoRefMatch match = plugin.getMatch(block.getWorld());
-		AutoRefPlayer apl = match == null ? null : match.getPlayer(pl);
-
-		if (match != null && apl != null)
-		{
-			if (apl.getTeam() != null)
-				for (BlockGoal goal : apl.getTeam().getTeamGoals(BlockGoal.class))
-			{
-				BlockData b = goal.getItem();
-				if (b.matchesBlock(block) && goal.getItemStatus() != AutoRefGoal.ItemStatus.TARGET)
-				{
-					if (goal.isSatisfied(match))
-					{
-						match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.OBJECTIVE_PLACED,
-							String.format("%s has placed the %s on the Victory Monument", apl.getDisplayName(), b.getDisplayName()), goal.getTarget(), apl, b));
-						apl.addPoints(AchievementPoints.OBJECTIVE_PLACE);
-					}
-				}
-			}
-			match.checkWinConditions();
-		}
-	}
+	// Note: Wool on VM has been moved to ObjectiveTracer
 
 	/* TRACKING OBJECTIVES/BED */
 

@@ -36,6 +36,7 @@ import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.AutoRefMatch.TranscriptEvent;
+import org.mctourney.autoreferee.goals.AutoRefGoal;
 import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.LocationUtil;
 
@@ -179,19 +180,31 @@ public class ObjectiveTracer implements Listener
 		if (apl.getTeam() == null)
 		{ return; }
 
-		for (BlockData b : apl.getTeam().getObjectives())
+		for (Map.Entry<BlockData, AutoRefGoal> entry :
+				apl.getTeam().getGoalsByObjective().entrySet())
 		{
+			BlockData b = entry.getKey();
+			AutoRefGoal g = entry.getValue();
 			if (b.matchesBlock(block))
 			{
-				// TranscriptEvent.ObjectiveDetailType.PLACE
-				match.addEvent(new TranscriptEvent(match,
-						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
-						// {player} has placed a {goal} block (@ {loc})
-						"%s has placed a %s block (@ %s)", apl.getDisplayName(),
-						b.getDisplayName(),
-						LocationUtil.toBlockCoords(block.getLocation())), block
-						.getLocation(), apl, b
-				));
+				if (g.getItemStatus() != AutoRefGoal.ItemStatus.TARGET
+						&& g.isSatisfied(match)) {
+					match.addEvent(new TranscriptEvent(match,
+							TranscriptEvent.EventType.OBJECTIVE_PLACED, String.format(
+							"%s has placed the %s on the Victory Monument!",
+							apl.getDisplayName(), b.getDisplayName()), block.getLocation(), apl, b
+					));
+				} else {
+					// TranscriptEvent.ObjectiveDetailType.PLACE
+					match.addEvent(new TranscriptEvent(match,
+							TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+							// {player} has placed a {goal} block (@ {loc})
+							"%s has placed a %s block (@ %s)", apl.getDisplayName(),
+							b.getDisplayName(),
+							LocationUtil.toBlockCoords(block.getLocation())),
+							block.getLocation(), apl, b
+					));
+				}
 			}
 		}
 	}

@@ -833,6 +833,20 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		return objectives;
 	}
 
+	/**
+	 * Gets a list of team objectives for this match.
+	 *
+	 * @return collection of block types to be retrieved
+	 */
+	public Map<BlockData, AutoRefGoal> getGoalsByObjective()
+	{
+		Map<BlockData, AutoRefGoal> goalsByObjective = Maps.newHashMap();
+		for (AutoRefGoal goal : goals)
+			if (goal.hasItem()) goalsByObjective.put(goal.getItem(), goal);
+		goalsByObjective.remove(BlockData.AIR);
+		return goalsByObjective;
+	}
+
 	public boolean canCraft(BlockData bdata)
 	{
 		for (AutoRefGoal goal : goals)
