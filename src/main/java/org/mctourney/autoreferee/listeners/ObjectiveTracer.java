@@ -432,8 +432,8 @@ public class ObjectiveTracer implements Listener
 			match.addEvent(new TranscriptEvent(
 					match,
 					TranscriptEvent.EventType.OBJECTIVE_DETAIL,
-					// {entity} has exploded {snap} in {area} (@ {loc})
-					String.format("%s has exploded %s in %s (@ %s)", causeStr, snap,
+					// {entity} has exploded {snap} block(s) in {area} (@ {loc})
+					String.format("%s has exploded %s block(s) in %s (@ %s)", causeStr, snap,
 							getLocationDescription(loc, match), LocationUtil.toBlockCoords(loc)),
 					loc, unpack(snap, currentResponsibleTntPlayer)
 			));
@@ -444,8 +444,8 @@ public class ObjectiveTracer implements Listener
 			match.addEvent(new TranscriptEvent(
 					match,
 					TranscriptEvent.EventType.OBJECTIVE_DETAIL,
-					// {entity} has exploded {snap} in {area} (@ {loc})
-					String.format("%s has exploded %s in %s (@ %s)", causeStr, snap,
+					// {entity} has exploded {snap} block(s) in {area} (@ {loc})
+					String.format("%s has exploded %s block(s) in %s (@ %s)", causeStr, snap,
 							getLocationDescription(loc, match), LocationUtil.toBlockCoords(loc)),
 					loc, unpack(snap)
 			));
@@ -582,6 +582,7 @@ public class ObjectiveTracer implements Listener
 
 	private String getLocationDescription(Location loc, AutoRefMatch match)
 	{
+		// TODO map-defined points of interest
 		Validate.isTrue(match.getWorld().equals(loc.getWorld()),
 				"The provided location must be within the provided match!");
 		if (match.inStartRegion(loc))
