@@ -25,6 +25,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
@@ -511,6 +512,40 @@ public class ObjectiveTracer implements Listener
 			// process potential break
 			checkContainerBreak(block, goals, match, causeStr);
 		}
+	}
+
+	@EventHandler
+	public void traceDespawn(ItemDespawnEvent event)
+	{
+		if (event.getEntity() == null)
+		{ return; }
+		if (event.getEntity().getItemStack() == null)
+		{ return; }
+
+		Location loc = event.getEntity().getLocation();
+
+		AutoRefMatch match = plugin.getMatch(loc.getWorld());
+
+		if (match == null)
+		{ return; }
+
+		Set<AutoRefTeam> teams = match.getTeams();
+		Set<BlockData> goals = Sets.newHashSet();
+		for (AutoRefTeam te : teams)
+			goals.addAll(te.getObjectives());
+
+		if (goals.isEmpty())
+		{ return; }
+
+		GoalsInventorySnapshot snap = new GoalsInventorySnapshot(event.getEntity().getItemStack(), goals);
+
+		match.addEvent(new TranscriptEvent(match,
+				TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
+					// "A {snap} item entity has EXPIRED in {area} (@ {loc})"
+					"A %s item entity has EXPIRED in %s (@ %s)",
+					snap, getLocationDescription(loc, match), LocationUtil.toBlockCoords(loc)
+				), loc, unpack(snap)
+		));
 	}
 
 	// Not an @EventHandler
