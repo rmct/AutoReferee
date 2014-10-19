@@ -16,6 +16,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -369,6 +370,8 @@ public class ObjectiveTracer implements Listener
 				{
 					apl.getBeforeOpeningInventorySnapshot().addInPlace(pickupItems);
 				}
+
+				untrackItem(event.getItem());
 			}
 		}
 	}
@@ -540,6 +543,18 @@ public class ObjectiveTracer implements Listener
 					), loc, unpack(snap)
 			));
 		}
+	}
+
+	// Item entity tracker
+
+	private void trackItem(Item item)
+	{
+		// todo
+	}
+
+	private void untrackItem(Item item)
+	{
+		// todo
 	}
 
 	// Utility functions
