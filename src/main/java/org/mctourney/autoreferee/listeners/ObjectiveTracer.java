@@ -272,13 +272,19 @@ public class ObjectiveTracer implements Listener
 		{
 			if (b.equals(item))
 			{
+				GoalsInventorySnapshot droppedItems = new GoalsInventorySnapshot(event.getItemDrop().getItemStack(), b);
 				match.addEvent(new TranscriptEvent(match,
 						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
-						// {player} has tossed {snap} (@ {loc})
-						"%s has tossed %s (@ %s)", apl.getDisplayName(),
-						new GoalsInventorySnapshot(event.getItemDrop().getItemStack(), b),
-						LocationUtil.toBlockCoords(pl.getLocation())), pl.getLocation(), apl, b
+							// {player} has tossed {snap} (@ {loc})
+							"%s has tossed %s (@ %s)", apl.getDisplayName(),
+							droppedItems, LocationUtil.toBlockCoords(pl.getLocation())),
+						pl.getLocation(), apl, b
 				));
+
+				if (apl.hasActiveInventoryInfo())
+				{
+					apl.getBeforeOpeningInventorySnapshot().subtractInPlace(droppedItems);
+				}
 			}
 		}
 	}
@@ -350,18 +356,19 @@ public class ObjectiveTracer implements Listener
 		{
 			if (b.equals(item))
 			{
-				GoalsInventorySnapshot snap = new GoalsInventorySnapshot(event.getItem().getItemStack(), b);
+				GoalsInventorySnapshot pickupItems = new GoalsInventorySnapshot(event.getItem().getItemStack(), b);
 				match.addEvent(new TranscriptEvent(match,
 						TranscriptEvent.EventType.OBJECTIVE_DETAIL, String.format(
-						// {player} has picked up {snap} (@ {loc})
-						"%s has picked up %s (@ %s)", apl.getDisplayName(),
-						snap,
-						LocationUtil.toBlockCoords(pl.getLocation())), pl.getLocation(), apl, b
+							// {player} has picked up {snap} (@ {loc})
+							"%s has picked up %s (@ %s)", apl.getDisplayName(),
+							pickupItems, LocationUtil.toBlockCoords(pl.getLocation())),
+						pl.getLocation(), apl, b
 				));
 
-				GoalsInventorySnapshot inventorySnapshot = apl.getBeforeOpeningInventorySnapshot();
-				if (inventorySnapshot != null)
-				{ inventorySnapshot.subtractInPlace(snap); }
+				if (apl.hasActiveInventoryInfo())
+				{
+					apl.getBeforeOpeningInventorySnapshot().addInPlace(pickupItems);
+				}
 			}
 		}
 	}

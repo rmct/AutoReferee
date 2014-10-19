@@ -349,6 +349,9 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	public GoalsInventorySnapshot getBeforeOpeningInventorySnapshot()
 	{ return beforeOpeningInventory; }
 
+	public boolean hasActiveInventoryInfo()
+	{ return beforeOpeningInventory != null; }
+
 	public String getInventoryDescription()
 	{ return ChatColor.GOLD + StringUtils.capitalize(inventoryDescription.toLowerCase()); }
 

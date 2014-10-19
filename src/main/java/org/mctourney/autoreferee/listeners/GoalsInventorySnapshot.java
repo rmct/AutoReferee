@@ -137,6 +137,18 @@ public class GoalsInventorySnapshot extends HashMap<BlockData, Integer>
 		return Maps.difference(this, other);
 	}
 
+	public void addInPlace(GoalsInventorySnapshot other)
+	{
+		for (Map.Entry<BlockData, Integer> entry : other.entrySet())
+			addInPlace(entry.getKey(), entry.getValue());
+	}
+
+	public void addInPlace(BlockData key, Integer value)
+	{
+		Validate.notNull(value);
+		put(key, getInt(key) + value);
+	}
+
 	public void subtractInPlace(GoalsInventorySnapshot other)
 	{
 		for (Map.Entry<BlockData, Integer> entry : other.entrySet())
