@@ -2739,14 +2739,14 @@ public class AutoRefMatch implements Metadatable
 		if (currentlyTied) return;
 		currentlyTied = true;
 
+		// let the console know that the match cannot be ruled upon
+		AutoReferee.log("Match tied. Deferring to referee intervention...");
+
 		for (Player ref : getReferees())
 		{
 			ref.sendMessage(ChatColor.DARK_GRAY + "This match is currently tied.");
 			ref.sendMessage(ChatColor.DARK_GRAY + "Use '/autoref endmatch <team>' to declare a winner.");
 		}
-
-		// let the console know that the match cannot be ruled upon
-		AutoReferee.log("Match tied. Deferring to referee intervention...");
 		if (clockTask != null) clockTask.cancel();
 	}
 
