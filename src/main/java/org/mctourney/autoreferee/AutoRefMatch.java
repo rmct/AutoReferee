@@ -113,9 +113,6 @@ public class AutoRefMatch implements Metadatable
 	// modify the internal NMS scoreboard instance with a custom scoreboard
 	private static final boolean REPLACE_INTERNAL_SCOREBOARD = false;
 
-	private static final String GENERIC_NOTIFICATION_MESSAGE =
-		"A notification has been sent. Type /artp to teleport.";
-
 	// online map list
 	private static String MAPREPO = "http://autoreferee.s3.amazonaws.com/";
 
@@ -758,7 +755,7 @@ public class AutoRefMatch implements Metadatable
 		this.setLastNotificationLocation(loc);
 
 		// send a notification message
-		if (message.trim().isEmpty()) message = GENERIC_NOTIFICATION_MESSAGE;
+		if (message.trim().isEmpty()) message = "A notification has been sent. Type /artp to teleport.";
 		String m = ChatColor.DARK_GRAY + "[N] " + message;
 		for (Player pl : this.getReferees(false)) pl.sendMessage(m);
 	}
