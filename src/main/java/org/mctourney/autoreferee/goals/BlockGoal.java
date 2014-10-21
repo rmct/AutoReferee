@@ -3,9 +3,7 @@ package org.mctourney.autoreferee.goals;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-
 import org.jdom2.Element;
-
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.util.BlockData;

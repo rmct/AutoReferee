@@ -9,8 +9,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -104,7 +102,6 @@ public class SpectatorListener implements PluginMessageListener, Listener
 			AutoRefMatch match = plugin.getMatch(player.getWorld());
 
 			if (match == null || !match.isSpectator(player)) return;
-			AutoRefSpectator spec = match.getSpectator(player);
 
 			String[] parts = message.trim().split("\\|");
 			if ("tp".equalsIgnoreCase(parts[0]))
@@ -355,7 +352,6 @@ public class SpectatorListener implements PluginMessageListener, Listener
 		if (match == null) return;
 
 		Block block;
-		BlockState blockState;
 
 		// this event is not an "item" event
 		if (!event.hasItem()) return;
@@ -401,7 +397,6 @@ public class SpectatorListener implements PluginMessageListener, Listener
 
 				// determine who owns the region that the clicked block is in
 				block = event.getClickedBlock();
-				blockState = block.getState();
 
 				// get the start mechanism
 				AutoRefMatch.StartMechanism sm = match.toggleStartMech(block);

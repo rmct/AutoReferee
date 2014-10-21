@@ -31,8 +31,8 @@ public abstract class AutoRefGoal
 	public abstract Element toElement();
 
 	// make a copy of this goal
-	public abstract <T extends AutoRefGoal> T copy();
-	public abstract <T extends AutoRefGoal> T copy(AutoRefTeam team);
+	public abstract AutoRefGoal copy();
+	public abstract AutoRefGoal copy(AutoRefTeam team);
 
 	/**
 	 * Represents the status of a tracked item.

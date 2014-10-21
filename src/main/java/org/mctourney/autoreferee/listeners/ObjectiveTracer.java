@@ -589,7 +589,6 @@ public class ObjectiveTracer implements Listener
 		// todo
 	}
 
-	@SuppressWarnings("unused")
 	private void untrackItem(Item item)
 	{
 		// todo
