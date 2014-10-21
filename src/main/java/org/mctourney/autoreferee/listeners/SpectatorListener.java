@@ -281,34 +281,6 @@ public class SpectatorListener implements PluginMessageListener, Listener
 		}
 	}
 
-	@EventHandler(priority=EventPriority.HIGHEST)
-	public void spectatorInfo(PlayerInteractEvent event)
-	{
-		Player player = event.getPlayer();
-		AutoRefMatch match = plugin.getMatch(player.getWorld());
-
-		// if this is a match and the person is just a spectator
-		if (match == null || !match.isSpectator(player)) return;
-
-		// spawners
-		if (event.hasBlock() && event.getClickedBlock().getState() instanceof CreatureSpawner)
-		{
-			CreatureSpawner spawner = (CreatureSpawner) event.getClickedBlock().getState();
-			String spawnerType = spawner.getCreatureTypeName();
-
-			if (spawner.getSpawnedType() == null) spawnerType = "<Unknown>";
-			else switch (spawner.getSpawnedType())
-			{
-				case DROPPED_ITEM:
-					// TODO - Not implemented in CraftBukkit:
-					// a method to determine the data for the dropped item
-					break;
-			}
-
-			player.sendMessage(ChatColor.DARK_GRAY + String.format("%s Spawner", spawnerType));
-		}
-	}
-
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void foreignInventoryEvent(InventoryClickEvent event)
 	{

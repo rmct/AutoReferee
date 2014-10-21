@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.MapDifference;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
@@ -582,11 +583,13 @@ public class ObjectiveTracer implements Listener
 
 	// Item entity tracker
 
+	@SuppressWarnings("unused")
 	private void trackItem(Item item)
 	{
 		// todo
 	}
 
+	@SuppressWarnings("unused")
 	private void untrackItem(Item item)
 	{
 		// todo
