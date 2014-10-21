@@ -2672,36 +2672,35 @@ public class AutoRefMatch implements Metadatable
 
 	private void _checkWinConditions()
 	{
-		if (getCurrentState().inProgress())
+		if (!getCurrentState().inProgress())
+		{ return; }
+
+		Set<AutoRefTeam> winningTeams = Sets.newHashSet();
+		for (AutoRefTeam team : this.teams)
 		{
-			Set<AutoRefTeam> winningTeams = Sets.newHashSet();
-			for (AutoRefTeam team : this.teams)
-			{
-				// pass this information along to the scoreboard
-				team.updateObjectives();
+			// pass this information along to the scoreboard
+			team.updateObjectives();
 
-				// if there are no win conditions set, skip this team
-				if (team.getTeamGoals().size() == 0) continue;
+			// if there are no win conditions set, skip this team
+			if (team.getTeamGoals().size() == 0) continue;
 
-				// check all win condition blocks (AND together)
-				boolean win = true;
-				for (AutoRefGoal goal : team.getTeamGoals())
-					win &= goal.isSatisfied(this);
+			// check all win condition blocks (AND together)
+			boolean win = true;
+			for (AutoRefGoal goal : team.getTeamGoals())
+				win &= goal.isSatisfied(this);
 
-				// force an update of objective status
-				team.updateBlockGoals();
+			// force an update of objective status
+			team.updateBlockGoals();
 
-				// if the team won, mark the match as completed
-				if (win) winningTeams.add(team);
-			}
-
-			// if there is one "winning" team, they win
-			if (winningTeams.size() == 1)
-				endMatch(Iterables.getOnlyElement(winningTeams));
-
-			// if we are just waiting for this match to end, check always
-			else if (currentlyTied) endMatch();
+			// if the team won, mark the match as completed
+			if (win) winningTeams.add(team);
 		}
+		// if there is one "winning" team, they win
+		if (winningTeams.size() == 1)
+			endMatch(Iterables.getOnlyElement(winningTeams));
+
+		// if we are just waiting for this match to end, check always
+		else if (currentlyTied) endMatch();
 	}
 
 	// helper class for terminating world, synchronous task
