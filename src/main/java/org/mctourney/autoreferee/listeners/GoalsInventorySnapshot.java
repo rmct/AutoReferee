@@ -12,7 +12,6 @@ import com.google.common.collect.Maps;
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.mctourney.autoreferee.util.BlockData;

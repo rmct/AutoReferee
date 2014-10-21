@@ -85,15 +85,21 @@ public class CombatListener implements Listener
 				EntityDamageByEntityEvent ed = (EntityDamageByEntityEvent) lastDmg;
 				switch (ed.getDamager().getType())
 				{
-					case CREEPER: dmsg = victim.getName() + " was blown up by Creeper"; break;
+					case CREEPER:
+						dmsg = victim.getName() + " was blown up by Creeper";
+						break;
 					case PRIMED_TNT:
 						dmsg = victim.getName() + " was blown up by TNT";
 						if (plugin.getTNTOwner(ed.getDamager()) != vapl)
 						{
 							kapl = plugin.getTNTOwner(ed.getDamager());
-							if (kapl != null) dmsg = victim.getName() + " was blown up by " + kapl.getName();
+							if (kapl != null)
+								dmsg = victim.getName() + " was blown up by " + kapl.getName();
 						}
-					break;
+						break;
+					default:
+						// noop
+						break;
 				}
 
 				if (ed.getDamager() instanceof Projectile)
