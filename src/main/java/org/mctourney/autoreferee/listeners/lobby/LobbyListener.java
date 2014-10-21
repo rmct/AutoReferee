@@ -141,6 +141,7 @@ public abstract class LobbyListener implements CommandHandler, Listener
 			if (!player.hasPlayedBefore())
 				player.teleport(player.getWorld().getSpawnLocation());
 			PlayerUtil.setGameMode(player, GameMode.ADVENTURE, true);
+			PlayerUtil.reset(player);
 		}
 	}
 
