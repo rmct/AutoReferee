@@ -11,6 +11,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -34,7 +35,7 @@ import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoReferee;
 import org.mctourney.autoreferee.regions.AutoRefRegion.Flag;
 import org.mctourney.autoreferee.util.AchievementPoints;
-import org.mctourney.autoreferee.util.SportBukkitUtil;
+//import org.mctourney.autoreferee.util.SportBukkitUtil;
 
 import com.google.common.collect.Maps;
 
@@ -344,16 +345,34 @@ public class CombatListener implements Listener
 	public void explosionPrime(ExplosionPrimeEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
-		if (!SportBukkitUtil.hasSportBukkitApi() || match == null) return;
+		// if (!SportBukkitUtil.hasSportBukkitApi() || match == null) return;
 
 		if (event.getEntityType() == EntityType.PRIMED_TNT)
 		{
-			Location tntLocation = event.getEntity().getLocation().getBlock().getLocation();
-			AutoRefPlayer apl = tntPropagation.remove(tntLocation);
+			TNTPrimed entity = (TNTPrimed) event.getEntity();
+			AutoRefPlayer apl;
+
+			Location tntLocation = entity.getLocation().getBlock().getLocation();
+			apl = tntPropagation.remove(tntLocation);
 
 			// if there was no propagation chain
 			if (apl == null)
 			{
+				// Try the new API
+				try
+				{
+					Entity tntSource = entity.getSource();
+					if (tntSource instanceof Player)
+						apl = match.getPlayer((Player) tntSource);
+				}
+				catch (Throwable ignored)
+				{}
+			}
+
+			// Try position-based inference
+			if (apl == null)
+			{
+
 				// try to determine if this was the first tnt in a chain
 				if ((apl = match.getNearestPlayer(tntLocation)) == null) return;
 
@@ -362,7 +381,7 @@ public class CombatListener implements Listener
 			}
 
 			// add an owner for this tnt object
-			if (apl != null) plugin.setTNTOwner(event.getEntity(), apl);
+			if (apl != null) plugin.setTNTOwner(entity, apl);
 		}
 	}
 
