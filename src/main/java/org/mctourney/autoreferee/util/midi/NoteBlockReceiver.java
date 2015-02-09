@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.Sound;
-import org.bukkit.entity.Player;
 
 import com.google.common.collect.Maps;
 
@@ -22,7 +21,7 @@ public class NoteBlockReceiver implements Receiver
 {
 	private static final float VOLUME_RANGE = 10.0f;
 
-	private final Set<Player> listeners;
+	private final Set<UUID> listeners;
 	private final Map<Integer, Integer> channelPatches;
 
 	public NoteBlockReceiver(Set<Player> listeners) throws InvalidMidiDataException, IOException
@@ -41,16 +40,16 @@ public class NoteBlockReceiver implements Receiver
 
 			switch (smessage.getCommand())
 			{
-				case ShortMessage.PROGRAM_CHANGE:
+				case PROGRAM_CHANGE:
 					int patch = smessage.getData1();
 					channelPatches.put(chan, patch);
 					break;
 
-				case ShortMessage.NOTE_ON:
+				case NOTE_ON:
 					this.playNote(smessage);
 					break;
 
-				case ShortMessage.NOTE_OFF:
+				case NOTE_OFF:
 					break;
 			}
 		}
@@ -70,8 +69,8 @@ public class NoteBlockReceiver implements Receiver
 		Sound instrument = Sound.NOTE_PIANO;
 		if (patch != null) instrument = MidiUtil.patchToInstrument(patch);
 
-		for (Player player : listeners)
-			player.playSound(player.getLocation(), instrument, volume, pitch);
+		for (UUID uuid : listeners)
+			Bukkit.getServer().getPlayer(uuid).playSound(player.getLocation(), instrument, volume, pitch);
 	}
 
 	@Override
