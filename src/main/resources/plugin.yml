@@ -1,7 +1,7 @@
 name: AutoReferee
 main: org.mctourney.autoreferee.AutoReferee
-version: 2.6-SNAPSHOT
-author: authorblues
+version: 2.7-UNOFFICIAL FOR 1.8
+author: "authorblues"
 load: startup
 
 softdepend:
