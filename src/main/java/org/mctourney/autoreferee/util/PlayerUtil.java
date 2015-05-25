@@ -157,7 +157,7 @@ public class PlayerUtil
 	public static void setSpectatorSettings(Player player, boolean spec, GameMode pgm)
 	{
 		// gamemode is the obvious issue
-		PlayerUtil.setGameMode(player, spec ? GameMode.CREATIVE : pgm);
+		PlayerUtil.setGameMode(player, spec ? GameMode.SPECTATOR : pgm);
 
 		// basic player settings depending on role
 		player.setAllowFlight(spec);
