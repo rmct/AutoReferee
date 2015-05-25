@@ -9,14 +9,14 @@
 
   <groupId>org.mctourney.autoreferee</groupId>
   <artifactId>AutoReferee</artifactId>
-  <version>2.6-SNAPSHOT</version>
+  <version>2.7-UNOFFICIAL</version>
   <name>AutoReferee Core Plugin</name>
   <url>http://www.reddit.com/r/mctourney</url>
   <description>Bukkit plugin for automatically refereeing competitive Minecraft matches.</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <bukkit.version>1.5.1-R0.2</bukkit.version>
+    <bukkit.version>1.8.3-R0.1-SNAPSHOT</bukkit.version>
     <java.target.version>1.6</java.target.version>
   </properties>
 
@@ -64,6 +64,8 @@
       <groupId>org.bukkit</groupId>
       <artifactId>bukkit</artifactId>
       <version>${bukkit.version}</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/bukkit/bukkit-${bukkit.version}-shaded.jar</systemPath>
     </dependency>
 
     <dependency>
