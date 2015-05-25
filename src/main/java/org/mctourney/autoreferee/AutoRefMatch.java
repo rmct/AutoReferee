@@ -1691,7 +1691,7 @@ public class AutoRefMatch implements Metadatable
 		Player pl = apl.getPlayer();
 		if (pl != null)
 		{
-			messageReferee(ref, "player", apl.getName(), "hp", Integer.toString(pl.getHealth()));
+			messageReferee(ref, "player", apl.getName(), "hp", Integer.toString((int) pl.getHealth()));
 			messageReferee(ref, "player", apl.getName(), "armor", Integer.toString(ArmorPoints.fromPlayer(pl)));
 		}
 
