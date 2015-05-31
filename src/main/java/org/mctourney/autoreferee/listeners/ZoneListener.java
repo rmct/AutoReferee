@@ -1,4 +1,4 @@
-package org.mctourney.autoreferee.listeners;
+  package org.mctourney.autoreferee.listeners;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -87,8 +87,8 @@ public class ZoneListener implements Listener
 		AutoRefPlayer apl = match.getPlayer(player);
 		if (apl == null)
 		{
-			// if the player is not on a team and has left the start area, teleport back
-			if (!match.isSpectator(player) && !match.inStartRegion(event.getTo()) && onGround)
+			// if the player is not on a team and has left the start area and is not in creative, teleport back
+			if (!match.isSpectator(player) && !match.inStartRegion(event.getTo()) && onGround && player.getGameMode() != GameMode.CREATIVE)
 			{
 				player.teleport(match.getWorldSpawn());
 				player.setFallDistance(0.0f);
