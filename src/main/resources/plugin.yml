@@ -70,6 +70,9 @@ commands:
   scoreboard:
     description: Replacement for Bukkit's /scoreboard command
     usage: /<command> ...
+  time:
+    description: Replacement for Minecraft's /time command
+    usage: /<command> [set, add] <value>
 
 permissions:
   autoreferee.*:
