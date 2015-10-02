@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -78,6 +79,16 @@ public class PlayerUtil
 		for (PotionEffect effect : player.getActivePotionEffects())
 			player.removePotionEffect(effect.getType());
 	}
+	
+	/**
+	 * Clears player's ender chest
+	 */
+	public static void clearEnderChest(Player player)
+	{
+	    // clear the ender chest
+	    Inventory enderChest = player.getEnderChest();
+	    enderChest.clear();
+	}
 
 	/**
 	 * Performs all PlayerUtil actions on this player.
@@ -95,6 +106,9 @@ public class PlayerUtil
 
 		// remove potion and beacon effects
 		removeStatusEffects(player);
+		
+		// clear their ender chest
+		clearEnderChest(player);
 	}
 
 	private static class BufferedGameModeChangeTask extends BukkitRunnable
