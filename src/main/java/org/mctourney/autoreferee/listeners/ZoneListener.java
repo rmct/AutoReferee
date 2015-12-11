@@ -18,6 +18,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
@@ -37,7 +38,6 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.plugin.Plugin;
-
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoRefTeam;
@@ -318,6 +318,33 @@ public class ZoneListener implements Listener
 		}
 	}
 
+	/*
+	 * Prevents liquids from flowing in regions flagged with NO_FLOW
+	 */
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockFromTo(BlockFromToEvent event) {			
+		Block block = event.getToBlock();
+		AutoRefMatch match = plugin.getMatch(block.getWorld());
+		
+		if (match == null) return;
+		
+		Location location = block.getLocation();
+		
+		// .getToBlock() is strange so we must correct the block's location
+		switch (event.getFace()) {
+		case EAST:
+			location = location.add(1d, 0d, 0d);
+		case SOUTH:
+			location = location.add(0d, 0d, 1d);
+		default:
+			break;
+		}
+		
+		if (match.hasFlag(location, AutoRefRegion.Flag.NO_FLOW)) {
+			event.setCancelled(true); return;
+		}
+	}
+	
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void entityInteract(PlayerInteractEntityEvent event)
 	{
