@@ -106,9 +106,6 @@ public class PlayerUtil
 
 		// remove potion and beacon effects
 		removeStatusEffects(player);
-		
-		// clear their ender chest
-		clearEnderChest(player);
 	}
 
 	private static class BufferedGameModeChangeTask extends BukkitRunnable

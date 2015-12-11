@@ -2337,6 +2337,9 @@ public class AutoRefMatch implements Metadatable
 			}
 		}
 
+		// reset enderchests
+		for (AutoRefPlayer apl : getPlayers()) PlayerUtil.clearEnderChest(apl.getPlayer());
+		
 		// set teams as started
 		for (AutoRefTeam team : getTeams())
 			team.startMatch();
