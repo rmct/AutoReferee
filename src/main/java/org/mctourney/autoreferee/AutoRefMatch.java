@@ -2339,8 +2339,9 @@ public class AutoRefMatch implements Metadatable
 
 		// reset enderchests and bed spawns
 		for (AutoRefPlayer apl : getPlayers()) {
-			PlayerUtil.clearEnderChest(apl.getPlayer());
-			PlayerUtil.clearBedSpawn(apl.getPlayer());
+			Player player = apl.getPlayer();
+			PlayerUtil.clearEnderChest(player);
+			PlayerUtil.clearBedSpawn(player);
 		}
 		
 		// set teams as started
