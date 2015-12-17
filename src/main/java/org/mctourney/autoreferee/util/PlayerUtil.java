@@ -89,6 +89,14 @@ public class PlayerUtil
 	    Inventory enderChest = player.getEnderChest();
 	    enderChest.clear();
 	}
+	
+	/**
+	 * Clears player's bed spawn
+	 */
+	public static void clearBedSpawn(Player player)
+	{
+		player.setBedSpawnLocation(null, true);
+	}
 
 	/**
 	 * Performs all PlayerUtil actions on this player.
