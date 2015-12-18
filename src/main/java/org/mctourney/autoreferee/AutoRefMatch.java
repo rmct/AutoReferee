@@ -349,7 +349,10 @@ public class AutoRefMatch implements Metadatable
 	 * @param status new match status
 	 */
 	public void setCurrentState(MatchStatus status)
-	{ this.currentState = status; this.setupSpectators(); }
+	{
+		this.currentState = status;
+		if (!status.isBeforeMatch()) this.setupSpectators();
+	}
 
 	// custom scoreboard
 	protected final Scoreboard scoreboard;
