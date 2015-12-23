@@ -18,7 +18,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -531,21 +530,6 @@ public class ZoneListener implements Listener
 	public void explosion(EntityExplodeEvent event)
 	{
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
-		if (match == null) return;
-
-		Iterator<Block> iter = event.blockList().iterator();
-		blockloop: while (iter.hasNext())
-		{
-			Block b = iter.next();
-			if (match.hasFlag(b.getLocation(), AutoRefRegion.Flag.NO_EXPLOSIONS))
-			{ iter.remove(); continue blockloop; }
-		}
-	}
-	
-	@EventHandler
-	public void blockExplosion(BlockExplodeEvent event)
-	{
-		AutoRefMatch match = plugin.getMatch(event.getBlock().getWorld());
 		if (match == null) return;
 
 		Iterator<Block> iter = event.blockList().iterator();
