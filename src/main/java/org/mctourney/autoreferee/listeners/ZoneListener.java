@@ -325,23 +325,9 @@ public class ZoneListener implements Listener
     public void onBlockFromTo(BlockFromToEvent event) {			
 		Block block = event.getToBlock();
 		AutoRefMatch match = plugin.getMatch(block.getWorld());
-		
-		if (match == null) return;
-		
-		Location location = block.getLocation();
-		
-		// .getToBlock() is strange so we must correct the block's location
-		switch (event.getFace()) {
-		case EAST:
-			location = location.add(1d, 0d, 0d);
-		case SOUTH:
-			location = location.add(0d, 0d, 1d);
-		default:
-			break;
-		}
-		
-		if (match.hasFlag(location, AutoRefRegion.Flag.NO_FLOW)) {
-			event.setCancelled(true); return;
+
+		if (match != null && match.hasFlag(block.getLocation().add(0d, 0d, 0.5), AutoRefRegion.Flag.NO_FLOW)) {
+			event.setCancelled(true);
 		}
 	}
 	
