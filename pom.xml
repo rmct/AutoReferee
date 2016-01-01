@@ -28,8 +28,8 @@
 
   <repositories>
     <repository>
-      <id>bukkit-repo</id>
-      <url>http://repo.bukkit.org/content/groups/public/</url>
+      <id>spigot-repo</id>
+      <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
     </repository>
     <repository>
       <id>sk89q-mvn2</id>
@@ -64,8 +64,7 @@
       <groupId>org.bukkit</groupId>
       <artifactId>bukkit</artifactId>
       <version>${bukkit.version}</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/bukkit/bukkit-${bukkit.version}-shaded.jar</systemPath>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -191,7 +190,7 @@
         <configuration>
           <mainClass>org.mctourney.autoreferee.AutoRefereeTools</mainClass>
           <arguments>
-            <argument></argument>
+            <argument/>
           </arguments>
         </configuration>
       </plugin>
