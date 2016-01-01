@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -77,6 +78,24 @@ public class PlayerUtil
 		// remove all potion effects
 		for (PotionEffect effect : player.getActivePotionEffects())
 			player.removePotionEffect(effect.getType());
+	}
+	
+	/**
+	 * Clears player's ender chest
+	 */
+	public static void clearEnderChest(Player player)
+	{
+	    // clear the ender chest
+	    Inventory enderChest = player.getEnderChest();
+	    enderChest.clear();
+	}
+	
+	/**
+	 * Clears player's bed spawn
+	 */
+	public static void clearBedSpawn(Player player)
+	{
+		player.setBedSpawnLocation(null, true);
 	}
 
 	/**
@@ -157,7 +176,7 @@ public class PlayerUtil
 	public static void setSpectatorSettings(Player player, boolean spec, GameMode pgm)
 	{
 		// gamemode is the obvious issue
-		PlayerUtil.setGameMode(player, spec ? GameMode.CREATIVE : pgm);
+		PlayerUtil.setGameMode(player, spec ? GameMode.SPECTATOR : pgm);
 
 		// basic player settings depending on role
 		player.setAllowFlight(spec);

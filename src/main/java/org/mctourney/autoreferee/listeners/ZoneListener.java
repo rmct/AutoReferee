@@ -1,4 +1,4 @@
-package org.mctourney.autoreferee.listeners;
+  package org.mctourney.autoreferee.listeners;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -18,6 +18,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
@@ -37,7 +38,6 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.plugin.Plugin;
-
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoRefTeam;
@@ -87,8 +87,8 @@ public class ZoneListener implements Listener
 		AutoRefPlayer apl = match.getPlayer(player);
 		if (apl == null)
 		{
-			// if the player is not on a team and has left the start area, teleport back
-			if (!match.isSpectator(player) && !match.inStartRegion(event.getTo()) && onGround)
+			// if the player is not on a team and has left the start area and is not in creative, teleport back
+			if (!match.isSpectator(player) && !match.inStartRegion(event.getTo()) && onGround && player.getGameMode() != GameMode.CREATIVE)
 			{
 				player.teleport(match.getWorldSpawn());
 				player.setFallDistance(0.0f);
@@ -318,6 +318,19 @@ public class ZoneListener implements Listener
 		}
 	}
 
+	/*
+	 * Prevents liquids from flowing in regions flagged with NO_FLOW
+	 */
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockFromTo(BlockFromToEvent event) {			
+		Block block = event.getToBlock();
+		AutoRefMatch match = plugin.getMatch(block.getWorld());
+
+		if (match != null && match.hasFlag(block.getLocation().add(0d, 0d, 0.5), AutoRefRegion.Flag.NO_FLOW)) {
+			event.setCancelled(true);
+		}
+	}
+	
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void entityInteract(PlayerInteractEntityEvent event)
 	{
