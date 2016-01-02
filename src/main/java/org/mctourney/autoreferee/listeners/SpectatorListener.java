@@ -298,7 +298,7 @@ public class SpectatorListener implements PluginMessageListener, Listener
 	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void projectileLaunch(ProjectileLaunchEvent event)
 	{
-		LivingEntity entity = event.getEntity().getShooter();
+		LivingEntity entity = (LivingEntity) event.getEntity().getShooter();
 		AutoRefMatch match = plugin.getMatch(event.getEntity().getWorld());
 		if (!(entity instanceof Player) || match == null) return;
 

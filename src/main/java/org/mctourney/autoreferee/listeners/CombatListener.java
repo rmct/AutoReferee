@@ -160,7 +160,7 @@ public class CombatListener implements Listener
 		// damaging entity is an arrow, then who was bow?
 		if ((e instanceof Projectile))
 		{
-			LivingEntity shooter = ((Projectile) e).getShooter();
+			LivingEntity shooter = (LivingEntity) ((Projectile) e).getShooter();
 			if ((shooter instanceof Player)) return (Player) shooter;
 		}
 		return null;
@@ -194,7 +194,7 @@ public class CombatListener implements Listener
 				if (apl != null) apl.incrementShotsHit();
 
 				Arrow arrow = (Arrow) ed.getDamager();
-				if (arrow.getShooter().getType() == EntityType.PLAYER)
+				if (((LivingEntity)arrow.getShooter()).getType() == EntityType.PLAYER)
 				{
 					AutoRefPlayer shooter = match.getPlayer((Player) arrow.getShooter());
 					Location shotFrom = shotArrows.get(arrow);

@@ -349,7 +349,10 @@ public class AutoRefMatch implements Metadatable
 	 * @param status new match status
 	 */
 	public void setCurrentState(MatchStatus status)
-	{ this.currentState = status; this.setupSpectators(); }
+	{
+		this.currentState = status;
+		if (!status.isBeforeMatch()) this.setupSpectators();
+	}
 
 	// custom scoreboard
 	protected final Scoreboard scoreboard;
@@ -1691,7 +1694,7 @@ public class AutoRefMatch implements Metadatable
 		Player pl = apl.getPlayer();
 		if (pl != null)
 		{
-			messageReferee(ref, "player", apl.getName(), "hp", Integer.toString(pl.getHealth()));
+			messageReferee(ref, "player", apl.getName(), "hp", Integer.toString((int) pl.getHealth()));
 			messageReferee(ref, "player", apl.getName(), "armor", Integer.toString(ArmorPoints.fromPlayer(pl)));
 		}
 
@@ -2337,6 +2340,13 @@ public class AutoRefMatch implements Metadatable
 			}
 		}
 
+		// reset enderchests and bed spawns
+		for (AutoRefPlayer apl : getPlayers()) {
+			Player player = apl.getPlayer();
+			PlayerUtil.clearEnderChest(player);
+			PlayerUtil.clearBedSpawn(player);
+		}
+		
 		// set teams as started
 		for (AutoRefTeam team : getTeams())
 			team.startMatch();

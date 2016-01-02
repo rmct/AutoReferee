@@ -8,13 +8,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
-
 import org.apache.commons.lang.StringUtils;
-
 import org.mctourney.autoreferee.AutoRefMap;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefTeam;
@@ -24,7 +24,6 @@ import org.mctourney.autoreferee.event.player.PlayerTeamJoinEvent.Reason;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
 import org.mctourney.autoreferee.util.commands.CommandHandler;
-
 import org.apache.commons.cli.CommandLine;
 
 import com.google.common.collect.Lists;
@@ -272,6 +271,67 @@ public class AdminCommands implements CommandHandler
 		if (!(sender instanceof Player) || !sender.isOp()) return false;
 		AutoRefMatch.messageReferee((Player) sender, StringUtils.join(args, " "));
 
+		return true;
+	}
+	
+	
+	/*
+	 * Replaces the vanilla /time command so time is set only in the sender's world.
+	 */
+	
+	@AutoRefCommand(name={"time"}, argmin=2,
+		description="Set the world time.",
+		usage="§cUsage: /time <set|add> <value>")
+	@AutoRefPermission(console=false, nodes={"bukkit.command.time"})
+
+	public boolean setTime(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
+	{
+		if (args[0].equalsIgnoreCase("set")) {
+			int time = 0;
+			
+			if (args[1].equalsIgnoreCase("day")) {
+				time = 1000;
+			} else if (args[1].equalsIgnoreCase("night")) {
+				time = 13000;
+			} else if (args[1].matches("\\d+")) {
+				time = Integer.parseInt(args[1]);
+			} else {
+				sender.sendMessage(ChatColor.RED + "'" + args[1] +"' is not a valid number");
+				return true;
+			}
+			
+			if (sender instanceof Player) {
+				((Player) sender).getWorld().setTime(time);
+				sender.sendMessage("Set the time to " + time);
+			} else if (sender instanceof BlockCommandSender) {
+				((BlockCommandSender) sender).getBlock().getWorld().setTime(time);
+			} else if (sender instanceof CommandMinecart) {
+				((CommandMinecart) sender).getWorld().setTime(time);	
+			}
+		}
+		
+		if (args[0].equalsIgnoreCase("add")) {
+			if (args[1].matches("\\d+")) {
+				int time = Integer.parseInt(args[1]);
+				
+				if (sender instanceof Player) {
+					World world = ((Player) sender).getWorld();
+					world.setTime(time + world.getTime());
+					sender.sendMessage("Added " + time + " to the time");
+				} else if (sender instanceof BlockCommandSender) {
+					World world = ((BlockCommandSender) sender).getBlock().getWorld();
+					world.setTime(time + world.getTime());
+				} else if (sender instanceof CommandMinecart) {
+					World world = ((CommandMinecart) sender).getWorld();
+					world.setTime(time + world.getTime());
+				}
+
+			} else {
+				sender.sendMessage(ChatColor.RED + "'" + args[1] +"' is not a valid number");
+				return true;
+			}
+		}
+		
 		return true;
 	}
 }
