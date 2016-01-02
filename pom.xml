@@ -33,7 +33,7 @@
     </repository>
     <repository>
       <id>sk89q-mvn2</id>
-      <url>https://mvn2.sk89q.com/repo</url>
+      <url>http://mvn2.sk89q.com/repo</url>
     </repository>
     <repository>
       <id>Plugin Metrics</id>
