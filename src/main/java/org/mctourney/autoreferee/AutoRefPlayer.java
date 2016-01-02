@@ -576,7 +576,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		this(player.getName(), team);
 
 		// setup base health and armor level
-		this.currentHealth = player.getHealth();
+		this.currentHealth = (int) player.getHealth();
 		this.currentArmor = ArmorPoints.fromPlayerInventory(player.getInventory());
 	}
 
@@ -908,7 +908,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 		Player player = this.getPlayer();
 		if (player == null) return;
 
-		int newHealth = Math.max(0, player.getHealth());
+		int newHealth = (int) Math.max(0, player.getHealth());
 		int newArmor = ArmorPoints.fromPlayerInventory(player.getInventory());
 
 		if (getTeam() != null) getTeam().updateHealthArmor(this,
@@ -1001,7 +1001,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 
 		// SLOT 8: PLAYER HEALTH
 		{
-			ItemStack health = new ItemStack(Material.APPLE, player.getHealth());
+			ItemStack health = new ItemStack(Material.APPLE, (int) player.getHealth());
 			ItemMeta meta = health.getItemMeta();
 
 			meta.setDisplayName(ChatColor.RED + "" + ChatColor.ITALIC + "Player Health");
