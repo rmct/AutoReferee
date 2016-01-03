@@ -91,7 +91,7 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	 */
 	public boolean isOnline()
 	{
-		return AutoReferee.getInstance().getServer().getOfflinePlayer(pname).isOnline()
+		return AutoReferee.getInstance().getServer().getPlayer(pname) != null
 			&& getPlayer().getWorld() == getMatch().getWorld();
 	}
 
