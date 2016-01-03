@@ -2368,37 +2368,44 @@ public class AutoRefMatch implements Metadatable
 		// match minute timer
 		AutoReferee plugin = AutoReferee.getInstance();
 		clockTask = new MatchClockTask();
-		clockTask.runTaskTimer(plugin, 60 * 20L, 60 * 20L);
+		clockTask.runTaskTimer(plugin, 20L, 20L);
 
 		if (plugin.playedMapsTracker != null)
 			plugin.playedMapsTracker.increment(normalizeMapName(this.getMapName()));
 	}
-
-	private static final Set<Long> announceMinutes =
-		Sets.newHashSet(60L, 30L, 10L, 5L, 4L, 3L, 2L, 1L);
 
 	// handle to the clock task
 	protected MatchClockTask clockTask;
 
 	protected class MatchClockTask extends BukkitRunnable
 	{
+		private Set<Long> announceMinutes = Sets.newHashSet(60L, 30L, 10L, 5L, 4L, 3L, 2L, 1L);
+		
 		public void run()
 		{
 			AutoRefMatch match = AutoRefMatch.this;
 
 			if (match.hasTimeLimit())
 			{
-				long minutesRemaining = match.getTimeRemaining() / 60L;
-				if (minutesRemaining == 0L)
+				long secondsRemaining = match.getTimeRemaining();
+				if (secondsRemaining <= 0L)
 				{
 					String timelimit = (match.getTimeLimit() / 60L) + " min";
 					match.addEvent(new TranscriptEvent(match, TranscriptEvent.EventType.MATCH_END,
 						"Match time limit reached: " + timelimit, null));
 					match.endMatch();
 				}
-				else if (AutoRefMatch.announceMinutes.contains(minutesRemaining))
-					match.broadcast(">>> " + ChatColor.GREEN +
-						"Match ends in " + minutesRemaining + "m");
+				else
+				{
+					long minutesRemaining = secondsRemaining / 60L - 1;
+
+					if (announceMinutes.contains(minutesRemaining))
+					{
+						match.broadcast(">>> " + ChatColor.GREEN +
+							"Match ends in " + minutesRemaining + "m");
+						announceMinutes.remove(minutesRemaining);
+					}
+				}
 			}
 
 			// send clock updates to ensure that client hud stays sync'd
