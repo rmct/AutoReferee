@@ -1647,12 +1647,22 @@ public class AutoRefMatch implements Metadatable
 	{
 		try
 		{
+			ByteArrayOutputStream b = new ByteArrayOutputStream();
+			DataOutputStream out = new DataOutputStream(b);
+			
 			String msg = StringUtils.join(parts, SpectatorListener.DELIMITER);
+			//ASSUMING UTF
+			out.writeUTF(msg);
+			
 			ref.sendPluginMessage(AutoReferee.getInstance(), AutoReferee.REFEREE_PLUGIN_CHANNEL,
-				msg.getBytes(AutoReferee.PLUGIN_CHANNEL_ENC));
+				b.toByteArray());
 		}
-		catch (UnsupportedEncodingException e)
-		{ AutoReferee.log("Unsupported encoding: " + AutoReferee.PLUGIN_CHANNEL_ENC); }
+		catch (UnsupportedEncodingException i)
+		{ 
+			AutoReferee.log("Unsupported encoding: " + AutoReferee.PLUGIN_CHANNEL_ENC); 
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
