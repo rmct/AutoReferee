@@ -2803,6 +2803,9 @@ public class AutoRefMatch implements Metadatable
 			Player pl = apl.getPlayer();
 			if (pl == null) continue;
 			pl.getInventory().clear();
+
+			// reset bed spawns
+			PlayerUtil.clearBedSpawn(pl);
 		}
 
 		// update the client clock to ensure it syncs with match summary
