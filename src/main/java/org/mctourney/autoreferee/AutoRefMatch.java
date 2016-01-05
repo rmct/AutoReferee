@@ -28,7 +28,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang3.StringUtils;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Difficulty;
@@ -66,14 +65,12 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
-
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
-
 import org.mctourney.autoreferee.event.match.MatchCompleteEvent;
 import org.mctourney.autoreferee.event.match.MatchStartEvent;
 import org.mctourney.autoreferee.event.match.MatchTranscriptEvent;
@@ -1647,12 +1644,24 @@ public class AutoRefMatch implements Metadatable
 	{
 		try
 		{
+			ByteArrayOutputStream b = new ByteArrayOutputStream();
+			DataOutputStream out = new DataOutputStream(b);
+			
 			String msg = StringUtils.join(parts, SpectatorListener.DELIMITER);
+			//ASSUMING UTF
+			out.writeUTF(msg);
+			
 			ref.sendPluginMessage(AutoReferee.getInstance(), AutoReferee.REFEREE_PLUGIN_CHANNEL,
-				msg.getBytes(AutoReferee.PLUGIN_CHANNEL_ENC));
+				b.toByteArray());
 		}
 		catch (UnsupportedEncodingException e)
-		{ AutoReferee.log("Unsupported encoding: " + AutoReferee.PLUGIN_CHANNEL_ENC); }
+		{ 
+			AutoReferee.log("Unsupported encoding: " + AutoReferee.PLUGIN_CHANNEL_ENC); 
+		}
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -2794,6 +2803,9 @@ public class AutoRefMatch implements Metadatable
 			Player pl = apl.getPlayer();
 			if (pl == null) continue;
 			pl.getInventory().clear();
+
+			// reset bed spawns
+			PlayerUtil.clearBedSpawn(pl);
 		}
 
 		// update the client clock to ensure it syncs with match summary

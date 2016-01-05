@@ -326,7 +326,7 @@ public class ZoneListener implements Listener
 		Block block = event.getToBlock();
 		AutoRefMatch match = plugin.getMatch(block.getWorld());
 
-		if (match != null && match.hasFlag(block.getLocation().add(0d, 0d, 0.5), AutoRefRegion.Flag.NO_FLOW)) {
+		if (match != null && match.hasFlag(block.getLocation().add(0.5, 0d, 0.5), AutoRefRegion.Flag.NO_FLOW)) {
 			event.setCancelled(true);
 		}
 	}
