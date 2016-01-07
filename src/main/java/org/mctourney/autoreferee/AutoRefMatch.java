@@ -204,6 +204,14 @@ public class AutoRefMatch implements Metadatable
 		return existingteams < 2;
 	}
 
+	public boolean willBePracticeMode()
+	{
+		int existingteams = 0;
+		for (AutoRefTeam team : this.getTeams())
+			if (!team.isEmptyTeam()) ++existingteams;
+		return existingteams < 2;
+	}
+
 	protected boolean previewMode = false;
 
 	public void setPreviewMode(boolean b)
