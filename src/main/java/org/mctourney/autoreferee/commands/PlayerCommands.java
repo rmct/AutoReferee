@@ -250,17 +250,22 @@ public class PlayerCommands implements CommandHandler
 			match.cancelCountdown();
 		}
 
-		// if console or referee sends this message
-		if (sender instanceof ConsoleCommandSender || match.isReferee(player))
-		{
-			// attempt to set the ready delay if one is specified
-			try { if (options.hasOption('s')) match.setReadyDelay(Integer.parseInt(options.getOptionValue('s'))); }
-			catch (NumberFormatException e) {  };
+		// Reset the ready delay.
+		match.setReadyDelay(-1);
 
+		// If a ready delay is specified (-s), and the delay is authorized (practise mode or ref), then set the delay.
+		if (options.hasOption('s')
+				&& (match.willBePracticeMode() || sender instanceof ConsoleCommandSender || match.isReferee(player))) {
+			try {
+				match.setReadyDelay(Integer.parseInt(options.getOptionValue('s')));
+			} catch (NumberFormatException e) { }
+		}
+
+		// if console or referee sends this message
+		if (sender instanceof ConsoleCommandSender || match.isReferee(player)) {
 			match.setRefereeReady(rstate);
 		}
-		else
-		{
+		else {
 			AutoRefTeam team = match.getPlayerTeam(player);
 			if (team != null) team.setReady(rstate);
 		}
