@@ -167,12 +167,24 @@ public class ZoneListener implements Listener
 		{
 			Player player = (Player) event.getEntity().getShooter();
 			AutoRefPlayer apl = match.getPlayer(player);
-
+			
 			if (apl != null && apl.getTeam().hasFlag(player.getLocation(), Flag.NO_ENTRY))
 			{
 				String msg = ChatColor.DARK_GRAY + apl.getDisplayName() +
 					ChatColor.DARK_GRAY + " has thrown an enderpearl while out of bounds.";
 				for (Player ref : match.getReferees()) ref.sendMessage(msg);
+			}
+		}
+		
+		//if match isn't in progress, return
+		if (!match.getCurrentState().inProgress()) return;
+		
+		//if they throw an enderpearl
+		if (event.getEntityType() == EntityType.ENDER_PEARL){
+			//if the APL exists, and is in a no enderpearl zone
+			if (apl != null && apl.getTeam().hasFlag(player.getLocation(), Flag.NO_ENDERPEARL)){
+				//cancel event (cancel enderpearl throw)
+				event.setCancelled(true); return;
 			}
 		}
 	}
