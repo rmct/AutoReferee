@@ -165,26 +165,21 @@ public class ZoneListener implements Listener
 
 		if (event.getEntityType() == EntityType.ENDER_PEARL)
 		{
+			EnderPearl enderpearl = (EnderPearl) event.getEntity();
+			
 			Player player = (Player) event.getEntity().getShooter();
 			AutoRefPlayer apl = match.getPlayer(player);
-			
-			if (apl != null && apl.getTeam().hasFlag(player.getLocation(), Flag.NO_ENTRY))
-			{
-				String msg = ChatColor.DARK_GRAY + apl.getDisplayName() +
-					ChatColor.DARK_GRAY + " has thrown an enderpearl while out of bounds.";
-				for (Player ref : match.getReferees()) ref.sendMessage(msg);
-			}
-		}
-		
-		//if match isn't in progress, return
-		if (!match.getCurrentState().inProgress()) return;
-		
-		//if they throw an enderpearl
-		if (event.getEntityType() == EntityType.ENDER_PEARL){
-			//if the APL exists, and is in a no enderpearl zone
-			if (apl != null && apl.getTeam().hasFlag(player.getLocation(), Flag.NO_ENDERPEARL)){
-				//cancel event (cancel enderpearl throw)
-				event.setCancelled(true); return;
+
+			if (apl != null){
+				if(apl.getTeam().hasFlag(player.getLocation(), Flag.NO_ENTRY)){
+					String msg = ChatColor.DARK_GRAY + apl.getDisplayName() +
+							ChatColor.DARK_GRAY + " has thrown an enderpearl while out of bounds.";
+						for (Player ref : match.getReferees()) ref.sendMessage(msg);
+				}
+				
+				if(match.getCurrentState().inProgress()){
+					BukkitTask task = new EnderpearlTask(enderpearl, apl.getMatch()).runTaskTimer(AutoReferee.getInstance(), 0, 20);
+				}
 			}
 		}
 	}
