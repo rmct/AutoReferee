@@ -53,7 +53,9 @@ public abstract class ArmorPoints
 	{
 		int armorPoints = 0;
 		for (ItemStack item : inv.getArmorContents())
+			if (item != null){
 			armorPoints += ArmorPoints.fromItemStack(item);
+			}
 		return armorPoints;
 	}
 
