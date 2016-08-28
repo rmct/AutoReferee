@@ -718,8 +718,12 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 	{
 		// sanity check...
 		if (e.getEntity() != getPlayer()) return;
+		try{
 		this.saveInventoryView();
-
+		} catch (IllegalArgumentException ex){
+			//Print a stack trace if inventory sizes change in future updates. 
+			ex.printStackTrace();
+		}
 		// if this player has a number of lives, reduce by one
 		if (hasLives()) --livesRemaining;
 
@@ -956,9 +960,15 @@ public class AutoRefPlayer implements Metadatable, Comparable<AutoRefPlayer>
 
 		PlayerInventory pInventory = player.getInventory();
 		String inventoryName = name.length() > 32 ? name.substring(0, 32) : name;
+		
+		// Player inventory grew by a slot in 1.9
+		// This code ensures that no matter how many slots we have, we're always a multiple of 9
+		int displayInventorySize = pInventory.getSize() + 9 + (9 - (pInventory.getSize() % 9));
 		Inventory inventoryView = Bukkit.getServer().createInventory(null,
-			pInventory.getSize() + 9, inventoryName);
-
+				displayInventorySize, inventoryName);	
+		 
+		 		
+		
 		ItemStack[] oldContents = pInventory.getContents();
 		ItemStack[] newContents = inventoryView.getContents();
 
