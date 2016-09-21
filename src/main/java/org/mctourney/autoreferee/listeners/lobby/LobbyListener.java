@@ -168,11 +168,14 @@ public abstract class LobbyListener implements CommandHandler, Listener
 	@EventHandler(priority= EventPriority.HIGHEST)
 	public void projectileLaunch(ProjectileLaunchEvent event)
 	{
-		LivingEntity shooter = (LivingEntity) event.getEntity().getShooter();
-		if (shooter != null && checkAdminPrivilege(shooter)) return;
-
+		//Some nonliving entities can shoot
+		if (event.getEntity().getShooter() instanceof LivingEntity){		
+			LivingEntity shooter = (LivingEntity) event.getEntity().getShooter();
+			if (shooter != null && checkAdminPrivilege(shooter)) return;
+		}
 		if (event.getEntity().getWorld() == plugin.getLobbyWorld())
 			event.setCancelled(true);
+		
 	}
 
 	@EventHandler(priority=EventPriority.HIGHEST)
