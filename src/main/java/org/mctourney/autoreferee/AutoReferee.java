@@ -434,6 +434,11 @@ public class AutoReferee extends JavaPlugin
 			Player player = getServer().getPlayer(name);
 			if (player != null) world = player.getWorld();
 		}
+		if (world == null)
+		{
+			consoleWorld = null;
+			return;
+		}
 
 		this.setConsoleWorld(world);
 	}
