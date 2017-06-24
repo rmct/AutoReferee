@@ -145,7 +145,7 @@ public class TeleportationUtil
 				Location nc = c.add(v);
 
 				// if this block is impassable, dec k before quitting
-				if (!isBlockPassable(nc.getBlock())) { --k; break; }
+				if (!safeLocation(nc)) { --k; break; }
 
 				// update c if the block is passable
 				else c = nc;
