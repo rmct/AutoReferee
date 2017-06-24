@@ -149,6 +149,10 @@ public class SpectatorListener implements PluginMessageListener, Listener
 						player.sendMessage(ChatColor.DARK_GRAY + "Cannot show inventory for " + parts[2]);
 				}
 			}
+			else if (message.contains("panic")){
+				match.updateReferee(player);
+				player.sendMessage(ChatColor.DARK_RED + "Panic button successful.");
+			}
 		}
 		catch (UnsupportedEncodingException e)
 		{ AutoReferee.log("Unsupported encoding: " + AutoReferee.PLUGIN_CHANNEL_ENC); }
