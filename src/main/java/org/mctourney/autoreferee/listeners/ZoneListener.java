@@ -9,6 +9,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
@@ -38,6 +39,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoRefTeam;
@@ -164,15 +166,21 @@ public class ZoneListener implements Listener
 		if (match == null || match.getCurrentState() == MatchStatus.NONE) return;
 
 		if (event.getEntityType() == EntityType.ENDER_PEARL)
-		{
+		{	
 			Player player = (Player) event.getEntity().getShooter();
 			AutoRefPlayer apl = match.getPlayer(player);
 
-			if (apl != null && apl.getTeam().hasFlag(player.getLocation(), Flag.NO_ENTRY))
-			{
-				String msg = ChatColor.DARK_GRAY + apl.getDisplayName() +
-					ChatColor.DARK_GRAY + " has thrown an enderpearl while out of bounds.";
-				for (Player ref : match.getReferees()) ref.sendMessage(msg);
+			if (apl != null){
+				if(apl.getTeam().hasFlag(player.getLocation(), Flag.NO_ENTRY)){
+					String msg = ChatColor.DARK_GRAY + apl.getDisplayName() +
+							ChatColor.DARK_GRAY + " has thrown an enderpearl while out of bounds.";
+						for (Player ref : match.getReferees()) ref.sendMessage(msg);
+				}
+				
+				if(match.getCurrentState().inProgress()){
+					EnderPearl enderpearl = (EnderPearl) event.getEntity();
+					BukkitTask task = new EnderpearlTask(enderpearl, apl.getMatch()).runTaskTimer(AutoReferee.getInstance(), 0, 20);
+				}
 			}
 		}
 	}
