@@ -128,12 +128,21 @@ public class AdminCommands implements CommandHandler
 
 	@AutoRefCommand(name={"autoref", "unload"}, argmin=0, argmax=0,
 		description="Unloads the current map. Connected players are either moved to the lobby or kicked.")
-	@AutoRefPermission(console=true, nodes={"autoreferee.admin"})
+	@AutoRefPermission(console=true)
 
 	public boolean unloadMap(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options)
 	{
-		if (match != null) match.destroy(MatchUnloadEvent.Reason.COMMAND);
-		else sender.sendMessage(ChatColor.GRAY + "No world to unload.");
+		if (match == null)
+		{
+			sender.sendMessage(ChatColor.GRAY + "No world to unload.");
+			return false;
+		}
+		
+		if ((!match.isPracticeMode() || match.getCurrentState().isBeforeMatch())
+				&& !sender.hasPermission("autoreferee.admin")) return false;
+		
+		if (match != null)
+			match.destroy(MatchUnloadEvent.Reason.COMMAND);
 
 		return true;
 	}

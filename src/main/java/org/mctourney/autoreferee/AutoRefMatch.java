@@ -2019,27 +2019,39 @@ public class AutoRefMatch implements Metadatable
 		MatchUnloadEvent event = new MatchUnloadEvent(this, reason);
 		AutoReferee.callEvent(event);
 		if (event.isCancelled()) return;
-
 		// for cleanup purposes, BEFORE we eject all of the players
 		this.messageReferees("world", getWorld().getName(), "destroy");
+		
+		// we have to make our own teleport function because ejectPlayer() runs a task
+		// not the best solution but it works
+		
+		// if there is a lobby to teleport the players to, do so (copied from ejectPlayer())
+		World target = AutoReferee.getInstance().getLobbyWorld();
+		if (target == null) for (World w : Bukkit.getWorlds())
+			if (!AutoRefMatch.isCompatible(w)) { target = w; break; }
 
 		// first, handle all the players
-		for (Player p : primaryWorld.getPlayers()) this.ejectPlayer(p);
-
+		for (Player p : primaryWorld.getPlayers()){
+			if (target != null)
+			{
+				PlayerUtil.setGameMode(p, GameMode.SURVIVAL);
+				p.teleport(target.getSpawnLocation()); // so that there are no players in the world by the next line of code
+			}
+			//this.ejectPlayer(p);
+		}
+		
 		// if everyone has been moved out of this world, clean it up
 		if (primaryWorld.getPlayers().size() == 0)
-		{
+		{		
 			// if this is OUR world (we can delete it if we want)
 			AutoReferee plugin = AutoReferee.getInstance();
-			if (this.isTemporaryWorld())
-			{
-				plugin.clearMatch(this);
-				this.countTask.cancel();
-
-				plugin.getServer().unloadWorld(primaryWorld, false);
-				if (!plugin.getConfig().getBoolean("save-worlds", false))
-					new WorldFolderDeleter(primaryWorld).runTaskTimer(plugin, 0L, 10 * 20L);
+			plugin.clearMatch(this);
+			this.countTask.cancel();
+			plugin.getServer().unloadWorld(primaryWorld, false);
+			if (!plugin.getConfig().getBoolean("save-worlds", false)){
+				new WorldFolderDeleter(primaryWorld).runTaskTimer(plugin, 0L, 10 * 20L);
 			}
+			
 		}
 	}
 
