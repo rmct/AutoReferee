@@ -32,8 +32,8 @@
       <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
     </repository>
     <repository>
-      <id>sk89q-mvn2</id>
-      <url>http://mvn2.sk89q.com/repo</url>
+      <id>sk89q</id>
+      <url>http://maven.sk89q.com/repo/</url>
     </repository>
     <repository>
       <id>Plugin Metrics</id>
@@ -125,7 +125,7 @@
     <dependency>
       <groupId>org.mcstats.bukkit</groupId>
       <artifactId>metrics</artifactId>
-      <version>R7</version>
+      <version>R8-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
