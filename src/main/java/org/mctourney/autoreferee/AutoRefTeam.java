@@ -1,10 +1,12 @@
 package org.mctourney.autoreferee;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Maps;
 
@@ -28,6 +30,8 @@ import org.mctourney.autoreferee.goals.scoreboard.AutoRefObjective;
 import org.mctourney.autoreferee.listeners.GoalsInventorySnapshot;
 import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
+import org.mctourney.autoreferee.regions.AutoRefRegion.Flag;
+import org.mctourney.autoreferee.regions.RegionGraph;
 import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.Metadatable;
 import org.mctourney.autoreferee.util.PlayerKit;
@@ -343,6 +347,56 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		return regs[random.nextInt(spawnRegions.size())].getLocation();
 	}
 
+	private RegionGraph graph;
+	
+	protected RegionGraph getRegGraph() {
+		return this.graph;
+	}
+	
+	protected void initRegionGraph() {
+		// this is an expiremental feature
+		if(!AutoReferee.getInstance().isExperimentalMode()) return;
+		
+		if(this.getMatch() == null) return;
+		World w = this.getMatch().getWorld();
+		if(w == null) return;
+		
+		if(this.getRegions() == null) return;
+		
+		graph = new RegionGraph(w, this.getRegions());
+	}
+	
+	protected void computeRegionGraph() {
+		// this is an expiremental feature
+		if(!AutoReferee.getInstance().isExperimentalMode()) return;
+		
+		RegionGraph graph = this.getRegGraph();
+		if(graph == null) return;
+		
+		if(this.getMatch() == null) return;
+		World w = this.getMatch().getWorld();
+		if(w == null) return;
+		
+		graph.computeGraph().findConnectedRegions();
+	}
+	
+	private Set<Location> unrestrictedPts() {
+		if(this.getRegions() == null) return null;
+		
+		return this.getRegions().stream()
+				.filter(reg -> reg.getFlags().contains(Flag.NON_RESTRICTED))
+				.map(reg -> reg.getBoundingCuboid().getMinimumPoint().getBlock().getLocation())
+				.collect(Collectors.toSet());
+	}
+	
+	public boolean isRestrictedLoc(Location l) {
+		boolean def = false;
+		if(!this.getRegGraph().loaded()) return def;
+		if(this.getRegGraph().connectedRegions().isEmpty()) return def;
+		
+		return this.getRegGraph().isInRestrictedArea(l, this.unrestrictedPts());
+	}
+	
 	private Set<AutoRefGoal> goals = Sets.newHashSet();
 
 	/**

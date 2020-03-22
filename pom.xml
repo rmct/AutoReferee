@@ -17,7 +17,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <bukkit.version>1.8.8-R0.1-SNAPSHOT</bukkit.version>
-    <java.target.version>1.6</java.target.version>
+    <java.target.version>1.8</java.target.version>
   </properties>
 
   <scm>
@@ -127,6 +127,12 @@
       <artifactId>metrics</artifactId>
       <version>R8-SNAPSHOT</version>
       <scope>compile</scope>
+    </dependency>
+    
+    <dependency>
+    	<groupId>org.jgrapht</groupId>
+		<artifactId>jgrapht-core</artifactId>
+		<version>1.4.0</version>
     </dependency>
   </dependencies>
 
@@ -250,6 +256,7 @@
                   <include>com.google.code.gson:gson</include>
                   <include>org.jdom:jdom2</include>
                   <include>org.mcstats.bukkit:metrics</include>
+                  <include>org.jgrapht:jgrapht-core</include>
                 </includes>
               </artifactSet>
             </configuration>

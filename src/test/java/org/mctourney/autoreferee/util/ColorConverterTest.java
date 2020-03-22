@@ -1,4 +1,5 @@
 package org.mctourney.autoreferee.util;
+
 import org.bukkit.Color;
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,8 +9,6 @@ public class ColorConverterTest
 	@Test
 	public void testHexToColor() throws Exception
 	{
-		//org.apache.commons.lang.Validate;
-		
 		Assert.assertEquals(Color.fromRGB(255, 255, 255), ColorConverter.hexToColor("#ffffff"));
 		Assert.assertEquals(Color.fromRGB(255,   0, 136), ColorConverter.hexToColor("#ff0088"));
 		Assert.assertEquals(Color.fromRGB(222, 173,   0), ColorConverter.hexToColor("#dead00"));

@@ -38,10 +38,12 @@ public abstract class AutoRefRegion
 		NO_ACCESS          (1 << 4, false, 'a', "noaccess"),
 		NO_TELEPORT        (1 << 5, false, 't', "noteleport"),
 		SPAWNERS_ONLY      (1 << 6, false, 'w', "spawnersonly"),
-		NO_FLOW            (1 << 7, true,  'f', "noflow");
+		NO_FLOW            (1 << 7, true,  'f', "noflow"),
+		DUNGEON_BOUNDARY   (1 << 8, false, 'd', "dungeonboundary"),
+		NON_RESTRICTED     (1 << 9, false, 'r', "nonrestricted");
 
 		// generated from above values
-		public static final String OPTIONS = "abenstwf";
+		public static final String OPTIONS = "abdenrstwf";
 
 		private int value;
 		private String name;
