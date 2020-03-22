@@ -87,7 +87,6 @@ import org.mctourney.autoreferee.listeners.SpectatorListener;
 import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
 import org.mctourney.autoreferee.regions.CuboidRegion;
-import org.mctourney.autoreferee.regions.RegionGraph;
 import org.mctourney.autoreferee.util.ArmorPoints;
 import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.BookUtil;
@@ -969,9 +968,7 @@ public class AutoRefMatch implements Metadatable
 
 		messageReferees("match", getWorld().getName(), "init");
 		loadWorldConfiguration();
-		if(AutoReferee.getInstance().isExperimentalMode()) // experemental feature
-			{ this.initRegionGraphs(); this.computeRegionGraphs(); }
-		
+
 		messageReferees("match", getWorld().getName(), "map", getMapName());
 		setCurrentState(MatchStatus.WAITING);
 
@@ -2119,19 +2116,7 @@ public class AutoRefMatch implements Metadatable
 
 	public boolean addRegion(AutoRefRegion reg)
 	{ return reg != null && !regions.contains(reg) && regions.add(reg); }
-	
-	protected void initRegionGraphs() {
-		for ( AutoRefTeam t : this.getTeams() ) {
-			t.initRegionGraph();
-		}
-	}
-	
-	protected void computeRegionGraphs() {
-		for ( AutoRefTeam t : this.getTeams() ) {
-			t.computeRegionGraph();
-		}
-	}
-	
+
 	/**
 	 * A redstone mechanism necessary to start a match.
 	 *
