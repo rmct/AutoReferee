@@ -485,6 +485,7 @@ public class AutoReferee extends JavaPlugin
 
 	/**
 	 * Get whether server is in experimental mode or not
+	 * @author char
 	 * 
 	 * @return Whether server is in experimental mode
 	 */

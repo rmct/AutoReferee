@@ -547,8 +547,10 @@ public class ConfigurationCommands implements CommandHandler
 		AutoRefTeam team = match.getTeam(args[0]);
 
 		if(options.hasOption('r')) { 
+			match.cancelGraphTask();
+			team.initRegionGraph();
 			team.computeRegionGraph(); 
-			player.sendMessage( "" + team.getRegGraph().connectedRegions().size() );
+			player.sendMessage( "Found " + team.getRegGraph().connectedRegions().size() + " regions.");
 		}
 		
 		if(options.hasOption('p')) {
@@ -620,8 +622,10 @@ public class ConfigurationCommands implements CommandHandler
 		
 		AutoRefTeam team = match.getTeam(args[0]);
 		
-		p.sendMessage("" + ( team.getRegGraph().vec(csel.getMaximumPoint()).hashCode() == 
-							team.getRegGraph().vec(csel.getMinimumPoint()).hashCode() ));
+		Location pos = p.getLocation();
+		pos.getBlock().setType(Material.WOOL);
+		
+		
 		
 		return true;
 	}

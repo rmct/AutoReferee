@@ -353,7 +353,9 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		return this.graph;
 	}
 	
-	protected void initRegionGraph() {
+	public boolean regGraphLoaded() { return this.getRegGraph().loaded(); }
+	
+	public void initRegionGraph() {
 		// this is an experimental feature
 		if(!AutoReferee.getInstance().isExperimentalMode()) return;
 		
@@ -363,15 +365,18 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		
 		if(this.getRegions() == null) return;
 		
-		graph = new RegionGraph(w, this.getRegions())
-					.setDungeonOpenings( this.getRegions().stream()
+		graph = new RegionGraph(w, this.getRegions(), AutoReferee.getInstance().getLogger())
+						.computeGraph().regions(this.getRegions());
+					/*.setDungeonOpenings( this.getRegions().stream()
 							.filter(r -> r.getFlags().contains(Flag.DUNGEON_BOUNDARY))
-							.collect(Collectors.toSet()));
+							.collect(Collectors.toSet()));*/
 	}
 	
+	// safe from async thread
 	public void computeRegionGraph() {
 		// this is an expiremental feature
 		if(!AutoReferee.getInstance().isExperimentalMode()) return;
+		if(this.getRegions() == null) return;
 		
 		RegionGraph graph = this.getRegGraph();
 		if(graph == null) return;
@@ -380,7 +385,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		World w = this.getMatch().getWorld();
 		if(w == null) return;
 		
-		graph.computeGraph().findConnectedRegions();
+		graph.findConnectedRegions();
 	}
 	
 	public Set<Location> unrestrictedPts() {
@@ -391,6 +396,14 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 				.map(reg -> reg.getBoundingCuboid().getMinimumPoint().getBlock().getLocation())
 				.collect(Collectors.toSet());
 	}
+	
+	/*public Set<AutoRefRegion> dungeonOpenings() {
+		if(this.getRegions() == null) return null;
+		
+		return this.regions().stream()
+			.filter(r -> r.getFlags().contains(Flag.DUNGEON_BOUNDARY))
+			.collect(Collectors.toSet());
+	}*/
 	
 	public boolean isRestrictedLoc(Location l) {
 		boolean def = false;

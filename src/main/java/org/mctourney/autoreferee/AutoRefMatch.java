@@ -9,6 +9,7 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -931,6 +932,7 @@ public class AutoRefMatch implements Metadatable
 	public AutoRefMatch(World world, boolean tmp, MatchStatus state)
 	{ this(world, tmp); setCurrentState(state); }
 
+	@SuppressWarnings("deprecation")
 	public AutoRefMatch(World world, boolean tmp)
 	{
 		setPrimaryWorld(world);
@@ -969,8 +971,19 @@ public class AutoRefMatch implements Metadatable
 
 		messageReferees("match", getWorld().getName(), "init");
 		loadWorldConfiguration();
-		if(AutoReferee.getInstance().isExperimentalMode()) // experemental feature
-			{ this.initRegionGraphs(); this.computeRegionGraphs(); }
+		
+		if(AutoReferee.getInstance().isExperimentalMode()) { // experimental feature
+			 this.initRegionGraphs(); 
+			 
+			 graphTask = Bukkit.getScheduler()
+			 	.scheduleAsyncDelayedTask(AutoReferee.getInstance(), new BukkitRunnable() {
+					@Override
+					public void run() {
+						computeRegionGraphs();
+						graphTask = -1;
+					}
+				});
+		}
 		
 		messageReferees("match", getWorld().getName(), "map", getMapName());
 		setCurrentState(MatchStatus.WAITING);
@@ -2120,6 +2133,14 @@ public class AutoRefMatch implements Metadatable
 	public boolean addRegion(AutoRefRegion reg)
 	{ return reg != null && !regions.contains(reg) && regions.add(reg); }
 	
+	public int graphTask = -1;
+	
+	public boolean cancelGraphTask() {
+		if(graphTask < 0) return false;
+		Bukkit.getScheduler().cancelTask(graphTask);
+		return true;
+	}
+	
 	protected void initRegionGraphs() {
 		for ( AutoRefTeam t : this.getTeams() ) {
 			t.initRegionGraph();
@@ -2130,6 +2151,11 @@ public class AutoRefMatch implements Metadatable
 		for ( AutoRefTeam t : this.getTeams() ) {
 			t.computeRegionGraph();
 		}
+	}
+	
+	public boolean regionGraphsLoaded() {
+		return this.getTeams().stream()
+						.allMatch(t -> t.getRegGraph().loaded());
 	}
 	
 	/**

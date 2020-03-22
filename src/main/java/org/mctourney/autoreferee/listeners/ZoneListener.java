@@ -3,12 +3,14 @@
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
@@ -26,6 +28,7 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -35,6 +38,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.plugin.Plugin;
@@ -47,6 +51,7 @@ import org.mctourney.autoreferee.AutoRefMatch.Role;
 import org.mctourney.autoreferee.goals.BlockGoal;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
 import org.mctourney.autoreferee.regions.AutoRefRegion.Flag;
+import org.mctourney.autoreferee.regions.RegionGraph;
 import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.LocationUtil;
 
@@ -155,7 +160,7 @@ public class ZoneListener implements Listener
 			}
 		}
 	}
-
+	
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void enderpearlThrow(ProjectileLaunchEvent event)
 	{
@@ -175,6 +180,10 @@ public class ZoneListener implements Listener
 				for (Player ref : match.getReferees()) ref.sendMessage(msg);
 			}
 		}
+	}
+	
+	private boolean doPreventDungeonExits() {
+		return AutoReferee.getInstance().isExperimentalMode();
 	}
 
 	public boolean validPlayer(Player player)
@@ -412,7 +421,7 @@ public class ZoneListener implements Listener
 		AutoRefPlayer apl = match.getPlayer(pl);
 		if (apl == null) return;
 		apl.setLastTeleportLocation(to);
-
+		
 		// generate message regarding the teleport event
 		String bedrock = BlockGoal.blockInRange(BlockData.BEDROCK, to, 5) != null ? " (near bedrock)" : "";
 		String message = apl.getDisplayName() + ChatColor.GRAY + " has teleported @ " +
@@ -420,6 +429,32 @@ public class ZoneListener implements Listener
 
 		boolean excludeStreamers = dsq <= LONG_TELE_DISTANCE * LONG_TELE_DISTANCE;
 		for (Player ref : match.getReferees(excludeStreamers)) ref.sendMessage(message);
+	}
+	
+	public boolean enderPearlLegal(Player pl, Location fm, Location to, AutoRefMatch match) {
+		boolean def = true;
+		// This is an experimental feature
+		AutoReferee plugin = AutoReferee.getInstance();
+		if(!plugin.isExperimentalMode()) return def;
+		if(match.getCurrentState() != MatchStatus.PLAYING) return def;
+		
+		AutoRefTeam t = match.getPlayerTeam(pl);
+		if(t == null) return def;
+		
+		if( RegionGraph.unbreakableInRange(to, 1) != null )
+			{ return false; }
+		
+		if(t.regGraphLoaded()) {
+			if(t.isRestrictedLoc(fm)) {
+				plugin.getLogger().info("Pearl 1");
+				return false;
+			}else if(t.isRestrictedLoc(to)) {
+				plugin.getLogger().info("Pearl 2");
+				return false;
+			}
+		}
+		
+		return def;
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
@@ -448,6 +483,13 @@ public class ZoneListener implements Listener
 				if (apl.getTeam().hasFlag(event.getTo(), Flag.NO_TELEPORT))
 				{ event.setCancelled(true); return; }
 
+				if(event.getCause() == TeleportCause.ENDER_PEARL) {
+					if(!enderPearlLegal(event.getPlayer(), event.getFrom(), event.getTo(), match)) {
+						event.getPlayer().sendMessage(ChatColor.RED + "Illegal pearl!");
+						event.setCancelled(true); return;
+					}
+				}
+				
 				String reason = "by " + event.getCause().name().toLowerCase().replaceAll("_", " ");
 				teleportEvent(event.getPlayer(), event.getFrom(), event.getTo(), reason);
 

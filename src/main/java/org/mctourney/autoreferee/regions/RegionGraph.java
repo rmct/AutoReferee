@@ -3,6 +3,7 @@ package org.mctourney.autoreferee.regions;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,8 @@ import org.jgrapht.alg.connectivity.ConnectivityInspector;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleGraph;
+import org.mctourney.autoreferee.regions.AutoRefRegion.Flag;
+import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.Vec3;
 
 import com.google.common.collect.HashBiMap;
@@ -35,10 +38,12 @@ public class RegionGraph {
 	private World world;
 	
 	private boolean loaded = false;
+	private Logger logger;
 	
-	public RegionGraph(World w, Set<AutoRefRegion> regions) {
+	public RegionGraph(World w, Set<AutoRefRegion> regions, Logger logger) {
 		this.mapRegions = regions;
 		this.world = w;
+		this.logger = logger;
 	}
 	
 	// converts block data into a Graph object
@@ -50,6 +55,8 @@ public class RegionGraph {
 	public RegionGraph computeGraph() {
 		CuboidRegion bound = this.boundingBox();
 		if(bound == null) return this;
+		
+		this.setLoaded(false);
 		
 		this.graph = new SimpleGraph<Object, DefaultEdge>(DefaultEdge.class);
 		this.vertices.clear();
@@ -91,7 +98,6 @@ public class RegionGraph {
 			}
 		}
 		
-		this.setLoaded(true);
 		return this;
 	}
 	
@@ -99,6 +105,8 @@ public class RegionGraph {
 	// useful for finding bedrock holes, and determining legality
 	//									 of enderpearl teleports
 	public RegionGraph findConnectedRegions() {
+		log("Computing a RegionGraph...");
+		
 		ConnectivityInspector<Object, DefaultEdge> conn = new ConnectivityInspector<Object, DefaultEdge>(this.graph());
 		List<Set<Object>> components = conn.connectedSets();
 		
@@ -109,8 +117,10 @@ public class RegionGraph {
 												return vec;
 											})
 											.filter(s2 -> s2 != null)
-									.collect(Collectors.toSet())).collect(Collectors.toSet());
+									.collect(Collectors.toSet())).filter(s2 -> !s2.isEmpty()).collect(Collectors.toSet());
 		
+		log("Initialized graph!");
+		this.setLoaded(true);
 		return this;
 	}
 	
@@ -121,7 +131,8 @@ public class RegionGraph {
 		Set<Set<Vec3>> restrictedRegions = regionsWithoutPoints(vecs);
 		if(restrictedRegions == null) return null;
 		
-		return restrictedRegions.stream().anyMatch(s -> s.contains( vec(l) ));
+		return restrictedRegions.stream().anyMatch(s -> s.contains( vec(l) )) ||
+					!this.regions().stream().anyMatch(r -> r.contains(l));
 	}
 	
 	public Set<Set<Vec3>> regionsWithPoints(Set<Vec3> pts) {
@@ -213,7 +224,7 @@ public class RegionGraph {
 				.orElse(null);
 	}
 	
-	private boolean isDungeonBound(Block b) {
+	public boolean isDungeonBound(Block b) {
 		return UNBREAKABLE_BLOCKS.contains(b.getType()) || 
 					this.openings().stream().anyMatch(reg -> reg.containsBlock(b));
 	}
@@ -225,13 +236,42 @@ public class RegionGraph {
 	
 	private World world() { return this.world; }
 	private Set<AutoRefRegion> regions() { return this.mapRegions; }
-	private Set<AutoRefRegion> openings() { return this.dungeonOpenings; }
+	public Set<AutoRefRegion> openings() { 
+		//return this.dungeonOpenings; 
+		return this.regions().stream()
+				.filter(r -> r.getFlags().contains(Flag.DUNGEON_BOUNDARY))
+				.collect(Collectors.toSet());
+	}
 	public Set<Set<Vec3>> connectedRegions() { return this.connectedRegions; }
 	
 	public boolean loaded() { return this.loaded; }
 	
-	public RegionGraph setLoaded(boolean loaded) { this.loaded = loaded; return this; }
+	public RegionGraph regions(Set<AutoRefRegion> regions) { this.mapRegions = regions; return this; }
+	private RegionGraph setLoaded(boolean loaded) { this.loaded = loaded; return this; }
 	public RegionGraph setDungeonOpenings(Set<AutoRefRegion> openings) {
 		this.dungeonOpenings = openings; return this;
+	}
+	
+	private void log(String msg) {
+		if(this.logger != null) this.logger.info( msg );
+	}
+	
+	// Proper block in range
+	public static Location unbreakableInRange(Location loc, int radius)
+	{
+		Block b = loc.getBlock();
+		int h = loc.getWorld().getMaxHeight();
+		int by = loc.getBlockY();
+
+		for (int y = -radius; y <= radius; ++y) if (by + y >= 0 && by + y < h)
+		for (int x = -radius; x <= radius; ++x)
+		for (int z = -radius; z <= radius; ++z)
+		{
+			Block rel = b.getRelative(x, y, z);
+			if(UNBREAKABLE_BLOCKS.contains(rel.getType())) return rel.getLocation();
+			//if (blockdata.matchesBlock(rel)) return rel.getLocation();
+		}
+
+		return null;
 	}
 }
