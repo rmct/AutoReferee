@@ -349,12 +349,12 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 
 	private RegionGraph graph;
 	
-	protected RegionGraph getRegGraph() {
+	public RegionGraph getRegGraph() {
 		return this.graph;
 	}
 	
 	protected void initRegionGraph() {
-		// this is an expiremental feature
+		// this is an experimental feature
 		if(!AutoReferee.getInstance().isExperimentalMode()) return;
 		
 		if(this.getMatch() == null) return;
@@ -363,10 +363,13 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		
 		if(this.getRegions() == null) return;
 		
-		graph = new RegionGraph(w, this.getRegions());
+		graph = new RegionGraph(w, this.getRegions())
+					.setDungeonOpenings( this.getRegions().stream()
+							.filter(r -> r.getFlags().contains(Flag.DUNGEON_BOUNDARY))
+							.collect(Collectors.toSet()));
 	}
 	
-	protected void computeRegionGraph() {
+	public void computeRegionGraph() {
 		// this is an expiremental feature
 		if(!AutoReferee.getInstance().isExperimentalMode()) return;
 		
@@ -380,7 +383,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		graph.computeGraph().findConnectedRegions();
 	}
 	
-	private Set<Location> unrestrictedPts() {
+	public Set<Location> unrestrictedPts() {
 		if(this.getRegions() == null) return null;
 		
 		return this.getRegions().stream()

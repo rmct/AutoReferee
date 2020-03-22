@@ -237,7 +237,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>1.7</version>
+        <version>3.2.2</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -257,6 +257,7 @@
                   <include>org.jdom:jdom2</include>
                   <include>org.mcstats.bukkit:metrics</include>
                   <include>org.jgrapht:jgrapht-core</include>
+                  <include>org.jheaps:jheaps</include>
                 </includes>
               </artifactSet>
             </configuration>

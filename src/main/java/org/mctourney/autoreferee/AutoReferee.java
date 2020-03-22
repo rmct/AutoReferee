@@ -353,6 +353,11 @@ public class AutoReferee extends JavaPlugin
 		consoleLog = getConfig().getBoolean("console-log", true);
 		consoleLogInColor = getConfig().getBoolean("console-colors", true);
 
+		// experimental mode?
+		if(this.isExperimentalMode()) {
+			getLogger().info(this.getName() + " loaded in Experimental Mode. This is not intended for regular use!");
+		}
+		
 		// setup the map library folder
 		AutoRefMap.getMapLibrary();
 

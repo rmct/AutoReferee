@@ -2126,7 +2126,7 @@ public class AutoRefMatch implements Metadatable
 		}
 	}
 	
-	protected void computeRegionGraphs() {
+	public void computeRegionGraphs() {
 		for ( AutoRefTeam t : this.getTeams() ) {
 			t.computeRegionGraph();
 		}

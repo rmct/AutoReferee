@@ -11,9 +11,12 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.jgrapht.Graph;
+import org.jgrapht.GraphPath;
 import org.jgrapht.alg.connectivity.ConnectivityInspector;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleGraph;
+import org.mctourney.autoreferee.util.Vec3;
 
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Sets;
@@ -115,10 +118,10 @@ public class RegionGraph {
 		if(this.connectedRegions().isEmpty()) return true;
 		
 		Set<Vec3> vecs = nonrestricted.stream().map(loc -> vec(loc)).collect(Collectors.toSet());
-		Set<Set<Vec3>> outsideRegions = regionsWithPoints(vecs);
-		if(outsideRegions == null) return null;
+		Set<Set<Vec3>> restrictedRegions = regionsWithoutPoints(vecs);
+		if(restrictedRegions == null) return null;
 		
-		return !outsideRegions.stream().anyMatch(s -> s.contains( vec(l) ));
+		return restrictedRegions.stream().anyMatch(s -> s.contains( vec(l) ));
 	}
 	
 	public Set<Set<Vec3>> regionsWithPoints(Set<Vec3> pts) {
@@ -128,11 +131,31 @@ public class RegionGraph {
 				.collect(Collectors.toSet());
 	}
 	
-	public Set<Set<Vec3>> regionsWithoutPoint(Vec3 p) {
+	public Set<Set<Vec3>> regionsWithoutPoints(Set<Vec3> pts) {
 		return this.connectedRegions()
 				.stream()
-				.filter( s -> !s.contains(p) )
+				.filter( s -> s.stream().allMatch(v -> !pts.contains(v)) )
 				.collect(Collectors.toSet());
+	}
+	
+	public Set<Set<Vec3>> regionsWithoutPointsLoc(Set<Location> pts) {
+		Set<Vec3> ptsVec = pts.stream().map(l -> vec(l)).collect(Collectors.toSet());
+		return regionsWithoutPoints( ptsVec );
+	}
+	
+	public Set<Block> shortestPath(Location l0, Location l1) {
+		if(!this.loaded()) return Sets.newHashSet();
+		
+		DijkstraShortestPath<Object, DefaultEdge> path = new DijkstraShortestPath<Object, DefaultEdge>(this.graph());
+		GraphPath<Object, DefaultEdge> gpath = path.getPath( vertex(vec(l0)), vertex(vec(l1)) );
+		
+		if(gpath == null) return null;
+		
+		return gpath.getVertexList().stream()
+				.map(v -> this.world().getBlockAt(vertexVec(v).loc(this.world())))
+				.collect(Collectors.toSet());
+		
+		//return null;
 	}
 	
 	// creates Vec3 from coords
@@ -148,12 +171,12 @@ public class RegionGraph {
 	}
 	
 	// create Vec3 from Location
-	private Vec3 vec(Location l) {
+	public Vec3 vec(Location l) {
 		return vec(l.getBlockX(), l.getBlockY(), l.getBlockZ());
 	}
 
 	// create Vec3 from block
-	private Vec3 vec(Block b) {
+	public Vec3 vec(Block b) {
 		return vec(b.getLocation());
 	}
 	
@@ -210,48 +233,5 @@ public class RegionGraph {
 	public RegionGraph setLoaded(boolean loaded) { this.loaded = loaded; return this; }
 	public RegionGraph setDungeonOpenings(Set<AutoRefRegion> openings) {
 		this.dungeonOpenings = openings; return this;
-	}
-}
-
-// helper class, needed as keys for hashmap
-class Vec3 {
-	private int x;
-	private int y;
-	private int z;
-	private int maxX;
-	private int maxY;
-	private int maxZ;
-	private int minX;
-	private int minY;
-	private int minZ;
-	
-	//public Vec3() { }
-	public Vec3(int x, int y, int z, int maxX, int maxY, int maxZ, int minX, int minY, int minZ) 
-		{ this.x = x; this.y = y; this.z = z; this.maxX = maxX; this.maxY = maxY; this.maxZ = maxZ; } 
-	
-	public int x() { return this.x; }
-	public int y() { return this.y; }
-	public int z() { return this.z; }
-	
-	public Vec3 x(int x) { this.x =  this.minX + ( (x - this.minX) % (this.width() + 1)); return this; }
-	public Vec3 y(int y) { this.y =  this.minY + ( (y - this.minY) % (this.length() + 1)); return this; }
-	public Vec3 z(int z) { this.z =  this.minZ + ( (z - this.minZ) % (this.height() + 1)); return this; }
-	
-	private int width() { return this.maxX - this.minX; }
-	private int length() { return this.maxY - this.minY; }
-	private int height() { return this.maxZ - this.minZ; }
-	
-	@Override
-	public boolean equals(Object obj) {
-		if(obj == this) return true;
-		if(!(obj instanceof Vec3)) return false;
-		Vec3 vec = (Vec3) obj;
-		
-		return (this.x() == vec.x() && this.y() == vec.y() && this.z() == vec.z());
-	}
-	
-	@Override
-	public int hashCode() {
-		return ( x() - this.minX ) + (( y() - this.minY ) * ( this.width() + 1 )) + ((z() - this.minZ) * ( this.width() + 1 ) * (this.length() + 1));
 	}
 }
