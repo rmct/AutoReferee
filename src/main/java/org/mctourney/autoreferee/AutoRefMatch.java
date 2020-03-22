@@ -62,6 +62,7 @@ import org.bukkit.material.PressureSensor;
 import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
@@ -975,14 +976,14 @@ public class AutoRefMatch implements Metadatable
 		if(AutoReferee.getInstance().isExperimentalMode()) { // experimental feature
 			 this.initRegionGraphs(); 
 			 
-			 graphTask = Bukkit.getScheduler()
-			 	.scheduleAsyncDelayedTask(AutoReferee.getInstance(), new BukkitRunnable() {
+			 graphTask =
+			 	new BukkitRunnable() {
 					@Override
 					public void run() {
 						computeRegionGraphs();
-						graphTask = -1;
+						graphTask = null;
 					}
-				});
+				}.runTaskAsynchronously(AutoReferee.getInstance());
 		}
 		
 		messageReferees("match", getWorld().getName(), "map", getMapName());
@@ -1187,6 +1188,8 @@ public class AutoRefMatch implements Metadatable
 
 	protected void clearScoreboardData(Scoreboard sb)
 	{
+		if(!AutoReferee.getInstance().doScoreboard()) return;
+		
 		// unregister all old objectives (created by AutoReferee)
 		for (Objective obj : scoreboard.getObjectives())
 			if (obj.getName().startsWith("ar#")) obj.unregister();
@@ -1198,6 +1201,8 @@ public class AutoRefMatch implements Metadatable
 
 	protected void loadScoreboardData()
 	{
+		if(!AutoReferee.getInstance().doScoreboard()) return;
+		
 		clearScoreboardData(scoreboard);
 		clearScoreboardData( infoboard);
 
@@ -1257,6 +1262,8 @@ public class AutoRefMatch implements Metadatable
 
 	public void saveScoreboardData(Scoreboard sb)
 	{
+		if(!AutoReferee.getInstance().doScoreboard()) return;
+		
 		Element teams = new Element("teams");
 		for (Team team : sb.getTeams())
 		{
@@ -1506,6 +1513,8 @@ public class AutoRefMatch implements Metadatable
 
 	private void setupScoreboardObjectives()
 	{
+		if(!AutoReferee.getInstance().doScoreboard()) return;
+		
 		// defer to prevent exception on server start,
 		// before any worlds are fully loaded
 		new BukkitRunnable()
@@ -2133,11 +2142,11 @@ public class AutoRefMatch implements Metadatable
 	public boolean addRegion(AutoRefRegion reg)
 	{ return reg != null && !regions.contains(reg) && regions.add(reg); }
 	
-	public int graphTask = -1;
+	public BukkitTask graphTask = null;
 	
 	public boolean cancelGraphTask() {
-		if(graphTask < 0) return false;
-		Bukkit.getScheduler().cancelTask(graphTask);
+		if(graphTask == null) return false;
+		graphTask.cancel();
 		return true;
 	}
 	
