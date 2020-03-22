@@ -478,6 +478,15 @@ public class AutoReferee extends JavaPlugin
 		catch (IllegalStateException ignored) {  }
 	}
 
+	/**
+	 * Get whether server is in experimental mode or not
+	 * 
+	 * @return Whether server is in experimental mode
+	 */
+	public boolean isExperimentalMode() {
+		return this.getConfig().getBoolean("experimental-mode", false);
+	}
+	
 	private class SyncMessageTask extends BukkitRunnable
 	{
 		private class RoutedMessage
