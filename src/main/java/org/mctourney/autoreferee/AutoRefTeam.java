@@ -36,7 +36,7 @@ import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.Metadatable;
 import org.mctourney.autoreferee.util.PlayerKit;
 import org.mctourney.autoreferee.util.PlayerUtil;
-
+import org.mctourney.autoreferee.util.Vec3;
 import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Sets;
@@ -348,28 +348,34 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	}
 
 	private RegionGraph graph;
+	private Set<Set<Vec3>> restrictedRegions;
 	
-	public RegionGraph getRegGraph() {
-		return this.graph;
-	}
+	public RegionGraph getRegGraph() { return this.graph; }
+	public void setRestrictionRegions(Set<Set<Vec3>> regions) 
+		{ this.restrictedRegions = regions; }
 	
 	public boolean regGraphLoaded() { return this.getRegGraph().loaded(); }
 	
 	public void initRegionGraph() {
+		createRegionGraph();
+		graph.computeGraph();
+	}
+	
+	public void createRegionGraph() {
 		// this is an experimental feature
-		if(!AutoReferee.getInstance().isExperimentalMode()) return;
-		
-		if(this.getMatch() == null) return;
-		World w = this.getMatch().getWorld();
-		if(w == null) return;
-		
-		if(this.getRegions() == null) return;
-		
-		graph = new RegionGraph(w, this.getRegions(), AutoReferee.getInstance().getLogger())
-						.computeGraph().regions(this.getRegions());
-					/*.setDungeonOpenings( this.getRegions().stream()
-							.filter(r -> r.getFlags().contains(Flag.DUNGEON_BOUNDARY))
-							.collect(Collectors.toSet()));*/
+			if(!AutoReferee.getInstance().isExperimentalMode()) return;
+			
+			if(this.getMatch() == null) return;
+			World w = this.getMatch().getWorld();
+			if(w == null) return;
+			
+			if(this.getRegions() == null) return;
+			
+			graph = new RegionGraph(w, this.getRegions(), AutoReferee.getInstance().getLogger(), this)
+					.regions(this.getRegions());
+			/*.setDungeonOpenings( this.getRegions().stream()
+			.filter(r -> r.getFlags().contains(Flag.DUNGEON_BOUNDARY))
+			.collect(Collectors.toSet()));*/
 	}
 	
 	// safe from async thread
@@ -407,6 +413,13 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	
 	public boolean isRestrictedLoc(Location l) {
 		boolean def = false;
+		if(this.getRegGraph() == null) return def;
+		
+		if(this.restrictedRegions != null) {
+			return this.getRegGraph()
+					.isRestricted(l, this.restrictedRegions, this.getRegions());
+		}
+		
 		if(!this.getRegGraph().loaded()) return def;
 		if(this.getRegGraph().connectedRegions().isEmpty()) return def;
 		

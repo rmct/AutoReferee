@@ -444,14 +444,10 @@ public class ZoneListener implements Listener
 		if( RegionGraph.unbreakableInRange(to, 1) != null )
 			{ return false; }
 		
-		if(t.regGraphLoaded()) {
-			if(t.isRestrictedLoc(fm)) {
-				plugin.getLogger().info("Pearl 1");
-				return false;
-			}else if(t.isRestrictedLoc(to)) {
-				plugin.getLogger().info("Pearl 2");
-				return false;
-			}
+		if(t.isRestrictedLoc(fm)) {
+			return false;
+		}else if(t.isRestrictedLoc(to)) {
+			return false;
 		}
 		
 		return def;

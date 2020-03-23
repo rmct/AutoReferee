@@ -1,5 +1,8 @@
 package org.mctourney.autoreferee.util;
 
+import java.util.List;
+import java.util.Set;
+
 import org.bukkit.Location;
 import org.bukkit.World;
 

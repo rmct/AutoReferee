@@ -2,7 +2,9 @@ package org.mctourney.autoreferee.commands;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
@@ -39,6 +41,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
 
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -529,7 +532,7 @@ public class ConfigurationCommands implements CommandHandler
 		return true;
 	}
 	
-	@AutoRefCommand(name= {"autoref", "regions"}, argmin=1, argmax=1, options="rpf")
+	@AutoRefCommand(name= {"autoref", "regions"}, argmin=1, argmax=1, options="fprs")
 	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
 	public boolean arRegions(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options) {
 		if(!AutoReferee.getInstance().isExperimentalMode()) return false;
@@ -547,7 +550,7 @@ public class ConfigurationCommands implements CommandHandler
 		AutoRefTeam team = match.getTeam(args[0]);
 
 		if(options.hasOption('r')) { 
-			match.cancelGraphTask();
+			//match.cancelGraphTask();
 			team.initRegionGraph();
 			team.computeRegionGraph(); 
 			player.sendMessage( "Found " + team.getRegGraph().connectedRegions().size() + " regions.");
@@ -595,6 +598,29 @@ public class ConfigurationCommands implements CommandHandler
 				
 				data = (byte)(data + 1);
 			}
+		}
+		
+		if(options.hasOption('s')) {
+			//System.out.println(team.getRegGraph().toJSON( team.unrestrictedPts() ));
+			
+			HashMap<String, Object> json = new HashMap<String, Object>();
+			
+			for(AutoRefTeam t : match.getTeams()) {
+				json.put( t.getName() , t.getRegGraph().toJSON( t.unrestrictedPts() ) );
+			}
+			
+			Gson gson = new Gson();
+					
+			File f = new File( match.getWorld().getWorldFolder(), AutoRefMatch.REGION_CFG_FILENAME );
+			
+			try (FileWriter writer = new FileWriter( f )) {
+	            gson.toJson(json, writer);
+	        } catch(IOException e) {
+	        	player.sendMessage("Error writing file");
+	        	e.printStackTrace();
+	        }
+			
+			player.sendMessage("Successfully wrote " + AutoRefMatch.REGION_CFG_FILENAME + "!");
 		}
 		
 		return true;

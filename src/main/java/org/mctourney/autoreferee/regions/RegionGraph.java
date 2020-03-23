@@ -1,7 +1,10 @@
 package org.mctourney.autoreferee.regions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collector;
@@ -17,12 +20,15 @@ import org.jgrapht.alg.connectivity.ConnectivityInspector;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleGraph;
+import org.json.simple.JSONObject;
+import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.regions.AutoRefRegion.Flag;
 import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.Vec3;
 
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
 import com.sk89q.worldedit.Vector;
 
 public class RegionGraph {
@@ -39,11 +45,13 @@ public class RegionGraph {
 	
 	private boolean loaded = false;
 	private Logger logger;
+	private AutoRefTeam team;
 	
-	public RegionGraph(World w, Set<AutoRefRegion> regions, Logger logger) {
+	public RegionGraph(World w, Set<AutoRefRegion> regions, Logger logger, AutoRefTeam team) {
 		this.mapRegions = regions;
 		this.world = w;
 		this.logger = logger;
+		this.team = team;
 	}
 	
 	// converts block data into a Graph object
@@ -51,7 +59,7 @@ public class RegionGraph {
 	//    (e.g. finding dungeons, bedrock holes)
 	//
 	// computationally meh but its ok b/c it will
-	// only be run once per match
+	// save relevant info to a file
 	public RegionGraph computeGraph() {
 		CuboidRegion bound = this.boundingBox();
 		if(bound == null) return this;
@@ -124,6 +132,59 @@ public class RegionGraph {
 		return this;
 	}
 	
+	public HashMap<String, Object> toJSON(Set<Location> nonrestricted) {
+		Set<Vec3> vecs = nonrestricted.stream().map(loc -> vec(loc)).collect(Collectors.toSet());
+		Set<Set<Vec3>> restrictedRegions = regionsWithoutPoints(vecs);
+		
+		//JSONObject restricted = new JSONObject();
+		//JSONObject regions = new JSONObject();
+		
+		/*int i = 0; int j = 0;
+		for( Set<Vec3> vecl : restrictedRegions ) {
+			JSONObject region = new JSONObject();
+			
+			for( Vec3 v : vecl ) {
+				region.put(j, new int[] { v.x(), v.y(), v.z() } );
+				j++;
+			}
+			
+			regions.put(i, region);
+			i++;
+		}*/
+		
+		
+		
+		List<List<int[]>> regions = restrictedRegions.stream()
+											.map(
+													r -> r.stream().map(v -> (new int[]{ v.x(), v.y(), v.z() }) )
+																.collect(Collectors.toList())
+												)
+											.collect(Collectors.toList());
+		
+		HashMap<String, Object> json = new HashMap<String, Object>();
+		json.put("restricted", regions);
+		
+		return json;
+		
+		/*int i = 0; int j = 0;
+		for( Set<Vec3> vecl : restrictedRegions ) {
+			for( Vec3 v : vecl ) {
+				regions[i][j][0] = v.x();
+				regions[i][j][1] = v.y();
+				regions[i][j][2] = v.z();
+				j++;
+			}
+			i++;
+		}*/
+		
+		//restricted.put("restricted", regions);
+		//JSONObject r = new JSONObject();
+		//r.put(this.team.getName(), restricted);
+		
+		//return r;
+		//restricted.put("", arg1)
+	}
+	
 	public Boolean isInRestrictedArea(Location l, Set<Location> nonrestricted) {
 		if(this.connectedRegions().isEmpty()) return true;
 		
@@ -131,8 +192,12 @@ public class RegionGraph {
 		Set<Set<Vec3>> restrictedRegions = regionsWithoutPoints(vecs);
 		if(restrictedRegions == null) return null;
 		
+		return this.isRestricted(l, restrictedRegions, this.regions());
+	}
+	
+	public boolean isRestricted(Location l, Set<Set<Vec3>> restrictedRegions, Set<AutoRefRegion> regions) {
 		return restrictedRegions.stream().anyMatch(s -> s.contains( vec(l) )) ||
-					!this.regions().stream().anyMatch(r -> r.contains(l));
+					!regions.stream().anyMatch(r -> r.contains(l));
 	}
 	
 	public Set<Set<Vec3>> regionsWithPoints(Set<Vec3> pts) {
@@ -273,5 +338,18 @@ public class RegionGraph {
 		}
 
 		return null;
+	}
+	
+	public Set<Set<Vec3>> fromInts(List<List<List<Double>>> list) {	
+		return list.stream()
+					.map(l -> l.stream().map(v -> {
+						if(v.size() < 3) return null;
+						int v0 = (int) Math.round(v.get(0));
+						int v1 = (int) Math.round(v.get(1));
+						int v2 = (int) Math.round(v.get(2));
+						return vec(v0, v1, v2);
+					})
+					.filter(v -> v != null)
+					.collect(Collectors.toSet())).collect(Collectors.toSet());
 	}
 }
