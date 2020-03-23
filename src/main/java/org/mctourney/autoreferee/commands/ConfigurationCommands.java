@@ -551,6 +551,7 @@ public class ConfigurationCommands implements CommandHandler
 		AutoRefTeam team = match.getTeam(args[0]);
 
 		if(options.hasOption('r')) { 
+			player.sendMessage("Computing Region Graph. This may take a while...");
 			//match.cancelGraphTask();
 			team.initRegionGraph();
 			team.computeRegionGraph(); 
@@ -633,36 +634,6 @@ public class ConfigurationCommands implements CommandHandler
 				e.printStackTrace();
 			}
 		}
-		
-		return true;
-	}
-	
-	@AutoRefCommand(name= {"autoref", "test"}, argmin=1, argmax=1)
-	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
-	public boolean bruh(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options) {
-		if ( match == null ) return false;
-		Player p = (Player) sender;
-		
-		if(!p.isOp()) return false;
-		
-		WorldEditPlugin worldEdit = AutoReferee.getWorldEdit();
-		if (worldEdit == null)
-		{
-			// world edit not installed
-			sender.sendMessage("This method requires WorldEdit installed and running.");
-			return true;
-		}
-		
-		Selection sel = worldEdit.getSelection(p);
-		if(sel == null || !(sel instanceof CuboidSelection))  return true;
-		CuboidSelection csel = (CuboidSelection) sel;
-		
-		AutoRefTeam team = match.getTeam(args[0]);
-		
-		Location pos = p.getLocation();
-		pos.getBlock().setType(Material.WOOL);
-		
-		
 		
 		return true;
 	}

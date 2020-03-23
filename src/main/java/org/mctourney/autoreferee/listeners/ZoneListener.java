@@ -497,8 +497,6 @@ public class ZoneListener implements Listener
 		if(type == TeleportType.BED || type == TeleportType.VEHICLE) {
 			//if(match.isPracticeMode()) return def;
 			
-			plugin.getLogger().info(fm.distance(to) + "");
-			
 			// cannot enter bed/vehicle from void lane
 			if(!t.containsLoc( fm )) {
 				return false;

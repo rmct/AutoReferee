@@ -64,6 +64,8 @@ public class RegionGraph {
 		CuboidRegion bound = this.boundingBox();
 		if(bound == null) return this;
 		
+		log("Creating a RegionGraph...");
+		
 		this.setLoaded(false);
 		
 		this.graph = new SimpleGraph<Object, DefaultEdge>(DefaultEdge.class);
@@ -113,7 +115,7 @@ public class RegionGraph {
 	// useful for finding bedrock holes, and determining legality
 	//									 of enderpearl teleports
 	public RegionGraph findConnectedRegions() {
-		log("Computing a RegionGraph...");
+		log("Computing connected regions in a RegionGraph...");
 		
 		ConnectivityInspector<Object, DefaultEdge> conn = new ConnectivityInspector<Object, DefaultEdge>(this.graph());
 		List<Set<Object>> components = conn.connectedSets();

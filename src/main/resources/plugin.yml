@@ -1,6 +1,6 @@
 name: AutoReferee
 main: org.mctourney.autoreferee.AutoReferee
-version: 2.8.5
+version: 2.8.4
 author: "authorblues, net"
 load: startup
 

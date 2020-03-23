@@ -599,9 +599,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	}
 
 	protected void setupScoreboard()
-	{
-		if(!AutoReferee.getInstance().doScoreboard()) return;
-		
+	{	
 		String sbteam = this.getScoreboardTeamName();
 
 		// set team data on spectators' scoreboard

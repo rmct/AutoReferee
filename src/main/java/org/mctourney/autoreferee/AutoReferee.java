@@ -499,16 +499,6 @@ public class AutoReferee extends JavaPlugin
 		return this.getConfig().getBoolean("experimental-mode", false);
 	}
 	
-	/**
-	 * Get whether to create scoreboard or not
-	 * @author char
-	 *
-	 * @return if to create scoreboard
-	 */
-	public boolean doScoreboard() {
-		return this.getConfig().getBoolean("scoreboard", true);
-	}
-	
 	private class SyncMessageTask extends BukkitRunnable
 	{
 		private class RoutedMessage

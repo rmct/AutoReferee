@@ -1199,8 +1199,6 @@ public class AutoRefMatch implements Metadatable
 
 	protected void clearScoreboardData(Scoreboard sb)
 	{
-		if(!AutoReferee.getInstance().doScoreboard()) return;
-		
 		// unregister all old objectives (created by AutoReferee)
 		for (Objective obj : scoreboard.getObjectives())
 			if (obj.getName().startsWith("ar#")) obj.unregister();
@@ -1211,9 +1209,7 @@ public class AutoRefMatch implements Metadatable
 	}
 
 	protected void loadScoreboardData()
-	{
-		if(!AutoReferee.getInstance().doScoreboard()) return;
-		
+	{	
 		clearScoreboardData(scoreboard);
 		clearScoreboardData( infoboard);
 
@@ -1273,8 +1269,6 @@ public class AutoRefMatch implements Metadatable
 
 	public void saveScoreboardData(Scoreboard sb)
 	{
-		if(!AutoReferee.getInstance().doScoreboard()) return;
-		
 		Element teams = new Element("teams");
 		for (Team team : sb.getTeams())
 		{
@@ -1524,8 +1518,6 @@ public class AutoRefMatch implements Metadatable
 
 	private void setupScoreboardObjectives()
 	{
-		if(!AutoReferee.getInstance().doScoreboard()) return;
-		
 		// defer to prevent exception on server start,
 		// before any worlds are fully loaded
 		new BukkitRunnable()
