@@ -46,6 +46,7 @@ import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.AutoRefPlayer;
 import org.mctourney.autoreferee.AutoRefTeam;
 import org.mctourney.autoreferee.AutoReferee;
+import org.mctourney.autoreferee.entity.EntityAREnderPearl;
 import org.mctourney.autoreferee.AutoRefMatch.MatchStatus;
 import org.mctourney.autoreferee.AutoRefMatch.Role;
 import org.mctourney.autoreferee.goals.BlockGoal;
@@ -161,6 +162,8 @@ public class ZoneListener implements Listener
 		}
 	}
 	
+	Set<Entity> trackedPearls = Sets.newHashSet();
+	
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void enderpearlThrow(ProjectileLaunchEvent event)
 	{
@@ -169,7 +172,7 @@ public class ZoneListener implements Listener
 		if (match == null || match.getCurrentState() == MatchStatus.NONE) return;
 
 		if (event.getEntityType() == EntityType.ENDER_PEARL)
-		{
+		{	
 			Player player = (Player) event.getEntity().getShooter();
 			AutoRefPlayer apl = match.getPlayer(player);
 
@@ -179,6 +182,37 @@ public class ZoneListener implements Listener
 					ChatColor.DARK_GRAY + " has thrown an enderpearl while out of bounds.";
 				for (Player ref : match.getReferees()) ref.sendMessage(msg);
 			}
+			
+			// Expiremental: track ender pearls
+			if(!AutoReferee.getInstance().isExperimentalMode()) return;
+			if(match.getCurrentState() != MatchStatus.PLAYING) return;
+			if(!EntityAREnderPearl.PATCHED) return;
+			
+			if(trackedPearls.contains(event.getEntity())) return;
+			
+			if(apl != null && apl.getTeam() != null) {
+				AutoRefTeam team = apl.getTeam();
+				
+				if(team.isRestrictedLoc(player.getLocation())) {
+					event.setCancelled(true);
+					
+					EntityAREnderPearl pearl = new EntityAREnderPearl(player, team, false)
+														.setAR(AutoReferee.getInstance());
+					
+					trackedPearls.add(pearl.getBukkitEntity());
+					
+					pearl.spawn();
+				}
+			}
+		}
+	}
+	
+	@EventHandler(priority=EventPriority.MONITOR)
+	public void enderpearlHit(ProjectileHitEvent event) {
+		if(!AutoReferee.getInstance().isExperimentalMode()) return;
+		
+		if(event.getEntity() instanceof EnderPearl) {
+			trackedPearls.remove(event.getEntity());
 		}
 	}
 	
@@ -405,7 +439,11 @@ public class ZoneListener implements Listener
 		{ event.setCancelled(true); return; }
 	}
 
-	public void teleportEvent(Player pl, Location fm, Location to, String reason)
+	public static enum TeleportType {
+		ENDER_PEARL, BED, VEHICLE, MISC
+	}
+	
+	public void teleportEvent(Player pl, Location fm, Location to, String reason, TeleportType type)
 	{
 		// cannot compare locations in different worlds
 		if (fm.getWorld() != to.getWorld()) return;
@@ -431,8 +469,9 @@ public class ZoneListener implements Listener
 		for (Player ref : match.getReferees(excludeStreamers)) ref.sendMessage(message);
 	}
 	
-	public boolean enderPearlLegal(Player pl, Location fm, Location to, AutoRefMatch match) {
+	public boolean teleportationLegal(Player pl, Location fm, Location to, AutoRefMatch match, TeleportType type) {
 		boolean def = true;
+		if(type == TeleportType.MISC) return def;
 		// This is an experimental feature
 		AutoReferee plugin = AutoReferee.getInstance();
 		if(!plugin.isExperimentalMode()) return def;
@@ -441,13 +480,34 @@ public class ZoneListener implements Listener
 		AutoRefTeam t = match.getPlayerTeam(pl);
 		if(t == null) return def;
 		
-		if( RegionGraph.unbreakableInRange(to, 1) != null )
+		// Prevents teleporting through bedrock
+		if( RegionGraph.unbreakableInRange(to, 0) != null )
 			{ return false; }
 		
-		if(t.isRestrictedLoc(fm)) {
+		// Cannot teleport between regions
+		if(t.restrictedRegion(fm) != t.restrictedRegion(to)) {
 			return false;
-		}else if(t.isRestrictedLoc(to)) {
+		}
+		
+		// Cannot teleport outside of lane
+		if(!t.containsLoc( to )) {
 			return false;
+		}
+		
+		if(type == TeleportType.BED || type == TeleportType.VEHICLE) {
+			//if(match.isPracticeMode()) return def;
+			
+			plugin.getLogger().info(fm.distance(to) + "");
+			
+			// cannot enter bed/vehicle from void lane
+			if(!t.containsLoc( fm )) {
+				return false;
+			}
+			
+			// cannot enter bed/vehicle from far distances
+			if(fm.distance(to) >= 1.5) {
+				return false;
+			}
 		}
 		
 		return def;
@@ -480,14 +540,15 @@ public class ZoneListener implements Listener
 				{ event.setCancelled(true); return; }
 
 				if(event.getCause() == TeleportCause.ENDER_PEARL) {
-					if(!enderPearlLegal(event.getPlayer(), event.getFrom(), event.getTo(), match)) {
+					if(!teleportationLegal(event.getPlayer(), event.getFrom(), event.getTo(), match, TeleportType.ENDER_PEARL)) {
 						event.getPlayer().sendMessage(ChatColor.RED + "Illegal pearl!");
 						event.setCancelled(true); return;
 					}
 				}
 				
 				String reason = "by " + event.getCause().name().toLowerCase().replaceAll("_", " ");
-				teleportEvent(event.getPlayer(), event.getFrom(), event.getTo(), reason);
+				teleportEvent(event.getPlayer(), event.getFrom(), event.getTo(), reason,
+						event.getCause() == TeleportCause.ENDER_PEARL ? TeleportType.ENDER_PEARL : TeleportType.MISC );
 
 				break;
 		}
@@ -522,16 +583,39 @@ public class ZoneListener implements Listener
 		for (Map.Entry<Class<? extends Entity>, String> e : entityRenames.entrySet())
 			if (e.getKey().isAssignableFrom(clazz)) vehicleType = e.getValue();
 
-		if (event.getEntered() instanceof Player)
+		AutoRefMatch match = plugin.getMatch(event.getVehicle().getWorld());
+		if (match == null || match.getCurrentState() == MatchStatus.NONE) return;
+		
+		if (event.getEntered() instanceof Player) {
+			Player pl = (Player) event.getEntered(); Location fm = event.getEntered().getLocation();
+			Location to = event.getVehicle().getLocation(); TeleportType type = TeleportType.VEHICLE;
+			
+			if(!teleportationLegal(pl, fm, to, match, type)) {
+				pl.sendMessage(ChatColor.RED + "Invalid teleport");
+				event.setCancelled(true); return;
+			}
+			
 			teleportEvent((Player) event.getEntered(), event.getEntered().getLocation(),
-				event.getVehicle().getLocation(), "into a " + vehicleType);
+				event.getVehicle().getLocation(), "into a " + vehicleType, TeleportType.VEHICLE);
+		}
 	}
 
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void playerBedEnter(PlayerBedEnterEvent event)
 	{
+		AutoRefMatch match = plugin.getMatch(event.getPlayer().getWorld());
+		if (match == null || match.getCurrentState() == MatchStatus.NONE) return;
+		
+		Player pl = event.getPlayer(); Location fm = event.getPlayer().getLocation();
+		Location to = event.getBed().getLocation(); TeleportType type = TeleportType.BED;
+		
+		if(!teleportationLegal(pl, fm, to, match, type)) {
+			pl.sendMessage(ChatColor.RED + "Invalid teleport");
+			event.setCancelled(true); return;
+		}
+		
 		teleportEvent(event.getPlayer(), event.getPlayer().getLocation(),
-			event.getBed().getLocation(), "into a bed");
+			event.getBed().getLocation(), "into a bed", TeleportType.BED);
 	}
 
 	@EventHandler

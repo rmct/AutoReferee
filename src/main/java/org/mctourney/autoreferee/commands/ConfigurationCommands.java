@@ -1,6 +1,7 @@
 package org.mctourney.autoreferee.commands;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -532,7 +533,7 @@ public class ConfigurationCommands implements CommandHandler
 		return true;
 	}
 	
-	@AutoRefCommand(name= {"autoref", "regions"}, argmin=1, argmax=1, options="fprs")
+	@AutoRefCommand(name= {"autoref", "regions"}, argmin=1, argmax=1, options="flprs")
 	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
 	public boolean arRegions(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options) {
 		if(!AutoReferee.getInstance().isExperimentalMode()) return false;
@@ -621,6 +622,16 @@ public class ConfigurationCommands implements CommandHandler
 	        }
 			
 			player.sendMessage("Successfully wrote " + AutoRefMatch.REGION_CFG_FILENAME + "!");
+		}
+		
+		if(options.hasOption('l')) {
+			try {
+				match.loadRegionJSON();
+				player.sendMessage("Successfully loaded regions file");
+			} catch (FileNotFoundException | ClassCastException e) {
+				player.sendMessage("Failed loading regions file");
+				e.printStackTrace();
+			}
 		}
 		
 		return true;

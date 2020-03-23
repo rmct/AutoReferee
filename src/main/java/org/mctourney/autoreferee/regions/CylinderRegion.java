@@ -9,6 +9,7 @@ import org.jdom2.Element;
 
 import org.mctourney.autoreferee.AutoRefMatch;
 import org.mctourney.autoreferee.util.LocationUtil;
+import org.mctourney.autoreferee.util.MathUtil;
 
 public class CylinderRegion extends AutoRefRegion
 {
@@ -39,10 +40,12 @@ public class CylinderRegion extends AutoRefRegion
 	}
 
 	@Override
-	public double distanceToRegion(Location loc)
+	public double distanceToRegion(double x0, double y0, double z0)
 	{
-		return multimax(0, y - loc.getY(), loc.getY() - (y + h),
-			new Location(world, x, loc.getY(), z).distance(loc) - r);
+		double dist = MathUtil.dist(x, y, z, x0, y, z0);
+		
+		return multimax(0, y - y0, y0 - (y + h), 
+			dist - r);
 	}
 
 	public Location getBase()

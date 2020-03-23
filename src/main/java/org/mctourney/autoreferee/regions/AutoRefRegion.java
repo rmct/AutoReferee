@@ -104,7 +104,9 @@ public abstract class AutoRefRegion
 	}
 
 	// these methods need to be implemented
-	public abstract double distanceToRegion(Location loc);
+	//   NOTE: distanceToRegion is accessed by an async
+	//   task and so MUST NOT ACCESS THE BUKKIT API
+	public abstract double distanceToRegion(double x, double y, double z);
 	public abstract Location getRandomLocation(Random r);
 	public abstract CuboidRegion getBoundingCuboid();
 
@@ -166,8 +168,10 @@ public abstract class AutoRefRegion
 		return loc;
 	}
 
+	public double distanceToRegion(Location loc) { return this.distanceToRegion(loc.getX(), loc.getY(), loc.getZ()); }
+	
 	public boolean contains(Location loc)
-	{ return distanceToRegion(loc) <= 0.0; }
+	{ return distanceToRegion(loc.getX(), loc.getY(), loc.getZ()) <= 0.0; }
 
 	public boolean containsBlock(Block block)
 	{ return this.contains(block.getLocation().clone().add(0.5, 0.5, 0.5)); }

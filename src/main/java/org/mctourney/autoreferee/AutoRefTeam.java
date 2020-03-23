@@ -302,7 +302,18 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	 */
 	public Set<AutoRefRegion> getRegions()
 	{ return match.getRegions(this); }
-
+	
+	/**
+	 * Returns whether a particular Location
+	 * is in team's lane or not
+	 * @author char
+	 * 
+	 * @param loc
+	 * @return
+	 */
+	public boolean containsLoc(Location loc)
+	{ return this.getRegions().stream().anyMatch(reg -> reg.contains(loc)); }
+	
 	public boolean addRegion(AutoRefRegion reg)
 	{
 		for (AutoRefRegion ereg : match.getRegions())
@@ -410,6 +421,23 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 			.filter(r -> r.getFlags().contains(Flag.DUNGEON_BOUNDARY))
 			.collect(Collectors.toSet());
 	}*/
+	
+	public Set<Vec3> restrictedRegion(Location l) {
+		if(this.getRegGraph() == null) return null;
+		
+		if(this.restrictedRegions != null) {
+			return this.restrictedRegions.stream()
+					.filter(reg -> reg.contains( this.getRegGraph().vec(l) ))
+					.findAny().orElse(null);
+		}
+		
+		if(!this.getRegGraph().loaded()) return null;
+		if(this.getRegGraph().connectedRegions().isEmpty()) return null;
+		
+		return this.getRegGraph().connectedRegions().stream()
+				.filter(reg -> reg.contains( this.getRegGraph().vec(l) ))
+				.findAny().orElse(null);
+	}
 	
 	public boolean isRestrictedLoc(Location l) {
 		boolean def = false;

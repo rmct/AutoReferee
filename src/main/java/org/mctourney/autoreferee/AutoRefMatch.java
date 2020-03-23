@@ -2178,7 +2178,7 @@ public class AutoRefMatch implements Metadatable
 	
 	public static final String REGION_CFG_FILENAME = "regions.json";
 	
-	private void loadRegionJSON(  ) throws FileNotFoundException, ClassCastException {
+	public void loadRegionJSON(  ) throws FileNotFoundException, ClassCastException {
 		if(!AutoReferee.getInstance().isExperimentalMode()) return;
 		
 		File f = new File(this.getWorld().getWorldFolder(), REGION_CFG_FILENAME);

@@ -40,6 +40,7 @@ import org.mctourney.autoreferee.commands.PlayerCommands;
 import org.mctourney.autoreferee.commands.PracticeCommands;
 import org.mctourney.autoreferee.commands.ScoreboardCommands;
 import org.mctourney.autoreferee.commands.SpectatorCommands;
+import org.mctourney.autoreferee.entity.EntityAREnderPearl;
 import org.mctourney.autoreferee.listeners.CombatListener;
 import org.mctourney.autoreferee.listeners.ObjectiveTracker;
 import org.mctourney.autoreferee.listeners.ObjectiveTracer;
@@ -356,6 +357,11 @@ public class AutoReferee extends JavaPlugin
 		// experimental mode?
 		if(this.isExperimentalMode()) {
 			getLogger().info(this.getName() + " loaded in Experimental Mode. This is not intended for regular use!");
+			
+			if(EntityAREnderPearl.patch())
+				getLogger().info("Successfully patched EntityEnderPearl!");
+			else
+				getLogger().severe("Failed to patch EntityEnderPearl! Please let a dev know about this.");
 		}
 		
 		// setup the map library folder
