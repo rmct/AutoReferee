@@ -1,14 +1,19 @@
 package org.mctourney.autoreferee.commands;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.NPC;
@@ -28,6 +33,7 @@ import org.mctourney.autoreferee.regions.AutoRefRegion;
 import org.mctourney.autoreferee.regions.CuboidRegion;
 import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.LocationUtil;
+import org.mctourney.autoreferee.util.Vec3;
 import org.mctourney.autoreferee.util.commands.AutoRefCommand;
 import org.mctourney.autoreferee.util.commands.AutoRefPermission;
 import org.mctourney.autoreferee.util.commands.CommandHandler;
@@ -36,12 +42,14 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
 
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
+import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 import com.sk89q.worldedit.bukkit.selections.Selection;
@@ -522,6 +530,111 @@ public class ConfigurationCommands implements CommandHandler
 		match.saveScoreboardData(scoreboard);
 		sender.sendMessage(ChatColor.GREEN + "Scoreboard saved to file.");
 
+		return true;
+	}
+	
+	@AutoRefCommand(name= {"autoref", "regions"}, argmin=1, argmax=1, options="flprs")
+	@AutoRefPermission(console=false, nodes={"autoreferee.configure"})
+	public boolean arRegions(CommandSender sender, AutoRefMatch match, String[] args, CommandLine options) {
+		if(!AutoReferee.getInstance().isExperimentalMode()) return false;
+		if ( match == null ) return false;
+		Player player = (Player) sender;
+
+		WorldEditPlugin worldEdit = AutoReferee.getWorldEdit();
+		if (worldEdit == null)
+		{
+			// world edit not installed
+			sender.sendMessage("This method requires WorldEdit installed and running.");
+			return true;
+		}
+		
+		AutoRefTeam team = match.getTeam(args[0]);
+
+		if(options.hasOption('r')) { 
+			player.sendMessage("Computing Region Graph. This may take a while...");
+			//match.cancelGraphTask();
+			team.initRegionGraph();
+			team.computeRegionGraph(); 
+			player.sendMessage( "Found " + team.getRegGraph().connectedRegions().size() + " regions.");
+		}
+		
+		if(options.hasOption('p')) {
+			Selection sel = worldEdit.getSelection(player);
+			if(sel == null || !(sel instanceof CuboidSelection))  return true;
+			
+			CuboidSelection csel = (CuboidSelection) sel;
+			if(!sel.getRegionSelector().isDefined()) return true;
+			
+			com.sk89q.worldedit.regions.CuboidRegion reg;
+			
+			try {
+				reg 
+					= (com.sk89q.worldedit.regions.CuboidRegion) csel.getRegionSelector().getRegion();
+			} catch (IncompleteRegionException e) {
+				e.printStackTrace();
+				return false;
+			}
+			
+			Location l0 = new Location(player.getWorld(), reg.getPos1().getBlockX(), reg.getPos1().getBlockY(), reg.getPos1().getBlockZ());
+			Location l1 = new Location(player.getWorld(), reg.getPos2().getBlockX(), reg.getPos2().getBlockY(), reg.getPos2().getBlockZ());
+			
+			Set<Block> path = team.getRegGraph().shortestPath(l0, l1);
+			
+			if(path == null) {
+				player.sendMessage("No path found");
+				return true;
+			}
+			
+			path.forEach(b -> b.setType(Material.WOOL));
+		}
+		
+		if(options.hasOption('f')) {
+			byte data = 1;
+			
+			for( Set<Vec3> reg : team.getRegGraph().regionsWithoutPointsLoc( team.unrestrictedPts() ) ) {
+				for( Vec3 v : reg ) {
+					Block b = v.loc(player.getWorld()).getBlock();
+					b.setType(Material.WOOL);
+					b.setData(data);
+				}
+				
+				data = (byte)(data + 1);
+			}
+		}
+		
+		if(options.hasOption('s')) {
+			//System.out.println(team.getRegGraph().toJSON( team.unrestrictedPts() ));
+			
+			HashMap<String, Object> json = new HashMap<String, Object>();
+			
+			for(AutoRefTeam t : match.getTeams()) {
+				json.put( t.getName() , t.getRegGraph().toJSON( t.unrestrictedPts() ) );
+			}
+			
+			Gson gson = new Gson();
+					
+			File f = new File( match.getWorld().getWorldFolder(), AutoRefMatch.REGION_CFG_FILENAME );
+			
+			try (FileWriter writer = new FileWriter( f )) {
+	            gson.toJson(json, writer);
+	        } catch(IOException e) {
+	        	player.sendMessage("Error writing file");
+	        	e.printStackTrace();
+	        }
+			
+			player.sendMessage("Successfully wrote " + AutoRefMatch.REGION_CFG_FILENAME + "!");
+		}
+		
+		if(options.hasOption('l')) {
+			try {
+				match.loadRegionJSON();
+				player.sendMessage("Successfully loaded regions file");
+			} catch (FileNotFoundException | ClassCastException e) {
+				player.sendMessage("Failed loading regions file");
+				e.printStackTrace();
+			}
+		}
+		
 		return true;
 	}
 }

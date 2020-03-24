@@ -40,6 +40,7 @@ import org.mctourney.autoreferee.commands.PlayerCommands;
 import org.mctourney.autoreferee.commands.PracticeCommands;
 import org.mctourney.autoreferee.commands.ScoreboardCommands;
 import org.mctourney.autoreferee.commands.SpectatorCommands;
+import org.mctourney.autoreferee.entity.EntityAREnderPearl;
 import org.mctourney.autoreferee.listeners.CombatListener;
 import org.mctourney.autoreferee.listeners.ObjectiveTracker;
 import org.mctourney.autoreferee.listeners.ObjectiveTracer;
@@ -353,6 +354,16 @@ public class AutoReferee extends JavaPlugin
 		consoleLog = getConfig().getBoolean("console-log", true);
 		consoleLogInColor = getConfig().getBoolean("console-colors", true);
 
+		// experimental mode?
+		if(this.isExperimentalMode()) {
+			getLogger().info(this.getName() + " loaded in Experimental Mode. This is not intended for regular use!");
+			
+			if(EntityAREnderPearl.patch())
+				getLogger().info("Successfully patched EntityEnderPearl!");
+			else
+				getLogger().severe("Failed to patch EntityEnderPearl! Please let a dev know about this.");
+		}
+		
 		// setup the map library folder
 		AutoRefMap.getMapLibrary();
 
@@ -478,6 +489,16 @@ public class AutoReferee extends JavaPlugin
 		catch (IllegalStateException ignored) {  }
 	}
 
+	/**
+	 * Get whether server is in experimental mode or not
+	 * @author char
+	 * 
+	 * @return Whether server is in experimental mode
+	 */
+	public boolean isExperimentalMode() {
+		return this.getConfig().getBoolean("experimental-mode", false);
+	}
+	
 	private class SyncMessageTask extends BukkitRunnable
 	{
 		private class RoutedMessage

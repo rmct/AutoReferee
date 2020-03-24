@@ -9,6 +9,7 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -22,6 +23,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -61,6 +64,7 @@ import org.bukkit.material.PressureSensor;
 import org.bukkit.material.Redstone;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
@@ -87,6 +91,7 @@ import org.mctourney.autoreferee.listeners.SpectatorListener;
 import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
 import org.mctourney.autoreferee.regions.CuboidRegion;
+import org.mctourney.autoreferee.regions.RegionGraph;
 import org.mctourney.autoreferee.util.ArmorPoints;
 import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.BookUtil;
@@ -930,6 +935,7 @@ public class AutoRefMatch implements Metadatable
 	public AutoRefMatch(World world, boolean tmp, MatchStatus state)
 	{ this(world, tmp); setCurrentState(state); }
 
+	@SuppressWarnings("deprecation")
 	public AutoRefMatch(World world, boolean tmp)
 	{
 		setPrimaryWorld(world);
@@ -968,7 +974,29 @@ public class AutoRefMatch implements Metadatable
 
 		messageReferees("match", getWorld().getName(), "init");
 		loadWorldConfiguration();
-
+		
+		this.createRegionGraphs();
+		
+		try {
+			this.loadRegionJSON();
+		} catch (FileNotFoundException | ClassCastException e) {
+			AutoReferee.log("Failed to load " + REGION_CFG_FILENAME);
+			e.printStackTrace();
+		}
+		
+		/*if(AutoReferee.getInstance().isExperimentalMode()) { // experimental feature
+			 this.initRegionGraphs(); 
+			 
+			 graphTask =
+			 	new BukkitRunnable() {
+					@Override
+					public void run() {
+						computeRegionGraphs();
+						graphTask = null;
+					}
+				}.runTaskAsynchronously(AutoReferee.getInstance());
+		}*/
+		
 		messageReferees("match", getWorld().getName(), "map", getMapName());
 		setCurrentState(MatchStatus.WAITING);
 
@@ -1181,7 +1209,7 @@ public class AutoRefMatch implements Metadatable
 	}
 
 	protected void loadScoreboardData()
-	{
+	{	
 		clearScoreboardData(scoreboard);
 		clearScoreboardData( infoboard);
 
@@ -2116,7 +2144,57 @@ public class AutoRefMatch implements Metadatable
 
 	public boolean addRegion(AutoRefRegion reg)
 	{ return reg != null && !regions.contains(reg) && regions.add(reg); }
-
+	
+	protected void createRegionGraphs() {
+		for ( AutoRefTeam t : this.getTeams() ) {
+			t.createRegionGraph();
+		}
+	}
+	
+	protected void initRegionGraphs() {
+		for ( AutoRefTeam t : this.getTeams() ) {
+			t.initRegionGraph();
+		}
+	}
+	
+	public void computeRegionGraphs() {
+		for ( AutoRefTeam t : this.getTeams() ) {
+			t.computeRegionGraph();
+		}
+	}
+	
+	public boolean regionGraphsLoaded() {
+		return this.getTeams().stream()
+						.allMatch(t -> t.getRegGraph().loaded());
+	}
+	
+	public static final String REGION_CFG_FILENAME = "regions.json";
+	
+	public void loadRegionJSON(  ) throws FileNotFoundException, ClassCastException {
+		if(!AutoReferee.getInstance().isExperimentalMode()) return;
+		
+		File f = new File(this.getWorld().getWorldFolder(), REGION_CFG_FILENAME);
+		if(!f.exists()) return;
+		
+		Gson gson = new Gson();
+		Reader reader = new FileReader(f);
+		
+		Map<String, Object> data = gson.fromJson(reader, Map.class);
+		
+		for( String key : data.keySet() ) {
+			AutoRefTeam team = this.getTeam(key);
+			if(team == null) continue;
+			
+			Map<String, Object> data2 = (Map<String, Object>) data.get(key);
+			
+			List restricted = (List) data2.get("restricted");
+			
+			if(restricted != null) {
+				team.setRestrictionRegions( team.getRegGraph().fromInts( restricted ) );
+			}
+		}
+	}
+	
 	/**
 	 * A redstone mechanism necessary to start a match.
 	 *

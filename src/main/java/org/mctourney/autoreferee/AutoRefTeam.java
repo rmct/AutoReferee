@@ -1,10 +1,12 @@
 package org.mctourney.autoreferee;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Maps;
 
@@ -28,11 +30,13 @@ import org.mctourney.autoreferee.goals.scoreboard.AutoRefObjective;
 import org.mctourney.autoreferee.listeners.GoalsInventorySnapshot;
 import org.mctourney.autoreferee.listeners.ZoneListener;
 import org.mctourney.autoreferee.regions.AutoRefRegion;
+import org.mctourney.autoreferee.regions.AutoRefRegion.Flag;
+import org.mctourney.autoreferee.regions.RegionGraph;
 import org.mctourney.autoreferee.util.BlockData;
 import org.mctourney.autoreferee.util.Metadatable;
 import org.mctourney.autoreferee.util.PlayerKit;
 import org.mctourney.autoreferee.util.PlayerUtil;
-
+import org.mctourney.autoreferee.util.Vec3;
 import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Sets;
@@ -298,7 +302,18 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	 */
 	public Set<AutoRefRegion> getRegions()
 	{ return match.getRegions(this); }
-
+	
+	/**
+	 * Returns whether a particular Location
+	 * is in team's lane or not
+	 * @author char
+	 * 
+	 * @param loc
+	 * @return
+	 */
+	public boolean containsLoc(Location loc)
+	{ return this.getRegions().stream().anyMatch(reg -> reg.contains(loc)); }
+	
 	public boolean addRegion(AutoRefRegion reg)
 	{
 		for (AutoRefRegion ereg : match.getRegions())
@@ -343,6 +358,102 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 		return regs[random.nextInt(spawnRegions.size())].getLocation();
 	}
 
+	private RegionGraph graph;
+	private Set<Set<Vec3>> restrictedRegions;
+	
+	public RegionGraph getRegGraph() { return this.graph; }
+	public void setRestrictionRegions(Set<Set<Vec3>> regions) 
+		{ this.restrictedRegions = regions; }
+	
+	public boolean regGraphLoaded() { return this.getRegGraph().loaded(); }
+	
+	public void initRegionGraph() {
+		createRegionGraph();
+		graph.computeGraph();
+	}
+	
+	public void createRegionGraph() {
+		// this is an experimental feature
+			if(!AutoReferee.getInstance().isExperimentalMode()) return;
+			
+			if(this.getMatch() == null) return;
+			World w = this.getMatch().getWorld();
+			if(w == null) return;
+			
+			if(this.getRegions() == null) return;
+			
+			graph = new RegionGraph(w, this.getRegions(), AutoReferee.getInstance().getLogger(), this)
+					.regions(this.getRegions());
+			/*.setDungeonOpenings( this.getRegions().stream()
+			.filter(r -> r.getFlags().contains(Flag.DUNGEON_BOUNDARY))
+			.collect(Collectors.toSet()));*/
+	}
+	
+	// safe from async thread
+	public void computeRegionGraph() {
+		// this is an expiremental feature
+		if(!AutoReferee.getInstance().isExperimentalMode()) return;
+		if(this.getRegions() == null) return;
+		
+		RegionGraph graph = this.getRegGraph();
+		if(graph == null) return;
+		
+		if(this.getMatch() == null) return;
+		World w = this.getMatch().getWorld();
+		if(w == null) return;
+		
+		graph.findConnectedRegions();
+	}
+	
+	public Set<Location> unrestrictedPts() {
+		if(this.getRegions() == null) return null;
+		
+		return this.getRegions().stream()
+				.filter(reg -> reg.getFlags().contains(Flag.NON_RESTRICTED))
+				.map(reg -> reg.getBoundingCuboid().getMinimumPoint().getBlock().getLocation())
+				.collect(Collectors.toSet());
+	}
+	
+	/*public Set<AutoRefRegion> dungeonOpenings() {
+		if(this.getRegions() == null) return null;
+		
+		return this.regions().stream()
+			.filter(r -> r.getFlags().contains(Flag.DUNGEON_BOUNDARY))
+			.collect(Collectors.toSet());
+	}*/
+	
+	public Set<Vec3> restrictedRegion(Location l) {
+		if(this.getRegGraph() == null) return null;
+		
+		if(this.restrictedRegions != null) {
+			return this.restrictedRegions.stream()
+					.filter(reg -> reg.contains( this.getRegGraph().vec(l) ))
+					.findAny().orElse(null);
+		}
+		
+		if(!this.getRegGraph().loaded()) return null;
+		if(this.getRegGraph().connectedRegions().isEmpty()) return null;
+		
+		return this.getRegGraph().connectedRegions().stream()
+				.filter(reg -> reg.contains( this.getRegGraph().vec(l) ))
+				.findAny().orElse(null);
+	}
+	
+	public boolean isRestrictedLoc(Location l) {
+		boolean def = false;
+		if(this.getRegGraph() == null) return def;
+		
+		if(this.restrictedRegions != null) {
+			return this.getRegGraph()
+					.isRestricted(l, this.restrictedRegions, this.getRegions());
+		}
+		
+		if(!this.getRegGraph().loaded()) return def;
+		if(this.getRegGraph().connectedRegions().isEmpty()) return def;
+		
+		return this.getRegGraph().isInRestrictedArea(l, this.unrestrictedPts());
+	}
+	
 	private Set<AutoRefGoal> goals = Sets.newHashSet();
 
 	/**
@@ -488,7 +599,7 @@ public class AutoRefTeam implements Metadatable, Comparable<AutoRefTeam>
 	}
 
 	protected void setupScoreboard()
-	{
+	{	
 		String sbteam = this.getScoreboardTeamName();
 
 		// set team data on spectators' scoreboard

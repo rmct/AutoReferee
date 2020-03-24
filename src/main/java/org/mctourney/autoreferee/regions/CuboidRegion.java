@@ -89,13 +89,13 @@ public class CuboidRegion extends AutoRefRegion
 	// distance from region, axially aligned (value less than actual distance, but
 	// appropriate for measurements on cuboid regions)
 	@Override
-	public double distanceToRegion(Location v)
+	public double distanceToRegion(double x, double y, double z)
 	{
-		// garbage-in, garbage-out
+		/*// garbage-in, garbage-out
 		if (v == null || v.getWorld() != world)
-			return Double.POSITIVE_INFINITY;
+			return Double.POSITIVE_INFINITY;*/
 
-		double x = v.getX(), y = v.getY(), z = v.getZ();
+		//double x = v.getX(), y = v.getY(), z = v.getZ();
 		Location mx = getMaximumPoint(), mn = getMinimumPoint();
 
 		// return maximum distance from this region

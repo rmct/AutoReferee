@@ -128,6 +128,12 @@
       <version>R7</version>
       <scope>compile</scope>
     </dependency>
+    
+    <dependency>
+    	<groupId>org.jgrapht</groupId>
+	<artifactId>jgrapht-core</artifactId>
+	<version>1.4.0</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -250,6 +256,8 @@
                   <include>com.google.code.gson:gson</include>
                   <include>org.jdom:jdom2</include>
                   <include>org.mcstats.bukkit:metrics</include>
+                  <include>org.jgrapht:jgrapht-core</include>
+                  <include>org.jheaps:jheaps</include>
                 </includes>
               </artifactSet>
             </configuration>
